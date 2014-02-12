@@ -1,0 +1,14 @@
+#!/bin/bash
+
+rm -f @PACKAGE@-@VERSION@.tar.bz2
+make dist-bzip2
+
+cd ..
+rm -rf @PACKAGE@_@VERSION@*
+rm -rf @PACKAGE@-dev_@VERSION@*
+tar xjf lib/@PACKAGE@-@VERSION@.tar.bz2
+cd @PACKAGE@-@VERSION@
+
+cp -r ../lib/debian .
+dpkg-buildpackage
+

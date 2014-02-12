@@ -1,0 +1,64 @@
+Summary: Directory command library
+Name: @PACKAGE@
+Version: @VERSION@
+Release: @REVISION@%{?dist}
+License: GPLv2
+URL: http://www.tzclock.org
+Group: Applications/Productivity
+Source: http://www.tzclock.org/releases/%{name}-%{version}.tar.bz2
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
+BuildRequires: ncurses-devel readline-devel libselinux-devel
+
+%description
+dircmd consists of a general porpose directory library.
+ 
+%package devel
+Summary: libdircmd development files
+Provides: dircmd-devel
+BuildArch: noarch
+Group: Development/C
+
+%description devel
+This package contains necessary header files for libdircmd development.
+
+%prep
+%setup -q
+
+%build
+%configure 
+make CDEBUGFLAGS="$RPM_OPT_FLAGS" CXXDEBUGFLAGS="$RPM_OPT_FLAGS"
+
+%install
+rm -rf $RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT%{_bindir}
+mkdir -p $RPM_BUILD_ROOT%{_libdir}
+mkdir -p $RPM_BUILD_ROOT%{_libdir}/pkgconfig
+mkdir -p $RPM_BUILD_ROOT%{_includedir}
+mkdir -p $RPM_BUILD_ROOT/etc
+
+install -s -m 755 .libs/libdircmd.so.4 $RPM_BUILD_ROOT%{_libdir}/libdircmd.so.%{version}
+install -m 644 pkgconfig/dircmd.pc $RPM_BUILD_ROOT%{_libdir}/pkgconfig/dircmd.pc
+install -m 644 dircmd.h $RPM_BUILD_ROOT%{_includedir}/dircmd.h
+ln -s libdircmd.so.%{version} $RPM_BUILD_ROOT%{_libdir}/libdircmd.so.4
+ln -s libdircmd.so.%{version} $RPM_BUILD_ROOT%{_libdir}/libdircmd.so
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%post -p /sbin/ldconfig
+
+%postun -p /sbin/ldconfig
+
+%files
+%defattr(-,root,root)
+%{_libdir}/libdircmd.so*
+
+%files devel
+%defattr(-,root,root)
+%{_libdir}/pkgconfig/dircmd.pc
+%{_includedir}/dircmd.h
+
+%changelog
+* Wed Sep 26 2007 Chris Knight <chris@theknight.co.uk> 4.0.5-1%{?dist}
+- Fixes to the build and distribution system.
+

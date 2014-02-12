@@ -1,0 +1,66 @@
+Summary: Directory utilities
+Name: @PACKAGE@
+Version: @VERSION@
+Release: @REVISION@%{?dist}
+License: GPLv2
+URL: http://www.tzclock.org
+Group: Applications/Productivity
+Source: http://www.tzclock.org/releases/%{name}-%{version}.tar.bz2
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
+BuildRequires: ncurses-devel readline-devel libselinux-devel
+
+%description
+dirutils consists of a general porpose directory library and a number
+of utilities that make use of that library.
+ 
+%prep
+%setup -q
+
+%build
+%configure 
+make CDEBUGFLAGS="$RPM_OPT_FLAGS" CXXDEBUGFLAGS="$RPM_OPT_FLAGS"
+
+%install
+rm -rf $RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT%{_bindir}
+mkdir -p $RPM_BUILD_ROOT/etc
+
+install -s -m 755 addComment $RPM_BUILD_ROOT%{_bindir}/addComment
+install -s -m 755 addcr $RPM_BUILD_ROOT%{_bindir}/addcr
+install -s -m 755 casedir $RPM_BUILD_ROOT%{_bindir}/casedir
+install -s -m 755 casefile $RPM_BUILD_ROOT%{_bindir}/casefile
+install -s -m 755 ndir $RPM_BUILD_ROOT%{_bindir}/ndir
+install -s -m 755 hexDump $RPM_BUILD_ROOT%{_bindir}/hexDump
+install -s -m 755 lines $RPM_BUILD_ROOT%{_bindir}/lines
+install -s -m 755 listFunc $RPM_BUILD_ROOT%{_bindir}/listFunc
+install -s -m 755 pfile $RPM_BUILD_ROOT%{_bindir}/pfile
+install -s -m 755 memTest $RPM_BUILD_ROOT%{_bindir}/memTest
+install -s -m 755 rmcr $RPM_BUILD_ROOT%{_bindir}/rmcr
+install -m 644 ndirrc $RPM_BUILD_ROOT/etc/ndirrc
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%post -p /sbin/ldconfig
+
+%postun -p /sbin/ldconfig
+
+%files
+%defattr(-,root,root)
+%{_bindir}/addComment
+%{_bindir}/addcr
+%{_bindir}/casedir
+%{_bindir}/casefile
+%{_bindir}/ndir
+%{_bindir}/hexDump
+%{_bindir}/lines
+%{_bindir}/listFunc
+%{_bindir}/pfile
+%{_bindir}/memTest
+%{_bindir}/rmcr
+/etc/ndirrc
+
+%changelog
+* Wed Sep 26 2007 Chris Knight <chris@theknight.co.uk> 4.0.5-1%{?dist}
+- Fixes to the build and distribution system.
+

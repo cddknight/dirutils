@@ -1,0 +1,2 @@
+shlibs:Depends=libdircmd (>=4.0.11), libc6 (>= 2.4), libreadline6 (>= 6.0)
+misc:Depends=

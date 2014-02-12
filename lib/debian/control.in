@@ -1,0 +1,20 @@
+Source: @PACKAGE@
+Priority: extra
+Maintainer: Chris Knight (Developer) <chris@theknight.co.uk>
+Build-Depends: debhelper (>= 8.0.0), autotools-dev
+Standards-Version: 3.9.4
+Section: libs
+Homepage: www.theknight.co.uk
+
+Package: @PACKAGE@-dev
+Section: libdevel
+Architecture: any
+Depends: @PACKAGE@ (= ${binary:Version})
+Description: DirCmd consists of a general porpose directory library.
+
+Package: @PACKAGE@
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: DirCmd consists of a general porpose directory library.
+
