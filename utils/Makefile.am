@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = dist-bzip2
 bin_PROGRAMS = ndir addComment addcr casedir casefile hexDump inQuote lines listFunc memTest pfile rmcr procMonitor
 AM_CPPFLAGS = -D_FILE_OFFSET_BITS=64 $(DEPS_CFLAGS)
-LIBS = $(DEPS_LIBS) -lcrypto
+LIBS = $(DEPS_LIBS)
 ndir_SOURCES = src/ndir.c
 addComment_SOURCES = src/addComment.c
 addComment_LDADD = -lreadline 
