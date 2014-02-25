@@ -224,6 +224,7 @@ int directoryProcess (int(*ProcFile)(DIR_ENTRY *f1), void **fileList);
  *  crc.c
  */
 int CRCFile (char *filename);
+int MD5File (char *filename, unsigned char *md5Buffer);
 
 /*
  *  display.c
@@ -237,6 +238,7 @@ char *displayRightsString (int userRights, char *outString);
 char *displayOwnerString (int ownerID, char *outString);
 char *displayGroupString (int groupID, char *outString);
 char *displayContextString (char *fullpath, char *outString);
+char *displayMD5String (char *fullpath, char *outString);
 void displayGetWindowSize (void);
 void displayForceSize (int cols, int rows);
 int displayGetWidth (void);

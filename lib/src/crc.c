@@ -24,6 +24,7 @@
  */
 #include <stdio.h>
 #include <dircmd.h>
+#include <openssl/md5.h>
 
 static unsigned char tempBuff[4096];
 
@@ -99,12 +100,12 @@ static long CRC32[256] =
 
 #define  UpdC32(b,c) (CRC32[((int)c ^ b) & 0xff] ^ ((c >> 8) & 0x00FFFFFF))
 
-/******************************************************************************************************
- *                                                                                                    *
- *  C R C F I L E                                                                                     *
- *  =============                                                                                     *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  C R C F I L E                                                                                                     *
+ *  =============                                                                                                     *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
  *  @brief Calculate a CRC value for a file.
  *  @param filename Name of the file to calculate the crc value for.
@@ -126,5 +127,40 @@ int CRCFile (char *filename)
 		fclose (inFile);
 	}
 	return retnCRC;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  M D 5 F I L E                                                                                                     *
+ *  =============                                                                                                     *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  @brief Create an md5 for a file.
+ *  @param filename Name of the file to md5.
+ *  @param md5Buffer Write the md5 value here (must be 16 bytes long).
+ *  @result 1 if file read.
+ */
+int MD5File (char *filename, unsigned char *md5Buffer)
+{
+	FILE *inFile;
+	MD5_CTX md5c;
+	int read, retn = 0;
+
+	if (filename != NULL && md5Buffer != NULL)
+	{
+		if ((inFile = fopen (filename, "rb")) != NULL)
+		{
+			MD5_Init (&md5c);
+		
+			retn = 1;
+			while ((read = fread (tempBuff, 1, 4096, inFile)) != 0)
+				MD5_Update (&md5c, tempBuff, read);
+
+			fclose (inFile);
+			MD5_Final (md5Buffer, &md5c);
+		}
+	}
+	return retn;
 }
 

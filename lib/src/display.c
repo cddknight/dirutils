@@ -443,6 +443,21 @@ char *displayContextString (char *fullpath, char *outString)
 	return outString;
 }
 
+char *displayMD5String (char *fullpath, char *outString)
+{
+	unsigned char digest[16];
+	
+	outString[0] = 0;
+	if (MD5File (fullpath, digest))
+	{
+		int i;
+		
+		for (i = 0; i < 16; ++i)
+			sprintf (&outString[i * 2], "%02x", (unsigned int)digest[i]);
+	}
+	return outString;	
+}
+
 /******************************************************************************************************
  *                                                                                                    *
  *  D I S P L A Y  G E T  W I D T H                                                                   *

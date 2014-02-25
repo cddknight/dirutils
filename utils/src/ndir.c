@@ -85,12 +85,13 @@ char *quoteCopy (char *dst, char *src);
 #define SHOW_BACKUP		(1 << 16)
 #define SHOW_QUOTE		(1 << 17)
 #define SHOW_SELINUX	(1 << 18)
+#define SHOW_MD5		(1 << 19)
 
 #define DATE_MOD		0
 #define DATE_ACC		1
 #define DATE_CHG		2
 
-#define MAX_COL_DESC	14
+#define MAX_COL_DESC	15
 #define MAX_W_COL_DESC	3
 #define EXTRA_COLOURS	8
 
@@ -137,6 +138,7 @@ int			dirColour = 0;
 #define		COL_ARROW		11
 #define		COL_TARGET		12
 #define		COL_CONTEXT		13
+#define		COL_MD5			14
 
 #define		COL_W_TYPE_L	0
 #define		COL_W_FILENAME	1
@@ -146,7 +148,7 @@ int columnTranslate[MAX_COL_DESC] =
 {
 	COL_TYPE, COL_RIGHTS, COL_N_LINKS, COL_OWNER, COL_GROUP, COL_SIZE, 
 	COL_DATE, COL_DAYS, COL_TIME, COL_FILENAME, COL_EXTN, COL_ARROW, 
-	COL_TARGET, COL_CONTEXT
+	COL_TARGET, COL_CONTEXT, COL_MD5
 };
 
 COLUMN_DESC allColumnDescs[MAX_COL_DESC] =
@@ -165,6 +167,7 @@ COLUMN_DESC allColumnDescs[MAX_COL_DESC] =
 	{	2,	2,	0,	2,	0x01,	0,					NULL,		10	},	/* 11 */
 	{	255,12,	0,	2,	0x07,	0,					"Target",	9	},	/* 12 */
 	{	80,	8,	0,	2,	0x05,	0,					"Context",	12	},  /* 13 */
+	{	33,	33,	0,	2,	0x05,	0,					"MD5 Sum",	13	},  /* 13 */
 };
 
 COLUMN_DESC wideColumnDescs[MAX_W_COL_DESC] =
@@ -194,8 +197,8 @@ COLUMN_DESC *ptrAllColumns[30] =
 char *colourNames[] = 
 {
 	"colour_type",		"colour_rights",	"colour_numlinks",	"colour_owner",		"colour_group",		
-	"colour_size",		"colour_date",		"colour_day",		"colour_time",		
-	"colour_filename",	"colour_extn",		"colour_linkptr",	"colour_target",	"colour_context",
+	"colour_size",		"colour_date",		"colour_day",		"colour_time",		"colour_filename",	
+	"colour_extn",		"colour_linkptr",	"colour_target",	"colour_context",	"colour_md5",
 
 	"colour_wide_col1",	"colour_wide_filename", "colour_wide_col2",
 
@@ -531,6 +534,10 @@ void commandOption (char *option, char *progName)
 						break;
 					case 'c':
 						showType ^= SHOW_SELINUX;
+						j++;
+						break;
+					case 'm':
+						showType ^= SHOW_MD5;
 						j++;
 						break;
 					default:
@@ -1159,6 +1166,7 @@ int showDir (DIR_ENTRY *file)
 		char ownerString[81];
 		char groupString[81];
 		char contextString[81];
+		char md5String[33];
 		char rightsBuff[12];
 		char numBuff[21];
 		int fileAge;
@@ -1456,6 +1464,10 @@ int showDir (DIR_ENTRY *file)
 				if (showType & SHOW_SELINUX)
 				{
 					displayInColumn (columnTranslate[COL_CONTEXT], "%s", displayContextString (fullName, contextString));
+				}
+				if (showType & SHOW_MD5)
+				{
+					displayInColumn (columnTranslate[COL_MD5], "%s", displayMD5String (fullName, md5String));
 				}
 				if (showType & SHOW_EXTN)
 				{
