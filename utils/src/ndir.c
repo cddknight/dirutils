@@ -64,6 +64,7 @@ char *quoteCopy (char *dst, char *src);
 #define ORDER_GRUP		6
 #define ORDER_LINK		7
 #define ORDER_CNXT		8
+#define ORDER_MD5S		9
 
 #define SHOW_NORMAL		0
 #define SHOW_WIDE		1
@@ -262,6 +263,7 @@ void helpThem (char *progName)
 	printf ("         -o[f|F] . . . Order by the file name (default)\n");
 	printf ("         -o[g|G] . . . Order the files by group name\n");
 	printf ("         -o[l|L] . . . Order by the number of hard links\n");
+	printf ("         -o[m|M] . . . Order by the MD5 checksum\n");
 	printf ("         -o[n|N] . . . Do not order, use directory order\n");
 	printf ("         -o[o|O] . . . Order the files by owners name\n");
 	printf ("         -o[s|S] . . . Order the files by size\n");
@@ -390,6 +392,13 @@ void commandOption (char *option, char *progName)
 			case 'C':
 				orderType = ORDER_CNXT;
 				showType |= (option[j] == 'C' ? SHOW_RORDER : 0);
+				j++;
+				break;
+
+			case 'm':
+			case 'M':
+				orderType = ORDER_MD5S;
+				showType |= (option[j] == 'M' ? SHOW_RORDER : 0);
 				j++;
 				break;
 			}
@@ -1468,7 +1477,7 @@ int showDir (DIR_ENTRY *file)
 				}
 				if (showType & SHOW_MD5)
 				{
-					displayInColumn (columnTranslate[COL_MD5], "%s", displayMD5String (fullName, md5String));
+					displayInColumn (columnTranslate[COL_MD5], "%s", displayMD5String (file, md5String));
 				}
 				if (showType & SHOW_EXTN)
 				{
@@ -1732,6 +1741,36 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 			displayContextString (fileNameOne, contextOne);
 			displayContextString (fileNameTwo, contextTwo);
 			retn = strcasecmp (contextOne, contextTwo);
+		}
+		break;
+		
+	case ORDER_MD5S:
+		if (fileOne -> md5Sum == NULL)
+		{
+			if ((fileOne -> md5Sum = malloc (16)) != NULL)
+			{
+				strcpy (fullName, fileOne -> fullPath);
+				strcat (fullName, fileOne -> fileName);
+				MD5File (fullName, fileOne -> md5Sum);
+			}
+		}
+		if (fileTwo -> md5Sum == NULL)
+		{
+			if ((fileTwo -> md5Sum = malloc (16)) != NULL)
+			{
+				strcpy (fullName, fileTwo -> fullPath);
+				strcat (fullName, fileTwo -> fileName);
+				MD5File (fullName, fileTwo -> md5Sum);
+			}
+		}
+		if (fileOne -> md5Sum != NULL && fileTwo -> md5Sum != NULL)
+		{
+			int i;
+			for (i = 0; i < 16 && retn == 0; ++i)
+			{
+				retn = (fileOne -> md5Sum[i] < fileTwo -> md5Sum[i] ? -1 :
+						fileOne -> md5Sum[i] > fileTwo -> md5Sum[i] ? 1 : 0);
+			}
 		}
 		break;
 	}

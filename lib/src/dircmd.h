@@ -192,6 +192,8 @@ struct dirEntry
 	char *fullPath;
 	/** Path as it goes into sub directories */
 	char *partPath;
+	/** MD5 checksum if needed */
+	unsigned char *md5Sum;
 	/** Directory information */
 	struct stat fileStat;
 	/** Has the CRC been calculated for this file */
@@ -238,7 +240,7 @@ char *displayRightsString (int userRights, char *outString);
 char *displayOwnerString (int ownerID, char *outString);
 char *displayGroupString (int groupID, char *outString);
 char *displayContextString (char *fullpath, char *outString);
-char *displayMD5String (char *fullpath, char *outString);
+char *displayMD5String (DIR_ENTRY *file, char *outString);
 void displayGetWindowSize (void);
 void displayForceSize (int cols, int rows);
 int displayGetWidth (void);
