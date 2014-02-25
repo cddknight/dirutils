@@ -249,6 +249,7 @@ void helpThem (char *progName)
 	printf ("         -De . . . . . Show the file extension\n");
 	printf ("         -Dg . . . . . Show the group of the file\n");
 	printf ("         -Dl . . . . . Show the target of the link\n");
+	printf ("         -Dm . . . . . Show the MD5 checksum of the file\n");
 	printf ("         -Dn . . . . . Show the number of links\n");
 	printf ("         -Do . . . . . Show the owner of the file\n");
 	printf ("         -Dr . . . . . Show the user rights of the file\n");
