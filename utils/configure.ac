@@ -1,7 +1,7 @@
 AC_INIT([dircmdutils], [4.0.11])
-AC_CONFIG_SRCDIR([ndir.c])
+AC_CONFIG_SRCDIR([src/ndir.c])
 AC_CONFIG_HEADER([config.h])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 AC_CANONICAL_HOST
 AC_PROG_CC
 AM_PROG_CC_C_O
