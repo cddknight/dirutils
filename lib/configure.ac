@@ -1,5 +1,5 @@
-AC_INIT([libdircmd], [4.0.11])
-AC_CONFIG_SRCDIR([dircmd.c])
+AC_INIT([libdircmd], [4.0.12])
+AC_CONFIG_SRCDIR([src/dircmd.c])
 AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE
 AC_CANONICAL_HOST
