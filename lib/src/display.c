@@ -458,8 +458,6 @@ char *displayContextString (char *fullpath, char *outString)
  */
 char *displayMD5String (DIR_ENTRY *file, char *outString)
 {
-	unsigned char digest[16];
-
 	if (file -> md5Sum == NULL)
 	{
 		if ((file -> md5Sum = malloc (16)) != NULL)

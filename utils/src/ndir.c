@@ -1638,23 +1638,32 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 		{
 			if (fileOne -> fileStat.st_size == fileTwo -> fileStat.st_size)
 			{
-				if (!fileOne -> doneCRC)
+				int i;
+				
+				if (fileOne -> md5Sum == NULL)
 				{
-					strcpy (fullName, fileOne -> fullPath);
-					strcat (fullName, fileOne -> fileName);
-
-					fileOne -> CRC = CRCFile (fullName);
-					fileOne -> doneCRC = 1;
+					if ((fileOne -> md5Sum = malloc (16)) != NULL)
+					{
+						strcpy (fullName, fileOne -> fullPath);
+						strcat (fullName, fileOne -> fileName);
+						MD5File (fullName, fileOne -> md5Sum);
+					}
 				}
-				if (!fileTwo -> doneCRC)
+				if (fileTwo -> md5Sum == NULL)
 				{
-					strcpy (fullName, fileTwo -> fullPath);
-					strcat (fullName, fileTwo -> fileName);
-
-					fileTwo -> CRC = CRCFile (fullName);
-					fileTwo -> doneCRC = 1;
+					if ((fileTwo -> md5Sum = malloc (16)) != NULL)
+					{
+						strcpy (fullName, fileTwo -> fullPath);
+						strcat (fullName, fileTwo -> fileName);
+						MD5File (fullName, fileTwo -> md5Sum);
+					}
 				}
-				if (fileOne -> CRC == fileTwo -> CRC)
+				for (i = 0; i < 16 && retn == 0; ++i)
+				{
+					if (fileOne -> md5Sum[i] != fileTwo -> md5Sum[i])
+						break;
+				}
+				if (i == 16)
 				{
 					fileOne -> match = 1;
 					fileTwo -> match = 1;
