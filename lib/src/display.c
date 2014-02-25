@@ -39,10 +39,11 @@
 #endif
 #include <pwd.h>
 #include <grp.h>
-#include <dircmd.h>
 #include <locale.h>
 #include <langinfo.h>
 #include <errno.h>
+
+#include "dircmd.h"
 
 #define ONE_DAY (24 * 60 * 60)
 

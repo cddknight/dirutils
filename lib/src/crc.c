@@ -23,8 +23,8 @@
  *  @version $Id: crc.c 1076 2010-10-02 20:38:45Z chris $
  */
 #include <stdio.h>
-#include <dircmd.h>
 #include <openssl/md5.h>
+#include "dircmd.h"
 
 static unsigned char tempBuff[4096];
 
