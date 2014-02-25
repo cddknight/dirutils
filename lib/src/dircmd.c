@@ -30,8 +30,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <dircmd.h>
 
+#include "dircmd.h"
 #include "config.h"
 
 /******************************************************************************************************

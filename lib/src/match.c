@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <fnmatch.h>
-#include <dircmd.h>
+#include "dircmd.h"
 
 #define NO_CMD		0
 #define OR_CMD		1

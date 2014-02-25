@@ -24,7 +24,7 @@
  */
 #include <stdlib.h>
 #include <string.h>
-#include <dircmd.h>
+#include "dircmd.h"
 
 #ifdef MULTI_THREAD
 	#ifdef WIN32
