@@ -34,6 +34,8 @@
 #include <limits.h>
 #ifdef HAVE_VALUES_H
 #include <values.h>
+#else
+#define MAXINT 2147483647
 #endif
 #include <sys/stat.h>
 
