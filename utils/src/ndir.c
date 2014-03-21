@@ -25,7 +25,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <config.h>
+#ifdef HAVE_VALUES_H
 #include <values.h>
+#else
+#define MAXINT 2147483647
+#endif
 #include <time.h>
 #include <ctype.h>
 #include <dirent.h>

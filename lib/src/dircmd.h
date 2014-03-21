@@ -27,11 +27,16 @@
  */
 #ifndef INCLUDE_DIRCMD_H
 #define INCLUDE_DIRCMD_H
- 
+
+#include <config.h> 
 #include <time.h>
 #include <dirent.h>
 #include <limits.h>
+#ifdef HAVE_VALUES_H
 #include <values.h>
+#else
+#define MAXINT 2147483647
+#endif
 #include <sys/stat.h>
 
 #ifdef DOS
