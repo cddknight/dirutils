@@ -15,7 +15,6 @@ dircmd consists of a general porpose directory library.
 %package devel
 Summary: libdircmd development files
 Provides: dircmd-devel
-BuildArch: noarch
 Group: Development/C
 
 %description devel
