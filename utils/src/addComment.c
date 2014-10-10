@@ -891,6 +891,12 @@ int showDir(DIR_ENTRY * file)
 						debugLine("Line %d: Ending C++ comment\n", line);
 						if (braceLevel) clear = 1;
 						inComment = 0;
+
+						if (inDefine == 1)
+						{
+							debugLine("Line %d: Ending define\n", line);
+							inDefine = 0;
+						}
 					}
 				}
 				else if (lastChar == '/' && inChar == '*' && !inQuote)
