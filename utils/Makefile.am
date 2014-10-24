@@ -4,7 +4,7 @@ AM_CPPFLAGS = -D_FILE_OFFSET_BITS=64 $(DEPS_CFLAGS)
 LIBS = $(DEPS_LIBS)
 ndir_SOURCES = src/ndir.c
 addComment_SOURCES = src/addComment.c
-addComment_LDADD = -lreadline 
+addComment_LDADD = -lreadline
 addcr_SOURCES = src/addcr.c
 casedir_SOURCES = src/casedir.c
 casefile_SOURCES = src/casefile.c
