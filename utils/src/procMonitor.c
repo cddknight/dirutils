@@ -41,15 +41,16 @@ int showDir (DIR_ENTRY *file);
 /*----------------------------------------------------------------------------*
  * Globals                                                                    *
  *----------------------------------------------------------------------------*/
-COLUMN_DESC colChangeDescs[5] =
+COLUMN_DESC colChangeDescs[] =
 {
 	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Max",		1	},	/* 0 */
 	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Min",		1	},	/* 1 */
 	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Pressure",	1	},	/* 2 */
 	{	160,12,	0,	3,	0x07,	0,					"Filename", 0	},	/* 3 */
+	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Average",	1	},	/* 4 */
 };
 
-COLUMN_DESC *ptrChangeColumn[5] =
+COLUMN_DESC *ptrChangeColumn[] =
 {
 	&colChangeDescs[0],
 	&colChangeDescs[1],
@@ -57,6 +58,7 @@ COLUMN_DESC *ptrChangeColumn[5] =
 	&colChangeDescs[3]
 };
 
+int inputMode = 0;
 int filesFound = 0;
 int totalProcessed = 0;
 float savedValues[15];
@@ -101,7 +103,7 @@ int main (int argc, char *argv[])
 	if (argc == 1)
 	{
 		version ();
-		printf ("Enter the command: %s <filename>\n", argv[0]);
+		printf ("Enter the command: %s [-<mode>] <file pattern>\n", argv[0]);
 		exit (1);
 	}
     /*------------------------------------------------------------------------*
@@ -109,7 +111,25 @@ int main (int argc, char *argv[])
      * files with.                                                            *
      *------------------------------------------------------------------------*/
 	while (i < argc)
-		found += directoryLoad (argv[i++], ONLYFILES, fileCompare, &fileList);
+	{
+		if (argv[i][0] == '-')
+		{
+			switch (argv[i][1])
+			{
+			case 'w':
+				inputMode = 0;
+				break;
+			case 't':
+				inputMode = 1;
+				break;
+			}
+			++i;
+		}
+		else
+		{
+			found += directoryLoad (argv[i++], ONLYFILES, fileCompare, &fileList);
+		}
+	}
 
     /*------------------------------------------------------------------------*
      * Now we can sort the directory.                                         *
@@ -158,35 +178,47 @@ int main (int argc, char *argv[])
  *  @param readVal Array of bools to show if the value is valid.
  *  @result True if processed OK.
  */
-void processValues (float *values, int *readVal)
+void processValues (float *values, int *readVal, int count)
 {
 	int i;
 
-	for (i = 0; i < 15; ++i)
+	for (i = 0; i < count; ++i)
 	{
 		if (readVal[i])
 		{
-			if (savedRead[i] == 0)
-			{
-				savedValues[i] = values[i];
-				savedRead[i] = 1;
-			}
 			switch (i % 3)
 			{
 			case 0:
-				if (values[i] < savedValues[i])
+				if (savedRead[i] == 0)
+				{
+					savedValues[i] = values[i];
+					savedRead[i] = 1;
+				}
+				else if (values[i] < savedValues[i])
 				{
 					savedValues[i] = values[i];
 				}
 				break;
 			case 1:
-				if (values[i] > savedValues[i])
+				if (savedRead[i] == 0)
+				{
+					savedValues[i] = values[i];
+					savedRead[i] = 1;
+				}
+				else if (values[i] > savedValues[i])
 				{
 					savedValues[i] = values[i];
 				}
 				break;
 			case 2:
-				savedValues[i] += values[i];
+				if (savedRead[i] == 0)
+				{
+					savedValues[i] = values[i];
+				}
+				else
+				{
+					savedValues[i] += values[i];
+				}
 				savedRead[i] += 1;
 				break;
 			}
@@ -242,7 +274,7 @@ int processBuffer (char *inBuffer)
 		}
 		++i;
 	}
-	processValues (&tempValues[0], &readVal[0]);
+	processValues (&tempValues[0], &readVal[0], count);
 	return count;
 }
 
