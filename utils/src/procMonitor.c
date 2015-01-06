@@ -117,9 +117,11 @@ int main (int argc, char *argv[])
 			switch (argv[i][1])
 			{
 			case 'w':
+				ptrChangeColumn[2] = &colChangeDescs[2];
 				inputMode = 0;
 				break;
-			case 't':
+			case 'p':
+				ptrChangeColumn[2] = &colChangeDescs[4];
 				inputMode = 1;
 				break;
 			}
@@ -353,7 +355,9 @@ int showDir (DIR_ENTRY *file)
 	strcat (inFile, file -> fileName);
 	getcwd (outFile, 255);
 	strcat (outFile, "/");
-	sprintf (&outFile[strlen (outFile)], "monitor-%d.csv", getNumber (file -> fileName) / 100);
+	sprintf (&outFile[strlen (outFile)], "%s-%d.csv", 
+			(inputMode == 0 ? "monitor" : "power"),
+			getNumber (file -> fileName) / 100);
 
 	if ((readFile = fopen (inFile, "r")) != NULL)
 	{
