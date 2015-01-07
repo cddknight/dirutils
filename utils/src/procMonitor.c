@@ -180,7 +180,7 @@ int main (int argc, char *argv[])
  *  @param readVal Array of bools to show if the value is valid.
  *  @result True if processed OK.
  */
-void processValues (float *values, int *readVal, int count)
+void processValues (float *values, int *readVal, int count, int getTime)
 {
 	int i;
 
@@ -188,7 +188,9 @@ void processValues (float *values, int *readVal, int count)
 	{
 		if (readVal[i])
 		{
-			switch (i % 3)
+			int mode = (getTime ? i % 3 : 2);
+
+			switch (mode)
 			{
 			case 0:
 				if (savedRead[i] == 0)
@@ -239,7 +241,7 @@ void processValues (float *values, int *readVal, int count)
  *  @param inBuffer Line read from the file.
  *  @result True if processed OK.
  */
-int processBuffer (char *inBuffer)
+int processBuffer (char *inBuffer, int getTime)
 {
 	char singleVal[21];
 	float tempValues[15];
@@ -265,6 +267,10 @@ int processBuffer (char *inBuffer)
 			if (count == 0 && j)
 			{
 				strcpy (linePrefix, singleVal);
+				if (!getTime)
+				{
+					++count;
+				}
 			}
 			if (count < 17 && count > 1 && j)
 			{
@@ -276,7 +282,7 @@ int processBuffer (char *inBuffer)
 		}
 		++i;
 	}
-	processValues (&tempValues[0], &readVal[0], count);
+	processValues (&tempValues[0], &readVal[0], count, getTime);
 	return count;
 }
 
@@ -348,16 +354,13 @@ int getNumber (char *str)
 int showDir (DIR_ENTRY *file)
 {
 	char inBuffer[256], outBuffer[256], inFile[PATH_SIZE], outFile[PATH_SIZE];
-	int lines = 0, i, showCols[3] = { 1, 0, 8 };
+	int lines = 0, i, showCols[3] = { 1, 0, 8 }, getTime = 1;
 	FILE *readFile, *writeFile;
 
 	strcpy (inFile, file -> fullPath);
 	strcat (inFile, file -> fileName);
 	getcwd (outFile, 255);
 	strcat (outFile, "/");
-	sprintf (&outFile[strlen (outFile)], "%s-%d.csv", 
-			(inputMode == 0 ? "monitor" : "power"),
-			getNumber (file -> fileName) / 100);
 
 	if ((readFile = fopen (inFile, "r")) != NULL)
 	{
@@ -365,16 +368,25 @@ int showDir (DIR_ENTRY *file)
 		{
 			if (strncmp (inBuffer, "Date,Time,", 10) != 0)
 			{
-				fclose (readFile);
-				return 0;
+				if (strncmp (inBuffer, "Date,", 5) != 0)
+				{
+					fclose (readFile);
+					return 0;
+				}
+				getTime = 0;
 			}
 		}
+
+		sprintf (&outFile[strlen (outFile)], "%s-%d.csv", 
+				(inputMode == 0 ? "monitor" : "power"),
+				getNumber (file -> fileName) / 100);
+
 		if ((writeFile = fopen (outFile, "r+")) == NULL)
 		{
 			if ((writeFile = fopen (outFile, "a")) != NULL)
 			{
 				fputs ("Date,", writeFile);
-				fputs (&inBuffer[10], writeFile);
+				fputs (&inBuffer[getTime ? 10 : 5], writeFile);
 			}
 		}
 		if (writeFile != NULL)
@@ -382,7 +394,7 @@ int showDir (DIR_ENTRY *file)
 			fseek (writeFile, 0, SEEK_END);
 			while (fgets (inBuffer, 255, readFile))
 			{
-				if (processBuffer (inBuffer))
+				if (processBuffer (inBuffer, getTime))
 					++totalProcessed;
 				++lines;
 			}
