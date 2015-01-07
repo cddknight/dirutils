@@ -178,6 +178,8 @@ int main (int argc, char *argv[])
  *  @brief Process the values read from one line in the source file.
  *  @param values Array of values from the file.
  *  @param readVal Array of bools to show if the value is valid.
+ *  @param count Number of triplets to process (min,max,average).
+ *  @param getTime Is this an hourly (getTime = 1) or monthly summary.
  *  @result True if processed OK.
  */
 void processValues (float *values, int *readVal, int count, int getTime)
@@ -188,11 +190,15 @@ void processValues (float *values, int *readVal, int count, int getTime)
 	{
 		if (readVal[i])
 		{
+			/**********************************************************************************************************
+		     * When processing months all the values should be averaged. When processing days the monthly max and min *
+			 * values are calculated and the averages are averaged.                                                   *
+			 **********************************************************************************************************/
 			int mode = (getTime ? i % 3 : 2);
 
 			switch (mode)
 			{
-			case 0:
+			case 0:	/* Min */
 				if (savedRead[i] == 0)
 				{
 					savedValues[i] = values[i];
@@ -203,7 +209,7 @@ void processValues (float *values, int *readVal, int count, int getTime)
 					savedValues[i] = values[i];
 				}
 				break;
-			case 1:
+			case 1: /* Max */
 				if (savedRead[i] == 0)
 				{
 					savedValues[i] = values[i];
@@ -214,7 +220,7 @@ void processValues (float *values, int *readVal, int count, int getTime)
 					savedValues[i] = values[i];
 				}
 				break;
-			case 2:
+			default: /* Average */
 				if (savedRead[i] == 0)
 				{
 					savedValues[i] = values[i];
@@ -239,6 +245,7 @@ void processValues (float *values, int *readVal, int count, int getTime)
 /**
  *  @brief Process a line read fom the input file.
  *  @param inBuffer Line read from the file.
+ *  @param getTime Is this an hourly (getTime = 1) or monthly summary.
  *  @result True if processed OK.
  */
 int processBuffer (char *inBuffer, int getTime)
