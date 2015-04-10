@@ -850,7 +850,7 @@ int showDir(DIR_ENTRY * file)
 	char inChar, lastChar = 0;
 	char currentWord[80];
 	char inFile[PATH_SIZE], outFile[PATH_SIZE], bkpFile[PATH_SIZE];
-	int braceLevel = 0, bracketLevel = 0, inComment = 0, inQuote = 0, inDefine = 0;
+	int braceLevel = 0, bracketLevel = 0, inComment = 0, inQuote = 0, inDefine = 0, colonCount = 0;
 	int addComment = 0, curWordPos = 0, curParam = 0, clear = 0, i, line = 1, funcLine = 0;
 	FILE *readFile, *writeFile;
 
@@ -970,6 +970,13 @@ int showDir(DIR_ENTRY * file)
 					bufferFlush(writeFile, 0);
 					inDefine = 1;
 				}
+				else if (inChar == ':')
+				{
+					if (bracketLevel == 0 && braceLevel == 0)
+						++colonCount;
+					currentWord[curWordPos++] = inChar;
+					currentWord[curWordPos] = 0;
+				}
 				else if (inChar == '{')
 				{
 					debugLine("Line %d: Starting brace level (%d)\n", line, braceLevel + 1);
@@ -986,16 +993,17 @@ int showDir(DIR_ENTRY * file)
 							}
 							curParam = 0;
 						}
+						colonCount = 0;
 					}
 					braceLevel++;
 				}
 				else if (inChar == '}' && braceLevel)
 				{
 					debugLine("Line %d: Ending brace level (%d)\n", line, braceLevel);
-					braceLevel--;
-					if (braceLevel == 0)
+					if (--braceLevel == 0)
 					{
 						commentFlush(writeFile);
+						colonCount = 0;
 						clear = 1;
 					}
 				}
@@ -1004,7 +1012,7 @@ int showDir(DIR_ENTRY * file)
 					debugLine("Line %d: Starting bracket level (%d)\n", line, bracketLevel + 1);
 					if (bracketLevel == 0)
 					{
-						if (currentWord[0])
+						if (currentWord[0] && colonCount < 3)
 						{
 							funcLine = line;
 							strcpy(possibleName[0], currentWord);
@@ -1028,7 +1036,7 @@ int showDir(DIR_ENTRY * file)
 				else if (inChar == ')' && bracketLevel)
 				{
 					debugLine("Line %d: Ending bracket level (%d)\n", line, bracketLevel);
-					if (bracketLevel == 1 && braceLevel == 0)
+					if (bracketLevel == 1 && braceLevel == 0 && colonCount < 3)
 					{
 						if (currentWord[0])
 						{
@@ -1051,6 +1059,7 @@ int showDir(DIR_ENTRY * file)
 				else if (inChar == ';' && !bracketLevel && !braceLevel)
 				{
 					commentFlush(writeFile);
+					colonCount = 0;
 					curParam = 0;
 					clear = 1;
 				}
