@@ -1,26 +1,24 @@
-/******************************************************************************************************
- *                                                                                                    *
- *  C A S E D I R . C                                                                                 *
- *  =================                                                                                 *
- *                                                                                                    *
- *  This is free software; you can redistribute it and/or modify it under the terms of the GNU        *
- *  General Public License version 2 as published by the Free Software Foundation.  Note that I am    *
- *  not granting permission to redistribute or modify this under the terms of any later version of    *
- *  the General Public License.                                                                       *
- *                                                                                                    *
- *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even    *
- *  the impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU          *
- *  General Public License for more details.                                                          *
- *                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program (in     *
- *  the file "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place -       *
- *  Suite 330, Boston, MA 02111, USA.                                                                 *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  C A S E D I R . C                                                                                                 *
+ *  =================                                                                                                 *
+ *                                                                                                                    *
+ *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
+ *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
+ *  redistribute or modify this under the terms of any later version of the General Public License.                   *
+ *                                                                                                                    *
+ *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the                *
+ *  impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   *
+ *  more details.                                                                                                     *
+ *                                                                                                                    *
+ *  You should have received a copy of the GNU General Public License along with this program (in the file            *
+ *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
+ *  USA.                                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @file
- *  @brief Change the case of the files in a directory.
- *  @version $Id: casedir.c 1076 2010-10-02 20:38:45Z chris $
+ *  \file
+ *  \brief Change the case of the files in a directory.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -72,8 +70,8 @@ int useCase = CASE_LOWER;
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Print the version of the application.
- *  @result None.
+ *  \brief Print the version of the application.
+ *  \result None.
  */
 void version (void)
 {
@@ -88,10 +86,10 @@ void version (void)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief The program starts here.
- *  @param argc The number of arguments passed to the program.
- *  @param argv Pointers to the arguments passed to the program.
- *  @result 0 (zero) if all process OK.
+ *  \brief The program starts here.
+ *  \param argc The number of arguments passed to the program.
+ *  \param argv Pointers to the arguments passed to the program.
+ *  \result 0 (zero) if all process OK.
  */
 int main (int argc, char *argv[])
 {
@@ -183,9 +181,9 @@ int main (int argc, char *argv[])
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Convert the file that was found.
- *  @param file File to convert.
- *  @result 1 if file changed.
+ *  \brief Convert the file that was found.
+ *  \param file File to convert.
+ *  \result 1 if file changed.
  */
 int showDir (DIR_ENTRY *file)
 {
@@ -244,10 +242,10 @@ int showDir (DIR_ENTRY *file)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Compare two files for sorting.
- *  @param fileOne First file.
- *  @param fileTwo Second file.
- *  @result 0, 1 or -1 depending on compare.
+ *  \brief Compare two files for sorting.
+ *  \param fileOne First file.
+ *  \param fileTwo Second file.
+ *  \result 0, 1 or -1 depending on compare.
  */
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 {

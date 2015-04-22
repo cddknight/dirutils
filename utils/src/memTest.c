@@ -1,30 +1,29 @@
-/******************************************************************************************************
- *                                                                                                    *
- *  M E M  T E S T . C                                                                                *
- *  ==================                                                                                *
- *                                                                                                    *
- *  This is free software; you can redistribute it and/or modify it under the terms of the GNU        *
- *  General Public License version 2 as published by the Free Software Foundation.  Note that I am    *
- *  not granting permission to redistribute or modify this under the terms of any later version of    *
- *  the General Public License.                                                                       *
- *                                                                                                    *
- *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even    *
- *  the impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU          *
- *  General Public License for more details.                                                          *
- *                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program (in     *
- *  the file "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place -       *
- *  Suite 330, Boston, MA 02111, USA.                                                                 *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  M E M  T E S T . C                                                                                                *
+ *  ==================                                                                                                *
+ *                                                                                                                    *
+ *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
+ *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
+ *  redistribute or modify this under the terms of any later version of the General Public License.                   *
+ *                                                                                                                    *
+ *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the                *
+ *  impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   *
+ *  more details.                                                                                                     *
+ *                                                                                                                    *
+ *  You should have received a copy of the GNU General Public License along with this program (in the file            *
+ *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
+ *  USA.                                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @file
- *  @brief Program to test the memory for problems.
- *  @version $Id: memTest.c 1076 2010-10-02 20:38:45Z chris $
+ *  \file
+ *  \brief Program to test the memory for problems.
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <dircmd.h>
+#include <unistd.h>
 
 #define CHECKSIZE	(1024 * 1024)
 
@@ -37,12 +36,12 @@ void *memQueue;
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Create, test and free the memory blocks.
- *  @param mode 0 create, 1 test, 2 free.
- *  @param loopCount Number of blocks.
- *  @param oldValue Old value to check for.
- *  @param newValue New value to set.
- *  @result Number of faults found.
+ *  \brief Create, test and free the memory blocks.
+ *  \param mode 0 create, 1 test, 2 free.
+ *  \param loopCount Number of blocks.
+ *  \param oldValue Old value to check for.
+ *  \param newValue New value to set.
+ *  \result Number of faults found.
  */
 int testMemory (int mode, int loopCount, unsigned char oldValue, unsigned char newValue)
 {
@@ -107,10 +106,10 @@ int testMemory (int mode, int loopCount, unsigned char oldValue, unsigned char n
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief The program starts here.
- *  @param argc The number of arguments passed to the program.
- *  @param argv Pointers to the arguments passed to the program.
- *  @result 0 (zero) if all process OK.
+ *  \brief The program starts here.
+ *  \param argc The number of arguments passed to the program.
+ *  \param argv Pointers to the arguments passed to the program.
+ *  \result 0 (zero) if all process OK.
  */
 int main (int argc, char *argv[])
 {

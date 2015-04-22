@@ -1,26 +1,24 @@
-/******************************************************************************************************
- *                                                                                                    *
- *  L I S T  F U N C . C                                                                              *
- *  ====================                                                                              *
- *                                                                                                    *
- *  This is free software; you can redistribute it and/or modify it under the terms of the GNU        *
- *  General Public License version 2 as published by the Free Software Foundation.  Note that I am    *
- *  not granting permission to redistribute or modify this under the terms of any later version of    *
- *  the General Public License.                                                                       *
- *                                                                                                    *
- *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even    *
- *  the impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU          *
- *  General Public License for more details.                                                          *
- *                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program (in     *
- *  the file "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place -       *
- *  Suite 330, Boston, MA 02111, USA.                                                                 *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  L I S T  F U N C . C                                                                                              *
+ *  ====================                                                                                              *
+ *                                                                                                                    *
+ *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
+ *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
+ *  redistribute or modify this under the terms of any later version of the General Public License.                   *
+ *                                                                                                                    *
+ *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the                *
+ *  impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   *
+ *  more details.                                                                                                     *
+ *                                                                                                                    *
+ *  You should have received a copy of the GNU General Public License along with this program (in the file            *
+ *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
+ *  USA.                                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @file
- *  @brief Chris Knight's own program to list C functions.
- *  @version $Id: listFunc.c 1076 2010-10-02 20:38:45Z chris $
+ *  \file
+ *  \brief Chris Knight's own program to list C functions.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,8 +76,8 @@ static char funtionChars[] =
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Display the version of the application.
- *  @result None.
+ *  \brief Display the version of the application.
+ *  \result None.
  */
 void version (void)
 {
@@ -94,10 +92,10 @@ void version (void)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief The program starts here.
- *  @param argc The number of arguments passed to the program.
- *  @param argv Pointers to the arguments passed to the program.
- *  @result 0 (zero) if all process OK.
+ *  \brief The program starts here.
+ *  \param argc The number of arguments passed to the program.
+ *  \param argv Pointers to the arguments passed to the program.
+ *  \result 0 (zero) if all process OK.
  */
 int main(int argc, char *argv[])
 {
@@ -184,10 +182,10 @@ int main(int argc, char *argv[])
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Read a chunck of bytes from a file.
- *  @param inChar Return the next charater read here.
- *  @param inFile File to read from.
- *  @result True if a character was read.
+ *  \brief Read a chunck of bytes from a file.
+ *  \param inChar Return the next charater read here.
+ *  \param inFile File to read from.
+ *  \result True if a character was read.
  */
 int bufferRead(char *inChar, FILE * inFile)
 {
@@ -213,9 +211,9 @@ int bufferRead(char *inChar, FILE * inFile)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Is this word a special work for C.
- *  @param currentWord Word to check.
- *  @result True if it is special.
+ *  \brief Is this word a special work for C.
+ *  \param currentWord Word to check.
+ *  \result True if it is special.
  */
 int isKeyWord (char *currentWord)
 {
@@ -232,10 +230,10 @@ int isKeyWord (char *currentWord)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief If debug is on print debug information.
- *  @param format String to display.
- *  @param ... Extra paramters for the format.
- *  @result Nothing.
+ *  \brief If debug is on print debug information.
+ *  \param format String to display.
+ *  \param ... Extra paramters for the format.
+ *  \result Nothing.
  */
 void debugLine(char *format, ...)
 {
@@ -256,13 +254,13 @@ void debugLine(char *format, ...)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Output the name and parameters of the fuction found.
- *  @param fileName Name of the file the function was found in.
- *  @param line Line number that function was found on.
- *  @param func The number of the function in the file.
- *  @param count Number of parameters, first is function name.
- *  @param values Pointers to the parmamters.
- *  @result Nothing.
+ *  \brief Output the name and parameters of the fuction found.
+ *  \param fileName Name of the file the function was found in.
+ *  \param line Line number that function was found on.
+ *  \param func The number of the function in the file.
+ *  \param count Number of parameters, first is function name.
+ *  \param values Pointers to the parmamters.
+ *  \result Nothing.
  */
 void displayFunc(char *fileName, int line, int func, int count, char *values[])
 {
@@ -300,9 +298,9 @@ void displayFunc(char *fileName, int line, int func, int count, char *values[])
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Called back by process dir to show the directory.
- *  @param file Information about the file to search.
- *  @result 1 if the file contained functions.
+ *  \brief Called back by process dir to show the directory.
+ *  \param file Information about the file to search.
+ *  \result 1 if the file contained functions.
  */
 int showDir(DIR_ENTRY * file)
 {
@@ -516,10 +514,10 @@ int showDir(DIR_ENTRY * file)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Called back by load dir to sort the files.
- *  @param fileOne First file.
- *  @param fileTwo Second file to compare first with.
- *  @result 1, 0 or -1 depending on order.
+ *  \brief Called back by load dir to sort the files.
+ *  \param fileOne First file.
+ *  \param fileTwo Second file to compare first with.
+ *  \result 1, 0 or -1 depending on order.
  */
 int fileCompare(DIR_ENTRY * fileOne, DIR_ENTRY * fileTwo)
 {

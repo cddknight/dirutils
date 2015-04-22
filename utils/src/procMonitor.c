@@ -1,26 +1,24 @@
-/******************************************************************************************************
- *                                                                                                    *
- *  P R O C  M O N I T O R . C                                                                        *
- *  ==========================                                                                        *
- *                                                                                                    *
- *  This is free software; you can redistribute it and/or modify it under the terms of the GNU        *
- *  General Public License version 2 as published by the Free Software Foundation.  Note that I am    *
- *  not granting permission to redistribute or modify this under the terms of any later version of    *
- *  the General Public License.                                                                       *
- *                                                                                                    *
- *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even    *
- *  the impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU          *
- *  General Public License for more details.                                                          *
- *                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program (in     *
- *  the file "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place -       *
- *  Suite 330, Boston, MA 02111, USA.                                                                 *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  P R O C  M O N I T O R . C                                                                                        *
+ *  ==========================                                                                                        *
+ *                                                                                                                    *
+ *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
+ *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
+ *  redistribute or modify this under the terms of any later version of the General Public License.                   *
+ *                                                                                                                    *
+ *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the                *
+ *  impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   *
+ *  more details.                                                                                                     *
+ *                                                                                                                    *
+ *  You should have received a copy of the GNU General Public License along with this program (in the file            *
+ *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
+ *  USA.                                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @file
- *  @brief Program to process daily weather monitor files in to monthly overview.
- *  @version $Id: procMonitor.c 1690 2013-05-22 08:15:00Z chris $
+ *  \file
+ *  \brief Program to process daily weather monitor files in to monthly overview.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -72,8 +70,8 @@ char linePrefix[21];
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Display the version of the application.
- *  @result None.
+ *  \brief Display the version of the application.
+ *  \result None.
  */
 void version (void)
 {
@@ -88,10 +86,10 @@ void version (void)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief The program starts here.
- *  @param argc The number of arguments passed to the program.
- *  @param argv Pointers to the arguments passed to the program.
- *  @result 0 (zero) if all process OK.
+ *  \brief The program starts here.
+ *  \param argc The number of arguments passed to the program.
+ *  \param argv Pointers to the arguments passed to the program.
+ *  \result 0 (zero) if all process OK.
  */
 int main (int argc, char *argv[])
 {
@@ -175,12 +173,12 @@ int main (int argc, char *argv[])
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Process the values read from one line in the source file.
- *  @param values Array of values from the file.
- *  @param readVal Array of bools to show if the value is valid.
- *  @param count Number of triplets to process (min,max,average).
- *  @param getTime Is this an hourly (getTime = 1) or monthly summary.
- *  @result True if processed OK.
+ *  \brief Process the values read from one line in the source file.
+ *  \param values Array of values from the file.
+ *  \param readVal Array of bools to show if the value is valid.
+ *  \param count Number of triplets to process (min,max,average).
+ *  \param getTime Is this an hourly (getTime = 1) or monthly summary.
+ *  \result True if processed OK.
  */
 void processValues (float *values, int *readVal, int count, int getTime)
 {
@@ -243,10 +241,10 @@ void processValues (float *values, int *readVal, int count, int getTime)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Process a line read fom the input file.
- *  @param inBuffer Line read from the file.
- *  @param getTime Is this an hourly (getTime = 1) or monthly summary.
- *  @result True if processed OK.
+ *  \brief Process a line read fom the input file.
+ *  \param inBuffer Line read from the file.
+ *  \param getTime Is this an hourly (getTime = 1) or monthly summary.
+ *  \result True if processed OK.
  */
 int processBuffer (char *inBuffer, int getTime)
 {
@@ -300,9 +298,9 @@ int processBuffer (char *inBuffer, int getTime)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Write the current values back out to the file.
- *  @param outBuffer Write here before calling function writes to the file.
- *  @result True if processed OK.
+ *  \brief Write the current values back out to the file.
+ *  \param outBuffer Write here before calling function writes to the file.
+ *  \result True if processed OK.
  */
 int flushBuffer (char *outBuffer)
 {
@@ -330,9 +328,9 @@ int flushBuffer (char *outBuffer)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Convert the digits in a string to a number.
- *  @param str String to convert.
- *  @result Number found.
+ *  \brief Convert the digits in a string to a number.
+ *  \param str String to convert.
+ *  \result Number found.
  */
 int getNumber (char *str)
 {
@@ -354,9 +352,9 @@ int getNumber (char *str)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Remove CR's from LF's to make file Linux compatable.
- *  @param file File to Convert.
- *  @result 1 if file changed.
+ *  \brief Remove CR's from LF's to make file Linux compatable.
+ *  \param file File to Convert.
+ *  \result 1 if file changed.
  */
 int showDir (DIR_ENTRY *file)
 {
@@ -366,7 +364,8 @@ int showDir (DIR_ENTRY *file)
 
 	strcpy (inFile, file -> fullPath);
 	strcat (inFile, file -> fileName);
-	getcwd (outFile, 255);
+	if (getcwd (outFile, 255) == NULL)
+		strcpy (outFile, ".");
 	strcat (outFile, "/");
 
 	if ((readFile = fopen (inFile, "r")) != NULL)
@@ -436,10 +435,10 @@ int showDir (DIR_ENTRY *file)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Compare two files for sorting.
- *  @param fileOne First file.
- *  @param fileTwo Second file.
- *  @result 0, 1 or -1 depending on order.
+ *  \brief Compare two files for sorting.
+ *  \param fileOne First file.
+ *  \param fileTwo Second file.
+ *  \result 0, 1 or -1 depending on order.
  */
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 {

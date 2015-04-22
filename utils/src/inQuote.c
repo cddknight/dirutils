@@ -1,26 +1,24 @@
-/******************************************************************************************************
- *                                                                                                    *
- *  I N  Q U O T E . C                                                                                *
- *  ==================                                                                                *
- *                                                                                                    *
- *  This is free software; you can redistribute it and/or modify it under the terms of the GNU        *
- *  General Public License version 2 as published by the Free Software Foundation.  Note that I am    *
- *  not granting permission to redistribute or modify this under the terms of any later version of    *
- *  the General Public License.                                                                       *
- *                                                                                                    *
- *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even    *
- *  the impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU          *
- *  General Public License for more details.                                                          *
- *                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program (in     *
- *  the file "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place -       *
- *  Suite 330, Boston, MA 02111, USA.                                                                 *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  I N  Q U O T E . C                                                                                                *
+ *  ==================                                                                                                *
+ *                                                                                                                    *
+ *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
+ *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
+ *  redistribute or modify this under the terms of any later version of the General Public License.                   *
+ *                                                                                                                    *
+ *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the                *
+ *  impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   *
+ *  more details.                                                                                                     *
+ *                                                                                                                    *
+ *  You should have received a copy of the GNU General Public License along with this program (in the file            *
+ *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
+ *  USA.                                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @file
- *  @brief Print out text within quotes.
- *  @version $Id: inQuote.c 1076 2010-10-02 20:38:45Z chris $
+ *  \file
+ *  \brief Print out text within quotes.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -66,8 +64,8 @@ int totalLines = 0;
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Display the library version.
- *  @result None.
+ *  \brief Display the library version.
+ *  \result None.
  */
 void version (void)
 {
@@ -82,10 +80,10 @@ void version (void)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief The program starts here.
- *  @param argc The number of arguments passed to the program.
- *  @param argv Pointers to the arguments passed to the program.
- *  @result 0 (zero) if all process OK.
+ *  \brief The program starts here.
+ *  \param argc The number of arguments passed to the program.
+ *  \param argv Pointers to the arguments passed to the program.
+ *  \result 0 (zero) if all process OK.
  */
 int main (int argc, char *argv[])
 {
@@ -149,9 +147,9 @@ int main (int argc, char *argv[])
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Display a directory entry.
- *  @param file Directory entry to display, in the case extract text from.
- *  @result 1 if text was extracted.
+ *  \brief Display a directory entry.
+ *  \param file Directory entry to display, in the case extract text from.
+ *  \result 1 if text was extracted.
  */
 int showDir (DIR_ENTRY *file)
 {
@@ -214,10 +212,10 @@ int showDir (DIR_ENTRY *file)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Compare two directory names for sorting.
- *  @param fileOne First file.
- *  @param fileTwo Second file.
- *  @result The same as the result of strcmp.
+ *  \brief Compare two directory names for sorting.
+ *  \param fileOne First file.
+ *  \param fileTwo Second file.
+ *  \result The same as the result of strcmp.
  */
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 {

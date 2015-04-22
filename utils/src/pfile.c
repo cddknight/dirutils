@@ -1,26 +1,24 @@
-/******************************************************************************************************
- *                                                                                                    *
- *  P F I L E . C                                                                                     *
- *  =============                                                                                     *
- *                                                                                                    *
- *  This is free software; you can redistribute it and/or modify it under the terms of the GNU        *
- *  General Public License version 2 as published by the Free Software Foundation.  Note that I am    *
- *  not granting permission to redistribute or modify this under the terms of any later version of    *
- *  the General Public License.                                                                       *
- *                                                                                                    *
- *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even    *
- *  the impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU          *
- *  General Public License for more details.                                                          *
- *                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program (in     *
- *  the file "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place -       *
- *  Suite 330, Boston, MA 02111, USA.                                                                 *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  P F I L E . C                                                                                                     *
+ *  =============                                                                                                     *
+ *                                                                                                                    *
+ *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
+ *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
+ *  redistribute or modify this under the terms of any later version of the General Public License.                   *
+ *                                                                                                                    *
+ *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the                *
+ *  impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   *
+ *  more details.                                                                                                     *
+ *                                                                                                                    *
+ *  You should have received a copy of the GNU General Public License along with this program (in the file            *
+ *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
+ *  USA.                                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @file
- *  @brief Chris Knight's own path search program.
- *  @version $Id: pfile.c 1076 2010-10-02 20:38:45Z chris $
+ *  \file
+ *  \brief Chris Knight's own path search program.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -107,8 +105,8 @@ int			displayColour = 0;
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Display version information.
- *  @result Nothing.
+ *  \brief Display version information.
+ *  \result Nothing.
  */
 void version ()
 {
@@ -123,10 +121,10 @@ void version ()
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief The program starts here.
- *  @param argc The number of arguments passed to the program.
- *  @param argv Pointers to the arguments passed to the program.
- *  @result 0 (zero) if all process OK.
+ *  \brief The program starts here.
+ *  \param argc The number of arguments passed to the program.
+ *  \param argv Pointers to the arguments passed to the program.
+ *  \result 0 (zero) if all process OK.
  */
 int main (int argc, char *argv[])
 {
@@ -393,9 +391,9 @@ int main (int argc, char *argv[])
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Called back by process dir to show the directory.
- *  @param file Information about the file to show.
- *  @result 1 if the file was shown.
+ *  \brief Called back by process dir to show the directory.
+ *  \param file Information about the file to show.
+ *  \result 1 if the file was shown.
  */
 int showDir (DIR_ENTRY *file)
 {
@@ -537,10 +535,10 @@ int showDir (DIR_ENTRY *file)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Called back by load dir to sort the files.
- *  @param fileOne First file.
- *  @param fileTwo Second file to compare first with.
- *  @result 1, 0 or -1 depending on order.
+ *  \brief Called back by load dir to sort the files.
+ *  \param fileOne First file.
+ *  \param fileTwo Second file to compare first with.
+ *  \result 1, 0 or -1 depending on order.
  */
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 {

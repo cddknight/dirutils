@@ -40,6 +40,7 @@
  ******************************************************************************************************/
 int addCommentsCmp (DIR_ENTRY * fileOne, DIR_ENTRY * fileTwo);
 int addComments (DIR_ENTRY * file);
+int displayBox(int type, int count, FILE *outFile);
 
 #define BUFFER_SIZE 4096
 #define MAX_BOXWIDTH 250
@@ -258,7 +259,7 @@ int bufferRead(char *inChar, FILE * inFile)
  */
 void bufferFlush(FILE * outFile, int removeSpace)
 {
-	int startPos = 0, saveSize = 0;
+	int saveSize = 0;
 
 	if (outBuffPos)
 	{
@@ -598,7 +599,6 @@ void boxLine (char *boxText, int first, int last, int addBlank, FILE *outFile)
 	int pos = 0, len = strlen (boxText);
 	char boxLine [MAX_BOXWIDTH + 1];
 	char boxFill [MAX_BOXWIDTH + 1];
-	char padBuff [MAX_BOXWIDTH + 1];
 	char txtBuff [MAX_BOXWIDTH + 1];
 	
 	char firstStart[6],		firstEnd[6];
@@ -872,7 +872,7 @@ int addComments(DIR_ENTRY * file)
 	char currentWord[80];
 	char inFile[PATH_SIZE], outFile[PATH_SIZE], bkpFile[PATH_SIZE];
 	int braceLevel = 0, bracketLevel = 0, inComment = 0, inQuote = 0, inDefine = 0, colonCount = 0;
-	int addComment = 0, curWordPos = 0, curParam = 0, clear = 0, i, line = 1, funcLine = 0;
+	int addComment = 0, curWordPos = 0, curParam = 0, clear = 0, line = 1, funcLine = 0;
 	FILE *readFile, *writeFile;
 
 	strcpy(inFile, file->fullPath);
