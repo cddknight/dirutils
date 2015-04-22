@@ -1,17 +1,24 @@
-/******************************************************************************************************
- *                                                                                                    *
- *  A D D  C O M M E N T . C                                                                          *
- *  ========================                                                                          *
- *                                                                                                    *
- *  All rights reserved. Reproduction, modification, use or disclosure to third parties without       *
- *  express authority is forbidden.                                                                   *
- *                                                                                                    *
- *  (c) Copyright 2012 TheKnight.co.uk                                                                *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  A D D  C O M M E N T . C                                                                                          *
+ *  ========================                                                                                          *
+ *                                                                                                                    *
+ *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
+ *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
+ *  redistribute or modify this under the terms of any later version of the General Public License.                   *
+ *                                                                                                                    *
+ *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the                *
+ *  impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   *
+ *  more details.                                                                                                     *
+ *                                                                                                                    *
+ *  You should have received a copy of the GNU General Public License along with this program (in the file            *
+ *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
+ *  USA.                                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @file
- *  @brief Automatically add comments to C source file.
+ *  \file
+ *  \brief Automatically add comments to C source file.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,8 +38,8 @@
 /******************************************************************************************************
  * Prototypes															                              *
  ******************************************************************************************************/
-int fileCompare(DIR_ENTRY * fileOne, DIR_ENTRY * fileTwo);
-int showDir(DIR_ENTRY * file);
+int addCommentsCmp (DIR_ENTRY * fileOne, DIR_ENTRY * fileTwo);
+int addComments (DIR_ENTRY * file);
 
 #define BUFFER_SIZE 4096
 #define MAX_BOXWIDTH 250
@@ -79,10 +86,10 @@ static char funtionChars[] =
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Display version and help info.
- *  @param progName Full name of the program.
- *  @param helpThem Should help be shown.
- *  @result None.
+ *  \brief Display version and help info.
+ *  \param progName Full name of the program.
+ *  \param helpThem Should help be shown.
+ *  \result None.
  */
 void version (char *progName, int helpThem)
 {
@@ -112,10 +119,10 @@ void version (char *progName, int helpThem)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief The program starts here.
- *  @param argc The number of arguments passed to the program.
- *  @param argv Pointers to the arguments passed to the program.
- *  @result 0 (zero) if all process OK.
+ *  \brief The program starts here.
+ *  \param argc The number of arguments passed to the program.
+ *  \param argv Pointers to the arguments passed to the program.
+ *  \result 0 (zero) if all process OK.
  */
 int main(int argc, char *argv[])
 {
@@ -192,14 +199,14 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			found += directoryLoad(argv[i], ONLYFILES, fileCompare, &fileList);
+			found += directoryLoad(argv[i], ONLYFILES, addCommentsCmp, &fileList);
 		}
 		i++;
 	}
 	directorySort (&fileList);
 
 	if (found)
-		directoryProcess(showDir, &fileList);
+		directoryProcess(addComments, &fileList);
 
 	if (filesFound)
 		displayLine();
@@ -215,10 +222,10 @@ int main(int argc, char *argv[])
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Read a character from the input file.
- *  @param inChar Return the read character here.
- *  @param inFile File to read from.
- *  @result 1 if a character was read 0 if not.
+ *  \brief Read a character from the input file.
+ *  \param inChar Return the read character here.
+ *  \param inFile File to read from.
+ *  \result 1 if a character was read 0 if not.
  */
 int bufferRead(char *inChar, FILE * inFile)
 {
@@ -244,10 +251,10 @@ int bufferRead(char *inChar, FILE * inFile)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Flush all the bytes in the output buffer.
- *  @param outFile File to write any bytes in the buffer too.
- *  @param removeSpace Remove the leading white space from the buffer.
- *  @result None.
+ *  \brief Flush all the bytes in the output buffer.
+ *  \param outFile File to write any bytes in the buffer too.
+ *  \param removeSpace Remove the leading white space from the buffer.
+ *  \result None.
  */
 void bufferFlush(FILE * outFile, int removeSpace)
 {
@@ -290,9 +297,9 @@ void bufferFlush(FILE * outFile, int removeSpace)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Flush the contents of the comment buffer.
- *  @param outFile File to write any bytes in the buffer too.
- *  @result None.
+ *  \brief Flush the contents of the comment buffer.
+ *  \param outFile File to write any bytes in the buffer too.
+ *  \result None.
  */
 void commentFlush(FILE * outFile)
 {
@@ -317,10 +324,10 @@ void commentFlush(FILE * outFile)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Write a character to the output buffer.
- *  @param inChar Character to write to the buffer.
- *  @param outFile If the buffer gets full write it to this file.
- *  @result None.
+ *  \brief Write a character to the output buffer.
+ *  \param inChar Character to write to the buffer.
+ *  \param outFile If the buffer gets full write it to this file.
+ *  \result None.
  */
 void bufferWrite(char inChar, FILE * outFile)
 {
@@ -339,10 +346,10 @@ void bufferWrite(char inChar, FILE * outFile)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Write a character to the comment buffer.
- *  @param inChar Character to write to the buffer.
- *  @param outFile If the buffer gets full write it to this file.
- *  @result None.
+ *  \brief Write a character to the comment buffer.
+ *  \param inChar Character to write to the buffer.
+ *  \param outFile If the buffer gets full write it to this file.
+ *  \result None.
  */
 void commentWrite(char inChar, FILE * outFile)
 {
@@ -360,11 +367,11 @@ void commentWrite(char inChar, FILE * outFile)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Convert a string into a doubled up string.
- *  @param oldName String to convert from.
- *  @param newName The converted string is saved here.
- *  @param underLn An under line string of the same length goes here.
- *  @result None.
+ *  \brief Convert a string into a doubled up string.
+ *  \param oldName String to convert from.
+ *  \param newName The converted string is saved here.
+ *  \param underLn An under line string of the same length goes here.
+ *  \result None.
  */
 void doubleName(char *oldName, char *newName, char *underLn)
 {
@@ -400,12 +407,12 @@ void doubleName(char *oldName, char *newName, char *underLn)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Read a line from the users console.
- *  @param retnBuff Save the read line here.
- *  @param maxSize Maximum size of the read line.
- *  @param format Format of the prompt, may have extra parameters.
- *  @param ... Parmeters for the format.
- *  @result None.
+ *  \brief Read a line from the users console.
+ *  \param retnBuff Save the read line here.
+ *  \param maxSize Maximum size of the read line.
+ *  \param format Format of the prompt, may have extra parameters.
+ *  \param ... Parmeters for the format.
+ *  \result None.
  */
 void myReadLine (char *retnBuff, int maxSize, char *format, ...)
 {
@@ -438,11 +445,11 @@ void myReadLine (char *retnBuff, int maxSize, char *format, ...)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Search the comment buffer for description of the parameter.
- *  @param findStr String to look for.
- *  @param outBuffer Returned description.
- *  @param endChar Character to end the buffer search on.
- *  @result Length of the description.
+ *  \brief Search the comment buffer for description of the parameter.
+ *  \param findStr String to look for.
+ *  \param outBuffer Returned description.
+ *  \param endChar Character to end the buffer search on.
+ *  \result Length of the description.
  */
 int searchBuff (char *findStr, char *outBuffer, char endChar)
 {
@@ -478,11 +485,11 @@ int searchBuff (char *findStr, char *outBuffer, char endChar)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Get the description for a parameter.
- *  @param retnBuff Return the description here.
- *  @param type Type of parameter.
- *  @param name Name of the parameter.
- *  @result None.
+ *  \brief Get the description for a parameter.
+ *  \param retnBuff Return the description here.
+ *  \param type Type of parameter.
+ *  \param name Name of the parameter.
+ *  \result None.
  */
 void getComment (char *retnBuff, int type, char *name)
 {
@@ -490,27 +497,41 @@ void getComment (char *retnBuff, int type, char *name)
 	switch (type)
 	{
 	case 0:
-		if (!searchBuff ("@brief ",  retnBuff, '.'))
-			myReadLine (retnBuff, boxWidth - 9, "Enter (%s) description: ", name);
+		if (!searchBuff ("\\brief ",  retnBuff, '.'))
+		{
+			if (!searchBuff ("@brief ",  retnBuff, '.'))
+				myReadLine (retnBuff, boxWidth - 9, "Enter (%s) description: ", name);
+		}
 		break;
 	case 1:
-		if (!searchBuff ("@brief ",  retnBuff, '.'))
-			myReadLine (retnBuff, boxWidth - 9, "Enter (%s) description: ", name);
+		if (!searchBuff ("\\brief ",  retnBuff, '.'))
+		{
+			if (!searchBuff ("@brief ",  retnBuff, '.'))
+				myReadLine (retnBuff, boxWidth - 9, "Enter (%s) description: ", name);
+		}
 		break;
 	case 2:
 		{
 			char buff[81];
-			sprintf (buff, "@param %s ", name);
+			sprintf (buff, "\\param %s ", name);
 			if (!searchBuff (buff,  retnBuff, '.'))
-				myReadLine (retnBuff, boxWidth - strlen(name) - 10, "Enter (%s) description: ", name);
+			{
+				sprintf (buff, "@param %s ", name);
+				if (!searchBuff (buff,  retnBuff, '.'))
+					myReadLine (retnBuff, boxWidth - strlen(name) - 10, "Enter (%s) description: ", name);
+			}
 		}
 		break;
 	case 3:
-		if (!searchBuff ("@result ", retnBuff, '.'))
-			myReadLine (retnBuff, boxWidth - 10, "Enter result: ");
+		if (!searchBuff ("\\result ", retnBuff, '.'))
+		{
+			if (!searchBuff ("@result ", retnBuff, '.'))
+				myReadLine (retnBuff, boxWidth - 10, "Enter result: ");
+		}
 		break;
 	case 4:
-		searchBuff ("@version ", retnBuff, '\n');
+		if (!searchBuff ("\\version ", retnBuff, '\n'))
+			searchBuff ("@version ", retnBuff, '\n');
 		break;
 	}
 }
@@ -522,10 +543,10 @@ void getComment (char *retnBuff, int type, char *name)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Add text to a box, with a simple wrap.
- *  @param outBuff Save the line so far here.
- *  @param inBuff Line to process.
- *  @result Number of bytes read from the input.
+ *  \brief Add text to a box, with a simple wrap.
+ *  \param outBuff Save the line so far here.
+ *  \param inBuff Line to process.
+ *  \result Number of bytes read from the input.
  */
 int addBoxText (char *outBuff, char *inBuff)
 {
@@ -564,13 +585,13 @@ int addBoxText (char *outBuff, char *inBuff)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Draw a part of a box.
- *  @param boxText Text to put in the box.
- *  @param first None zero if this is the first line of the box.
- *  @param last None zero if this is the last line of the box.
- *  @param addBlank None zero if a blank line should be added after the text.
- *  @param outFile File to output the box too.
- *  @result None.
+ *  \brief Draw a part of a box.
+ *  \param boxText Text to put in the box.
+ *  \param first None zero if this is the first line of the box.
+ *  \param last None zero if this is the last line of the box.
+ *  \param addBlank None zero if a blank line should be added after the text.
+ *  \param outFile File to output the box too.
+ *  \result None.
  */
 void boxLine (char *boxText, int first, int last, int addBlank, FILE *outFile)
 {
@@ -642,11 +663,11 @@ void boxLine (char *boxText, int first, int last, int addBlank, FILE *outFile)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Display a box, could be called add the comment.
- *  @param type Type of comment to add, header or function.
- *  @param count Number of parameters including the name.
- *  @param outFile File to write the comment too.
- *  @result Nothing.
+ *  \brief Display a box, could be called add the comment.
+ *  \param type Type of comment to add, header or function.
+ *  \param count Number of parameters including the name.
+ *  \param outFile File to write the comment too.
+ *  \result Nothing.
  */
 int displayBox(int type, int count, FILE *outFile)
 {
@@ -715,15 +736,15 @@ int displayBox(int type, int count, FILE *outFile)
 		
 		getComment (readLine, 0, curFilename);
 		fprintf(outFile, "%s\n", firstCom);
-		fprintf(outFile, "%s @file\n", middleCom);
-		fprintf(outFile, "%s @brief %s.\n", middleCom, readLine);
+		fprintf(outFile, "%s \\file\n", middleCom);
+		fprintf(outFile, "%s \\brief %s.\n", middleCom, readLine);
 		if (cvsID)
 		{
 			getComment (readLine, 4, curFilename);
 			if (readLine[0])
-				fprintf(outFile, "%s @version %s\n", middleCom, readLine);
+				fprintf(outFile, "%s \\version %s\n", middleCom, readLine);
 			else
-				fprintf(outFile, "%s @version %cId: %s 0 %04d-%02d-%02d 00:00:00Z owner $\n", middleCom,
+				fprintf(outFile, "%s \\version %cId: %s 0 %04d-%02d-%02d 00:00:00Z owner $\n", middleCom,
 						'$', curFilename, tm -> tm_year + 1900, tm -> tm_mon + 1,  tm -> tm_mday);
 		}
 		fprintf(outFile, "%s\n", lastCom);
@@ -750,40 +771,40 @@ int displayBox(int type, int count, FILE *outFile)
 		{
 			functionMain = 1;
 			fprintf(outFile, "%s\n", firstCom);
-			fprintf(outFile, "%s @brief %s.\n", middleCom, "The program starts here");			
+			fprintf(outFile, "%s \\brief %s.\n", middleCom, "The program starts here");			
 		}
 		else
 		{
 			getComment (readLine, 1, possibleName[0]);
 			fprintf(outFile, "%s\n", firstCom);
-			fprintf(outFile, "%s @brief %s.\n", middleCom, readLine);
+			fprintf(outFile, "%s \\brief %s.\n", middleCom, readLine);
 		}	
 		for (i = 1; i < count; i++)
 		{
 			if (functionMain && strcmp (possibleName[i], "argc") == 0)
 			{
-				fprintf(outFile, "%s @param %s %s.\n", middleCom, possibleName[i], 
+				fprintf(outFile, "%s \\param %s %s.\n", middleCom, possibleName[i], 
 						"The number of arguments passed to the program");
 				continue;
 			}
 			if (functionMain && strcmp (possibleName[i], "argv") == 0)
 			{
-				fprintf(outFile, "%s @param %s %s.\n", middleCom, possibleName[i], 
+				fprintf(outFile, "%s \\param %s %s.\n", middleCom, possibleName[i], 
 						"Pointers to the arguments passed to the program");
 				continue;
 			}
 			getComment (readLine, 2, possibleName[i]);
-			fprintf(outFile, "%s @param %s %s.\n", middleCom, possibleName[i], readLine);
+			fprintf(outFile, "%s \\param %s %s.\n", middleCom, possibleName[i], readLine);
 		}
 		
 		if (functionMain)
 		{
-			fprintf(outFile, "%s @result %s.\n", middleCom, "0 (zero) if all process OK");
+			fprintf(outFile, "%s \\result %s.\n", middleCom, "0 (zero) if all processed OK");
 		}
 		else
 		{
 			getComment (readLine, 3, "");
-			fprintf(outFile, "%s @result %s.\n", middleCom, readLine);
+			fprintf(outFile, "%s \\result %s.\n", middleCom, readLine);
 		}
 		fprintf(outFile, "%s\n", lastCom);
 		displayLine ();
@@ -798,9 +819,9 @@ int displayBox(int type, int count, FILE *outFile)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Check if this is a special keyword.
- *  @param currentWord Word to check.
- *  @result 1 if it is a keyword, 0 if not.
+ *  \brief Check if this is a special keyword.
+ *  \param currentWord Word to check.
+ *  \result 1 if it is a keyword, 0 if not.
  */
 int isKeyWord (char *currentWord)
 {
@@ -817,10 +838,10 @@ int isKeyWord (char *currentWord)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Paramters for the format.
- *  @param format Line to output, may have extra parameters.
- *  @param ... Parameter for the format.
- *  @result None.
+ *  \brief Paramters for the format.
+ *  \param format Line to output, may have extra parameters.
+ *  \param ... Parameter for the format.
+ *  \result None.
  */
 void debugLine(char *format, ...)
 {
@@ -836,16 +857,16 @@ void debugLine(char *format, ...)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  S H O W  D I R                                                                                                    *
- *  ==============                                                                                                    *
+ *  A D D  C O M M E N T S                                                                                            *
+ *  ======================                                                                                            *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Call back from the directoryProcess to display the file.
- *  @param file File found in the directory.
- *  @result 1 if file processed.
+ *  \brief Call back from the directoryProcess to display the file.
+ *  \param file File found in the directory.
+ *  \result 1 if file processed.
  */
-int showDir(DIR_ENTRY * file)
+int addComments(DIR_ENTRY * file)
 {
 	char inChar, lastChar = 0;
 	char currentWord[80];
@@ -1134,17 +1155,17 @@ int showDir(DIR_ENTRY * file)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  F I L E  C O M P A R E                                                                                            *
- *  ======================                                                                                            *
+ *  A D D  C O M M E N T S  C M P                                                                                     *
+ *  =============================                                                                                     *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Call back from directoryProcess to order the files.
- *  @param fileOne First file to compare.
- *  @param fileTwo Second file to compare with.
- *  @result 1, 0 and -1 depending on the match.
+ *  \brief Call back from directoryProcess to order the files.
+ *  \param fileOne First file to compare.
+ *  \param fileTwo Second file to compare with.
+ *  \result 1, 0 and -1 depending on the match.
  */
-int fileCompare(DIR_ENTRY * fileOne, DIR_ENTRY * fileTwo)
+int addCommentsCmp (DIR_ENTRY * fileOne, DIR_ENTRY * fileTwo)
 {
 	if (fileOne->fileStat.st_mode & S_IFDIR)
 	{
