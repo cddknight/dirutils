@@ -158,7 +158,7 @@ int columnTranslate[MAX_COL_DESC] =
 COLUMN_DESC allColumnDescs[MAX_COL_DESC] =
 {
 	{	6,	6,	0,	2,	0x03,	0,					"Type",		11	},	/*  0 */
-	{	10,	10,	0,	2,	0x02,	0,					"Rights",	5	},	/*  1 */
+	{	11,	11,	0,	2,	0x02,	0,					"Rights",	5	},	/*  1 */
 	{	20,	6,	0,	2,	0x04,	COL_ALIGN_RIGHT,	"Links",	8	},	/*  2 */
 	{	20,	6,	0,	2,	0x05,	0,					"Owner",	6	},	/*  3 */
 	{	20,	6,	0,	2,	0x05,	0,					"Group",	7	},	/*  8 */
@@ -1180,7 +1180,7 @@ int showDir (DIR_ENTRY *file)
 		char groupString[81];
 		char contextString[81];
 		char md5String[33];
-		char rightsBuff[12];
+		char rightsBuff[14];
 		char numBuff[21];
 		int fileAge = 0;
 		
@@ -1234,7 +1234,7 @@ int showDir (DIR_ENTRY *file)
 			{
 				if (showType & SHOW_RIGHTS)
 				{
-					displayInColumn (columnTranslate[COL_RIGHTS], displayRightsString (file -> fileStat.st_mode, rightsBuff));
+					displayInColumn (columnTranslate[COL_RIGHTS], displayRightsStringACL (file, rightsBuff));
 				}
 				if (showType & SHOW_NUM_LINKS)
 				{
@@ -1313,7 +1313,7 @@ int showDir (DIR_ENTRY *file)
 			{
 				if (showType & SHOW_RIGHTS)
 				{
-					displayInColumn (columnTranslate[COL_RIGHTS], displayRightsString (file -> fileStat.st_mode, rightsBuff));
+					displayInColumn (columnTranslate[COL_RIGHTS], displayRightsStringACL (file, rightsBuff));
 				}
 				if (showType & SHOW_NUM_LINKS)
 				{
@@ -1390,7 +1390,7 @@ int showDir (DIR_ENTRY *file)
 			{
 				if (showType & SHOW_RIGHTS)
 				{
-					displayInColumn (columnTranslate[COL_RIGHTS], displayRightsString (file -> fileStat.st_mode, rightsBuff));
+					displayInColumn (columnTranslate[COL_RIGHTS], displayRightsStringACL (file, rightsBuff));
 				}
 				if (showType & SHOW_NUM_LINKS)
 				{
@@ -1460,7 +1460,7 @@ int showDir (DIR_ENTRY *file)
 			{
 				if (showType & SHOW_RIGHTS)
 				{
-					displayInColumn (columnTranslate[COL_RIGHTS], displayRightsString (file -> fileStat.st_mode, rightsBuff));
+					displayInColumn (columnTranslate[COL_RIGHTS], displayRightsStringACL (file, rightsBuff));
 				}
 				if (showType & SHOW_NUM_LINKS)
 				{
@@ -1861,3 +1861,4 @@ char *quoteCopy (char *dst, char *src)
 	}
 	return dst;
 }
+

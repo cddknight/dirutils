@@ -1,26 +1,24 @@
-/******************************************************************************************************
- *                                                                                                    *
- *  C O N F I G . C                                                                                   *
- *  ===============                                                                                   *
- *                                                                                                    *
- *  This is free software; you can redistribute it and/or modify it under the terms of the GNU        *
- *  General Public License version 2 as published by the Free Software Foundation.  Note that I am    *
- *  not granting permission to redistribute or modify this under the terms of any later version of    *
- *  the General Public License.                                                                       *
- *                                                                                                    *
- *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even    *
- *  the impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU          *
- *  General Public License for more details.                                                          *
- *                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program (in     *
- *  the file "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place -       *
- *  Suite 330, Boston, MA 02111, USA.                                                                 *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  C O N F I G . C                                                                                                   *
+ *  ===============                                                                                                   *
+ *                                                                                                                    *
+ *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
+ *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
+ *  redistribute or modify this under the terms of any later version of the General Public License.                   *
+ *                                                                                                                    *
+ *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the                *
+ *  impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   *
+ *  more details.                                                                                                     *
+ *                                                                                                                    *
+ *  You should have received a copy of the GNU General Public License along with this program (in the file            *
+ *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
+ *  USA.                                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @file
- *  @brief Read and write configuration to a file.
- *  @version $Id: config.c 1473 2012-05-25 08:32:36Z ukchkn $
+ *  \file
+ *  \brief Read and write configuration to a file.
  */
 #include <stdio.h>
 #include <string.h>
@@ -44,9 +42,9 @@ void *configQueue = NULL;
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Load the cobviguration file.
- *  @param configFile File to load.
- *  @result 1 if all OK.
+ *  \brief Load the cobviguration file.
+ *  \param configFile File to load.
+ *  \result 1 if all OK.
  */
 int configLoad (const char *configFile)
 {
@@ -142,8 +140,8 @@ int configLoad (const char *configFile)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Free the memory used by the configuration .
- *  @result None.
+ *  \brief Free the memory used by the configuration .
+ *  \result None.
  */
 void configFree ()
 {
@@ -169,9 +167,9 @@ void configFree ()
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Find the value of a name.
- *  @param configName Name of the value to find.
- *  @result A config entery that was found or NULL.
+ *  \brief Find the value of a name.
+ *  \param configName Name of the value to find.
+ *  \result A config entery that was found or NULL.
  */
 static CONFIG_ENTRY *configFindEntry (const char *configName)
 {
@@ -197,10 +195,10 @@ static CONFIG_ENTRY *configFindEntry (const char *configName)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Set a config value.
- *  @param configName The name for the value.
- *  @param configValue The value of the value.
- *  @result 1 if all OK.
+ *  \brief Set a config value.
+ *  \param configName The name for the value.
+ *  \param configValue The value of the value.
+ *  \result 1 if all OK.
  */
 int configSetValue (char *configName, char *configValue)
 {
@@ -251,10 +249,10 @@ int configSetValue (char *configName, char *configValue)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Set an interger config value.
- *  @param configName The name for the value.
- *  @param configValue The value of the value.
- *  @result 1 if all OK.
+ *  \brief Set an interger config value.
+ *  \param configName The name for the value.
+ *  \param configValue The value of the value.
+ *  \result 1 if all OK.
  */
 int configSetIntValue (char *configName, int configValue)
 {
@@ -272,10 +270,10 @@ int configSetIntValue (char *configName, int configValue)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Get the value of an config item.
- *  @param configName Name of the value to find.
- *  @param value Save the value here.
- *  @result 1 if value found.
+ *  \brief Get the value of an config item.
+ *  \param configName Name of the value to find.
+ *  \param value Save the value here.
+ *  \result 1 if value found.
  */
 int configGetValue (char *configName, char *value)
 {
@@ -296,10 +294,10 @@ int configGetValue (char *configName, char *value)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Get the integer value of a config item.
- *  @param configName Name of the value to find.
- *  @param value Save the value here.
- *  @result 1 if value found.
+ *  \brief Get the integer value of a config item.
+ *  \param configName Name of the value to find.
+ *  \param value Save the value here.
+ *  \result 1 if value found.
  */
 int configGetIntValue (const char *configName, int *value)
 {

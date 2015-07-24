@@ -1,26 +1,24 @@
-/******************************************************************************************************
- *                                                                                                    *
- *  D I S P L A Y . C                                                                                 *
- *  =================                                                                                 *
- *                                                                                                    *
- *  This is free software; you can redistribute it and/or modify it under the terms of the GNU        *
- *  General Public License version 2 as published by the Free Software Foundation.  Note that I am    *
- *  not granting permission to redistribute or modify this under the terms of any later version of    *
- *  the General Public License.                                                                       *
- *                                                                                                    *
- *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even    *
- *  the impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU          *
- *  General Public License for more details.                                                          *
- *                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program (in     *
- *  the file "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place -       *
- *  Suite 330, Boston, MA 02111, USA.                                                                 *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I S P L A Y . C                                                                                                 *
+ *  =================                                                                                                 *
+ *                                                                                                                    *
+ *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
+ *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
+ *  redistribute or modify this under the terms of any later version of the General Public License.                   *
+ *                                                                                                                    *
+ *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the                *
+ *  impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   *
+ *  more details.                                                                                                     *
+ *                                                                                                                    *
+ *  You should have received a copy of the GNU General Public License along with this program (in the file            *
+ *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
+ *  USA.                                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @file
- *  @brief Functions to display information on a console.
- *  @version $Id: display.c 1521 2012-06-25 13:15:01Z ukchkn $
+ *  \file
+ *  \brief Functions to display information on a console.
  */
 #include "config.h"
 #include <stdio.h>
@@ -42,6 +40,9 @@
 #include <locale.h>
 #include <langinfo.h>
 #include <errno.h>
+#ifdef HAVE_SYS_ACL_H
+#include <sys/acl.h>
+#endif
 
 #include "dircmd.h"
 
@@ -118,8 +119,8 @@ static int displayOptions;
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Draw a line of dashes across the screen.
- *  @result None.
+ *  \brief Draw a line of dashes across the screen.
+ *  \result None.
  */
 void displayLine ()
 {
@@ -138,8 +139,8 @@ void displayLine ()
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Get the current time, used when making the date.
- *  @result None.
+ *  \brief Get the current time, used when making the date.
+ *  \result None.
  */
 static void getTheTimes ()
 {
@@ -173,10 +174,10 @@ static void getTheTimes ()
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Convert a number into a string with thousand seperators.
- *  @param number Number to convert into the string.
- *  @param outString Output the number to this string.
- *  @result Pointer to the outString.
+ *  \brief Convert a number into a string with thousand seperators.
+ *  \param number Number to convert into the string.
+ *  \param outString Output the number to this string.
+ *  \result Pointer to the outString.
  */
 char *displayCommaNumber (long long number, char *outString)
 {
@@ -212,10 +213,10 @@ char *displayCommaNumber (long long number, char *outString)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Make a date string out of a time_t.
- *  @param showDate Date in time_t format to convert to a string.
- *  @param outString Output the date to this string.
- *  @result Pointer to the outString.
+ *  \brief Make a date string out of a time_t.
+ *  \param showDate Date in time_t format to convert to a string.
+ *  \param outString Output the date to this string.
+ *  \result Pointer to the outString.
  */
 char *displayDateString (time_t showDate, char *outString)
 {
@@ -252,10 +253,10 @@ char *displayDateString (time_t showDate, char *outString)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Save the date time format to use.
- *  @param format Format to use for date time.
- *  @param which When to use this format.
- *  @result None.
+ *  \brief Save the date time format to use.
+ *  \param format Format to use for date time.
+ *  \param which When to use this format.
+ *  \result None.
  */
 void displaySetDateFormat (char *format, int which)
 {
@@ -270,10 +271,10 @@ void displaySetDateFormat (char *format, int which)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Make a file size string, converts to K, M .
- *  @param size Size to convert to a string.
- *  @param outString Output the size to this string.
- *  @result Pointer to the outString.
+ *  \brief Make a file size string, converts to K, M .
+ *  \param size Size to convert to a string.
+ *  \param outString Output the size to this string.
+ *  \result Pointer to the outString.
  */
 char *displayFileSize (long long size, char *outString)
 {
@@ -301,16 +302,16 @@ char *displayFileSize (long long size, char *outString)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Make a rights string from file rights.
- *  @param userRights User right for the file to convert.
- *  @param outString Output the rights to this string.
- *  @result Pointer to the outString.
+ *  \brief Make a rights string from file rights.
+ *  \param userRights User right for the file to convert.
+ *  \param outString Output the rights to this string.
+ *  \result Pointer to the outString.
  */
 char *displayRightsString (int userRights, char *outString)
 {
 	int i, saveRights = userRights;
 	
-	strcpy (outString, "----------");
+	strcpy (outString, "----------.");
 	
 	if (S_ISSOCK(userRights))
 		outString[0] = 's';	
@@ -358,15 +359,63 @@ char *displayRightsString (int userRights, char *outString)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  D I S P L A Y  R I G H T S  S T R I N G  A C L                                                                    *
+ *  ==============================================                                                                    *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Same as the displayRightsString but adds an ACL marker like ls.
+ *  \param file File we are looking at.
+ *  \param outString Output the attribute string here.
+ *  \result Pointer to the string.
+ */
+char *displayRightsStringACL (DIR_ENTRY *file, char *outString)
+{
+#ifdef HAVE_SYS_ACL_H
+	acl_t acl;
+	char fullName[1024];
+#endif
+
+	displayRightsString (file -> fileStat.st_mode, outString);
+
+#ifdef HAVE_SYS_ACL_H
+	strcpy (fullName, file -> fullPath);
+	strcat (fullName, file -> fileName);
+	if ((acl = acl_get_file (fullName, ACL_TYPE_ACCESS)) != NULL)
+	{
+	    acl_entry_t entry;
+   		acl_tag_t tag;
+	    int entryId = ACL_FIRST_ENTRY;
+
+		while (acl_get_entry(acl, entryId, &entry) == 1)
+		{
+    	    if (acl_get_tag_type (entry, &tag) != -1)
+    	    {
+    	    	if (tag == ACL_USER || tag == ACL_GROUP)
+    	    	{
+    	    		outString[10] = '+';
+    	    		break;
+    	    	}
+			}
+			entryId = ACL_NEXT_ENTRY;
+		}
+		acl_free (acl);
+	}
+#endif
+	return outString;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  D I S P L A Y  O W N E R  S T R I N G                                                                             *
  *  =====================================                                                                             *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Get the owners name from there ID.
- *  @param ownerID The ID of the owner to get the name of.
- *  @param outString Output the owner name to this string.
- *  @result Pointer to the outString.
+ *  \brief Get the owners name from there ID.
+ *  \param ownerID The ID of the owner to get the name of.
+ *  \param outString Output the owner name to this string.
+ *  \result Pointer to the outString.
  */
 char *displayOwnerString (int ownerID, char *outString)
 {
@@ -387,10 +436,10 @@ char *displayOwnerString (int ownerID, char *outString)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Get the group name from its ID.
- *  @param groupID The ID of the group to get the name of.
- *  @param outString Output the group name to this string.
- *  @result Pointer to the outString.
+ *  \brief Get the group name from its ID.
+ *  \param groupID The ID of the group to get the name of.
+ *  \param outString Output the group name to this string.
+ *  \result Pointer to the outString.
  */
 char *displayGroupString (int groupID, char *outString)
 {
@@ -411,10 +460,10 @@ char *displayGroupString (int groupID, char *outString)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Display the context for a given file.
- *  @param fullpath The file to get the context of.
- *  @param outString Save the context here.
- *  @result Pointer to the saved context.
+ *  \brief Display the context for a given file.
+ *  \param fullpath The file to get the context of.
+ *  \param outString Save the context here.
+ *  \result Pointer to the saved context.
  */
 char *displayContextString (char *fullpath, char *outString)
 {
@@ -451,10 +500,10 @@ char *displayContextString (char *fullpath, char *outString)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Display the MD5 checksum for a file.
- *  @param file File to checksum (may have been done).
- *  @param outString Output the string here .
- *  @result None.
+ *  \brief Display the MD5 checksum for a file.
+ *  \param file File to checksum (may have been done).
+ *  \param outString Output the string here .
+ *  \result None.
  */
 char *displayMD5String (DIR_ENTRY *file, char *outString)
 {
@@ -487,8 +536,8 @@ char *displayMD5String (DIR_ENTRY *file, char *outString)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Get the width of the screen.
- *  @result The width of the screen, terminal display.
+ *  \brief Get the width of the screen.
+ *  \result The width of the screen, terminal display.
  */
 int displayGetWidth ()
 {
@@ -502,8 +551,8 @@ int displayGetWidth ()
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Get the depth of the screen.
- *  @result The depth of the screen, terminal display.
+ *  \brief Get the depth of the screen.
+ *  \result The depth of the screen, terminal display.
  */
 int displayGetDepth ()
 {
@@ -517,8 +566,8 @@ int displayGetDepth ()
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Calculate the terminal size to be read later.
- *  @result None.
+ *  \brief Calculate the terminal size to be read later.
+ *  \result None.
  */
 void displayGetWindowSize ()
 {
@@ -575,10 +624,10 @@ void displayGetWindowSize ()
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Force to screen size to a value.
- *  @param cols Number of columns to set.
- *  @param rows Number of rows to set.
- *  @result None.
+ *  \brief Force to screen size to a value.
+ *  \param cols Number of columns to set.
+ *  \param rows Number of rows to set.
+ *  \result None.
  */
 void displayForceSize (int cols, int rows)
 {
@@ -593,11 +642,11 @@ void displayForceSize (int cols, int rows)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Initialise the structures for displaying columns.
- *  @param colCount Number of columns to be displayed.
- *  @param colDesc Descriptions of the columns to display.
- *  @param options Any other options for the columns, like display .
- *  @result 0 if the init failed, 1 if OK.
+ *  \brief Initialise the structures for displaying columns.
+ *  \param colCount Number of columns to be displayed.
+ *  \param colDesc Descriptions of the columns to display.
+ *  \param options Any other options for the columns, like display .
+ *  \result 0 if the init failed, 1 if OK.
  */
 int displayColumnInit (int colCount, COLUMN_DESC *colDesc[], int options)
 {
@@ -637,11 +686,11 @@ int displayColumnInit (int colCount, COLUMN_DESC *colDesc[], int options)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Function to add a column to the current display line.
- *  @param column Which column to add.
- *  @param format How to format the column.
- *  @param arg_ptr Arguments to the format.
- *  @result 1 is the add worked, 0 if a problem like column out of range.
+ *  \brief Function to add a column to the current display line.
+ *  \param column Which column to add.
+ *  \param format How to format the column.
+ *  \param arg_ptr Arguments to the format.
+ *  \result 1 is the add worked, 0 if a problem like column out of range.
  */
 static int vDisplayInColumn (int column, char *format, va_list arg_ptr)
 {
@@ -701,12 +750,12 @@ static int vDisplayInColumn (int column, char *format, va_list arg_ptr)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Display in a different colour to the default.
- *  @param column Number of the column to display the string in.
- *  @param colour Colour to use.
- *  @param format Format of the string (printf style) maybe more op.
- *  @param ... Parameters to format.
- *  @result 0 if the display failed, 1 if OK.
+ *  \brief Display in a different colour to the default.
+ *  \param column Number of the column to display the string in.
+ *  \param colour Colour to use.
+ *  \param format Format of the string (printf style) maybe more op.
+ *  \param ... Parameters to format.
+ *  \result 0 if the display failed, 1 if OK.
  */
 int displayInColour (int column, int colour, char *format, ...)
 {
@@ -732,11 +781,11 @@ int displayInColour (int column, int colour, char *format, ...)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Display a string in a column.
- *  @param column Number of the column to display the string in.
- *  @param format Format of the string (printf style) maybe more op.
- *  @param ... Parameters to format.
- *  @result 0 if the display failed, 1 if OK.
+ *  \brief Display a string in a column.
+ *  \param column Number of the column to display the string in.
+ *  \param format Format of the string (printf style) maybe more op.
+ *  \param ... Parameters to format.
+ *  \result 0 if the display failed, 1 if OK.
  */
 int displayInColumn (int column, char *format, ...)
 {
@@ -756,8 +805,8 @@ int displayInColumn (int column, char *format, ...)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Calculate the total size of all the columns.
- *  @result The size of all the columns.
+ *  \brief Calculate the total size of all the columns.
+ *  \result The size of all the columns.
  */
 static int calcDisplaySize (void)
 {
@@ -781,8 +830,8 @@ static int calcDisplaySize (void)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Add the sizes of the headings to the column sizes.
- *  @result None.
+ *  \brief Add the sizes of the headings to the column sizes.
+ *  \result None.
  */
 static void addHeadingSizes (void)
 {
@@ -810,8 +859,8 @@ static void addHeadingSizes (void)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Look at the columns an see if we can make them smaller.
- *  @result 1 if the size was changed, 0 if they are as small as possi.
+ *  \brief Look at the columns an see if we can make them smaller.
+ *  \result 1 if the size was changed, 0 if they are as small as possi.
  */
 static int reduceDisplaySize(void)
 {
@@ -874,10 +923,10 @@ static int reduceDisplaySize(void)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Make an over size string smaller to fit a column.
- *  @param dispString String to make smaller.
- *  @param displaySize Size that the fixed string should be.
- *  @result None.
+ *  \brief Make an over size string smaller to fit a column.
+ *  \param dispString String to make smaller.
+ *  \param displaySize Size that the fixed string should be.
+ *  \result None.
  */
 static void fixStringSize (char *dispString, int displaySize)
 {
@@ -902,10 +951,10 @@ static void fixStringSize (char *dispString, int displaySize)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Convert a colour to an ansi esape code.
- *  @param colour Colour to convert.
- *  @param outString Output colour as an escape code.
- *  @result None.
+ *  \brief Convert a colour to an ansi esape code.
+ *  \param colour Colour to convert.
+ *  \param outString Output colour as an escape code.
+ *  \result None.
  */
 static void displayColour (int colour, char *outString)
 {
@@ -937,11 +986,11 @@ static void displayColour (int colour, char *outString)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Output one of the columns to the screen.
- *  @param column The number of the column we are showing.
- *  @param string The string to show within the column.
- *  @param showColour Should we display in colour.
- *  @result None.
+ *  \brief Output one of the columns to the screen.
+ *  \param column The number of the column we are showing.
+ *  \param string The string to show within the column.
+ *  \param showColour Should we display in colour.
+ *  \result None.
  */
 static void displayColumn (int column, char *string, int showColour)
 {
@@ -1029,8 +1078,8 @@ static void displayColumn (int column, char *string, int showColour)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Called to make all the columns the same width.
- *  @result None.
+ *  \brief Called to make all the columns the same width.
+ *  \result None.
  */
 void displayMatchWidth (void)
 {
@@ -1058,9 +1107,9 @@ void displayMatchWidth (void)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Finish adding columns to a line and start a new one.
- *  @param flags Display flags.
- *  @result None.
+ *  \brief Finish adding columns to a line and start a new one.
+ *  \param flags Display flags.
+ *  \result None.
  */
 void displayNewLine (char flags)
 {
@@ -1087,9 +1136,9 @@ void displayNewLine (char flags)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Add a special line the will draw a line of dashes.
- *  @param flags Display flags.
- *  @result None.
+ *  \brief Add a special line the will draw a line of dashes.
+ *  \param flags Display flags.
+ *  \result None.
  */
 void displayDrawLine (char flags)
 {
@@ -1118,9 +1167,9 @@ void displayDrawLine (char flags)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Add a special line the will draw a blank line.
- *  @param flags Display flags.
- *  @result None.
+ *  \brief Add a special line the will draw a blank line.
+ *  \param flags Display flags.
+ *  \result None.
  */
 void displayBlank (char flags)
 {
@@ -1149,9 +1198,9 @@ void displayBlank (char flags)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Add a special line that will display the column headings.
- *  @param flags Display flags.
- *  @result None.
+ *  \brief Add a special line that will display the column headings.
+ *  \param flags Display flags.
+ *  \result None.
  */
 void displayHeading (char flags)
 {
@@ -1180,9 +1229,9 @@ void displayHeading (char flags)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Display some of the lines and discard the rest.
- *  @param lines The number of lines to show, eg: 5 the first 5, -5 the last 5.
- *  @result None.
+ *  \brief Display some of the lines and discard the rest.
+ *  \param lines The number of lines to show, eg: 5 the first 5, -5 the last 5.
+ *  \result None.
  */
 void displaySomeLines (int lines)
 {
@@ -1203,8 +1252,8 @@ void displaySomeLines (int lines)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Display all the lines saved in the columns.
- *  @result None.
+ *  \brief Display all the lines saved in the columns.
+ *  \result None.
  */
 void displayAllLines (void)
 {
@@ -1310,8 +1359,8 @@ void displayAllLines (void)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Tidy up and free all memory used by the display functions.
- *  @result None.
+ *  \brief Tidy up and free all memory used by the display functions.
+ *  \result None.
  */
 void displayTidy (void)
 {

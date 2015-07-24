@@ -1,26 +1,24 @@
-/******************************************************************************************************
- *                                                                                                    *
- *  D I R C M D . C                                                                                   *
- *  ===============                                                                                   *
- *                                                                                                    *
- *  This is free software; you can redistribute it and/or modify it under the terms of the GNU        *
- *  General Public License version 2 as published by the Free Software Foundation.  Note that I am    *
- *  not granting permission to redistribute or modify this under the terms of any later version of    *
- *  the General Public License.                                                                       *
- *                                                                                                    *
- *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even    *
- *  the impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU          *
- *  General Public License for more details.                                                          *
- *                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program (in     *
- *  the file "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place -       *
- *  Suite 330, Boston, MA 02111, USA.                                                                 *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I R C M D . C                                                                                                   *
+ *  ===============                                                                                                   *
+ *                                                                                                                    *
+ *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
+ *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
+ *  redistribute or modify this under the terms of any later version of the General Public License.                   *
+ *                                                                                                                    *
+ *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the                *
+ *  impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   *
+ *  more details.                                                                                                     *
+ *                                                                                                                    *
+ *  You should have received a copy of the GNU General Public License along with this program (in the file            *
+ *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
+ *  USA.                                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @file
- *  @brief Functions to process directories.
- *  @version $Id: dircmd.c 1076 2010-10-02 20:38:45Z chris $
+ *  \file
+ *  \brief Functions to process directories.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,32 +39,32 @@ static int listCompare (const void **item1, const void **item2);
 static int getEntryType (struct stat *fileStat);
 static char directoryVersionText[] = VERSION;
 
-/******************************************************************************************************
- *                                                                                                    *
- *  D I R E C T O R Y  V E R S I O N                                                                  *
- *  ================================                                                                  *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I R E C T O R Y  V E R S I O N                                                                                  *
+ *  ================================                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Return the version number of the dir library.
- *  @result Pointer to the version number.
+ *  \brief Return the version number of the dir library.
+ *  \result Pointer to the version number.
  */
 char *directoryVersion(void)
 {
 	return directoryVersionText;
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  S T R C A T _ C H                                                                                 *
- *  =================                                                                                 *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  S T R C A T _ C H                                                                                                 *
+ *  =================                                                                                                 *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Internal fuction to add a char to the end of a string.
- *  @param buff String to add the char to.
- *  @param ch Char to add the the string.
- *  @result Pointer to the string.
+ *  \brief Internal fuction to add a char to the end of a string.
+ *  \param buff String to add the char to.
+ *  \param ch Char to add the the string.
+ *  \result Pointer to the string.
  */
 static char *strcat_ch (char *buff, char ch)
 {
@@ -89,20 +87,20 @@ static char *strcat_ch (char *buff, char ch)
 	return buff;
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  D I R E C T O R Y  L O A D  I N T                                                                 *
- *  =================================                                                                 *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I R E C T O R Y  L O A D  I N T                                                                                 *
+ *  =================================                                                                                 *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Read the contents of a directory into memory.
- *  @param inPath The path to the directory to be process.
- *  @param partPath If it is recursive keep the subdirs to be added to t.
- *  @param findFlags Various options to select what files to read.
- *  @param Compare Function to compare two files.
- *  @param fileList Where to save the directory.
- *  @result The number of files found.
+ *  \brief Read the contents of a directory into memory.
+ *  \param inPath The path to the directory to be process.
+ *  \param partPath If it is recursive keep the subdirs to be added to t.
+ *  \param findFlags Various options to select what files to read.
+ *  \param f2 .
+ *  \param fileList Where to save the directory.
+ *  \result The number of files found.
  */
 static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
 		int(*Compare)(DIR_ENTRY *f1, DIR_ENTRY *f2),
@@ -235,19 +233,19 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
 	return filesFound;
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  D I R E C T O R Y  L O A D                                                                        *
- *  ==========================                                                                        *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I R E C T O R Y  L O A D                                                                                        *
+ *  ==========================                                                                                        *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Read the contents of a directory into memory.
- *  @param inPath The path to the directory to be process.
- *  @param findFlags Various options to select what files to read.
- *  @param Compare Function to compare two files.
- *  @param fileList Where to save the directory.
- *  @result The number of files found.
+ *  \brief Read the contents of a directory into memory.
+ *  \param inPath The path to the directory to be process.
+ *  \param findFlags Various options to select what files to read.
+ *  \param f2 .
+ *  \param fileList Where to save the directory.
+ *  \result The number of files found.
  */
 int directoryLoad (char *inPath, int findFlags,
 		int(*Compare)(DIR_ENTRY *f1, DIR_ENTRY *f2),
@@ -256,16 +254,16 @@ int directoryLoad (char *inPath, int findFlags,
 	return directoryLoadInt (inPath, "", findFlags, Compare, fileList);
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  D I R E C T O R Y  S O R T                                                                        *
- *  ==========================                                                                        *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I R E C T O R Y  S O R T                                                                                        *
+ *  ==========================                                                                                        *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Sort the directory.
- *  @param fileList List of files.
- *  @result 1 if OK.
+ *  \brief Sort the directory.
+ *  \param fileList List of files.
+ *  \result 1 if OK.
  */
 int directorySort (void **fileList)
 {
@@ -273,17 +271,17 @@ int directorySort (void **fileList)
 	return 1;
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  D I R E C T O R Y  P R O C E S S                                                                  *
- *  ================================                                                                  *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I R E C T O R Y  P R O C E S S                                                                                  *
+ *  ================================                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Funtion to process all the files in the directory.
- *  @param dirEntry xx.
- *  @param fileList Saved directory, loaded with directoryLoad.
- *  @result Number of files processed.
+ *  \brief Funtion to process all the files in the directory.
+ *  \param dirEntry xx.
+ *  \param fileList Saved directory, loaded with directoryLoad.
+ *  \result Number of files processed.
  */
 int directoryProcess (int(*ProcFile)(DIR_ENTRY *dirEntry),	void **fileList)
 {
@@ -306,17 +304,17 @@ int directoryProcess (int(*ProcFile)(DIR_ENTRY *dirEntry),	void **fileList)
 	return filesProcessed;
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  L I S T  C O M P A R E                                                                            *
- *  ======================                                                                            *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  L I S T  C O M P A R E                                                                                            *
+ *  ======================                                                                                            *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Function called to compare two directory items.
- *  @param item1 First item to compare.
- *  @param item2 Second item to compare with.
- *  @result 1, 0 and -1 depending on callback function.
+ *  \brief Function called to compare two directory items.
+ *  \param item1 First item to compare.
+ *  \param item2 Second item to compare with.
+ *  \result 1, 0 and -1 depending on callback function.
  */
 static int listCompare (const void **item1, const void **item2)
 {
@@ -326,16 +324,16 @@ static int listCompare (const void **item1, const void **item2)
 	return (dirOne -> Compare (dirOne, dirTwo));
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  G E T  E N T R Y  T Y P E                                                                         *
- *  =========================                                                                         *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  G E T  E N T R Y  T Y P E                                                                                         *
+ *  =========================                                                                                         *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Check the directory entry type, should we add it.
- *  @param fileStat File stat of the found file.
- *  @result The type of the file fond.
+ *  \brief Check the directory entry type, should we add it.
+ *  \param fileStat File stat of the found file.
+ *  \result The type of the file fond.
  */
 static int getEntryType (struct stat *fileStat)
 {

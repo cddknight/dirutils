@@ -1,26 +1,24 @@
-/******************************************************************************************************
- *                                                                                                    *
- *  M A T C H . C                                                                                     *
- *  =============                                                                                     *
- *                                                                                                    *
- *  This is free software; you can redistribute it and/or modify it under the terms of the GNU        *
- *  General Public License version 2 as published by the Free Software Foundation.  Note that I am    *
- *  not granting permission to redistribute or modify this under the terms of any later version of    *
- *  the General Public License.                                                                       *
- *                                                                                                    *
- *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even    *
- *  the impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU          *
- *  General Public License for more details.                                                          *
- *                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program (in     *
- *  the file "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place -       *
- *  Suite 330, Boston, MA 02111, USA.                                                                 *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  M A T C H . C                                                                                                     *
+ *  =============                                                                                                     *
+ *                                                                                                                    *
+ *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
+ *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
+ *  redistribute or modify this under the terms of any later version of the General Public License.                   *
+ *                                                                                                                    *
+ *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the                *
+ *  impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   *
+ *  more details.                                                                                                     *
+ *                                                                                                                    *
+ *  You should have received a copy of the GNU General Public License along with this program (in the file            *
+ *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
+ *  USA.                                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @file
- *  @brief Functions to compare strings with wildcards.
- *  @version $Id: match.c 1076 2010-10-02 20:38:45Z chris $
+ *  \file
+ *  \brief Functions to compare strings with wildcards.
  */
 #define _GNU_SOURCE
  
@@ -44,18 +42,18 @@
  *----------------------------------------------------------------------------*/
 static int evalCmd (int newLogic, int oldLogic, int cmd);
 
-/******************************************************************************************************
- *                                                                                                    *
- *  M A T C H  L O G I C                                                                              *
- *  ====================                                                                              *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  M A T C H  L O G I C                                                                                              *
+ *  ====================                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief A pattern match with AND and OR added.
- *  @param str String to try and match with.
- *  @param ptn The pattern to compare against.
- *  @param flags Passed to pattern match.
- *  @result True if there is a match, false if not.
+ *  \brief A pattern match with AND and OR added.
+ *  \param str String to try and match with.
+ *  \param ptn The pattern to compare against.
+ *  \param flags Passed to pattern match.
+ *  \result True if there is a match, false if not.
  */
 int matchLogic (char *str, char *ptn, int flags)
 {
@@ -101,18 +99,18 @@ int matchLogic (char *str, char *ptn, int flags)
 	return (curLogic & TRUE_STATE);
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  E V A L  C M D                                                                                    *
- *  ==============                                                                                    *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  E V A L  C M D                                                                                                    *
+ *  ==============                                                                                                    *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Evaluates the AND, OR and NOT from the logic.
- *  @param newLogic New command to process.
- *  @param oldLogic Current state of the logic.
- *  @param cmd New command to process.
- *  @result True or False.
+ *  \brief Evaluates the AND, OR and NOT from the logic.
+ *  \param newLogic New command to process.
+ *  \param oldLogic Current state of the logic.
+ *  \param cmd New command to process.
+ *  \result True or False.
  */
 static int evalCmd (int newLogic, int oldLogic, int cmd)
 {
@@ -133,18 +131,18 @@ static int evalCmd (int newLogic, int oldLogic, int cmd)
 	return retn;
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  M A T C H  P A T T E R N                                                                          *
- *  ========================                                                                          *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  M A T C H  P A T T E R N                                                                                          *
+ *  ========================                                                                                          *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Compare a filename against a pattern.
- *  @param str File name to compare.
- *  @param ptn Pattern to compare the filename with.
- *  @param flags Extra control on how the match is done.
- *  @result True or False.
+ *  \brief Compare a filename against a pattern.
+ *  \param str File name to compare.
+ *  \param ptn Pattern to compare the filename with.
+ *  \param flags Extra control on how the match is done.
+ *  \result True or False.
  */
 int matchPattern (char *str, char *ptn, int flags)
 {

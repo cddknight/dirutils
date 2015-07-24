@@ -1,26 +1,24 @@
-/******************************************************************************************************
- *                                                                                                    *
- *  L I S T . C                                                                                       *
- *  ===========                                                                                       *
- *                                                                                                    *
- *  This is free software; you can redistribute it and/or modify it under the terms of the GNU        *
- *  General Public License version 2 as published by the Free Software Foundation.  Note that I am    *
- *  not granting permission to redistribute or modify this under the terms of any later version of    *
- *  the General Public License.                                                                       *
- *                                                                                                    *
- *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even    *
- *  the impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU          *
- *  General Public License for more details.                                                          *
- *                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program (in     *
- *  the file "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place -       *
- *  Suite 330, Boston, MA 02111, USA.                                                                 *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  L I S T . C                                                                                                       *
+ *  ===========                                                                                                       *
+ *                                                                                                                    *
+ *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
+ *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
+ *  redistribute or modify this under the terms of any later version of the General Public License.                   *
+ *                                                                                                                    *
+ *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the                *
+ *  impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   *
+ *  more details.                                                                                                     *
+ *                                                                                                                    *
+ *  You should have received a copy of the GNU General Public License along with this program (in the file            *
+ *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
+ *  USA.                                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @file
- *  @brief Functions to a generic linked list.
- *  @version $Id: list.c 1076 2010-10-02 20:38:45Z chris $
+ *  \file
+ *  \brief Functions to a generic linked list.
  */
 #include <stdlib.h>
 #include <string.h>
@@ -72,16 +70,16 @@ typedef struct _queueHeader
 }
 QUEUE_HEADER;
 
-/******************************************************************************************************
- *                                                                                                    *
- *  Q U E U E  L O C K                                                                                *
- *  ==================                                                                                *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  Q U E U E  L O C K                                                                                                *
+ *  ==================                                                                                                *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Internal function to lock the queue.
- *  @param myQueue Queue to lock.
- *  @result None.
+ *  \brief Internal function to lock the queue.
+ *  \param myQueue Queue to lock.
+ *  \result None.
  */
 static void queueLock (QUEUE_HEADER *myQueue)
 {
@@ -98,16 +96,16 @@ static void queueLock (QUEUE_HEADER *myQueue)
 #endif
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  Q U E U E  U N  L O C K                                                                           *
- *  =======================                                                                           *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  Q U E U E  U N  L O C K                                                                                           *
+ *  =======================                                                                                           *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Internal function to unloch the queue.
- *  @param myQueue Queue to unlock.
- *  @result None.
+ *  \brief Internal function to unloch the queue.
+ *  \param myQueue Queue to unlock.
+ *  \result None.
  */
 static void queueUnLock (QUEUE_HEADER *myQueue)
 {
@@ -124,15 +122,15 @@ static void queueUnLock (QUEUE_HEADER *myQueue)
 #endif
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  Q U E U E  C R E A T E                                                                            *
- *  ======================                                                                            *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  Q U E U E  C R E A T E                                                                                            *
+ *  ======================                                                                                            *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Create a new queue.
- *  @result Reutrns a pointer to a queue header to be used in future calls.
+ *  \brief Create a new queue.
+ *  \result Reutrns a pointer to a queue header to be used in future calls.
  */
 void *queueCreate ()
 {
@@ -161,16 +159,16 @@ void *queueCreate ()
 	return newQueue;
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  Q U E U E  D E L E T E                                                                            *
- *  ======================                                                                            *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  Q U E U E  D E L E T E                                                                                            *
+ *  ======================                                                                                            *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Delete a queue.
- *  @param queueHandle Handle of the queue to delete, returned from create.
- *  @result None.
+ *  \brief Delete a queue.
+ *  \param queueHandle Handle of the queue to delete, returned from create.
+ *  \result None.
  */
 void queueDelete (void *queueHandle)
 {
@@ -195,16 +193,16 @@ void queueDelete (void *queueHandle)
 	}
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  Q U E U E  G E T                                                                                  *
- *  ================                                                                                  *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  Q U E U E  G E T                                                                                                  *
+ *  ================                                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Read the first item from the queue and remove it.
- *  @param queueHandle Handle of the queue, returned from create.
- *  @result A pointer to the item or NULL if the queue was empty.
+ *  \brief Read the first item from the queue and remove it.
+ *  \param queueHandle Handle of the queue, returned from create.
+ *  \result A pointer to the item or NULL if the queue was empty.
  */
 void *queueGet (void *queueHandle)
 {
@@ -235,17 +233,17 @@ void *queueGet (void *queueHandle)
 	return retn;
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  Q U E U E  P U T                                                                                  *
- *  ================                                                                                  *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  Q U E U E  P U T                                                                                                  *
+ *  ================                                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Put a item on the end of the queue.
- *  @param queueHandle Handle of the queue, returned from create.
- *  @param putData Data to put on the queue, normally a pointer.
- *  @result None.
+ *  \brief Put a item on the end of the queue.
+ *  \param queueHandle Handle of the queue, returned from create.
+ *  \param putData Data to put on the queue, normally a pointer.
+ *  \result None.
  */
 void queuePut (void *queueHandle, void *putData)
 {
@@ -275,17 +273,17 @@ void queuePut (void *queueHandle, void *putData)
 	}
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  Q U E U E  P U S H                                                                                *
- *  ==================                                                                                *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  Q U E U E  P U S H                                                                                                *
+ *  ==================                                                                                                *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Put a item at the front of the queue.
- *  @param queueHandle Handle of the queue, returned from create.
- *  @param putData Data to push on to queue, normally a pointer.
- *  @result None.
+ *  \brief Put a item at the front of the queue.
+ *  \param queueHandle Handle of the queue, returned from create.
+ *  \param putData Data to push on to queue, normally a pointer.
+ *  \result None.
  */
 void queuePush (void *queueHandle, void *putData)
 {
@@ -315,18 +313,18 @@ void queuePush (void *queueHandle, void *putData)
 	}
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  Q U E U E  P U T  S O R T                                                                         *
- *  =========================                                                                         *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  Q U E U E  P U T  S O R T                                                                                         *
+ *  =========================                                                                                         *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Put an item on the queue in a sorted order.
- *  @param queueHandle Handle of the queue, returned from create.
- *  @param putData Data to put on the queue, normally a pointer.
- *  @param Compare Function to compare two items.
- *  @result None.
+ *  \brief Put an item on the queue in a sorted order.
+ *  \param queueHandle Handle of the queue, returned from create.
+ *  \param putData Data to put on the queue, normally a pointer.
+ *  \param item2 .
+ *  \result None.
  */
 void queuePutSort (void *queueHandle, void *putData, 
 		int(*Compare)(const void *item1, const void *item2))
@@ -384,17 +382,17 @@ void queuePutSort (void *queueHandle, void *putData,
 	}
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  Q U E U E  R E A D                                                                                *
- *  ==================                                                                                *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  Q U E U E  R E A D                                                                                                *
+ *  ==================                                                                                                *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Read, do not remove, the nth item on the queue.
- *  @param queueHandle Handle of the queue, returned from create.
- *  @param item The number of the item to read, 0 is the first.
- *  @result A pointer to the item or NULL if none found.
+ *  \brief Read, do not remove, the nth item on the queue.
+ *  \param queueHandle Handle of the queue, returned from create.
+ *  \param item The number of the item to read, 0 is the first.
+ *  \result A pointer to the item or NULL if none found.
  */
 void *queueRead (void *queueHandle, int item)
 {
@@ -419,17 +417,17 @@ void *queueRead (void *queueHandle, int item)
 	return retn;
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  Q U E U E  S E T  F R E E  D A T A                                                                *
- *  ==================================                                                                *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  Q U E U E  S E T  F R E E  D A T A                                                                                *
+ *  ==================================                                                                                *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Sets a user defined long value on the queue .
- *  @param queueHandle Handle of the queue, returned from create.
- *  @param setData Data to save on the queue.
- *  @result None.
+ *  \brief Sets a user defined long value on the queue .
+ *  \param queueHandle Handle of the queue, returned from create.
+ *  \param setData Data to save on the queue.
+ *  \result None.
  */
 void queueSetFreeData (void *queueHandle, unsigned long setData)
 {
@@ -442,16 +440,16 @@ void queueSetFreeData (void *queueHandle, unsigned long setData)
 	}
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  Q U E U E  G E T  F R E E  D A T A                                                                *
- *  ==================================                                                                *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  Q U E U E  G E T  F R E E  D A T A                                                                                *
+ *  ==================================                                                                                *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Gets a user defined long value from the queue.
- *  @param queueHandle Handle of the queue, returned from create.
- *  @result Data to saved on the queue, default 0.
+ *  \brief Gets a user defined long value from the queue.
+ *  \param queueHandle Handle of the queue, returned from create.
+ *  \result Data to saved on the queue, default 0.
  */
 unsigned long queueGetFreeData (void *queueHandle)
 {
@@ -468,16 +466,16 @@ unsigned long queueGetFreeData (void *queueHandle)
 	return retn;
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  Q U E U E  G E T  I T E M  C O U N T                                                              *
- *  ====================================                                                              *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  Q U E U E  G E T  I T E M  C O U N T                                                                              *
+ *  ====================================                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Get the number of items currently in the queue.
- *  @param queueHandle Handle of the queue, returned from create.
- *  @result The number of items in the queue.
+ *  \brief Get the number of items currently in the queue.
+ *  \param queueHandle Handle of the queue, returned from create.
+ *  \result The number of items in the queue.
  */
 unsigned long queueGetItemCount (void *queueHandle)
 {
@@ -494,17 +492,17 @@ unsigned long queueGetItemCount (void *queueHandle)
 	return retn;
 }
 
-/******************************************************************************************************
- *                                                                                                    *
- *  Q U E U E  S O R T                                                                                *
- *  ==================                                                                                *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  Q U E U E  S O R T                                                                                                *
+ *  ==================                                                                                                *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @brief Sort the list.
- *  @param queueHandle Handle of the queue, returned from create.
- *  @param Compare Function to compare two items.
- *  @result None.
+ *  \brief Sort the list.
+ *  \param queueHandle Handle of the queue, returned from create.
+ *  \param item2 .
+ *  \result None.
  */
 void queueSort (void *queueHandle, int(*Compare)(const void *item1, const void *item2))
 {

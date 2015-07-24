@@ -1,26 +1,24 @@
-/******************************************************************************************************
- *                                                                                                    *
- *  C R C . C                                                                                         *
- *  =========                                                                                         *
- *                                                                                                    *
- *  This is free software; you can redistribute it and/or modify it under the terms of the GNU        *
- *  General Public License version 2 as published by the Free Software Foundation.  Note that I am    *
- *  not granting permission to redistribute or modify this under the terms of any later version of    *
- *  the General Public License.                                                                       *
- *                                                                                                    *
- *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even    *
- *  the impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU          *
- *  General Public License for more details.                                                          *
- *                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program (in     *
- *  the file "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place -       *
- *  Suite 330, Boston, MA 02111, USA.                                                                 *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  C R C . C                                                                                                         *
+ *  =========                                                                                                         *
+ *                                                                                                                    *
+ *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
+ *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
+ *  redistribute or modify this under the terms of any later version of the General Public License.                   *
+ *                                                                                                                    *
+ *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the                *
+ *  impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   *
+ *  more details.                                                                                                     *
+ *                                                                                                                    *
+ *  You should have received a copy of the GNU General Public License along with this program (in the file            *
+ *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
+ *  USA.                                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @file
- *  @brief Founction to calculate the crc of a file.
- *  @version $Id: crc.c 1076 2010-10-02 20:38:45Z chris $
+ *  \file
+ *  \brief Founction to calculate the crc of a file.
  */
 #include <stdio.h>
 #include <openssl/md5.h>
@@ -107,9 +105,9 @@ static long CRC32[256] =
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Calculate a CRC value for a file.
- *  @param filename Name of the file to calculate the crc value for.
- *  @result A CRC value for the file.
+ *  \brief Calculate a CRC value for a file.
+ *  \param filename Name of the file to calculate the crc value for.
+ *  \result A CRC value for the file.
  */
 int CRCFile (char *filename)
 {
@@ -136,10 +134,10 @@ int CRCFile (char *filename)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Create an md5 for a file.
- *  @param filename Name of the file to md5.
- *  @param md5Buffer Write the md5 value here (must be 16 bytes long).
- *  @result 1 if file read.
+ *  \brief Create an md5 for a file.
+ *  \param filename Name of the file to md5.
+ *  \param md5Buffer Write the md5 value here (must be 16 bytes long).
+ *  \result 1 if file read.
  */
 int MD5File (char *filename, unsigned char *md5Buffer)
 {

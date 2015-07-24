@@ -1,29 +1,24 @@
-/******************************************************************************
- *                                                                            *
- *  D I R U T I L S . H                                                       *
- *  ===================                                                       *
- *                                                                            *
- *  This is free software; you can redistribute it and/or modify it under     *
- *  the terms of the GNU General Public License version 2 as published by     *
- *  the Free Software Foundation.  Note that I am not granting permission     *
- *  to redistribute or modify this under the terms of any later version       *
- *  of the General Public License.                                            *
- *                                                                            *
- *  This is distributed in the hope that it will be useful, but WITHOUT       *
- *  ANY WARRANTY; without even the impliedwarranty of MERCHANTABILITY or      *
- *  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License     *
- *  for more details.                                                         *
- *                                                                            *
- *  You should have received a copy of the GNU General Public License         *
- *  along with this program (in the file "COPYING"); if not, write to         *
- *  the Free Software Foundation, Inc., 59 Temple Place - Suite 330,          *
- *  Boston, MA 02111, USA.                                                    *
- *                                                                            *
- ******************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I R C M D . H                                                                                                   *
+ *  ===============                                                                                                   *
+ *                                                                                                                    *
+ *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
+ *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
+ *  redistribute or modify this under the terms of any later version of the General Public License.                   *
+ *                                                                                                                    *
+ *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the                *
+ *  impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   *
+ *  more details.                                                                                                     *
+ *                                                                                                                    *
+ *  You should have received a copy of the GNU General Public License along with this program (in the file            *
+ *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
+ *  USA.                                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 /**
- *  @file
- *  @brief Headers for libdircmd.
- *  @version $Id: dirutils.h 0 2010-09-30 00:00:00Z owner $
+ *  \file
+ *  \brief Headers for libdircmd.
  */
 #ifndef INCLUDE_DIRCMD_H
 #define INCLUDE_DIRCMD_H
@@ -242,6 +237,7 @@ char *displayDateString (time_t showDate, char *outString);
 void displaySetDateFormat (char *format, int which);
 char *displayFileSize (long long size, char *outString);
 char *displayRightsString (int userRights, char *outString);
+char *displayRightsStringACL (DIR_ENTRY *file, char *outString);
 char *displayOwnerString (int ownerID, char *outString);
 char *displayGroupString (int groupID, char *outString);
 char *displayContextString (char *fullpath, char *outString);
