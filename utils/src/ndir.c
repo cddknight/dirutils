@@ -158,7 +158,11 @@ int columnTranslate[MAX_COL_DESC] =
 COLUMN_DESC allColumnDescs[MAX_COL_DESC] =
 {
 	{	6,	6,	0,	2,	0x03,	0,					"Type",		11	},	/*  0 */
+#ifdef HAVE_SYS_ACL_H
 	{	11,	11,	0,	2,	0x02,	0,					"Rights",	5	},	/*  1 */
+#else
+	{	10,	10,	0,	2,	0x02,	0,					"Rights",	5	},	/*  1 */
+#endif
 	{	20,	6,	0,	2,	0x04,	COL_ALIGN_RIGHT,	"Links",	8	},	/*  2 */
 	{	20,	6,	0,	2,	0x05,	0,					"Owner",	6	},	/*  3 */
 	{	20,	6,	0,	2,	0x05,	0,					"Group",	7	},	/*  8 */

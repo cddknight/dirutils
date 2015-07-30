@@ -311,7 +311,7 @@ char *displayRightsString (int userRights, char *outString)
 {
 	int i, saveRights = userRights;
 	
-	strcpy (outString, "----------.");
+	strcpy (outString, "----------");
 	
 	if (S_ISSOCK(userRights))
 		outString[0] = 's';	
@@ -379,6 +379,9 @@ char *displayRightsStringACL (DIR_ENTRY *file, char *outString)
 	displayRightsString (file -> fileStat.st_mode, outString);
 
 #ifdef HAVE_SYS_ACL_H
+	outString[10] = '.';
+	outString[11] = 0;
+
 	strcpy (fullName, file -> fullPath);
 	strcat (fullName, file -> fileName);
 	if ((acl = acl_get_file (fullName, ACL_TYPE_ACCESS)) != NULL)
