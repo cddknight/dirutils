@@ -60,7 +60,11 @@ int showDir (DIR_ENTRY *file);
 COLUMN_DESC colNormDescs[10] =
 {
 	{	5,	5,	0,	3,	0x03,	COL_ALIGN_RIGHT,	"Type",		8	},	/*  0 */
+#ifdef HAVE_SYS_ACL_H
 	{	11,	11,	0,	3,	0x02,	0,					"Rights",	3	},	/*  1 */
+#else
+	{	10,	10,	0,	3,	0x02,	0,					"Rights",	3	},	/*  1 */
+#endif
 	{	20,	6,	0,	1,	0x05,	0,					"Owner",	4	},	/*  2 */
 	{	20,	6,	0,	3,	0x05,	0,					"Group",	5	},	/*  3 */
 	{	7,	7,	0,	3,	0x06,	COL_ALIGN_RIGHT,	"Size",		1	},	/*  4 */
@@ -131,6 +135,12 @@ int main (int argc, char *argv[])
 	char *envPtr = getenv ("PATH");
 	int i = 1, j, found = 0;
 	void *fileList = NULL;
+
+	if (strcmp (directoryVersion(), VERSION) != 0)
+	{
+		fprintf (stderr, "Library (%s) does not match Utility (%s).\n", directoryVersion(), VERSION);
+		exit (1);
+	}
 
 	displayGetWindowSize ();
 
@@ -434,7 +444,7 @@ int showDir (DIR_ENTRY *file)
 	else if (showType & SHOW_FULL)
 	{
 		char dateString[41];
-		char rightsBuff[12];
+		char rightsBuff[14];
 		char ownerString[81];
 		char groupString[81];
 		char numBuff[10];
@@ -453,7 +463,7 @@ int showDir (DIR_ENTRY *file)
 				linkBuff[0] = 0;
 
 			displayInColumn (0, "<Lnk>");
-			displayInColumn (1, displayRightsString (file -> fileStat.st_mode, rightsBuff));
+			displayInColumn (1, displayRightsStringACL (file, rightsBuff));
 			displayInColumn (2, displayOwnerString (file -> fileStat.st_uid, ownerString));
 			displayInColumn (3, displayGroupString (file -> fileStat.st_gid, groupString));
 			displayInColumn (5,	displayDateString (file -> fileStat.st_mtime, dateString));
@@ -470,7 +480,7 @@ int showDir (DIR_ENTRY *file)
 		else if (S_ISDIR (file -> fileStat.st_mode))
 		{
 			displayInColumn (0, "<Dir>");
-			displayInColumn (1, displayRightsString (file -> fileStat.st_mode, rightsBuff));
+			displayInColumn (1, displayRightsStringACL (file, rightsBuff));
 			displayInColumn (2, displayOwnerString (file -> fileStat.st_uid, ownerString));
 			displayInColumn (3, displayGroupString (file -> fileStat.st_gid, groupString));
 			displayInColumn (5,	displayDateString (file -> fileStat.st_mtime, dateString));
@@ -484,7 +494,7 @@ int showDir (DIR_ENTRY *file)
 		 *--------------------------------------------------------------------*/
 		else if (!file -> fileStat.st_mode || file -> fileStat.st_mode & S_IFREG)
 		{
-			displayInColumn (1, displayRightsString (file -> fileStat.st_mode, rightsBuff));
+			displayInColumn (1, displayRightsStringACL (file, rightsBuff));
 			displayInColumn (2, displayOwnerString (file -> fileStat.st_uid, ownerString));
 			displayInColumn (3, displayGroupString (file -> fileStat.st_gid, groupString));
 			displayInColumn (4,	displayFileSize (file -> fileStat.st_size, numBuff));

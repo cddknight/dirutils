@@ -704,6 +704,12 @@ int main (int argc, char *argv[])
 	void *fileList = NULL;
 	char defaultDir[PATH_SIZE];
 
+	if (strcmp (directoryVersion(), VERSION) != 0)
+	{
+		fprintf (stderr, "Library (%s) does not match Utility (%s).\n", directoryVersion(), VERSION);
+		exit (1);
+	}
+
 	timeNow = time (NULL);
 	displayGetWindowSize ();
 	loadSettings (basename (argv[0]));
