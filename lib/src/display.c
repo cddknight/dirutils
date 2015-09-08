@@ -309,7 +309,7 @@ char *displayFileSize (long long size, char *outString)
  */
 char *displayRightsString (int userRights, char *outString)
 {
-	int i, saveRights = userRights;
+	int i, j = 9, saveRights = userRights;
 	
 	strcpy (outString, "----------");
 	
@@ -326,7 +326,6 @@ char *displayRightsString (int userRights, char *outString)
 	else if (S_ISDIR(userRights))
 		outString[0] = 'd';
 
-	int j = 9;
 	for (i = 0; i < 3; i++)
 	{
 		switch (i)
@@ -518,7 +517,11 @@ char *displayMD5String (DIR_ENTRY *file, char *outString)
 			
 			strcpy (fullName, file -> fullPath);
 			strcat (fullName, file -> fileName);
-			MD5File (fullName, file -> md5Sum);
+			if (!MD5File (fullName, file -> md5Sum))
+			{
+				free (file -> md5Sum);
+				file -> md5Sum = NULL;
+			}
 		}
 	}
 	outString[0] = 0;

@@ -20,8 +20,11 @@
  *  \file
  *  \brief Founction to calculate the crc of a file.
  */
+#include <config.h>
 #include <stdio.h>
+#ifdef HAVE_OPENSSL_MD5_H
 #include <openssl/md5.h>
+#endif
 #include "dircmd.h"
 
 static unsigned char tempBuff[4096];
@@ -141,9 +144,11 @@ int CRCFile (char *filename)
  */
 int MD5File (char *filename, unsigned char *md5Buffer)
 {
+	int retn = 0;
+#ifdef HAVE_OPENSSL_MD5_H
 	FILE *inFile;
 	MD5_CTX md5c;
-	int read, retn = 0;
+	int read;
 
 	if (filename != NULL && md5Buffer != NULL)
 	{
@@ -159,6 +164,9 @@ int MD5File (char *filename, unsigned char *md5Buffer)
 			MD5_Final (md5Buffer, &md5c);
 		}
 	}
+#else
+	*md5Buffer = 0;
+#endif
 	return retn;
 }
 
