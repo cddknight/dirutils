@@ -37,6 +37,8 @@ int fileCompare(DIR_ENTRY * fileOne, DIR_ENTRY * fileTwo);
 int showDir(DIR_ENTRY * file);
 
 #define BUFFER_SIZE 1024
+#define SQ	0x27
+#define	DQ	0x22
 
 /*----------------------------------------------------------------------------*
  * Globals                                                                    *
@@ -57,13 +59,21 @@ COLUMN_DESC *ptrFuncColumn[4] =
 	&colFuncDescs[3]
 };
 
+char possibleName[30][81];
+char curFilename[81];
+char inBuffer[BUFFER_SIZE];
+char outBuffer[BUFFER_SIZE];
+char comBuffer[BUFFER_SIZE];
+int outBuffPos = 0;
+int comBuffPos = 0;
+int firstWrite = 1;
 int filesFound = 0;
 int totalFuncs = 0;
 int javaMode = 0;
 int debug = 0;
 
-static char inBuffer[BUFFER_SIZE];
 static char whiteSpace[] = " \t\n\r[]<>=+-*/";
+static char ignoreChars[] = "[]<>=+-*";
 static char funtionChars[] =
 	"abcdefghijklmnopqrstuvwxyz" 
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ" 
@@ -259,10 +269,9 @@ void debugLine(char *format, ...)
  *  \param line Line number that function was found on.
  *  \param func The number of the function in the file.
  *  \param count Number of parameters, first is function name.
- *  \param values Pointers to the parmamters.
  *  \result Nothing.
  */
-void displayFunc(char *fileName, int line, int func, int count, char *values[])
+void displayFunc(char *fileName, int line, int func, int count)
 {
 	int i;
 	char numBuffer[21];
@@ -275,15 +284,15 @@ void displayFunc(char *fileName, int line, int func, int count, char *values[])
 	{
 		if (i == 0)
 		{
-			displayInColumn (3, "%s (", values[i]);
+			displayInColumn (3, "%s (", possibleName[i]);
 		}
 		else if (i == 1)
 		{
-			displayInColumn (3, "%s", values[i]);
+			displayInColumn (3, "%s", possibleName[i]);
 		}
 		else
 		{
-			displayInColumn (3, ", %s", values[i]);
+			displayInColumn (3, ", %s", possibleName[i]);
 		}
 	}
 	displayInColumn (3, ");");
@@ -298,37 +307,35 @@ void displayFunc(char *fileName, int line, int func, int count, char *values[])
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  \brief Called back by process dir to show the directory.
- *  \param file Information about the file to search.
- *  \result 1 if the file contained functions.
+ *  \brief Show the contents of the directory.
+ *  \param file While file we are to show.
+ *  \result Shown or not.
  */
 int showDir(DIR_ENTRY * file)
 {
-	char inChar, lastChar;
-	char *possibleName[30];
+	char inChar, lastChar = 0;
 	char currentWord[80];
-	char inFile[PATH_SIZE];
-	int braceLevel, bracketLevel, inComment, inQuote, inDefine;
-	int curWordPos = 0, curParam = 0, i, line = 1, shownFunc = 0;
-	int funcLine = 0;
+	char inFile[PATH_SIZE], outFile[PATH_SIZE], bkpFile[PATH_SIZE];
+	int braceLevel = 0, bracketLevel = 0, inComment = 0, inQuote = 0, inDefine = 0, colonCount = 0;
+	int addComment = 0, curWordPos = 0, curParam = 0, clear = 0, line = 1, funcLine = 0;
 	FILE *readFile;
 
 	strcpy(inFile, file->fullPath);
 	strcat(inFile, file->fileName);
 
-	for (i = 0; i < 30; i++)
-	{
-		if ((possibleName[i] = (char *)malloc(80)) == NULL)
-			return 0;
-	}
-
-	lastChar = 0;
+	strcpy(outFile, file->fullPath);
+	strcat(outFile, file->fileName);
+	strcat(outFile, ".$$$");
+	
+	firstWrite = 1;
 	possibleName[0][0] = 0;
 	currentWord[curWordPos = 0] = 0;
-	bracketLevel = braceLevel = inComment = inQuote = inDefine = curParam = 0;
 
 	if ((readFile = fopen(inFile, "rb")) != NULL)
 	{
+		int func = 0;
+		strcpy(curFilename, file -> fileName);
+
 		while (bufferRead(&inChar, readFile))
 		{
 			if (inChar == '\n')
@@ -339,6 +346,7 @@ int showDir(DIR_ENTRY * file)
 				if (lastChar == '*' && inChar == '/')
 				{
 					debugLine("Line %d: Ending C comment\n", line);
+					if (braceLevel) clear = 1;
 					inComment = 0;
 				}
 			}
@@ -347,20 +355,35 @@ int showDir(DIR_ENTRY * file)
 				if (inChar == '\n')
 				{
 					debugLine("Line %d: Ending C++ comment\n", line);
+					if (braceLevel) clear = 1;
 					inComment = 0;
+
+					if (inDefine == 1)
+					{
+						debugLine("Line %d: Ending define\n", line);
+						inDefine = 0;
+					}
 				}
 			}
 			else if (lastChar == '/' && inChar == '*' && !inQuote)
 			{
 				debugLine("Line %d: Starting C comment\n", line);
+				if (outBuffPos)
+				{
+					--outBuffPos;
+				}
 				inComment = 1;
 			}
 			else if (lastChar == '/' && inChar == '/' && !inQuote)
 			{
 				debugLine("Line %d: Starting C++ comment\n", line);
+				if (outBuffPos)
+				{
+					--outBuffPos;
+				}
 				inComment = 2;
 			}
-			else if (inChar == '"' && lastChar != '\\' && inQuote != 1)
+			else if (inChar == DQ && lastChar != '\\' && inQuote != 1)
 			{
 				if (inQuote == 0)
 				{
@@ -373,7 +396,7 @@ int showDir(DIR_ENTRY * file)
 					inQuote = 0;
 				}
 			}
-			else if (inChar == '\'' && lastChar != '\\' && inQuote != 2)
+			else if (inChar == SQ && lastChar != '\\' && inQuote != 2)
 			{
 				if (inQuote == 0)
 				{
@@ -403,30 +426,43 @@ int showDir(DIR_ENTRY * file)
 				debugLine("Line %d: Starting define\n", line);
 				inDefine = 1;
 			}
+			else if (inChar == ':')
+			{
+				if (bracketLevel == 0 && braceLevel == 0)
+					++colonCount;
+				currentWord[curWordPos++] = inChar;
+				currentWord[curWordPos] = 0;
+			}
 			else if (inChar == '{')
 			{
 				debugLine("Line %d: Starting brace level (%d)\n", line, braceLevel + 1);
-				if ((!javaMode && braceLevel == 0) || (javaMode && braceLevel == 1))
+				if (braceLevel == 0)
 				{
 					if (curParam)
 					{
-						displayFunc(file->fileName, funcLine, ++shownFunc, curParam, possibleName);
+						displayFunc(file->fileName, funcLine, ++func, curParam);
+						comBuffPos = 0;
 						curParam = 0;
 					}
+					colonCount = 0;
 				}
 				braceLevel++;
 			}
 			else if (inChar == '}' && braceLevel)
 			{
 				debugLine("Line %d: Ending brace level (%d)\n", line, braceLevel);
-				braceLevel--;
+				if (--braceLevel == 0)
+				{
+					colonCount = 0;
+					clear = 1;
+				}
 			}
 			else if (inChar == '(')
 			{
 				debugLine("Line %d: Starting bracket level (%d)\n", line, bracketLevel + 1);
 				if (bracketLevel == 0)
 				{
-					if (currentWord[0])
+					if (currentWord[0] && colonCount < 3)
 					{
 						funcLine = line;
 						strcpy(possibleName[0], currentWord);
@@ -450,7 +486,7 @@ int showDir(DIR_ENTRY * file)
 			else if (inChar == ')' && bracketLevel)
 			{
 				debugLine("Line %d: Ending bracket level (%d)\n", line, bracketLevel);
-				if (bracketLevel == 1 && braceLevel == 0)
+				if (bracketLevel == 1 && braceLevel == 0 && colonCount < 3)
 				{
 					if (currentWord[0])
 					{
@@ -466,13 +502,15 @@ int showDir(DIR_ENTRY * file)
 				}
 				bracketLevel--;
 			}
-			else if (strchr(whiteSpace, inChar))
+			else if (strchr(ignoreChars, inChar) || strchr(whiteSpace, inChar))
 			{
 				curWordPos = 0;
 			}
 			else if (inChar == ';' && !bracketLevel && !braceLevel)
 			{
+				colonCount = 0;
 				curParam = 0;
+				clear = 1;
 			}
 			else if (strchr(funtionChars, inChar))
 			{
@@ -483,7 +521,21 @@ int showDir(DIR_ENTRY * file)
 			{
 				currentWord[curWordPos = 0] = 0;
 			}
-
+			if (inComment)
+			{
+				addComment = 1;
+			}
+			else
+			{
+				if (!strchr(whiteSpace, inChar) && addComment)
+				{
+					addComment = 0;
+					if (clear)
+					{
+						clear = 0;
+					}
+				}
+			}
 			if (lastChar == '\\' && inChar == '\\')
 				lastChar = 0;
 			else
@@ -493,18 +545,17 @@ int showDir(DIR_ENTRY * file)
 
 		if (bracketLevel || braceLevel || inComment || inQuote || inDefine)
 		{
-			printf("(%s) WARNING unexpected EOF: Bracket: %d, Brace: %d, Comment: %d, "
-				   "Quote: %d, Define: %d\n", file->fileName, bracketLevel, braceLevel, 
-				   inComment, inQuote, inDefine);
+			printf("WARNING unexpected EOF: Bracket: %d, Brace: %d, Comment: %d, "
+				   "Quote: %d, Define: %d\n", bracketLevel, braceLevel, inComment, 
+				   inQuote, inDefine);
 		}
-		displayDrawLine (0);
+		if (func)
+		{
+			displayDrawLine (0);
+		}
 		filesFound++;
 	}
-	for (i = 0; i < 30; i++)
-	{
-		free(possibleName[i]);
-	}
-	return shownFunc ? 1 : 0;
+	return 1;
 }
 
 /**********************************************************************************************************************
