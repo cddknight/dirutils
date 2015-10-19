@@ -1,8 +1,8 @@
 AUTOMAKE_OPTIONS = dist-bzip2
-bin_PROGRAMS = ndir addComment addcr casedir casefile hexDump inQuote lines listFunc memTest pfile rmcr procMonitor
+bin_PROGRAMS = ldir addComment addcr casedir casefile hexDump inQuote lines listFunc memTest pfile rmcr procMonitor
 AM_CPPFLAGS = -D_FILE_OFFSET_BITS=64 $(DEPS_CFLAGS)
 LIBS = $(DEPS_LIBS)
-ndir_SOURCES = src/ndir.c
+ldir_SOURCES = src/ldir.c
 addComment_SOURCES = src/addComment.c
 addComment_LDADD = -lreadline
 addcr_SOURCES = src/addcr.c
@@ -16,7 +16,7 @@ memTest_SOURCES = src/memTest.c
 pfile_SOURCES = src/pfile.c
 procMonitor_SOURCES = src/procMonitor.c
 rmcr_SOURCES = src/rmcr.c
-EXTRA_DIST = ndirrc
+EXTRA_DIST = ldirrc
 Configdir = /etc
-Config_DATA = ndirrc 
+Config_DATA = ldirrc 
 

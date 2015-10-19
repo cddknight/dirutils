@@ -29,14 +29,14 @@ install -s -m 755 addComment $RPM_BUILD_ROOT%{_bindir}/addComment
 install -s -m 755 addcr $RPM_BUILD_ROOT%{_bindir}/addcr
 install -s -m 755 casedir $RPM_BUILD_ROOT%{_bindir}/casedir
 install -s -m 755 casefile $RPM_BUILD_ROOT%{_bindir}/casefile
-install -s -m 755 ndir $RPM_BUILD_ROOT%{_bindir}/ndir
+install -s -m 755 ldir $RPM_BUILD_ROOT%{_bindir}/ldir
 install -s -m 755 hexDump $RPM_BUILD_ROOT%{_bindir}/hexDump
 install -s -m 755 lines $RPM_BUILD_ROOT%{_bindir}/lines
 install -s -m 755 listFunc $RPM_BUILD_ROOT%{_bindir}/listFunc
 install -s -m 755 pfile $RPM_BUILD_ROOT%{_bindir}/pfile
 install -s -m 755 memTest $RPM_BUILD_ROOT%{_bindir}/memTest
 install -s -m 755 rmcr $RPM_BUILD_ROOT%{_bindir}/rmcr
-install -m 644 ndirrc $RPM_BUILD_ROOT/etc/ndirrc
+install -m 644 ldirrc $RPM_BUILD_ROOT/etc/ldirrc
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -51,14 +51,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/addcr
 %{_bindir}/casedir
 %{_bindir}/casefile
-%{_bindir}/ndir
+%{_bindir}/ldir
 %{_bindir}/hexDump
 %{_bindir}/lines
 %{_bindir}/listFunc
 %{_bindir}/pfile
 %{_bindir}/memTest
 %{_bindir}/rmcr
-/etc/ndirrc
+/etc/ldirrc
 
 %changelog
 * Wed Sep 26 2007 Chris Knight <chris@theknight.co.uk> 4.0.5-1%{?dist}
