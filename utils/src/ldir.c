@@ -119,7 +119,7 @@ int			showFound		=	MAXINT;
 int			sizeFormat		=	1;
 char		dateType[41]	=	"Modified";
 time_t		timeNow			= 	0;
-char		*quoteMe		=	" *?|&;()<>#\t\\";
+char		*quoteMe		=	" *?|&;()<>#\t\\\"";
 
 int			coloursAlt[MAX_COL_DESC + MAX_W_COL_DESC];	
 int			colourType[EXTRA_COLOURS];
@@ -277,7 +277,7 @@ void helpThem (char *progName)
 	printf ("         -o[t|T] . . . Order the files by time and date\n");
 	printf ("         -p  . . . . . Show the full path to the file\n");
 	printf ("         -q  . . . . . Quiet mode, only paths and file names\n");
-	printf ("         -Q  . . . . . Quiet mode, with quoted special chars\n");
+	printf ("         -Q  . . . . . Quote special chars\n");
 	printf ("         -r  . . . . . Recursive directory listing\n"); 
 	printf ("         -sd . . . . . Show only dirs\n");
 	printf ("         -sf . . . . . Show only files\n");
@@ -503,7 +503,7 @@ void commandOption (char *option, char *progName)
 			break;
 
 		case 'Q':
-			showType ^= (SHOW_QUIET | SHOW_QUOTE);
+			showType ^= SHOW_QUOTE;
 			break;
 
 		case 'D':
@@ -1065,7 +1065,7 @@ int showDir (DIR_ENTRY *file)
 	 *------------------------------------------------------------------------*/
 	if (showType & SHOW_WIDE)
 	{
-		char marker1[2], marker2[2];
+		char marker1[2], marker2[2], displayName[PATH_SIZE];
 		int colour = -1;
 		
 		if (S_ISLNK (file -> fileStat.st_mode))
@@ -1125,9 +1125,14 @@ int showDir (DIR_ENTRY *file)
 		}
 		else
 			return 0;
+
+		if (showType & SHOW_QUOTE)
+			quoteCopy (displayName, file -> fileName);
+		else
+			strcpy (displayName, file -> fileName);
 			
 		displayInColumn (currentCol++, marker1);
-		displayInColour (currentCol++, colour, "%s", file -> fileName);
+		displayInColour (currentCol++, colour, "%s", displayName);
 		displayInColumn (currentCol++, marker2);
 		
 		if (currentCol == maxCol)
@@ -1194,11 +1199,21 @@ int showDir (DIR_ENTRY *file)
 		char numBuff[21];
 		int fileAge = 0;
 		
-		strcpy (fullName, file -> fullPath);
-		strcat (fullName, file -> fileName);
-		strcpy (displayName, file -> partPath);
-		strcat (displayName, file -> fileName);
-
+		if (showType & SHOW_QUOTE)
+		{
+			quoteCopy (fullName, file -> fullPath);
+			quoteCopy (&fullName[strlen (fullName)], file -> fileName);
+			quoteCopy (displayName, file -> partPath);
+			quoteCopy (&displayName[strlen (displayName)], file -> fileName);
+		}
+		else
+		{
+			strcpy (fullName, file -> fullPath);
+			strcat (fullName, file -> fileName);
+			strcpy (displayName, file -> partPath);
+			strcat (displayName, file -> fileName);
+		}
+		
 		switch (showDate)
 		{
 		case DATE_MOD:
@@ -1860,7 +1875,7 @@ char *quoteCopy (char *dst, char *src)
 {
 	int i, j;
 
-	i = j = 0;	
+	dst[i = j = 0] = 0;	
 	while (src[i])
 	{
 		if (strchr (quoteMe, src[i]))
