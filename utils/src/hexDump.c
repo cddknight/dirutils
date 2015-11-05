@@ -42,9 +42,9 @@ int showDir (DIR_ENTRY *file);
  *----------------------------------------------------------------------------*/
 COLUMN_DESC colDumpDescs[4] =
 {
-	{	6,	6,	6,	3,	0x0E,	COL_ALIGN_RIGHT,	"Offset",	1	},	/* 0 */
-	{	47,	47,	47,	3,	0x0A,	0,					"Hex",		0	},	/* 1 */
-	{	16,	16,	16,	0,	0x0B,	0,					"Text",		2	},	/* 2 */
+	{	8,	6,	6,	3,	0x0E,	COL_ALIGN_RIGHT,	"Offset",	1	},	/* 0 */
+	{	95,	47,	47,	3,	0x0A,	0,					"Hex",		0	},	/* 1 */
+	{	32,	16,	16,	0,	0x0B,	0,					"Text",		2	},	/* 2 */
 	{	47,	47,	47,	3,	0x0A,	0,					"",			0	},	/* 1 */
 };
 
@@ -63,6 +63,7 @@ COLUMN_DESC *ptrDumpColQuiet[1] =
 int filesFound = 0;
 int displayColour = 0;
 int displayQuiet = 0;
+int displayBig = 0;
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -102,7 +103,7 @@ int main (int argc, char *argv[])
 	if (argc == 1)
 	{
 		version ();
-		printf ("Enter the command: %s [-q] <filename>\n", basename (argv[0]));
+		printf ("Enter the command: %s [-bqC] <filename>\n", basename (argv[0]));
 		exit (1);
 	}
 	
@@ -116,6 +117,10 @@ int main (int argc, char *argv[])
 		{	
 			switch (argv[i][1])
 			{
+			case 'b':
+				displayBig = 1;
+				break;
+
 			case 'C':
 				displayColour = DISPLAY_COLOURS;
 				break;
@@ -187,9 +192,11 @@ int main (int argc, char *argv[])
 int showDir (DIR_ENTRY *file)
 {
 	unsigned char inBuffer[1024 + 1], inFile[PATH_SIZE];
-	unsigned char saveHex[80], saveChar[40];
+	unsigned char saveHex[160], saveChar[80];
 	FILE *readFile;
-	int i, j = 0, read, filePosn = 0, l = 0;
+	int i, j = 0, read, filePosn = 0, l = 0, width;
+
+	width = displayBig ? 32 : 16;
 
 	strcpy ((char *)inFile, file -> fullPath);
 	strcat ((char *)inFile, file -> fileName);
@@ -205,14 +212,14 @@ int showDir (DIR_ENTRY *file)
 			i = 0;
 			while (i < read)
 			{
-				sprintf ((char *)&saveHex[j * 3], "%c%02X", j == 8 ? '-' : ' ',
+				sprintf ((char *)&saveHex[j * 3], "%c%02X", j == (width / 2) ? '-' : ' ',
 					((int)inBuffer[i]) & 0xFF);
 				saveChar[j++] = (inBuffer[i] < 127 && inBuffer[i] > ' ')
 					? inBuffer[i] : '.';
 
 				saveChar[j] = 0;
 
-				if (j == 16)
+				if (j == width)
 				{
 					int c = 0;
 					if (!displayQuiet) displayInColumn (c++, "%06X", filePosn);
@@ -220,9 +227,9 @@ int showDir (DIR_ENTRY *file)
 					if (!displayQuiet) displayInColumn (c++, "%s", saveChar);
 					displayNewLine(0);
 
-					filePosn += 16;
+					filePosn += width;
 					j = 0;
-					if (++l == 16)
+					if (++l == width)
 					{
 						displayBlank (0);
 						l = 0;
@@ -234,7 +241,7 @@ int showDir (DIR_ENTRY *file)
 		if (j)
 		{
 			int c = 0;
-			if (!displayQuiet) displayInColumn (c++, "%06X", filePosn);
+			if (!displayQuiet) displayInColumn (c++, displayBig ? "%06X" : "%08X", filePosn);
 			displayInColumn (c++, "%s", &saveHex[1]);
 			if (!displayQuiet) displayInColumn (c++, "%s", saveChar);
 			displayNewLine(0);
