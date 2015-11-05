@@ -222,7 +222,7 @@ int showDir (DIR_ENTRY *file)
 				if (j == width)
 				{
 					int c = 0;
-					if (!displayQuiet) displayInColumn (c++, "%06X", filePosn);
+					if (!displayQuiet) displayInColumn (c++, displayBig ? "%08X" : "%06X", filePosn);
 					displayInColumn (c++, "%s", &saveHex[1]);
 					if (!displayQuiet) displayInColumn (c++, "%s", saveChar);
 					displayNewLine(0);
@@ -241,7 +241,7 @@ int showDir (DIR_ENTRY *file)
 		if (j)
 		{
 			int c = 0;
-			if (!displayQuiet) displayInColumn (c++, displayBig ? "%06X" : "%08X", filePosn);
+			if (!displayQuiet) displayInColumn (c++, displayBig ? "%08X" : "%06X", filePosn);
 			displayInColumn (c++, "%s", &saveHex[1]);
 			if (!displayQuiet) displayInColumn (c++, "%s", saveChar);
 			displayNewLine(0);
