@@ -83,6 +83,26 @@ void version (void)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  H E L P  T H E M                                                                                                  *
+ *  ================                                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Function to display help information.
+ *  \param progName Name of the running program.
+ *  \result None.
+ */
+void helpThem(char *progName)
+{
+	printf ("Enter the command: %s [-bCqs] <filename>\n", basename (progName));
+	printf ("    -b . . . . Display in 32 column format.\n");
+	printf ("    -C . . . . Display in colour.\n");
+	printf ("    -q . . . . Quite mode, only dump hex.\n");
+	printf ("    -s . . . . Display in 16 column format.\n");
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  M A I N                                                                                                           *
  *  =======                                                                                                           *
  *                                                                                                                    *
@@ -99,11 +119,15 @@ int main (int argc, char *argv[])
 	int i = 1, found = 0;
 
 	displayGetWindowSize ();
+	if (displayGetWidth() >= 140)
+	{
+		displayBig = 1;	
+	}
 
 	if (argc == 1)
 	{
 		version ();
-		printf ("Enter the command: %s [-bqC] <filename>\n", basename (argv[0]));
+		helpThem (argv[0]);
 		exit (1);
 	}
 	
@@ -128,6 +152,15 @@ int main (int argc, char *argv[])
 			case 'q':
 				displayQuiet ^= 1;
 				break;
+
+			case 's':
+				displayBig = 0;
+				break;
+
+			default:
+				printf ("Unknown argument: -%c.\n", argv[i][1]);
+				helpThem (argv[0]);
+				exit (1);
 			}
 		}
 		else
