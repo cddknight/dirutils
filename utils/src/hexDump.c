@@ -40,24 +40,68 @@ int showDir (DIR_ENTRY *file);
  * Globals                                                                    *
  * 00 00 00 00 00 00 00 00-08 13 50 00 00 00 00 00 : ..........P.....         *
  *----------------------------------------------------------------------------*/
-COLUMN_DESC colDumpDescs[4] =
+COLUMN_DESC colDumpDescs[38] =
 {
-	{	8,	6,	6,	3,	0x0E,	COL_ALIGN_RIGHT,	"Offset",	1	},	/* 0 */
-	{	95,	47,	47,	3,	0x0A,	0,					"Hex",		0	},	/* 1 */
-	{	32,	16,	16,	0,	0x0B,	0,					"Text",		2	},	/* 2 */
-	{	47,	47,	47,	3,	0x0A,	0,					"",			0	},	/* 1 */
+	{	8,	6,	0,	2,	0x0B,	0,					"Offset",	1	},	/* 0 */
+	{	3,	3,	3,	0,	0x0A,	0,					"Hex",		0	},	/* 1 */
+	{	2,	2,	0,	1,	0x0E,	0,					"",			0	},	/* 2 */
+	{	2,	2,	0,	1,	0x0A,	0,					"",			0	},	/* 3 */
+	{	2,	2,	0,	1,	0x0E,	0,					"",			0	},	/* 4 */
+	{	2,	2,	0,	1,	0x0A,	0,					"",			0	},	/* 5 */
+	{	2,	2,	0,	1,	0x0E,	0,					"",			0	},	/* 6 */
+	{	2,	2,	0,	1,	0x0A,	0,					"",			0	},	/* 7 */
+	{	2,	2,	0,	1,	0x0E,	0,					"",			0	},	/* 8 */
+	{	1,	1,	0,	0,	0x0B,	0,					"",			0	},
+	{	2,	2,	0,	1,	0x0A,	0,					"",			0	},	/* 9 */
+	{	2,	2,	0,	1,	0x0E,	0,					"",			0	},	/* 10 */
+	{	2,	2,	0,	1,	0x0A,	0,					"",			0	},	/* 11 */
+	{	2,	2,	0,	1,	0x0E,	0,					"",			0	},	/* 12 */
+	{	2,	2,	0,	1,	0x0A,	0,					"",			0	},	/* 13 */
+	{	2,	2,	0,	1,	0x0E,	0,					"",			0	},	/* 14 */
+	{	2,	2,	0,	1,	0x0A,	0,					"",			0	},	/* 15 */
+	{	2,	2,	0,	1,	0x0E,	0,					"",			0	},	/* 16 */
+	{	1,	1,	0,	0,	0x0B,	0,					"",			0	},
+	{	2,	2,	0,	1,	0x0A,	0,					"",			0	},	/* 17 */
+	{	2,	2,	0,	1,	0x0E,	0,					"",			0	},	/* 18 */
+	{	2,	2,	0,	1,	0x0A,	0,					"",			0	},	/* 19 */
+	{	2,	2,	0,	1,	0x0E,	0,					"",			0	},	/* 20 */
+	{	2,	2,	0,	1,	0x0A,	0,					"",			0	},	/* 21 */
+	{	2,	2,	0,	1,	0x0E,	0,					"",			0	},	/* 22 */
+	{	2,	2,	0,	1,	0x0A,	0,					"",			0	},	/* 23 */
+	{	2,	2,	0,	1,	0x0E,	0,					"",			0	},	/* 24 */
+	{	1,	1,	0,	0,	0x0B,	0,					"",			0	},
+	{	2,	2,	0,	1,	0x0A,	0,					"",			0	},	/* 25 */
+	{	2,	2,	0,	1,	0x0E,	0,					"",			0	},	/* 26 */
+	{	2,	2,	0,	1,	0x0A,	0,					"",			0	},	/* 27 */
+	{	2,	2,	0,	1,	0x0E,	0,					"",			0	},	/* 28 */
+	{	2,	2,	0,	1,	0x0A,	0,					"",			0	},	/* 29 */
+	{	2,	2,	0,	1,	0x0E,	0,					"",			0	},	/* 30 */
+	{	2,	2,	0,	1,	0x0A,	0,					"",			0	},	/* 31 */
+	{	2,	2,	0,	1,	0x0E,	0,					"",			0	},	/* 32 */
+	{	1,	1,	0,	0,	0x0B,	0,					"",			0	},	/* 33 */
+	{	32,	16,	0,	0,	0x0B,	0,					"Text",		2	},	/* 34 */
 };
 
-COLUMN_DESC *ptrDumpColumn[3] =
+COLUMN_DESC *ptrDumpColumn[38] =
 {
-	&colDumpDescs[0],
-	&colDumpDescs[1],
-	&colDumpDescs[2]
+	&colDumpDescs[0],  &colDumpDescs[1],  &colDumpDescs[2],  &colDumpDescs[3],  &colDumpDescs[4],  &colDumpDescs[5],
+	&colDumpDescs[6],  &colDumpDescs[7],  &colDumpDescs[8],  &colDumpDescs[9],  &colDumpDescs[10], &colDumpDescs[11],
+	&colDumpDescs[12], &colDumpDescs[13], &colDumpDescs[14], &colDumpDescs[15], &colDumpDescs[16], &colDumpDescs[17],
+	&colDumpDescs[18], &colDumpDescs[19], &colDumpDescs[20], &colDumpDescs[21], &colDumpDescs[22], &colDumpDescs[23],
+	&colDumpDescs[24], &colDumpDescs[25], &colDumpDescs[26], &colDumpDescs[27], &colDumpDescs[28], &colDumpDescs[29],
+	&colDumpDescs[30], &colDumpDescs[31], &colDumpDescs[32], &colDumpDescs[33], &colDumpDescs[34], &colDumpDescs[35],
+	&colDumpDescs[36], &colDumpDescs[37]
 };
 
-COLUMN_DESC *ptrDumpColQuiet[1] =
+COLUMN_DESC fileDescs[38] =
 {
-	&colDumpDescs[3],
+	{	60,	8,	16,	2,	0x07,	0,	"Filename",	1	},	/* 0 */
+	{	20,	4,	4,	0,	0x07,	0,	"Size",		0	},	/* 1 */
+};
+
+COLUMN_DESC *ptrFileColumn[2] =
+{
+	&fileDescs[0],  &fileDescs[1]
 };
 
 int filesFound = 0;
@@ -119,7 +163,7 @@ int main (int argc, char *argv[])
 	int i = 1, found = 0;
 
 	displayGetWindowSize ();
-	if (displayGetWidth() >= 140)
+	if (displayGetWidth() >= 142)
 	{
 		displayBig = 1;	
 	}
@@ -176,31 +220,20 @@ int main (int argc, char *argv[])
 
 	if (found)
 	{
-		if (!displayQuiet)
-		{
-			if (!displayColumnInit (3, ptrDumpColumn, displayColour))
-			{
-				fprintf (stderr, "ERROR in: displayColumnInit\n");
-				return 1;
-			}
-		}
-		else
-		{
-			if (!displayColumnInit (1, ptrDumpColQuiet, 0))
-			{
-				fprintf (stderr, "ERROR in: displayColumnInit\n");
-				return 1;
-			}
-		}
 		directoryProcess (showDir, &fileList);
-		if (!displayQuiet)
-		{
-			displayInColumn (1, "%d %s shown\n", filesFound, 
-					filesFound == 1 ? "File" : "Files");
-		}
-		displayNewLine(DISPLAY_INFO);
-		displayAllLines ();		
 
+		if (!displayQuiet) 
+		{
+			if (!displayColumnInit (2, ptrFileColumn, displayColour))
+			{
+				fprintf (stderr, "ERROR in: displayColumnInit\n");
+				return 0;
+			}
+			displayDrawLine (0);
+			displayInColumn (0, "%d %s shown\n", filesFound, filesFound == 1 ? "File" : "Files");
+			displayNewLine(DISPLAY_INFO);
+			displayAllLines ();		
+		}
 		displayTidy ();
 	}
 	else
@@ -225,62 +258,120 @@ int main (int argc, char *argv[])
 int showDir (DIR_ENTRY *file)
 {
 	unsigned char inBuffer[1024 + 1], inFile[PATH_SIZE];
-	unsigned char saveHex[160], saveChar[80];
+	unsigned char saveHex[4], saveChar[80];
 	FILE *readFile;
-	int i, j = 0, read, filePosn = 0, l = 0, width;
+	int j = 0, read, filePosn = 0, l = 0, width;
 
 	width = displayBig ? 32 : 16;
 
 	strcpy ((char *)inFile, file -> fullPath);
 	strcat ((char *)inFile, file -> fileName);
+
+
+	if (!displayColumnInit (2, ptrFileColumn, displayColour))
+	{
+		fprintf (stderr, "ERROR in: displayColumnInit\n");
+		return 0;
+	}
+	if (!displayQuiet) 
+	{
+		long long fileSize = file -> fileStat.st_size;			
+
+		displayDrawLine (0);
+		displayHeading (0);
+		displayNewLine(0);
+		displayInColumn (0, "%s", file -> fileName);
+		displayInColumn (1,	displayFileSize (file -> fileStat.st_size, inBuffer));
+		displayNewLine(DISPLAY_INFO);
+		displayAllLines ();		
+	}
+	displayTidy ();
+
+
+
+
+
+/*		if (!displayQuiet)
+		{
+			displayInColumn (1, "%d %s shown\n", filesFound, 
+					filesFound == 1 ? "File" : "Files");
+		}
+		displayNewLine(DISPLAY_INFO);
+		displayAllLines ();		
+
+		displayTidy ();
+*/
+
+
+
+
+
+
 	
 	if ((readFile = fopen ((char *)inFile, "rb")) != NULL)
 	{
-		if (!displayQuiet) displayInColumn (1, "%s", file -> fileName);
+		if (!displayColumnInit (38, ptrDumpColumn, displayColour))
+		{
+			fprintf (stderr, "ERROR in: displayColumnInit\n");
+			return 0;
+		}
+
 		if (!displayQuiet) displayDrawLine (0);
 		if (!displayQuiet) displayHeading (0);
 		
 		while ((read = fread (inBuffer, 1, 1024, readFile)) != 0)
 		{
-			i = 0;
+			int i = 0, c = 1;
 			while (i < read)
 			{
-				sprintf ((char *)&saveHex[j * 3], "%c%02X", j == (width / 2) ? '-' : ' ',
-					((int)inBuffer[i]) & 0xFF);
-				saveChar[j++] = (inBuffer[i] < 127 && inBuffer[i] > ' ')
-					? inBuffer[i] : '.';
-
+				sprintf (saveHex, "%02X", ((int)inBuffer[i]) & 0xFF);
+				saveChar[j++] = (inBuffer[i] < 127 && inBuffer[i] > ' ') ? inBuffer[i] : '.';
 				saveChar[j] = 0;
+				
+				if (j > 1 && (j - 1) % 8 == 0)
+				{
+					if (!displayQuiet) 
+					{
+						displayInColumn (c, " ");
+					}
+					++c;
+				}
+				displayInColumn (c++, "%s", saveHex);
 
 				if (j == width)
 				{
-					int c = 0;
-					if (!displayQuiet) displayInColumn (c++, displayBig ? "%08X" : "%06X", filePosn);
-					displayInColumn (c++, "%s", &saveHex[1]);
-					if (!displayQuiet) displayInColumn (c++, "%s", saveChar);
+					if (!displayQuiet) 
+					{
+						displayInColumn (0, displayBig ? "%08X" : "%06X", filePosn);
+						displayInColumn (36, " ", saveChar);
+						displayInColumn (37, "%s", saveChar);
+					}
 					displayNewLine(0);
-
 					filePosn += width;
 					j = 0;
+
 					if (++l == width)
 					{
 						displayBlank (0);
 						l = 0;
 					}
+					c = 1;
 				}
 				i++;
 			}
 		}
 		if (j)
 		{
-			int c = 0;
-			if (!displayQuiet) displayInColumn (c++, displayBig ? "%08X" : "%06X", filePosn);
-			displayInColumn (c++, "%s", &saveHex[1]);
-			if (!displayQuiet) displayInColumn (c++, "%s", saveChar);
+			if (!displayQuiet) 
+			{
+				displayInColumn (0, displayBig ? "%08X" : "%06X", filePosn);
+				displayInColumn (36, " ", saveChar);
+				displayInColumn (37, "%s", saveChar);
+			}
 			displayNewLine(0);
 		}
-		if (!displayQuiet) displayDrawLine (0);
 		displayAllLines ();
+		displayTidy ();
 		
 		fclose (readFile);
 		filesFound ++;
