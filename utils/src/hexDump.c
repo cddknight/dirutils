@@ -207,6 +207,10 @@ int main (int argc, char *argv[])
 
 	if (found)
 	{
+	    /*--------------------------------------------------------------------*
+	     * Now we can sort the directory.                                     *
+	     *--------------------------------------------------------------------*/
+		directorySort (&fileList);
 		directoryProcess (showDir, &fileList);
 
 		if (!displayQuiet) 
@@ -247,12 +251,8 @@ int showDir (DIR_ENTRY *file)
 	unsigned char inBuffer[1024 + 1], inFile[PATH_SIZE];
 	unsigned char saveHex[4], saveChar[80];
 	FILE *readFile;
-	int j = 0, read, filePosn = 0, l = 0, width;
-
-	width = displayBig ? 32 : 16;
-
-	strcpy ((char *)inFile, file -> fullPath);
-	strcat ((char *)inFile, file -> fileName);
+	int j = 0, read, filePosn = 0, l = 0;
+	int width = displayBig ? 32 : 16;
 
 	if (!displayColumnInit (2, ptrFileColumn, displayColour))
 	{
@@ -270,6 +270,9 @@ int showDir (DIR_ENTRY *file)
 		displayAllLines ();		
 	}
 	displayTidy ();
+
+	strcpy ((char *)inFile, file -> fullPath);
+	strcat ((char *)inFile, file -> fileName);
 
 	if ((readFile = fopen ((char *)inFile, "rb")) != NULL)
 	{
