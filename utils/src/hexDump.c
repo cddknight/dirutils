@@ -29,6 +29,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <dircmd.h>
+#include <unistd.h>
 
 /*----------------------------------------------------------------------------*
  * Prototypes															      *
@@ -160,7 +161,7 @@ void helpThem(char *progName)
 int main (int argc, char *argv[])
 {
 	void *fileList = NULL;
-	int i = 1, found = 0;
+	int i, found = 0;
 
 	displayGetWindowSize ();
 	if (displayGetWidth() >= 142)
@@ -168,49 +169,35 @@ int main (int argc, char *argv[])
 		displayBig = 1;	
 	}
 
-	if (argc == 1)
+	while ((i = getopt(argc, argv, "bCqs?")) != -1)
 	{
-		version ();
-		helpThem (argv[0]);
-		exit (1);
-	}
-	
-    /*------------------------------------------------------------------------*
-     * If we got a path then split it into a path and a file pattern to match *
-     * files with.                                                            *
-     *------------------------------------------------------------------------*/
-	while (i < argc)
-	{
-		if (argv[i][0] == '-')
-		{	
-			switch (argv[i][1])
-			{
-			case 'b':
-				displayBig = 1;
-				break;
+		switch (i) 
+		{
+		case 'b':
+			displayBig = 1;
+			break;
 
-			case 'C':
-				displayColour = DISPLAY_COLOURS;
-				break;
-				
-			case 'q':
-				displayQuiet ^= 1;
-				break;
+		case 'C':
+			displayColour = DISPLAY_COLOURS;
+			break;
+			
+		case 'q':
+			displayQuiet ^= 1;
+			break;
 
-			case 's':
-				displayBig = 0;
-				break;
+		case 's':
+			displayBig = 0;
+			break;
 
-			default:
-				printf ("Unknown argument: -%c.\n", argv[i][1]);
-				helpThem (argv[0]);
-				exit (1);
-			}
+		case '?':
+			helpThem (argv[0]);
+			exit (1);
 		}
-		else
-			found += directoryLoad (argv[i], ONLYFILES, fileCompare, &fileList);
+	}
 
-		i ++;
+    for (; optind < argc; ++optind)
+    {
+		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
 	}
 
     /*------------------------------------------------------------------------*
