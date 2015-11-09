@@ -316,7 +316,10 @@ int showDir (DIR_ENTRY *file)
 
 					if (++l == width)
 					{
-						displayBlank (0);
+						if (!displayQuiet) 
+						{
+							displayBlank (0);
+						}
 						l = 0;
 					}
 					c = 1;
