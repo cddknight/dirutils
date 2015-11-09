@@ -28,8 +28,8 @@
 #include <libgen.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#include <dircmd.h>
 #include <unistd.h>
+#include <dircmd.h>
 
 /*----------------------------------------------------------------------------*
  * Prototypes															      *

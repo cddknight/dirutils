@@ -97,50 +97,37 @@ int main (int argc, char *argv[])
 
 	displayGetWindowSize ();
 
-	while (i < argc)
+	while ((i = getopt(argc, argv, "lup?")) != -1)
 	{
-		if (argv[i][0] == '-')
+		switch (i) 
 		{
-			switch (argv[i][1])
-			{
-			case 'l':
-				useCase = CASE_LOWER;
-				break;
+		case 'l':
+			useCase = CASE_LOWER;
+			break;
 
-			case 'u':
-				useCase = CASE_UPPER;
-				break;
+		case 'u':
+			useCase = CASE_UPPER;
+			break;
 
-			case 'p':
-				useCase = CASE_PROPER;
-				break;
+		case 'p':
+			useCase = CASE_PROPER;
+			break;
 
-			case '?':
-				version ();
-				printf ("%s -[options] <file names>\n\n", argv[0]);
-				printf ("        -l  To make the file names lower case.\n");
-				printf ("        -u  To make the file names upper case.\n");
-				printf ("        -p  To make the file names proper case.\n");
-				displayLine ();
-				exit (1);
-			}
+		case '?':
+			version ();
+			printf ("%s -[options] <file names>\n\n", basename (argv[0]));
+			printf ("        -l  To make the file names lower case.\n");
+			printf ("        -u  To make the file names upper case.\n");
+			printf ("        -p  To make the file names proper case.\n");
+			displayLine ();
+			exit (1);
 		}
-		i++;
 	}
-	i = 1;
 
-	if (argc == 1)
-	{
-		version ();
-		printf ("Enter the command: casefile <filename>\n");
-		exit (1);
+    for (; optind < argc; ++optind)
+    {
+		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
 	}
-	/*------------------------------------------------------------------------*
-	 * If we got a path then split it into a path and a file pattern to match *
-	 * files with.                                                            *
-     *------------------------------------------------------------------------*/
-	while (i < argc)
-		found += directoryLoad (argv[i++], ONLYFILES, fileCompare, &fileList);
 
 	/*------------------------------------------------------------------------*
      * Now we can sort the directory.                                         *

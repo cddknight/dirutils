@@ -28,6 +28,7 @@
 #include <ctype.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <dircmd.h>
 
 /*----------------------------------------------------------------------------*
@@ -114,41 +115,35 @@ int main(int argc, char *argv[])
 
 	displayGetWindowSize();
 
-	if (argc == 1)
-	{
-		version();
-		printf("Enter the command: %s [options] <filename>\n", argv[0]);
-		exit(1);
-	}
 	/*------------------------------------------------------------------------*
      * If we got a path then split it into a path and a file pattern to match *
 	 * files with.                                                            *
      *------------------------------------------------------------------------*/
-	while (i < argc)
+	while ((i = getopt(argc, argv, "dj?")) != -1)
 	{
-		if (argv[i][0] == '-')
+		switch (i) 
 		{
-			switch (argv[i][1])
-			{
-			case 'd':
-				debug = 1;
-				break;
+		case 'd':
+			debug = 1;
+			break;
 
-			case 'j':
-				javaMode = 1;
-				break;
-				
-			case '?':
-				printf("Options are:\n\n");
-				printf("    -d ...... Switch on debug output.\n");
-				return (1);
-			}
+		case 'j':
+			javaMode = 1;
+			break;
+			
+		case '?':
+			version ();
+			printf ("%s -[options] <file names>\n", basename (argv[0]));
+			printf("Options are:\n");
+			printf("    -d ...... Switch on debug output.\n");
+			printf("    -j ...... Switch on java mode.\n");
+			return (1);
 		}
-		else
-		{
-			found += directoryLoad(argv[i], ONLYFILES, fileCompare, &fileList);
-		}
-		i++;
+	}
+
+    for (; optind < argc; ++optind)
+    {
+		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
 	}
 
     /*------------------------------------------------------------------------*

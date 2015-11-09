@@ -108,27 +108,31 @@ int main (int argc, char *argv[])
      * If we got a path then split it into a path and a file pattern to match *
      * files with.                                                            *
      *------------------------------------------------------------------------*/
-	while (i < argc)
+	while ((i = getopt(argc, argv, "pw?")) != -1)
 	{
-		if (argv[i][0] == '-')
+		switch (i) 
 		{
-			switch (argv[i][1])
-			{
-			case 'w':
-				ptrChangeColumn[2] = &colChangeDescs[2];
-				inputMode = 0;
-				break;
-			case 'p':
-				ptrChangeColumn[2] = &colChangeDescs[4];
-				inputMode = 1;
-				break;
-			}
-			++i;
+		case 'w':
+			ptrChangeColumn[2] = &colChangeDescs[2];
+			inputMode = 0;
+			break;
+
+		case 'p':
+			ptrChangeColumn[2] = &colChangeDescs[4];
+			inputMode = 1;
+			break;
+
+		case '?':
+			printf ("%s -[options] <file names>\n\n", basename (argv[0]));
+			printf ("        -w  For weather logs (default).\n");
+			printf ("        -p  For power logs.\n");
+			return (1);
 		}
-		else
-		{
-			found += directoryLoad (argv[i++], ONLYFILES, fileCompare, &fileList);
-		}
+	}
+
+    for (; optind < argc; ++optind)
+    {
+		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
 	}
 
     /*------------------------------------------------------------------------*
