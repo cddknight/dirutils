@@ -254,7 +254,6 @@ int showDir (DIR_ENTRY *file)
 	strcpy ((char *)inFile, file -> fullPath);
 	strcat ((char *)inFile, file -> fileName);
 
-
 	if (!displayColumnInit (2, ptrFileColumn, displayColour))
 	{
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
