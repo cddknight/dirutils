@@ -108,7 +108,7 @@ COLUMN_DESC *ptrFileColumn[2] =
 int filesFound = 0;
 int displayColour = 0;
 int displayQuiet = 0;
-int displayBig = 0;
+int displayWidth = 16;
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -144,6 +144,7 @@ void helpThem(char *progName)
 	printf ("    -C . . . . Display in colour.\n");
 	printf ("    -q . . . . Quite mode, only dump hex.\n");
 	printf ("    -s . . . . Display in 16 column format.\n");
+	printf ("    -t . . . . Display in 8 column format.\n");
 }
 
 /**********************************************************************************************************************
@@ -161,20 +162,19 @@ void helpThem(char *progName)
 int main (int argc, char *argv[])
 {
 	void *fileList = NULL;
-	int i, found = 0;
+	int i, found = 0, width = 80;
 
 	displayGetWindowSize ();
-	if (displayGetWidth() >= 142)
-	{
-		displayBig = 1;	
-	}
 
-	while ((i = getopt(argc, argv, "bCqs?")) != -1)
+	width = displayGetWidth();
+	displayWidth = (width < 75 ? 8 : width < 143 ? 16 : 32);
+
+	while ((i = getopt(argc, argv, "bCqst?")) != -1)
 	{
 		switch (i) 
 		{
 		case 'b':
-			displayBig = 1;
+			displayWidth = 32;
 			break;
 
 		case 'C':
@@ -186,7 +186,11 @@ int main (int argc, char *argv[])
 			break;
 
 		case 's':
-			displayBig = 0;
+			displayWidth = 16;
+			break;
+
+		case 't':
+			displayWidth = 8;
 			break;
 
 		case '?':
@@ -252,7 +256,6 @@ int showDir (DIR_ENTRY *file)
 	unsigned char saveHex[4], saveChar[80];
 	FILE *readFile;
 	int j = 0, read, filePosn = 0, l = 0;
-	int width = displayBig ? 32 : 16;
 
 	if (!displayColumnInit (2, ptrFileColumn, displayColour))
 	{
@@ -304,19 +307,19 @@ int showDir (DIR_ENTRY *file)
 				}
 				displayInColumn (c++, "%s", saveHex);
 
-				if (j == width)
+				if (j == displayWidth)
 				{
 					if (!displayQuiet) 
 					{
-						displayInColumn (0, displayBig ? "%08X" : "%06X", filePosn);
+						displayInColumn (0, displayWidth == 32 ? "%08X" : "%06X", filePosn);
 						displayInColumn (36, " ", saveChar);
 						displayInColumn (37, "%s", saveChar);
 					}
 					displayNewLine(0);
-					filePosn += width;
+					filePosn += displayWidth;
 					j = 0;
 
-					if (++l == width)
+					if (++l == displayWidth)
 					{
 						if (!displayQuiet) 
 						{
@@ -333,7 +336,7 @@ int showDir (DIR_ENTRY *file)
 		{
 			if (!displayQuiet) 
 			{
-				displayInColumn (0, displayBig ? "%08X" : "%06X", filePosn);
+				displayInColumn (0, displayWidth == 32 ? "%08X" : "%06X", filePosn);
 				displayInColumn (36, " ", saveChar);
 				displayInColumn (37, "%s", saveChar);
 			}
