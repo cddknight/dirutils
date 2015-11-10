@@ -108,7 +108,7 @@ COLUMN_DESC *ptrFileColumn[2] =
 int filesFound = 0;
 int displayColour = 0;
 int displayQuiet = 0;
-int displayWidth = 16;
+int displayWidth = -1;
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -165,7 +165,6 @@ int main (int argc, char *argv[])
 	displayGetWindowSize ();
 
 	width = displayGetWidth();
-	displayWidth = (width < 77 ? 8 : width < 110 ? 16 : width < 143 ? 24 : 32);
 
 	while ((i = getopt(argc, argv, "Cqw:?")) != -1)
 	{
@@ -180,10 +179,10 @@ int main (int argc, char *argv[])
 			break;
 
 		case 'w':
-			width = atoi (optarg) / 8;
-			if (width >= 1 && width <= 4)
+			width = atoi (optarg);
+			if (width == 8 || width == 16 || width == 24 || width == 32)
 			{
-				displayWidth = width * 8;
+				displayWidth = width;
 				break;
 			}
 		case '?':
@@ -197,13 +196,15 @@ int main (int argc, char *argv[])
 		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
 	}
 
-    /*------------------------------------------------------------------------*
-     * Now we can sort the directory.                                         *
-     *------------------------------------------------------------------------*/
-	directorySort (&fileList);
-
 	if (found)
 	{
+		if (displayWidth == -1)
+		{
+			displayWidth = displayQuiet ? 
+					(width < 48 ? 8 : width < 72 ? 16 : width < 96 ? 24 : 32):
+					(width < 77 ? 8 : width < 110 ? 16 : width < 143 ? 24 : 32);
+		}
+
 	    /*--------------------------------------------------------------------*
 	     * Now we can sort the directory.                                     *
 	     *--------------------------------------------------------------------*/
