@@ -139,12 +139,10 @@ void version (void)
  */
 void helpThem(char *progName)
 {
-	printf ("Enter the command: %s [-bCqs] <filename>\n", basename (progName));
-	printf ("    -b . . . . Display in 32 column format.\n");
-	printf ("    -C . . . . Display in colour.\n");
-	printf ("    -q . . . . Quite mode, only dump hex.\n");
-	printf ("    -s . . . . Display in 16 column format.\n");
-	printf ("    -t . . . . Display in 8 column format.\n");
+	printf ("Enter the command: %s [-Cqw <size>] <filename>\n", basename (progName));
+	printf ("    -C . . . . . Display output in colour.\n");
+	printf ("    -q . . . . . Quite mode, only dump the hex codes.\n");
+	printf ("    -w <size>  . Set the display size (8, 16, 24 or 32).\n");
 }
 
 /**********************************************************************************************************************
@@ -167,16 +165,12 @@ int main (int argc, char *argv[])
 	displayGetWindowSize ();
 
 	width = displayGetWidth();
-	displayWidth = (width < 75 ? 8 : width < 143 ? 16 : 32);
+	displayWidth = (width < 77 ? 8 : width < 110 ? 16 : width < 143 ? 24 : 32);
 
-	while ((i = getopt(argc, argv, "bCqst?")) != -1)
+	while ((i = getopt(argc, argv, "Cqw:?")) != -1)
 	{
 		switch (i) 
 		{
-		case 'b':
-			displayWidth = 32;
-			break;
-
 		case 'C':
 			displayColour = DISPLAY_COLOURS;
 			break;
@@ -185,14 +179,13 @@ int main (int argc, char *argv[])
 			displayQuiet ^= 1;
 			break;
 
-		case 's':
-			displayWidth = 16;
-			break;
-
-		case 't':
-			displayWidth = 8;
-			break;
-
+		case 'w':
+			width = atoi (optarg) / 8;
+			if (width >= 1 && width <= 4)
+			{
+				displayWidth = width * 8;
+				break;
+			}
 		case '?':
 			helpThem (argv[0]);
 			exit (1);
@@ -252,7 +245,10 @@ int main (int argc, char *argv[])
  */
 int showDir (DIR_ENTRY *file)
 {
-	unsigned char inBuffer[1024 + 1], inFile[PATH_SIZE];
+    /*------------------------------------------------------------------------*
+     * The buffer size must be a multiple of 8,16,24 and 32.                  *
+     *------------------------------------------------------------------------*/
+	unsigned char inBuffer[1536 + 1], inFile[PATH_SIZE];
 	unsigned char saveHex[4], saveChar[80];
 	FILE *readFile;
 	int j = 0, read, filePosn = 0, l = 0;
@@ -288,7 +284,7 @@ int showDir (DIR_ENTRY *file)
 		if (!displayQuiet) displayDrawLine (0);
 		if (!displayQuiet) displayHeading (0);
 		
-		while ((read = fread (inBuffer, 1, 1024, readFile)) != 0)
+		while ((read = fread (inBuffer, 1, 1536, readFile)) != 0)
 		{
 			int i = 0, c = 1;
 			while (i < read)
@@ -311,7 +307,7 @@ int showDir (DIR_ENTRY *file)
 				{
 					if (!displayQuiet) 
 					{
-						displayInColumn (0, displayWidth == 32 ? "%08X" : "%06X", filePosn);
+						displayInColumn (0, "%08X", filePosn);
 						displayInColumn (36, " ", saveChar);
 						displayInColumn (37, "%s", saveChar);
 					}
@@ -336,7 +332,7 @@ int showDir (DIR_ENTRY *file)
 		{
 			if (!displayQuiet) 
 			{
-				displayInColumn (0, displayWidth == 32 ? "%08X" : "%06X", filePosn);
+				displayInColumn (0, "%08X", filePosn);
 				displayInColumn (36, " ", saveChar);
 				displayInColumn (37, "%s", saveChar);
 			}
