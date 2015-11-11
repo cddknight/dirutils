@@ -246,14 +246,14 @@ int main (int argc, char *argv[])
  */
 int showDir (DIR_ENTRY *file)
 {
-    /*------------------------------------------------------------------------*
-     * The buffer size must be a multiple of 8,16,24 and 32.                  *
-     *------------------------------------------------------------------------*/
-	unsigned char inBuffer[1536 + 1], inFile[PATH_SIZE];
+	unsigned char inBuffer[2048 + 1], inFile[PATH_SIZE];
 	unsigned char saveHex[4], saveChar[80];
 	FILE *readFile;
-	int j = 0, read, filePosn = 0, l = 0;
+	int j = 0, c = 1, read, filePosn = 0, l = 0;
 
+    /*------------------------------------------------------------------------*
+     * First display a table with the file name and size.                     *
+     *------------------------------------------------------------------------*/
 	if (!displayColumnInit (2, ptrFileColumn, displayColour))
 	{
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
@@ -263,14 +263,17 @@ int showDir (DIR_ENTRY *file)
 	{
 		displayDrawLine (0);
 		displayHeading (0);
-		displayNewLine(0);
+		displayNewLine (0);
 		displayInColumn (0, "%s", file -> fileName);
 		displayInColumn (1,	displayFileSize (file -> fileStat.st_size, (char *)inBuffer));
-		displayNewLine(DISPLAY_INFO);
+		displayNewLine (DISPLAY_INFO);
 		displayAllLines ();		
 	}
 	displayTidy ();
 
+    /*------------------------------------------------------------------------*
+     * Open the file and display a table containing the hex dump.             *
+     *------------------------------------------------------------------------*/
 	strcpy ((char *)inFile, file -> fullPath);
 	strcat ((char *)inFile, file -> fileName);
 
@@ -285,9 +288,9 @@ int showDir (DIR_ENTRY *file)
 		if (!displayQuiet) displayDrawLine (0);
 		if (!displayQuiet) displayHeading (0);
 		
-		while ((read = fread (inBuffer, 1, 1536, readFile)) != 0)
+		while ((read = fread (inBuffer, 1, 2048, readFile)) != 0)
 		{
-			int i = 0, c = 1;
+			int i = 0;
 			while (i < read)
 			{
 				sprintf ((char *)saveHex, "%02X", ((int)inBuffer[i]) & 0xFF);
@@ -337,13 +340,13 @@ int showDir (DIR_ENTRY *file)
 				displayInColumn (36, " ", saveChar);
 				displayInColumn (37, "%s", saveChar);
 			}
-			displayNewLine(0);
+			displayNewLine (0);
 		}
 		displayAllLines ();
 		displayTidy ();
 		
 		fclose (readFile);
-		filesFound ++;
+		++filesFound;
 	}
 	return 0;
 }
