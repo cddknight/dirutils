@@ -1,7 +1,7 @@
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  H E X  D U M P . C                                                                                                *
- *  ==================                                                                                                *
+ *  X M L  P A R S E . C                                                                                              *
+ *  ====================                                                                                              *
  *                                                                                                                    *
  *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
  *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
@@ -18,7 +18,7 @@
  **********************************************************************************************************************/
 /**
  *  \file
- *  \brief Program to dump the contence of a file in Hex.
+ *  \brief Program to parse an XML file.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,6 +38,7 @@
  *----------------------------------------------------------------------------*/
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo);
 int showDir (DIR_ENTRY *file);
+void parsePath (char *path);
 
 /*----------------------------------------------------------------------------*
  * Globals                                                                    *
@@ -46,7 +47,7 @@ int showDir (DIR_ENTRY *file);
 COLUMN_DESC colDumpDescs[38] =
 {
 	{	40,	5,	0,	2,	0x07,	0,	"Name",		1	},	/* 0 */
-	{	40,	5,	0,	0,	0x07,	0,	"key",		2	},	/* 1 */
+	{	40,	5,	0,	0,	0x07,	0,	"Key",		2	},	/* 1 */
 };
 
 COLUMN_DESC *ptrDumpColumn[2] =
@@ -69,6 +70,8 @@ int filesFound = 0;
 int displayColour = 0;
 int displayQuiet = 0;
 int displayWidth = -1;
+int levels = 0;
+char *levelName[20];
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -99,10 +102,10 @@ void version (void)
  */
 void helpThem(char *progName)
 {
-	printf ("Enter the command: %s [-Cqw <size>] <filename>\n", basename (progName));
+	printf ("Enter the command: %s [-Cqp <path>] <filename>\n", basename (progName));
 	printf ("    -C . . . . . Display output in colour.\n");
 	printf ("    -q . . . . . Quite mode, only dump the hex codes.\n");
-	printf ("    -w <size>  . Set the display size (8, 16, 24 or 32).\n");
+	printf ("    -p <path>  . Path to search (eg: /sensors/light).\n");
 }
 
 /**********************************************************************************************************************
@@ -126,10 +129,22 @@ int main (int argc, char *argv[])
 
 	width = displayGetWidth();
 
-	while ((i = getopt(argc, argv, "Cqw:?")) != -1)
+	while ((i = getopt(argc, argv, "Cqp:?")) != -1)
 	{
 		switch (i) 
 		{
+		case 'C':
+			displayColour = DISPLAY_COLOURS;
+			break;
+			
+		case 'q':
+			displayQuiet ^= 1;
+			break;
+			
+		case 'p':
+			parsePath (optarg);
+			break;
+
 		case '?':
 			helpThem (argv[0]);
 			exit (1);
@@ -173,16 +188,56 @@ int main (int argc, char *argv[])
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  P A R S E  P A T H                                                                                                *
+ *  ==================                                                                                                *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Split the passed in path so we know what to look for.
+ *  \param path Path from the command line.
+ *  \result None.
+ */
+void parsePath (char *path)
+{
+	char tempBuffer[81];
+	int i = 0, j = 0;
+
+	do	
+	{
+		if (path[i] == '/' || path[i] == 0)
+		{
+			if (j && levels < 20)
+			{
+				levelName[levels] = (char *)malloc (j + 1);
+				if (levelName[levels])
+				{
+					strcpy (levelName[levels], tempBuffer);
+					tempBuffer[j = 0] = 0;
+					++levels;
+				}
+			}
+		}
+		else if (j < 80)
+		{
+			tempBuffer[j] = path[i];
+			tempBuffer[++j] = 0;
+		}
+	}
+	while (path[i++]);
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  P R O C E S S  E L E M E N T  N A M E S                                                                           *
  *  =======================================                                                                           *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Process each of the elements in the file.
- *  @param doc Document to read.
- *  @param aNode Current node.
- *  @param readLevel 0 current, 1 today, 2 tomorrow.
- *  @result None.
+ *  \brief Process each of the elements in the file.
+ *  \param doc Document to read.
+ *  \param aNode Current node.
+ *  \param readLevel 0 current, 1 today, 2 tomorrow.
+ *  \result None.
  */
 static void
 processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
@@ -192,42 +247,50 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 
     for (curNode = aNode; curNode; curNode = curNode->next) 
     {
+       	int saveLevel = readLevel;
+
         if (curNode->type == XML_ELEMENT_NODE) 
         {
-			if ((!xmlStrcmp (curNode -> name, (const xmlChar *)"sensors"))) 
+			if ((!xmlStrcmp (curNode -> name, (const xmlChar *)levelName[readLevel]))) 
 			{
 				++readLevel;
 			}
-			else
+			if (readLevel >= levels)
 			{
 				key = xmlNodeListGetString (doc, curNode -> xmlChildrenNode, 1);
-//				printf ("Level: %d, Name: %s, Key: %s\n", readLevel, (const char *)curNode -> name, (char *)key);
-				displayInColumn (0, "%s", (char *)curNode -> name);
-				displayInColumn (1, "%s", (char *)key);
+				if (displayQuiet) 
+				{
+					printf ("%s=%s\n", (char *)curNode -> name, 
+							key == NULL ? "(null)" : (char *)key);
+				}
+				else
+				{
+					displayInColumn (0, "%s", (char *)curNode -> name);
+					displayInColumn (1, "%s", key == NULL ? "(null)" : (char *)key);
+				}
 				displayNewLine(0);
-
-//				processWeatherKey (readLevel, (const char *)curNode -> name, (char *)key);
 		    	xmlFree (key);
 		    }
         }
         processElementNames (doc, curNode->children, readLevel);
+        readLevel = saveLevel;
     }
 }
 
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  P R O C E S S  B U F F E R                                                                                        *
- *  ==========================                                                                                        *
+ *  P R O C E S S  F I L E                                                                                            *
+ *  ======================                                                                                            *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  @brief Process the down loaded buffer.
- *  @param buffer Buffer to process.
- *  @param size Size of the buffer.
- *  @result None.
+ *  \brief Process the down loaded buffer.
+ *  \param xmlFile File to parse.
+ *  \result None.
  */
-static void processFile (char *xmlFile)
+int processFile (char *xmlFile)
 {
+	int retn = 0;
 	xmlDoc *doc = NULL;
 	xmlNode *rootElement = NULL;
 
@@ -236,10 +299,12 @@ static void processFile (char *xmlFile)
 		if ((rootElement = xmlDocGetRootElement (doc)) != NULL)
 		{
 			processElementNames (doc, rootElement, 0);
+			retn = 1;
 		}
         xmlFreeDoc(doc);
 	}
 	xmlCleanupParser();
+	return retn;
 }
 
 /**********************************************************************************************************************
@@ -294,9 +359,11 @@ int showDir (DIR_ENTRY *file)
 	if (!displayQuiet) displayDrawLine (0);
 	if (!displayQuiet) displayHeading (0);
 
-	processFile (inFile);
-	++filesFound;
-
+	if (processFile (inFile))
+	{
+		displayAllLines ();		
+		++filesFound;
+	}
 	return 1;
 }
 
