@@ -226,24 +226,18 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
  *  @param size Size of the buffer.
  *  @result None.
  */
-static void processBuffer (char *buffer, size_t size)
+static void processFile (char *xmlFile)
 {
 	xmlDoc *doc = NULL;
 	xmlNode *rootElement = NULL;
-	xmlChar *xmlBuffer = NULL;
 
-	xmlBuffer = xmlCharStrndup(buffer, size);
-	if (xmlBuffer != NULL)
+	if ((doc = xmlParseFile (xmlFile)) != NULL)
 	{
-		doc = xmlParseDoc(xmlBuffer);
-
-		if (doc != NULL)
+		if ((rootElement = xmlDocGetRootElement (doc)) != NULL)
 		{
-			rootElement = xmlDocGetRootElement(doc);
-			processElementNames(doc, rootElement, 0);
-			xmlFreeDoc(doc);
+			processElementNames (doc, rootElement, 0);
 		}
-		xmlFree (xmlBuffer);
+        xmlFreeDoc(doc);
 	}
 	xmlCleanupParser();
 }
@@ -261,9 +255,7 @@ static void processBuffer (char *buffer, size_t size)
  */
 int showDir (DIR_ENTRY *file)
 {
-	unsigned char inBuffer[2048 + 1], inFile[PATH_SIZE];
-	int readSize = 0;
-	FILE *readFile;
+	unsigned char inFile[PATH_SIZE];
 
     /*------------------------------------------------------------------------*
      * First display a table with the file name and size.                     *
@@ -275,11 +267,13 @@ int showDir (DIR_ENTRY *file)
 	}
 	if (!displayQuiet) 
 	{
+		char sizeBuff[41];
+
 		displayDrawLine (0);
 		displayHeading (0);
 		displayNewLine (0);
 		displayInColumn (0, "%s", file -> fileName);
-		displayInColumn (1,	displayFileSize (file -> fileStat.st_size, (char *)inBuffer));
+		displayInColumn (1,	displayFileSize (file -> fileStat.st_size, sizeBuff));
 		displayNewLine (DISPLAY_INFO);
 		displayAllLines ();		
 	}
@@ -291,28 +285,19 @@ int showDir (DIR_ENTRY *file)
 	strcpy ((char *)inFile, file -> fullPath);
 	strcat ((char *)inFile, file -> fileName);
 
-	if ((readFile = fopen ((char *)inFile, "rb")) != NULL)
+	if (!displayColumnInit (2, ptrDumpColumn, displayColour))
 	{
-		if (!displayColumnInit (2, ptrDumpColumn, displayColour))
-		{
-			fprintf (stderr, "ERROR in: displayColumnInit\n");
-			return 0;
-		}
-
-		if (!displayQuiet) displayDrawLine (0);
-		if (!displayQuiet) displayHeading (0);
-		
-		while ((readSize = fread (inBuffer, 1, 2048, readFile)) != 0)
-		{
-			processBuffer (inBuffer, readSize);
-		}
-		displayAllLines ();
-		displayTidy ();
-		
-		fclose (readFile);
-		++filesFound;
+		fprintf (stderr, "ERROR in: displayColumnInit\n");
+		return 0;
 	}
-	return 0;
+
+	if (!displayQuiet) displayDrawLine (0);
+	if (!displayQuiet) displayHeading (0);
+
+	processFile (inFile);
+	++filesFound;
+
+	return 1;
 }
 
 /**********************************************************************************************************************
