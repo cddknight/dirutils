@@ -44,7 +44,7 @@ void parsePath (char *path);
  * Globals                                                                    *
  * 00 00 00 00 00 00 00 00-08 13 50 00 00 00 00 00 : ..........P.....         *
  *----------------------------------------------------------------------------*/
-COLUMN_DESC colDumpDescs[38] =
+COLUMN_DESC colDumpDescs[2] =
 {
 	{	40,	5,	0,	2,	0x07,	0,	"Name",		1	},	/* 0 */
 	{	40,	5,	0,	0,	0x07,	0,	"Key",		2	},	/* 1 */
@@ -55,7 +55,7 @@ COLUMN_DESC *ptrDumpColumn[2] =
 	&colDumpDescs[0],  &colDumpDescs[1]
 };
 
-COLUMN_DESC fileDescs[38] =
+COLUMN_DESC fileDescs[2] =
 {
 	{	60,	8,	16,	2,	0x07,	0,	"Filename",	1	},	/* 0 */
 	{	20,	4,	4,	0,	0x07,	0,	"Size",		0	},	/* 1 */
@@ -260,15 +260,14 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 				key = xmlNodeListGetString (doc, curNode -> xmlChildrenNode, 1);
 				if (displayQuiet) 
 				{
-					printf ("%s=%s\n", (char *)curNode -> name, 
-							key == NULL ? "(null)" : (char *)key);
+					printf ("%s=%s\n", (char *)curNode -> name, key == NULL ? "(null)" : (char *)key);
 				}
 				else
 				{
-					displayInColumn (0, "%s", (char *)curNode -> name);
-					displayInColumn (1, "%s", key == NULL ? "(null)" : (char *)key);
+					displayInColumn (0, "%s:", (char *)curNode -> name);
+					displayInColumn (1, "[%s]", key == NULL ? "(null)" : (char *)key);
+					displayNewLine(0);
 				}
-				displayNewLine(0);
 		    	xmlFree (key);
 		    }
         }
