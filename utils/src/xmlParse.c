@@ -228,6 +228,40 @@ void parsePath (char *path)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  R M  W H I T E  S P A C E                                                                                         *
+ *  =========================                                                                                         *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Remove any white space from a string.
+ *  \param inBuff String to process.
+ *  \param outBuff Save the output here.
+ *  \param maxLen Size of the output buffer.
+ *  \result Pointer to the output buffer.
+ */
+char *rmWhiteSpace (char *inBuff, char *outBuff, int maxLen)
+{
+	int lastChar = 0, i = 0, j = 0;
+	
+	while (inBuff[i] && j < maxLen)
+	{
+		if (inBuff[i] > ' ')
+		{
+			lastChar = i + 1;
+		}
+		if (lastChar)
+		{
+			outBuff[j] = inBuff[i];
+			outBuff[++j] = 0;
+		}
+		++i;
+	}
+	outBuff[j] = 0;
+	return outBuff;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  P R O C E S S  E L E M E N T  N A M E S                                                                           *
  *  =======================================                                                                           *
  *                                                                                                                    *
@@ -244,6 +278,7 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 {
 	xmlChar *key;
     xmlNode *curNode = NULL;
+    char tempBuff[81];
 
     for (curNode = aNode; curNode; curNode = curNode->next) 
     {
@@ -260,12 +295,14 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 				key = xmlNodeListGetString (doc, curNode -> xmlChildrenNode, 1);
 				if (displayQuiet) 
 				{
-					printf ("%s=%s\n", (char *)curNode -> name, key == NULL ? "(null)" : (char *)key);
+					printf ("%s=%s\n", (char *)curNode -> name, key == NULL ? "(null)" : 
+							rmWhiteSpace ((char *)key, tempBuff, 80));
 				}
 				else
 				{
-					displayInColumn (0, "%s:", (char *)curNode -> name);
-					displayInColumn (1, "[%s]", key == NULL ? "(null)" : (char *)key);
+					displayInColumn (0, "%s", (char *)curNode -> name);
+					displayInColumn (1, "%s", key == NULL ? "(null)" : 
+							rmWhiteSpace ((char *)key, tempBuff, 80));
 					displayNewLine(0);
 				}
 		    	xmlFree (key);

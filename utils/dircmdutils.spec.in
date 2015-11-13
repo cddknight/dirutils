@@ -37,6 +37,7 @@ install -s -m 755 listFunc $RPM_BUILD_ROOT%{_bindir}/listFunc
 install -s -m 755 pfile $RPM_BUILD_ROOT%{_bindir}/pfile
 install -s -m 755 memTest $RPM_BUILD_ROOT%{_bindir}/memTest
 install -s -m 755 rmcr $RPM_BUILD_ROOT%{_bindir}/rmcr
+install -s -m 755 xmlParse $RPM_BUILD_ROOT%{_bindir}/xmlParse
 install -m 644 ldirrc $RPM_BUILD_ROOT/etc/ldirrc
 
 %clean
@@ -59,6 +60,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/pfile
 %{_bindir}/memTest
 %{_bindir}/rmcr
+%{_bindir}/xmlParse
 /etc/ldirrc
 
 %changelog
