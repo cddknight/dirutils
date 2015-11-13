@@ -44,16 +44,17 @@ void parsePath (char *path);
  * Globals                                                                    *
  * 00 00 00 00 00 00 00 00-08 13 50 00 00 00 00 00 : ..........P.....         *
  *----------------------------------------------------------------------------*/
-COLUMN_DESC colParseDescs[3] =
+COLUMN_DESC colParseDescs[4] =
 {
-	{	40,	4,	0,	2,	0x07,	0,	"Name",		1	},	/* 0 */
+	{	10,	4,	0,	2,	0x07,	0,	"Num",		0	},	/* 0 */
+	{	40,	4,	0,	2,	0x07,	0,	"Name",		2	},	/* 0 */
 	{	40,	3,	0,	0,	0x07,	0,	"Key",		2	},	/* 1 */
 	{	80,	5,	0,	0,	0x07,	0,	"Error",	1	},	/* 2 */
 };
 
-COLUMN_DESC *ptrParseColumn[3] =
+COLUMN_DESC *ptrParseColumn[4] =
 {
-	&colParseDescs[0],  &colParseDescs[1],  &colParseDescs[2]
+	&colParseDescs[0],  &colParseDescs[1],  &colParseDescs[2],  &colParseDescs[3]
 };
 
 COLUMN_DESC fileDescs[2] =
@@ -73,6 +74,7 @@ int displayQuiet = 0;
 int displayDebug = 0;
 int levels = 0;
 char *levelName[20];
+int shownError = 0;
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -306,8 +308,8 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 				}
 				else
 				{
-					displayInColumn (0, "%s", (char *)curNode -> name);
-					displayInColumn (1, "%s", key == NULL ? "(null)" : 
+					displayInColumn (1, "%s", (char *)curNode -> name);
+					displayInColumn (2, "%s", key == NULL ? "(null)" : 
 							rmWhiteSpace ((char *)key, tempBuff, 80));
 					displayNewLine(0);
 				}
@@ -332,15 +334,22 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
  *  \param ... Extra parameters.
  *  \result None.
  */
-void myErrorFunc (void *ctx, conschchar *msg, ...)
+void myErrorFunc (void *ctx, const char *msg, ...)
 {
 	if (displayDebug)
 	{
 		va_list arg_ptr;
 
 		va_start (arg_ptr, msg);
-		displayVInColumn (2, msg, arg_ptr);
+		displayInColumn (0, "%04d", ++shownError);
+		displayVInColumn (3, (char *)msg, arg_ptr);
 		va_end (arg_ptr);
+		displayNewLine(0);
+	}
+	else if (!shownError)
+	{
+		++shownError;
+		displayInColumn (3, "Parsing file failed");
 		displayNewLine(0);
 	}
 	return;
@@ -420,15 +429,17 @@ int showDir (DIR_ENTRY *file)
 	strcpy ((char *)inFile, file -> fullPath);
 	strcat ((char *)inFile, file -> fileName);
 
-	if (!displayColumnInit (3, ptrParseColumn, displayColour))
+	if (!displayColumnInit (4, ptrParseColumn, displayColour))
 	{
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
 		return 0;
 	}
-
-	if (!displayQuiet) displayDrawLine (0);
-	if (!displayQuiet) displayHeading (0);
-
+	if (!displayQuiet)
+	{
+		displayDrawLine (0);
+		displayHeading (0);
+	}
+	shownError = 0;
 	if (processFile (inFile))
 	{
 		++filesFound;
