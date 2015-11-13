@@ -312,9 +312,11 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 				else
 				{
 					displayInColumn (1, "%s", (char *)curNode -> name);
-					displayInColumn (3, "%s", key == NULL ? "(null)" : 
-							rmWhiteSpace ((char *)key, tempBuff, 80));
-												
+					if (key != NULL)
+					{
+						displayInColumn (3, "%s", key == NULL ? "(null)" : 
+								rmWhiteSpace ((char *)key, tempBuff, 80));
+					}											
 					for (attr = curNode -> properties; attr != NULL; attr = attr -> next)
 					{
 						displayInColumn (2, "%s = %s", (char *)attr -> name, (char *)attr -> children -> content);
