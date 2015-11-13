@@ -46,9 +46,9 @@ void parsePath (char *path);
  *----------------------------------------------------------------------------*/
 COLUMN_DESC colParseDescs[5] =
 {
-	{	10,	4,	0,	2,	0x07,	0,	"Num",		0	},	/* 0 */
+	{	10,	5,	0,	2,	0x07,	0,	"Level",	0	},	/* 0 */
 	{	40,	4,	0,	2,	0x07,	0,	"Name",		2	},	/* 1 */
-	{	80, 5,	0,	2, 	0x07,	0,	"Attr",		3	},	/* 3 */
+	{	80, 5,	0,	2, 	0x07,	0,	"Attr.",	3	},	/* 3 */
 	{	40,	3,	0,	0,	0x07,	0,	"Key",		2	},	/* 2 */
 	{	80,	5,	0,	0,	0x07,	0,	"Error",	1	},	/* 4 */
 };
@@ -295,7 +295,7 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 
         if (curNode->type == XML_ELEMENT_NODE) 
         {
-			if ((!xmlStrcmp (curNode -> name, (const xmlChar *)levelName[readLevel]))) 
+			if ((!xmlStrcmp (curNode -> name, (const xmlChar *)levelName[readLevel])) || readLevel >= levels)
 			{
 				++readLevel;
 			}
@@ -311,6 +311,7 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 				}
 				else
 				{
+					displayInColumn (0, "%5d", readLevel);
 					displayInColumn (1, "%s", (char *)curNode -> name);
 					if (key != NULL)
 					{
