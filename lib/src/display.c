@@ -782,6 +782,31 @@ int displayInColour (int column, int colour, char *format, ...)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  D I S P L A Y  V I N  C O L O U R                                                                                 *
+ *  =================================                                                                                 *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Display in a different colour to the default.
+ *  \param column Number of the column to display the string in.
+ *  \param colour Colour to use.
+ *  \param format Format of the string (printf style) maybe more op.
+ *  \param arg_ptr Parameters to format.
+ *  \result 0 if the display failed, 1 if OK.
+ */
+int displayVInColour (int column, int colour, char *format, va_list arg_ptr)
+{
+	int retn = vDisplayInColumn (column, format, arg_ptr);
+	
+	if (retn == 1 && currentRow != NULL)
+	{
+		currentRow -> colColour[column] = colour;
+	}
+	return retn;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  D I S P L A Y  I N  C O L U M N                                                                                   *
  *  ===============================                                                                                   *
  *                                                                                                                    *
@@ -802,6 +827,24 @@ int displayInColumn (int column, char *format, ...)
 	retn = vDisplayInColumn (column, format, arg_ptr);
 	va_end (arg_ptr);
 	return retn;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I S P L A Y  V I N  C O L U M N                                                                                 *
+ *  =================================                                                                                 *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Display a string in a column.
+ *  \param column Number of the column to display the string in.
+ *  \param format Format of the string (printf style) maybe more op.
+ *  \param arg_ptr Parameters to format.
+ *  \result 0 if the display failed, 1 if OK.
+ */
+int displayVInColumn (int column, char *format, va_list arg_ptr)
+{
+	return vDisplayInColumn (column, format, arg_ptr);
 }
 
 /**********************************************************************************************************************

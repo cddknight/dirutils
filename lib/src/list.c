@@ -20,8 +20,6 @@
  *  \file
  *  \brief Functions to a generic linked list.
  */
-#include <stdlib.h>
-#include <string.h>
 #include "dircmd.h"
 
 #ifdef MULTI_THREAD

@@ -22,8 +22,6 @@
  */
 #define _GNU_SOURCE
  
-#include <string.h>
-#include <stdlib.h>
 #include <ctype.h>
 #include <fnmatch.h>
 #include "dircmd.h"

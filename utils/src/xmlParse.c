@@ -44,15 +44,16 @@ void parsePath (char *path);
  * Globals                                                                    *
  * 00 00 00 00 00 00 00 00-08 13 50 00 00 00 00 00 : ..........P.....         *
  *----------------------------------------------------------------------------*/
-COLUMN_DESC colDumpDescs[2] =
+COLUMN_DESC colParseDescs[3] =
 {
-	{	40,	5,	0,	2,	0x07,	0,	"Name",		1	},	/* 0 */
-	{	40,	5,	0,	0,	0x07,	0,	"Key",		2	},	/* 1 */
+	{	40,	4,	0,	2,	0x07,	0,	"Name",		1	},	/* 0 */
+	{	40,	3,	0,	0,	0x07,	0,	"Key",		2	},	/* 1 */
+	{	80,	5,	0,	0,	0x07,	0,	"Error",	1	},	/* 2 */
 };
 
-COLUMN_DESC *ptrDumpColumn[2] =
+COLUMN_DESC *ptrParseColumn[3] =
 {
-	&colDumpDescs[0],  &colDumpDescs[1]
+	&colParseDescs[0],  &colParseDescs[1],  &colParseDescs[2]
 };
 
 COLUMN_DESC fileDescs[2] =
@@ -69,7 +70,7 @@ COLUMN_DESC *ptrFileColumn[2] =
 int filesFound = 0;
 int displayColour = 0;
 int displayQuiet = 0;
-int displayWidth = -1;
+int displayDebug = 0;
 int levels = 0;
 char *levelName[20];
 
@@ -104,7 +105,8 @@ void helpThem(char *progName)
 {
 	printf ("Enter the command: %s [-Cqp <path>] <filename>\n", basename (progName));
 	printf ("    -C . . . . . Display output in colour.\n");
-	printf ("    -q . . . . . Quite mode, only dump the hex codes.\n");
+	printf ("    -d . . . . . Output parser debug messages.\n");
+	printf ("    -q . . . . . Quite mode, output name=key pairs.\n");
 	printf ("    -p <path>  . Path to search (eg: /sensors/light).\n");
 }
 
@@ -129,12 +131,16 @@ int main (int argc, char *argv[])
 
 	width = displayGetWidth();
 
-	while ((i = getopt(argc, argv, "Cqp:?")) != -1)
+	while ((i = getopt(argc, argv, "Cdqp:?")) != -1)
 	{
 		switch (i) 
 		{
 		case 'C':
 			displayColour = DISPLAY_COLOURS;
+			break;
+			
+		case 'd':
+			displayDebug ^= 1;
 			break;
 			
 		case 'q':
@@ -315,6 +321,33 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  M Y  E R R O R  F U N C                                                                                           *
+ *  =======================                                                                                           *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Callback used by the libxml2 to display messages.
+ *  \param ctx File handle (not used).
+ *  \param msg Error message.
+ *  \param ... Extra parameters.
+ *  \result None.
+ */
+void myErrorFunc (void *ctx, conschchar *msg, ...)
+{
+	if (displayDebug)
+	{
+		va_list arg_ptr;
+
+		va_start (arg_ptr, msg);
+		displayVInColumn (2, msg, arg_ptr);
+		va_end (arg_ptr);
+		displayNewLine(0);
+	}
+	return;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  P R O C E S S  F I L E                                                                                            *
  *  ======================                                                                                            *
  *                                                                                                                    *
@@ -330,6 +363,7 @@ int processFile (char *xmlFile)
 	xmlDoc *doc = NULL;
 	xmlNode *rootElement = NULL;
 
+	xmlSetGenericErrorFunc (NULL, myErrorFunc);
 	if ((doc = xmlParseFile (xmlFile)) != NULL)
 	{
 		if ((rootElement = xmlDocGetRootElement (doc)) != NULL)
@@ -386,7 +420,7 @@ int showDir (DIR_ENTRY *file)
 	strcpy ((char *)inFile, file -> fullPath);
 	strcat ((char *)inFile, file -> fileName);
 
-	if (!displayColumnInit (2, ptrDumpColumn, displayColour))
+	if (!displayColumnInit (3, ptrParseColumn, displayColour))
 	{
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
 		return 0;
@@ -397,9 +431,10 @@ int showDir (DIR_ENTRY *file)
 
 	if (processFile (inFile))
 	{
-		displayAllLines ();		
 		++filesFound;
 	}
+	displayAllLines ();
+	displayTidy ();
 	return 1;
 }
 
