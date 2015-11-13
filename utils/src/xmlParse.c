@@ -39,6 +39,7 @@
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo);
 int showDir (DIR_ENTRY *file);
 void parsePath (char *path);
+void processStdin (void);
 
 /*----------------------------------------------------------------------------*
  * Globals                                                                    *
@@ -134,7 +135,7 @@ int main (int argc, char *argv[])
 
 	width = displayGetWidth();
 
-	while ((i = getopt(argc, argv, "Cdqp:?")) != -1)
+	while ((i = getopt(argc, argv, "Cdqip:?")) != -1)
 	{
 		switch (i) 
 		{
@@ -153,6 +154,10 @@ int main (int argc, char *argv[])
 		case 'p':
 			parsePath (optarg);
 			break;
+
+		case 'i':
+			processStdin ();
+			exit (0);			
 
 		case '?':
 			helpThem (argv[0]);
@@ -385,7 +390,7 @@ int processFile (char *xmlFile)
 	xmlNode *rootElement = NULL;
 
 	xmlSetGenericErrorFunc (NULL, myErrorFunc);
-	if ((doc = xmlParseFile (xmlFile)) != NULL)
+	if ((doc = 	xmlParseFile (xmlFile)) != NULL)
 	{
 		if ((rootElement = xmlDocGetRootElement (doc)) != NULL)
 		{
@@ -411,7 +416,7 @@ int processFile (char *xmlFile)
  */
 int showDir (DIR_ENTRY *file)
 {
-	unsigned char inFile[PATH_SIZE];
+	char inFile[PATH_SIZE];
 
     /*------------------------------------------------------------------------*
      * First display a table with the file name and size.                     *
@@ -438,8 +443,8 @@ int showDir (DIR_ENTRY *file)
     /*------------------------------------------------------------------------*
      * Open the file and display a table containing the hex dump.             *
      *------------------------------------------------------------------------*/
-	strcpy ((char *)inFile, file -> fullPath);
-	strcat ((char *)inFile, file -> fileName);
+	strcpy (inFile, file -> fullPath);
+	strcat (inFile, file -> fileName);
 
 	if (!displayColumnInit (5, ptrParseColumn, displayColour))
 	{
@@ -487,3 +492,51 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	}
 	return strcasecmp (fileOne -> fileName, fileTwo -> fileName);
 }
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  P R O C E S S  S T D I N                                                                                          *
+ *  ========================                                                                                          *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Process input from stdin.
+ *  \result None.
+ */
+void processStdin ()
+{
+	int readSize;
+	char buffer[4097];
+	xmlDoc *doc = NULL;
+	xmlNode *rootElement = NULL;
+	xmlChar *xmlBuffer = NULL;
+	
+	if ((readSize = fread (buffer, 1, 4096, stdin)) > 0)
+	{
+		if (displayColumnInit (5, ptrParseColumn, displayColour))
+		{
+			if (!displayQuiet)
+			{
+				displayHeading (0);
+			}
+		
+			shownError = 0;		
+			xmlSetGenericErrorFunc (NULL, myErrorFunc);
+			if ((xmlBuffer = xmlCharStrndup(buffer, readSize)) != NULL)
+			{
+				if ((doc = xmlParseDoc(xmlBuffer)) != NULL)
+				{
+					rootElement = xmlDocGetRootElement(doc);
+					processElementNames (doc, rootElement, 0);
+					xmlFreeDoc(doc);
+				}
+				xmlFree (xmlBuffer);
+			}
+		
+			xmlCleanupParser();
+			displayAllLines ();
+			displayTidy ();
+		}
+	}
+}
+
