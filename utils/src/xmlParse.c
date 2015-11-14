@@ -47,11 +47,11 @@ void processStdin (void);
  *----------------------------------------------------------------------------*/
 COLUMN_DESC colParseDescs[5] =
 {
-	{	10,	5,	0,	2,	0x07,	0,	"Level",	0	},	/* 0 */
-	{	40,	4,	0,	2,	0x07,	0,	"Name",		2	},	/* 1 */
-	{	80, 5,	0,	2, 	0x07,	0,	"Attr.",	3	},	/* 3 */
-	{	40,	3,	0,	0,	0x07,	0,	"Key",		2	},	/* 2 */
-	{	80,	5,	0,	0,	0x07,	0,	"Error",	1	},	/* 4 */
+	{	10,	5,	0,	2,	0x07,	0,	"Depth",	0	},	/* 0 */
+	{	40,	5,	0,	2,	0x07,	0,	"Name",		2	},	/* 1 */
+	{	40, 5,	0,	2, 	0x07,	0,	"Attr.",	3	},	/* 3 */
+	{	40,	5,	0,	0,	0x07,	0,	"Key",		2	},	/* 2 */
+	{	40,	5,	0,	0,	0x07,	0,	"Error",	1	},	/* 4 */
 };
 
 COLUMN_DESC *ptrParseColumn[5] =
@@ -155,16 +155,17 @@ int main (int argc, char *argv[])
 			parsePath (optarg);
 			break;
 
-		case 'i':
-			processStdin ();
-			exit (0);			
-
 		case '?':
 			helpThem (argv[0]);
 			exit (1);
 		}
 	}
 
+	if (optind == argc)
+	{
+		processStdin ();
+		exit (0);			
+	}
     for (; optind < argc; ++optind)
     {
 		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
@@ -493,6 +494,8 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	return strcasecmp (fileOne -> fileName, fileTwo -> fileName);
 }
 
+#define READSIZE 4096
+
 /**********************************************************************************************************************
  *                                                                                                                    *
  *  P R O C E S S  S T D I N                                                                                          *
@@ -505,13 +508,28 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
  */
 void processStdin ()
 {
-	int readSize;
-	char buffer[4097];
+	int readSize, buffSize = 0, totalRead = 0;
+	char *buffer;
 	xmlDoc *doc = NULL;
 	xmlNode *rootElement = NULL;
 	xmlChar *xmlBuffer = NULL;
 	
-	if ((readSize = fread (buffer, 1, 4096, stdin)) > 0)
+	buffer = (char *)malloc(buffSize = READSIZE);
+	do
+	{
+		if ((readSize = fread (&buffer[buffSize - READSIZE], 1, READSIZE, stdin)) > 0)
+		{
+			totalRead += readSize;
+			if (readSize == READSIZE)
+			{
+				buffSize += READSIZE;
+				buffer = realloc (buffer, buffSize);
+			}
+		}
+	}
+	while (buffer && readSize == READSIZE);
+
+	if (buffer && totalRead)
 	{
 		if (displayColumnInit (5, ptrParseColumn, displayColour))
 		{
@@ -522,7 +540,7 @@ void processStdin ()
 		
 			shownError = 0;		
 			xmlSetGenericErrorFunc (NULL, myErrorFunc);
-			if ((xmlBuffer = xmlCharStrndup(buffer, readSize)) != NULL)
+			if ((xmlBuffer = xmlCharStrndup(buffer, totalRead)) != NULL)
 			{
 				if ((doc = xmlParseDoc(xmlBuffer)) != NULL)
 				{
