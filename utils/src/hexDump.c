@@ -28,6 +28,7 @@
 #include <libgen.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <dircmd.h>
 
 /*----------------------------------------------------------------------------*
@@ -107,7 +108,7 @@ COLUMN_DESC *ptrFileColumn[2] =
 int filesFound = 0;
 int displayColour = 0;
 int displayQuiet = 0;
-int displayBig = 0;
+int displayWidth = -1;
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -138,11 +139,10 @@ void version (void)
  */
 void helpThem(char *progName)
 {
-	printf ("Enter the command: %s [-bCqs] <filename>\n", basename (progName));
-	printf ("    -b . . . . Display in 32 column format.\n");
-	printf ("    -C . . . . Display in colour.\n");
-	printf ("    -q . . . . Quite mode, only dump hex.\n");
-	printf ("    -s . . . . Display in 16 column format.\n");
+	printf ("Enter the command: %s [-Cqw <size>] <filename>\n", basename (progName));
+	printf ("    -C . . . . . Display output in colour.\n");
+	printf ("    -q . . . . . Quite mode, only dump the hex codes.\n");
+	printf ("    -w <size>  . Set the display size (8, 16, 24 or 32).\n");
 }
 
 /**********************************************************************************************************************
@@ -160,66 +160,55 @@ void helpThem(char *progName)
 int main (int argc, char *argv[])
 {
 	void *fileList = NULL;
-	int i = 1, found = 0;
+	int i, found = 0, width = 80;
 
 	displayGetWindowSize ();
-	if (displayGetWidth() >= 142)
-	{
-		displayBig = 1;	
-	}
 
-	if (argc == 1)
+	width = displayGetWidth();
+
+	while ((i = getopt(argc, argv, "Cqw:?")) != -1)
 	{
-		version ();
-		helpThem (argv[0]);
-		exit (1);
-	}
-	
-    /*------------------------------------------------------------------------*
-     * If we got a path then split it into a path and a file pattern to match *
-     * files with.                                                            *
-     *------------------------------------------------------------------------*/
-	while (i < argc)
-	{
-		if (argv[i][0] == '-')
-		{	
-			switch (argv[i][1])
+		switch (i) 
+		{
+		case 'C':
+			displayColour = DISPLAY_COLOURS;
+			break;
+			
+		case 'q':
+			displayQuiet ^= 1;
+			break;
+
+		case 'w':
+			width = atoi (optarg);
+			if (width == 8 || width == 16 || width == 24 || width == 32)
 			{
-			case 'b':
-				displayBig = 1;
+				displayWidth = width;
 				break;
-
-			case 'C':
-				displayColour = DISPLAY_COLOURS;
-				break;
-				
-			case 'q':
-				displayQuiet ^= 1;
-				break;
-
-			case 's':
-				displayBig = 0;
-				break;
-
-			default:
-				printf ("Unknown argument: -%c.\n", argv[i][1]);
-				helpThem (argv[0]);
-				exit (1);
 			}
+		case '?':
+			helpThem (argv[0]);
+			exit (1);
 		}
-		else
-			found += directoryLoad (argv[i], ONLYFILES, fileCompare, &fileList);
-
-		i ++;
 	}
 
-    /*------------------------------------------------------------------------*
-     * Now we can sort the directory.                                         *
-     *------------------------------------------------------------------------*/
-	directorySort (&fileList);
+    for (; optind < argc; ++optind)
+    {
+		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
+	}
 
 	if (found)
 	{
+		if (displayWidth == -1)
+		{
+			displayWidth = displayQuiet ? 
+					(width < 48 ? 8 : width < 72 ? 16 : width < 96 ? 24 : 32):
+					(width < 77 ? 8 : width < 110 ? 16 : width < 143 ? 24 : 32);
+		}
+
+	    /*--------------------------------------------------------------------*
+	     * Now we can sort the directory.                                     *
+	     *--------------------------------------------------------------------*/
+		directorySort (&fileList);
 		directoryProcess (showDir, &fileList);
 
 		if (!displayQuiet) 
@@ -257,17 +246,14 @@ int main (int argc, char *argv[])
  */
 int showDir (DIR_ENTRY *file)
 {
-	unsigned char inBuffer[1024 + 1], inFile[PATH_SIZE];
+	unsigned char inBuffer[2048 + 1], inFile[PATH_SIZE];
 	unsigned char saveHex[4], saveChar[80];
 	FILE *readFile;
-	int j = 0, read, filePosn = 0, l = 0, width;
+	int j = 0, c = 1, read, filePosn = 0, l = 0;
 
-	width = displayBig ? 32 : 16;
-
-	strcpy ((char *)inFile, file -> fullPath);
-	strcat ((char *)inFile, file -> fileName);
-
-
+    /*------------------------------------------------------------------------*
+     * First display a table with the file name and size.                     *
+     *------------------------------------------------------------------------*/
 	if (!displayColumnInit (2, ptrFileColumn, displayColour))
 	{
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
@@ -277,13 +263,19 @@ int showDir (DIR_ENTRY *file)
 	{
 		displayDrawLine (0);
 		displayHeading (0);
-		displayNewLine(0);
+		displayNewLine (0);
 		displayInColumn (0, "%s", file -> fileName);
 		displayInColumn (1,	displayFileSize (file -> fileStat.st_size, (char *)inBuffer));
-		displayNewLine(DISPLAY_INFO);
+		displayNewLine (DISPLAY_INFO);
 		displayAllLines ();		
 	}
 	displayTidy ();
+
+    /*------------------------------------------------------------------------*
+     * Open the file and display a table containing the hex dump.             *
+     *------------------------------------------------------------------------*/
+	strcpy ((char *)inFile, file -> fullPath);
+	strcat ((char *)inFile, file -> fileName);
 
 	if ((readFile = fopen ((char *)inFile, "rb")) != NULL)
 	{
@@ -296,9 +288,9 @@ int showDir (DIR_ENTRY *file)
 		if (!displayQuiet) displayDrawLine (0);
 		if (!displayQuiet) displayHeading (0);
 		
-		while ((read = fread (inBuffer, 1, 1024, readFile)) != 0)
+		while ((read = fread (inBuffer, 1, 2048, readFile)) != 0)
 		{
-			int i = 0, c = 1;
+			int i = 0;
 			while (i < read)
 			{
 				sprintf ((char *)saveHex, "%02X", ((int)inBuffer[i]) & 0xFF);
@@ -315,21 +307,24 @@ int showDir (DIR_ENTRY *file)
 				}
 				displayInColumn (c++, "%s", saveHex);
 
-				if (j == width)
+				if (j == displayWidth)
 				{
 					if (!displayQuiet) 
 					{
-						displayInColumn (0, displayBig ? "%08X" : "%06X", filePosn);
+						displayInColumn (0, "%08X", filePosn);
 						displayInColumn (36, " ", saveChar);
 						displayInColumn (37, "%s", saveChar);
 					}
 					displayNewLine(0);
-					filePosn += width;
+					filePosn += displayWidth;
 					j = 0;
 
-					if (++l == width)
+					if (++l == displayWidth)
 					{
-						displayBlank (0);
+						if (!displayQuiet) 
+						{
+							displayBlank (0);
+						}
 						l = 0;
 					}
 					c = 1;
@@ -341,17 +336,17 @@ int showDir (DIR_ENTRY *file)
 		{
 			if (!displayQuiet) 
 			{
-				displayInColumn (0, displayBig ? "%08X" : "%06X", filePosn);
+				displayInColumn (0, "%08X", filePosn);
 				displayInColumn (36, " ", saveChar);
 				displayInColumn (37, "%s", saveChar);
 			}
-			displayNewLine(0);
+			displayNewLine (0);
 		}
 		displayAllLines ();
 		displayTidy ();
 		
 		fclose (readFile);
-		filesFound ++;
+		++filesFound;
 	}
 	return 0;
 }

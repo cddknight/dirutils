@@ -27,6 +27,10 @@
 #include <time.h>
 #include <dirent.h>
 #include <limits.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+
 #ifdef HAVE_VALUES_H
 #include <values.h>
 #else
@@ -249,6 +253,8 @@ int displayGetDepth (void);
 int displayColumnInit (int colCount, COLUMN_DESC *colDesc[], int options);
 int displayInColumn (int column, char *format, ...);
 int displayInColour (int column, int colour, char *format, ...);
+int displayVInColumn (int column, char *format, va_list arg_ptr);
+int displayVInColour (int column, int colour, char *format, va_list arg_ptr);
 void displayMatchWidth (void);
 void displaySomeLines (int lines);
 void displayAllLines (void);

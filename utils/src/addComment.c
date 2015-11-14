@@ -133,76 +133,75 @@ int main(int argc, char *argv[])
 	displayGetWindowSize();
 	rl_bind_key ('\t',rl_abort);		//disable auto-complete
 
-	if (argc == 1)
+	while ((i = getopt(argc, argv, "hdipqmvl:w:c:C:?")) != -1)
 	{
-		version (argv[0], 1);
-		exit(1);
-	}
-	while (i < argc)
-	{
-		if (argv[i][0] == '-')
+		switch (i) 
 		{
-			switch (argv[i][1])
+		case 'l':
+			commentLine = atoi (optarg);
+			break;
+
+		case 'h':
+			commentLine = -1;
+			break;
+
+		case 'w':
+			boxWidth = atoi (optarg);
+			if (boxWidth < 40 || boxWidth > MAX_BOXWIDTH)
 			{
-			case 'l':
-				commentLine = atoi(&argv[i][2]);
-				break;
-
-			case 'h':
-				commentLine = -1;
-				break;
-
-			case 'w':
-				boxWidth = atoi(&argv[i][2]);
-				if (boxWidth < 40 || boxWidth > MAX_BOXWIDTH)
-				{
-					boxWidth = DEF_BOXWIDTH;
-				}
-				break;
-
-			case 'c':
-				if (argv[i][2] >= ' ' && argv[i][2] < 127)
-					lineChar = argv[i][2];
-				break;
-
-			case 'C':
-				copyrightType = atoi(&argv[i][2]);
-				if (argv[i][3] && copyrightType == 1)
-					strncpy (companyName, &argv[i][3], 127);
-				break;
-
-			case 'd':
-				debug = !debug;
-				break;
-
-			case 'i':
-				cvsID = !cvsID;
-				break;
-
-			case 'p':
-				cppStyle = !cppStyle;
-				lineChar = '-';
-				break;
-				
-			case 'q':
-				quietMode = !quietMode;
-				break;
-				
-			case 'm':
-				autoMain = !autoMain;
-				break;
-
-			case 'v':
-			case '?':
-				version (argv[0], argv[i][1] == '?' ? 1 : 0);
-				return (1);
+				boxWidth = DEF_BOXWIDTH;
 			}
+			break;
+
+		case 'c':
+			if (optarg[0] >= ' ' && optarg[0] < 127)
+			{
+				lineChar = optarg[0];
+			}
+			break;
+
+		case 'C':
+			copyrightType = atoi (optarg);
+			if (optarg[1] != 0 && copyrightType == 1)
+			{
+				strncpy (companyName, &optarg[1], 127);
+			}
+			break;
+
+		case 'd':
+			debug = !debug;
+			break;
+
+		case 'i':
+			cvsID = !cvsID;
+			break;
+
+		case 'p':
+			cppStyle = !cppStyle;
+			lineChar = '-';
+			break;
+			
+		case 'q':
+			quietMode = !quietMode;
+			break;
+			
+		case 'm':
+			autoMain = !autoMain;
+			break;
+
+		case 'v':
+			version (argv[0], 0);
+			return 0;
+
+		case '?':
+			version (argv[0], 1);
+			return (1);
 		}
-		else
-		{
-			found += directoryLoad(argv[i], ONLYFILES, addCommentsCmp, &fileList);
-		}
-		i++;
+	}
+
+    for (; optind < argc; ++optind)
+    {
+		found += directoryLoad(argv[optind], ONLYFILES, addCommentsCmp, &fileList);
 	}
 	directorySort (&fileList);
 
