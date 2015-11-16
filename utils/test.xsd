@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:element name="sensors">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="outside" type="xs:decimal"/>
+      <xs:element name="inside" type="xs:decimal"/>
+      <xs:element name="pressure" type="xs:decimal"/>
+      <xs:element name="light" type="xs:decimal"/>
+      <xs:element name="humidity" type="xs:decimal"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+</xs:schema>
