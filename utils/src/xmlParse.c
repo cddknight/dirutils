@@ -30,8 +30,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dircmd.h>
+
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <libxml/valid.h>
+#include <libxml/xmlschemas.h>
 
 /*----------------------------------------------------------------------------*
  * Prototypes															      *
@@ -47,11 +50,11 @@ void processStdin (void);
  *----------------------------------------------------------------------------*/
 COLUMN_DESC colParseDescs[5] =
 {
-	{	10,	5,	0,	2,	0x07,	0,	"Depth",	0	},	/* 0 */
-	{	40,	5,	0,	2,	0x07,	0,	"Name",		2	},	/* 1 */
-	{	40, 5,	0,	2, 	0x07,	0,	"Attr.",	3	},	/* 3 */
-	{	40,	5,	0,	0,	0x07,	0,	"Key",		2	},	/* 2 */
-	{	40,	5,	0,	0,	0x07,	0,	"Error",	1	},	/* 4 */
+	{	10,		5,	0,	2,	0x07,	0,	"Depth",	0	},	/* 0 */
+	{	40,		5,	0,	2,	0x07,	0,	"Name",		2	},	/* 1 */
+	{	40, 	5,	0,	2, 	0x07,	0,	"Attr.",	3	},	/* 3 */
+	{	40,		5,	0,	0,	0x07,	0,	"Key",		2	},	/* 2 */
+	{	120,	5,	0,	0,	0x07,	0,	"Error",	1	},	/* 4 */
 };
 
 COLUMN_DESC *ptrParseColumn[5] =
@@ -61,8 +64,8 @@ COLUMN_DESC *ptrParseColumn[5] =
 
 COLUMN_DESC fileDescs[2] =
 {
-	{	60,	8,	16,	2,	0x07,	0,	"Filename",	1	},	/* 0 */
-	{	20,	4,	4,	0,	0x07,	0,	"Size",		0	},	/* 1 */
+	{	120,	8,	16,	2,	0x07,	0,	"Filename",	1	},	/* 0 */
+	{	20,		4,	4,	0,	0x07,	0,	"Size",		0	},	/* 1 */
 };
 
 COLUMN_DESC *ptrFileColumn[2] =
@@ -76,6 +79,7 @@ int displayQuiet = 0;
 int displayDebug = 0;
 int levels = 0;
 char *levelName[20];
+char xsdPath[PATH_SIZE];
 int shownError = 0;
 
 /**********************************************************************************************************************
@@ -112,6 +116,7 @@ void helpThem(char *progName)
 	printf ("    -d . . . . . Output parser debug messages.\n");
 	printf ("    -q . . . . . Quite mode, output name=key pairs.\n");
 	printf ("    -p <path>  . Path to search (eg: /sensors/light).\n");
+	printf ("    -s <xsd> . . Path to xsd schema validation file.\n");
 }
 
 /**********************************************************************************************************************
@@ -135,7 +140,7 @@ int main (int argc, char *argv[])
 
 	width = displayGetWidth();
 
-	while ((i = getopt(argc, argv, "Cdqip:?")) != -1)
+	while ((i = getopt(argc, argv, "Cdqp:s:?")) != -1)
 	{
 		switch (i) 
 		{
@@ -155,6 +160,10 @@ int main (int argc, char *argv[])
 			parsePath (optarg);
 			break;
 
+		case 's':
+			strncpy (xsdPath, optarg, PATH_SIZE);
+			break;
+			
 		case '?':
 			helpThem (argv[0]);
 			exit (1);
@@ -356,13 +365,13 @@ void myErrorFunc (void *ctx, const char *msg, ...)
 {
 	if (displayDebug)
 	{
+		char buff[121];
 		va_list arg_ptr;
 
 		va_start (arg_ptr, msg);
-		displayInColumn (0, "%04d", ++shownError);
 		displayVInColumn (4, (char *)msg, arg_ptr);
 		va_end (arg_ptr);
-		displayNewLine(0);
+//		displayNewLine(0);
 	}
 	else if (!shownError)
 	{
@@ -371,6 +380,48 @@ void myErrorFunc (void *ctx, const char *msg, ...)
 		displayNewLine(0);
 	}
 	return;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  V A L I D A T E  D O C U M E N T                                                                                  *
+ *  ================================                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Use any given xsd file to validate the document.
+ *  \param doc Document to validate.
+ *  \result Error code (0 if documant is good).
+ */
+int validateDocument (xmlDocPtr doc)
+{
+    xmlSchemaParserCtxtPtr parserCtxt = NULL;
+    xmlSchemaValidCtxtPtr validCtxt = NULL;
+    xmlSchemaPtr schema = NULL;
+
+	xmlSetStructuredErrorFunc (NULL, NULL);
+	xmlSetGenericErrorFunc (NULL, myErrorFunc);
+	xmlThrDefSetStructuredErrorFunc (NULL, NULL);
+	xmlThrDefSetGenericErrorFunc (NULL, myErrorFunc);
+
+	parserCtxt = xmlSchemaNewParserCtxt (xsdPath);
+
+	if (parserCtxt != NULL) 
+	{
+		schema = xmlSchemaParse (parserCtxt);
+
+		if (schema != NULL) 
+		{
+			validCtxt = xmlSchemaNewValidCtxt (schema);
+
+			if (validCtxt) 
+			{
+
+				return xmlSchemaValidateDoc (validCtxt, doc);
+			}
+		}
+	}
+	return -1;
 }
 
 /**********************************************************************************************************************
@@ -386,17 +437,24 @@ void myErrorFunc (void *ctx, const char *msg, ...)
  */
 int processFile (char *xmlFile)
 {
-	int retn = 0;
+	int retn = 0, notValid = 0;
 	xmlDoc *doc = NULL;
 	xmlNode *rootElement = NULL;
 
 	xmlSetGenericErrorFunc (NULL, myErrorFunc);
 	if ((doc = 	xmlParseFile (xmlFile)) != NULL)
 	{
-		if ((rootElement = xmlDocGetRootElement (doc)) != NULL)
+		if (xsdPath[0])
 		{
-			processElementNames (doc, rootElement, 0);
-			retn = 1;
+			notValid = validateDocument (doc);
+		}
+		if (!notValid)
+		{
+			if ((rootElement = xmlDocGetRootElement (doc)) != NULL)
+			{
+				processElementNames (doc, rootElement, 0);
+				retn = 1;
+			}
 		}
         xmlFreeDoc(doc);
 	}
@@ -544,6 +602,11 @@ void processStdin ()
 			{
 				if ((doc = xmlParseDoc(xmlBuffer)) != NULL)
 				{
+					printf ("validateDocument: [%s]\n", xsdPath);
+					if (xsdPath[0])
+					{
+						printf ("Validate: %d\n", validateDocument (doc));
+					}
 					rootElement = xmlDocGetRootElement(doc);
 					processElementNames (doc, rootElement, 0);
 					xmlFreeDoc(doc);
