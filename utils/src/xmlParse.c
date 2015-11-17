@@ -566,7 +566,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
  */
 void processStdin ()
 {
-	int readSize, buffSize = 0, totalRead = 0;
+	int readSize, buffSize = 0, totalRead = 0, notValid = 0;
 	char *buffer;
 	xmlDoc *doc = NULL;
 	xmlNode *rootElement = NULL;
@@ -593,6 +593,7 @@ void processStdin ()
 		{
 			if (!displayQuiet)
 			{
+				displayDrawLine (0);
 				displayHeading (0);
 			}
 		
@@ -602,18 +603,25 @@ void processStdin ()
 			{
 				if ((doc = xmlParseDoc(xmlBuffer)) != NULL)
 				{
-					printf ("validateDocument: [%s]\n", xsdPath);
 					if (xsdPath[0])
 					{
-						printf ("Validate: %d\n", validateDocument (doc));
+						notValid = validateDocument (doc);
 					}
-					rootElement = xmlDocGetRootElement(doc);
-					processElementNames (doc, rootElement, 0);
+					if (!notValid)
+					{
+						if ((rootElement = xmlDocGetRootElement (doc)) != NULL)
+						{
+							processElementNames (doc, rootElement, 0);
+						}
+					}
 					xmlFreeDoc(doc);
 				}
 				xmlFree (xmlBuffer);
 			}
-		
+			if (!displayQuiet)
+			{
+				displayDrawLine (0);
+			}
 			xmlCleanupParser();
 			displayAllLines ();
 			displayTidy ();
