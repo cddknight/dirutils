@@ -57,10 +57,11 @@ COLUMN_DESC *ptrChangeColumn[] =
 };
 
 int inputMode = 0;
+int outputMode = 0;
 int filesFound = 0;
 int totalProcessed = 0;
-float savedValues[15];
-int savedRead[15];
+float savedValues[21];
+int savedRead[21];
 char linePrefix[21];
 
 /**********************************************************************************************************************
@@ -108,10 +109,18 @@ int main (int argc, char *argv[])
      * If we got a path then split it into a path and a file pattern to match *
      * files with.                                                            *
      *------------------------------------------------------------------------*/
-	while ((i = getopt(argc, argv, "pw?")) != -1)
+	while ((i = getopt(argc, argv, "pwtT?")) != -1)
 	{
 		switch (i) 
 		{
+		case 't':
+			outputMode = 2;
+			break;
+
+		case 'T':
+			outputMode = 1;
+			break;
+
 		case 'w':
 			ptrChangeColumn[2] = &colChangeDescs[2];
 			inputMode = 0;
@@ -124,8 +133,10 @@ int main (int argc, char *argv[])
 
 		case '?':
 			printf ("%s -[options] <file names>\n\n", basename (argv[0]));
-			printf ("        -w  For weather logs (default).\n");
-			printf ("        -p  For power logs.\n");
+			printf ("        -w  Process weather logs (default).\n");
+			printf ("        -p  Process power logs.\n");
+			printf ("        -t  Tab separated output (days).\n");
+			printf ("        -T  Tab separated output (months).\n");
 			return (1);
 		}
 	}
@@ -254,7 +265,7 @@ int processBuffer (char *inBuffer, int getTime)
 {
 	char singleVal[21];
 	float tempValues[15];
-	int i = 0, j = 0, k, readVal[15], count = 0;
+	int i = 0, j = 0, k, l = 0, readVal[15], count = 0;
 
 	singleVal[0] = linePrefix[0] = 0;
 	for (k = 0; k < 15; ++k)
@@ -267,8 +278,23 @@ int processBuffer (char *inBuffer, int getTime)
 		{
 			if (j < 20)
 			{
-				singleVal[j] = inBuffer[i];
-				singleVal[++j] = 0;
+				if ((outputMode == 1 || outputMode == 2) && count == 0)
+				{
+					if (inBuffer[i] == '/')
+					{
+						++l;
+					}
+					else if (l == outputMode)
+					{
+						singleVal[j] = inBuffer[i];
+						singleVal[++j] = 0;
+					}
+				}
+				else
+				{
+					singleVal[j] = inBuffer[i];
+					singleVal[++j] = 0;
+				}
 			}
 		}
 		else if (inBuffer[i] == ',' || inBuffer[i] == 13)
@@ -310,12 +336,18 @@ int flushBuffer (char *outBuffer)
 {
 	int i, count = 0;
 
-	sprintf (outBuffer, "%s,", linePrefix);
+	if (outputMode == 0)
+		sprintf (outBuffer, "%s,", linePrefix);
+	else
+		sprintf (outBuffer, "%s\t", linePrefix);
+
 	for (i = 0; i < 15; ++i)
 	{
 		if (savedRead[i])
 		{
-			sprintf (&outBuffer[strlen (outBuffer)], "%0.2f,", savedValues[i] / savedRead[i]);
+			sprintf (&outBuffer[strlen (outBuffer)], 
+					(outputMode == 0 ? "%0.2f," : "%0.2f\t"), 
+					savedValues[i] / savedRead[i]);
 			savedRead[i] = 0;
 			++count;
 		}
@@ -387,15 +419,23 @@ int showDir (DIR_ENTRY *file)
 			}
 		}
 
-		sprintf (&outFile[strlen (outFile)], "%s-%d.csv", 
+		sprintf (&outFile[strlen (outFile)], "%s-%d.%s", 
 				(inputMode == 0 ? "monitor" : "power"),
-				getNumber (file -> fileName) / 100);
+				getNumber (file -> fileName) / 100,
+				(outputMode == 0 ? "csv" : "tsv"));
 
 		if ((writeFile = fopen (outFile, "r+")) == NULL)
 		{
 			if ((writeFile = fopen (outFile, "a")) != NULL)
 			{
-				fputs ("Date,", writeFile);
+				if (outputMode == 0)
+				{
+					fputs ("Date,", writeFile);
+				}
+				else
+				{
+					fputs ("# Date,", writeFile);
+				}
 				fputs (&inBuffer[getTime ? 10 : 5], writeFile);
 			}
 		}
@@ -408,6 +448,7 @@ int showDir (DIR_ENTRY *file)
 					++totalProcessed;
 				++lines;
 			}
+printf ("Flush Prefix: [%s]\n", linePrefix);
 			for (i = 0; i < 3; ++i)
 			{
 				int col = showCols[i];
