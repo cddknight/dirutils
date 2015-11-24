@@ -448,7 +448,6 @@ int showDir (DIR_ENTRY *file)
 					++totalProcessed;
 				++lines;
 			}
-printf ("Flush Prefix: [%s]\n", linePrefix);
 			for (i = 0; i < 3; ++i)
 			{
 				int col = showCols[i];
