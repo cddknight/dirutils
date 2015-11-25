@@ -26,6 +26,7 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
+#include <libgen.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -310,7 +311,7 @@ int showDir(DIR_ENTRY * file)
 {
 	char inChar, lastChar = 0;
 	char currentWord[80];
-	char inFile[PATH_SIZE], outFile[PATH_SIZE], bkpFile[PATH_SIZE];
+	char inFile[PATH_SIZE], outFile[PATH_SIZE];
 	int braceLevel = 0, bracketLevel = 0, inComment = 0, inQuote = 0, inDefine = 0, colonCount = 0;
 	int addComment = 0, curWordPos = 0, curParam = 0, clear = 0, line = 1, funcLine = 0;
 	FILE *readFile;

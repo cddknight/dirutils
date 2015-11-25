@@ -28,6 +28,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <libgen.h>
 #include <dircmd.h>
 
 /*----------------------------------------------------------------------*/

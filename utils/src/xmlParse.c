@@ -134,11 +134,11 @@ void helpThem(char *progName)
 int main (int argc, char *argv[])
 {
 	void *fileList = NULL;
-	int i, found = 0, width = 80;
+	int i, found = 0;
 
 	displayGetWindowSize ();
 
-	width = displayGetWidth();
+	displayGetWidth();
 
 	while ((i = getopt(argc, argv, "Cdqp:s:?")) != -1)
 	{
@@ -365,7 +365,6 @@ void myErrorFunc (void *ctx, const char *msg, ...)
 {
 	if (displayDebug)
 	{
-		char buff[121];
 		va_list arg_ptr;
 
 		va_start (arg_ptr, msg);
