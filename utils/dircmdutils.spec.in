@@ -7,8 +7,7 @@ URL: http://www.tzclock.org
 Group: Applications/Productivity
 Source: http://www.tzclock.org/releases/%{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-BuildRequires: ncurses-devel readline-devel libselinux-devel
-%define debug_package %{nil}
+BuildRequires: ncurses-devel readline-devel libselinux-devel libxml2-devel libacl-devel
 
 %define debug_package %{nil}
 
@@ -26,7 +25,7 @@ make CDEBUGFLAGS="$RPM_OPT_FLAGS" CXXDEBUGFLAGS="$RPM_OPT_FLAGS"
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{_bindir}
-mkdir -p $RPM_BUILD_ROOT/etc
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}
 
 install -s -m 755 addComment $RPM_BUILD_ROOT%{_bindir}/addComment
 install -s -m 755 addcr $RPM_BUILD_ROOT%{_bindir}/addcr
@@ -40,7 +39,7 @@ install -s -m 755 pfile $RPM_BUILD_ROOT%{_bindir}/pfile
 install -s -m 755 memTest $RPM_BUILD_ROOT%{_bindir}/memTest
 install -s -m 755 rmcr $RPM_BUILD_ROOT%{_bindir}/rmcr
 install -s -m 755 xmlParse $RPM_BUILD_ROOT%{_bindir}/xmlParse
-install -m 644 ldirrc $RPM_BUILD_ROOT/etc/ldirrc
+install -m 644 ldirrc $RPM_BUILD_ROOT%{_sysconfdir}/ldirrc
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -63,7 +62,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/memTest
 %{_bindir}/rmcr
 %{_bindir}/xmlParse
-/etc/ldirrc
+%config(noreplace) %{_sysconfdir}/ldirrc
 
 %changelog
 * Wed Sep 26 2007 Chris Knight <chris@theknight.co.uk> 4.0.5-1%{?dist}
