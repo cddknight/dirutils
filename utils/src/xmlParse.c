@@ -327,8 +327,10 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 				}
 				else
 				{
-					int count = xmlChildElementCount (curNode);
-
+					int count = 0;
+#if LIBXML_VERSION > 20700
+					count = xmlChildElementCount (curNode);
+#endif
 					for (i = 0; i < readLevel - 1; ++i) tempBuff[i] = ' ';
 					tempBuff[i] = count ? '+' : '-';
 					tempBuff[i + 1] = 0;
