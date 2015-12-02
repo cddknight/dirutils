@@ -50,8 +50,8 @@ void processStdin (void);
  *----------------------------------------------------------------------------*/
 COLUMN_DESC colParseDescs[5] =
 {
-	{	10,		5,	0,	2,	0x07,	0,	"Depth",	0	},	/* 0 */
-	{	40,		5,	0,	2,	0x07,	0,	"Name",		2	},	/* 1 */
+	{	10,		5,	5,	2,	0x07,	0,	"Depth",	0	},	/* 0 */
+	{	40,		5,	5,	2,	0x07,	0,	"Name",		2	},	/* 1 */
 	{	40, 	5,	0,	2, 	0x07,	0,	"Attr.",	3	},	/* 3 */
 	{	40,		5,	0,	0,	0x07,	0,	"Key",		2	},	/* 2 */
 	{	120,	5,	0,	0,	0x07,	0,	"Error",	1	},	/* 4 */
@@ -303,6 +303,7 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 	xmlChar *key;
     xmlNode *curNode = NULL;
     char tempBuff[81];
+	int i;
 
     for (curNode = aNode; curNode; curNode = curNode->next) 
     {
@@ -326,7 +327,12 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 				}
 				else
 				{
-					displayInColumn (0, "%5d", readLevel);
+					int count = xmlChildElementCount (curNode);
+
+					for (i = 0; i < readLevel - 1; ++i) tempBuff[i] = ' ';
+					tempBuff[i] = count ? '+' : '-';
+					tempBuff[i + 1] = 0;
+					displayInColumn (0, tempBuff);
 					displayInColumn (1, "%s", (char *)curNode -> name);
 					if (key != NULL)
 					{
