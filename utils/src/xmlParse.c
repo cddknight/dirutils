@@ -286,6 +286,32 @@ char *rmWhiteSpace (char *inBuff, char *outBuff, int maxLen)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  X M L  C H I L D  E L E M E N T  C O U N T                                                                        *
+ *  ==========================================                                                                        *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Added function available in newer versions of libxml.
+ *  \param curNode Current node.
+ *  \result Count of sub nodes.
+ */
+#if LIBXML_VERSION < 20700
+int xmlChildElementCount (xmlNode *curNode)
+{
+	int count = 0;
+	xmlNode *cNode = curNode -> children;
+
+    for (; cNode; cNode = cNode->next) 
+	{
+        if (cNode->type == XML_ELEMENT_NODE) 
+			++count;
+	}
+	return count;
+}
+#endif
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  P R O C E S S  E L E M E N T  N A M E S                                                                           *
  *  =======================================                                                                           *
  *                                                                                                                    *
@@ -328,9 +354,7 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 				else
 				{
 					int count = 0;
-#if LIBXML_VERSION > 20700
 					count = xmlChildElementCount (curNode);
-#endif
 					for (i = 0; i < readLevel - 1; ++i) tempBuff[i] = ' ';
 					tempBuff[i] = count ? '+' : '-';
 					tempBuff[i + 1] = 0;
