@@ -44,6 +44,12 @@ int showDir (DIR_ENTRY *file);
 void parsePath (char *path);
 void processStdin (void);
 
+#define COL_DEPTH		0
+#define COL_NAME		1
+#define COL_ATTR		2
+#define COL_KEY			3
+#define COL_ERROR		4
+
 /*----------------------------------------------------------------------------*
  * Globals                                                                    *
  * 00 00 00 00 00 00 00 00-08 13 50 00 00 00 00 00 : ..........P.....         *
@@ -358,19 +364,19 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 					for (i = 0; i < readLevel - 1; ++i) tempBuff[i] = ' ';
 					tempBuff[i] = count ? '+' : '-';
 					tempBuff[i + 1] = 0;
-					displayInColumn (0, tempBuff);
-					displayInColumn (1, "%s", (char *)curNode -> name);
+					displayInColumn (COL_DEPTH, tempBuff);
+					displayInColumn (COL_NAME, "%s", (char *)curNode -> name);
 					if (key != NULL)
 					{
-						displayInColumn (3, "%s", key == NULL ? "(null)" : 
+						displayInColumn (COL_KEY, "%s", key == NULL ? "(null)" : 
 								rmWhiteSpace ((char *)key, tempBuff, 80));
 					}											
 					for (attr = curNode -> properties; attr != NULL; attr = attr -> next)
 					{
-						displayInColumn (2, "%s = %s", (char *)attr -> name, (char *)attr -> children -> content);
-						displayNewLine(0);
+						displayInColumn (COL_ATTR, "%s = %s", (char *)attr -> name, (char *)attr -> children -> content);
+						displayNewLine (0);
 					}
-					displayNewLine(0);
+					displayNewLine (0);
 				}
 		    	xmlFree (key);
 		    }
@@ -407,7 +413,7 @@ void myErrorFunc (void *ctx, const char *msg, ...)
 	else if (!shownError)
 	{
 		++shownError;
-		displayInColumn (4, "Parsing file failed");
+		displayInColumn (COL_ERROR, "Parsing file failed");
 		displayNewLine(0);
 	}
 	return;
