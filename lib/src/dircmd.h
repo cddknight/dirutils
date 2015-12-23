@@ -148,8 +148,10 @@
  *
  *  Used in  displayColumnInit options.
  */
-#define DISPLAY_HEADINGS	1
-#define DISPLAY_COLOURS		2
+#define DISPLAY_HEADINGS	0x0001
+#define DISPLAY_COLOURS		0x0002
+#define DISPLAY_HEADINGS_NT	0x0004
+#define DISPLAY_HEADINGS_NB	0x0008
 
 #define DISPLAY_FIRST		1
 #define DISPLAY_INFO		2

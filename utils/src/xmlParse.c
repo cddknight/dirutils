@@ -44,43 +44,48 @@ int showDir (DIR_ENTRY *file);
 void parsePath (char *path);
 void processStdin (void);
 
-#define COL_DEPTH		0
-#define COL_NAME		1
-#define COL_ATTR		2
-#define COL_KEY			3
-#define COL_ERROR		4
+#define COL_DEPTH	0
+#define COL_NAME	1
+#define COL_ATTR	2
+#define COL_VALUE	3
+#define COL_KEY		4
+#define COL_ERROR	5
+#define COL_COUNT	6
 
 /*----------------------------------------------------------------------------*
  * Globals                                                                    *
  * 00 00 00 00 00 00 00 00-08 13 50 00 00 00 00 00 : ..........P.....         *
  *----------------------------------------------------------------------------*/
-COLUMN_DESC colParseDescs[5] =
+COLUMN_DESC colParseDescs[6] =
 {
-	{	10,		5,	5,	2,	0x07,	0,	"Depth",	0	},	/* 0 */
-	{	40,		5,	5,	2,	0x07,	0,	"Name",		2	},	/* 1 */
-	{	40, 	5,	0,	2, 	0x07,	0,	"Attr.",	3	},	/* 3 */
-	{	40,		5,	0,	0,	0x07,	0,	"Key",		2	},	/* 2 */
-	{	120,	5,	0,	0,	0x07,	0,	"Error",	1	},	/* 4 */
+	{	10,		5,	0,	2,	0x01,	0,	"Depth",		0	},	/* 0 */
+	{	40,		5,	0,	2,	0x02,	0,	"Name",			2	},	/* 1 */
+	{	40, 	5,	0,	2, 	0x04,	0,	"Attribute",	3	},	/* 3 */
+	{	40, 	5,	0,	2, 	0x04,	0,	"Value",		4	},	/* 3 */
+	{	40,		5,	0,	0,	0x06,	0,	"Key",			2	},	/* 2 */
+	{	120,	5,	0,	0,	0x01,	0,	"Error",		1	},	/* 4 */
 };
 
-COLUMN_DESC *ptrParseColumn[5] =
+COLUMN_DESC *ptrParseColumn[6] =
 {
-	&colParseDescs[0],  &colParseDescs[1],  &colParseDescs[2],  &colParseDescs[3],  &colParseDescs[4]
+	&colParseDescs[0],  &colParseDescs[1],  &colParseDescs[2],  &colParseDescs[3],  &colParseDescs[4],  &colParseDescs[5]
 };
 
-COLUMN_DESC fileDescs[2] =
+COLUMN_DESC fileDescs[3] =
 {
-	{	120,	8,	16,	2,	0x07,	0,	"Filename",	1	},	/* 0 */
-	{	20,		4,	4,	0,	0x07,	0,	"Size",		0	},	/* 1 */
+	{	120,	8,	0,	2,	0x07,	0,	"Filename",	1	},	/* 0 */
+	{	20,		4,	0,	2,	0x07,	0,	"Size",		2	},	/* 1 */
+	{	120,	12,	0,	0,	0x02,	0,	"Modified",	3	},	/* 2 */
+
 };
 
-COLUMN_DESC *ptrFileColumn[2] =
+COLUMN_DESC *ptrFileColumn[3] =
 {
-	&fileDescs[0],  &fileDescs[1]
+	&fileDescs[0],  &fileDescs[1],  &fileDescs[2]
 };
 
 int filesFound = 0;
-int displayColour = 0;
+int displayOptions = DISPLAY_HEADINGS | DISPLAY_HEADINGS_NB;
 int displayQuiet = 0;
 int displayDebug = 0;
 int levels = 0;
@@ -151,7 +156,7 @@ int main (int argc, char *argv[])
 		switch (i) 
 		{
 		case 'C':
-			displayColour = DISPLAY_COLOURS;
+			displayOptions ^= DISPLAY_COLOURS;
 			break;
 			
 		case 'd':
@@ -159,6 +164,7 @@ int main (int argc, char *argv[])
 			break;
 			
 		case 'q':
+			displayOptions ^= DISPLAY_HEADINGS;
 			displayQuiet ^= 1;
 			break;
 			
@@ -196,7 +202,7 @@ int main (int argc, char *argv[])
 
 		if (!displayQuiet) 
 		{
-			if (!displayColumnInit (2, ptrFileColumn, displayColour))
+			if (!displayColumnInit (2, ptrFileColumn, displayOptions & ~DISPLAY_HEADINGS))
 			{
 				fprintf (stderr, "ERROR in: displayColumnInit\n");
 				return 0;
@@ -373,7 +379,8 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 					}											
 					for (attr = curNode -> properties; attr != NULL; attr = attr -> next)
 					{
-						displayInColumn (COL_ATTR, "%s = %s", (char *)attr -> name, (char *)attr -> children -> content);
+						displayInColumn (COL_ATTR, "%s", (char *)attr -> name);
+						displayInColumn (COL_VALUE, "%s", (char *)attr -> children -> content);
 						displayNewLine (0);
 					}
 					displayNewLine (0);
@@ -406,7 +413,7 @@ void myErrorFunc (void *ctx, const char *msg, ...)
 		va_list arg_ptr;
 
 		va_start (arg_ptr, msg);
-		displayVInColumn (4, (char *)msg, arg_ptr);
+		displayVInColumn (COL_ERROR, (char *)msg, arg_ptr);
 		va_end (arg_ptr);
 //		displayNewLine(0);
 	}
@@ -517,20 +524,18 @@ int showDir (DIR_ENTRY *file)
     /*------------------------------------------------------------------------*
      * First display a table with the file name and size.                     *
      *------------------------------------------------------------------------*/
-	if (!displayColumnInit (2, ptrFileColumn, displayColour))
+	if (!displayColumnInit (3, ptrFileColumn, displayOptions))
 	{
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
 		return 0;
 	}
 	if (!displayQuiet) 
 	{
-		char sizeBuff[41];
+		char tempBuff[121];
 
-		displayDrawLine (0);
-		displayHeading (0);
-		displayNewLine (0);
 		displayInColumn (0, "%s", file -> fileName);
-		displayInColumn (1,	displayFileSize (file -> fileStat.st_size, sizeBuff));
+		displayInColumn (1,	displayFileSize (file -> fileStat.st_size, tempBuff));
+		displayInColumn (2, displayDateString (file -> fileStat.st_mtime, tempBuff));
 		displayNewLine (DISPLAY_INFO);
 		displayAllLines ();		
 	}
@@ -542,15 +547,10 @@ int showDir (DIR_ENTRY *file)
 	strcpy (inFile, file -> fullPath);
 	strcat (inFile, file -> fileName);
 
-	if (!displayColumnInit (5, ptrParseColumn, displayColour))
+	if (!displayColumnInit (COL_COUNT, ptrParseColumn, displayOptions))
 	{
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
 		return 0;
-	}
-	if (!displayQuiet)
-	{
-		displayDrawLine (0);
-		displayHeading (0);
 	}
 	shownError = 0;
 	if (processFile (inFile))
@@ -626,14 +626,8 @@ void processStdin ()
 
 	if (buffer && totalRead)
 	{
-		if (displayColumnInit (5, ptrParseColumn, displayColour))
+		if (displayColumnInit (COL_COUNT, ptrParseColumn, displayOptions))
 		{
-			if (!displayQuiet)
-			{
-				displayDrawLine (0);
-				displayHeading (0);
-			}
-		
 			shownError = 0;		
 			xmlSetGenericErrorFunc (NULL, myErrorFunc);
 			if ((xmlBuffer = xmlCharStrndup(buffer, totalRead)) != NULL)

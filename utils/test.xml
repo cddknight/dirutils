@@ -1,8 +1,8 @@
 <sensors>
-  <outside>15.94</outside>
-  <inside>20.19</inside>
+  <outside attrOne='one' attrTwo='Two'>15.94</outside>
+  <inside attrThree='three'>20.19</inside>
   <pressure>1019.02</pressure>
-  <light>72.00</light>
+  <light attrFour='four'>72.00</light>
   <humidity>47.30</humidity>
 </sensors>
 

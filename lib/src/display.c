@@ -1314,9 +1314,15 @@ void displayAllLines (void)
 		
 	if (displayOptions & DISPLAY_HEADINGS)
 	{
-		displayDrawLine (DISPLAY_FIRST);
+		if (!(displayOptions & DISPLAY_HEADINGS_NB))
+		{
+			displayDrawLine (DISPLAY_FIRST);
+		}
 		displayHeading (DISPLAY_FIRST);
-		displayDrawLine (DISPLAY_FIRST);
+		if (!(displayOptions & DISPLAY_HEADINGS_NT))
+		{
+			displayDrawLine (DISPLAY_FIRST);
+		}
 		addHeadingSizes ();
 	}
 	
