@@ -979,18 +979,29 @@ static int reduceDisplaySize(void)
  */
 static void fixStringSize (char *dispString, int displaySize)
 {
-	if (displaySize > 4)
-	{
-		int x = (displaySize - 3) / 2;
-		int y = strlen (dispString) - (displaySize - 3 - x);
-	
-		strcpy (dispString + x, "...");
-		strcpy (dispString + (x + 3), (dispString + y));
-	}
-	else
-	{
-		*(dispString + displaySize) = 0;
-	}
+    int len = strlen (dispString);
+
+    if (len > displaySize)
+    {
+        if (displaySize > 4)
+        {
+            int x = (displaySize - 3) / 2;
+            int y = len - (displaySize - 3 - x);
+
+            strcpy (&dispString[x], "...");
+            x += 3;
+            do
+            {
+                dispString[x++] = dispString[y++];
+            }
+            while (dispString[y]);
+            dispString[x] = 0;
+        }
+        else
+        {
+            dispString[displaySize] = 0;
+        }
+    }
 }
 
 /**********************************************************************************************************************
