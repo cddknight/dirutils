@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = dist-bzip2
-bin_PROGRAMS = ldir addComment addcr casedir casefile findFunny hexDump inQuote lines listFunc memTest pfile rmcr procMonitor xmlParse
+bin_PROGRAMS = ldir addComment addcr casedir casefile findFunny hexDump inQuote line lines listFunc memTest pfile rmcr procMonitor xmlParse
 AM_CPPFLAGS = -D_FILE_OFFSET_BITS=64 $(DEPS_CFLAGS)
 LIBS = $(DEPS_LIBS)
 ldir_SOURCES = src/ldir.c
@@ -10,6 +10,7 @@ casedir_SOURCES = src/casedir.c
 casefile_SOURCES = src/casefile.c
 findFunny_SOURCES = src/findFunny.c
 hexDump_SOURCES = src/hexDump.c
+line_SOURCES = src/line.c
 lines_SOURCES = src/lines.c
 inQuote_SOURCES = src/inQuote.c
 listFunc_SOURCES = src/listFunc.c

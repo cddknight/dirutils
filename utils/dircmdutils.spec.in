@@ -31,8 +31,10 @@ install -s -m 755 addComment $RPM_BUILD_ROOT%{_bindir}/addComment
 install -s -m 755 addcr $RPM_BUILD_ROOT%{_bindir}/addcr
 install -s -m 755 casedir $RPM_BUILD_ROOT%{_bindir}/casedir
 install -s -m 755 casefile $RPM_BUILD_ROOT%{_bindir}/casefile
-install -s -m 755 ldir $RPM_BUILD_ROOT%{_bindir}/ldir
+install -s -m 755 findFunny $RPM_BUILD_ROOT%{_bindir}/findFunny
 install -s -m 755 hexDump $RPM_BUILD_ROOT%{_bindir}/hexDump
+install -s -m 755 ldir $RPM_BUILD_ROOT%{_bindir}/ldir
+install -s -m 755 line $RPM_BUILD_ROOT%{_bindir}/line
 install -s -m 755 lines $RPM_BUILD_ROOT%{_bindir}/lines
 install -s -m 755 listFunc $RPM_BUILD_ROOT%{_bindir}/listFunc
 install -s -m 755 pfile $RPM_BUILD_ROOT%{_bindir}/pfile
@@ -54,8 +56,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/addcr
 %{_bindir}/casedir
 %{_bindir}/casefile
-%{_bindir}/ldir
+%{_bindir}/findFunny
 %{_bindir}/hexDump
+%{_bindir}/ldir
+%{_bindir}/line
 %{_bindir}/lines
 %{_bindir}/listFunc
 %{_bindir}/pfile
