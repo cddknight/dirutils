@@ -27,9 +27,11 @@
 #include <time.h>
 #include <dirent.h>
 #include <limits.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 #ifdef HAVE_VALUES_H
 #include <values.h>
@@ -294,11 +296,13 @@ int matchPattern (char *str, char *ptn, int flags);
  * config.c
  */
 int configLoad (const char *configFile);
+int configSave (const char *configFile);
 void configFree ();
-int configSetValue (char *configName, char *configValue);
-int configSetIntValue (char *configName, int configValue);
-int configGetValue (char *configName, char *value);
+int configSetValue (const char *configName, char *configValue);
+int configSetIntValue (const char *configName, int configValue);
+int configSetBoolValue (const char *configName, bool configValue);
+int configGetValue (const char *configName, char *value, int maxLen);
 int configGetIntValue (const char *configName, int *value);
-
+int configGetBoolValue (const char *configName, bool *value);
 
 #endif

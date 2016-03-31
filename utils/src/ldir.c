@@ -658,7 +658,7 @@ void loadSettings (char *progName)
 	{
 		configGetIntValue (colourNames[i + MAX_COL_DESC + MAX_W_COL_DESC], &colourType[i]);
 	}
-	if (configGetValue ("command_line", value))
+	if (configGetValue ("command_line", value, 80))
 	{
 		i = j = 0;
 		do
@@ -680,7 +680,7 @@ void loadSettings (char *progName)
 	for (i = 0; i < 4; i++)
 	{
 		sprintf (configPath, "date_format_%d", i + 1);
-		if (configGetValue (configPath, value))
+		if (configGetValue (configPath, value, 80))
 			displaySetDateFormat (value, i);
 	}
 	configFree ();
