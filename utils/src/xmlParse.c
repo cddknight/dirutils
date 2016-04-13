@@ -147,8 +147,13 @@ int main (int argc, char *argv[])
 	void *fileList = NULL;
 	int i, found = 0;
 
-	displayGetWindowSize ();
+	if (strcmp (directoryVersion(), VERSION) != 0)
+	{
+		fprintf (stderr, "Library (%s) does not match Utility (%s).\n", directoryVersion(), VERSION);
+		exit (1);
+	}
 
+	displayGetWindowSize ();
 	displayGetWidth();
 
 	while ((i = getopt(argc, argv, "Cdqp:s:?")) != -1)

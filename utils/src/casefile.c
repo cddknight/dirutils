@@ -96,6 +96,12 @@ int main (int argc, char *argv[])
 	void *fileList = NULL;
 	int i = 1, found =0;
 
+	if (strcmp (directoryVersion(), VERSION) != 0)
+	{
+		fprintf (stderr, "Library (%s) does not match Utility (%s).\n", directoryVersion(), VERSION);
+		exit (1);
+	}
+
 	displayGetWindowSize ();
 
 	while ((i = getopt(argc, argv, "lup?")) != -1)
