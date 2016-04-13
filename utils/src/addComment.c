@@ -764,7 +764,7 @@ int displayBox(int type, int count, FILE *outFile)
 		for (i = 0; i < count; i++)
 		{
 			if (i == 0)
-				printf ("Function: %s (", possibleName[i]);
+				printf ("[%s] Function: %s (", curFilename, possibleName[i]);
 			else if (i == 1)
 				printf ("%s", possibleName[i]);
 			else

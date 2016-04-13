@@ -20,6 +20,7 @@
  *  \file
  *  \brief Program to parse an XML file.
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -301,6 +302,7 @@ char *rmWhiteSpace (char *inBuff, char *outBuff, int maxLen)
 	return outBuff;
 }
 
+#if LIBXML_VERSION < 20700
 /**********************************************************************************************************************
  *                                                                                                                    *
  *  X M L  C H I L D  E L E M E N T  C O U N T                                                                        *
@@ -312,7 +314,6 @@ char *rmWhiteSpace (char *inBuff, char *outBuff, int maxLen)
  *  \param curNode Current node.
  *  \result Count of sub nodes.
  */
-#if LIBXML_VERSION < 20700
 int xmlChildElementCount (xmlNode *curNode)
 {
 	int count = 0;
