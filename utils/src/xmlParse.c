@@ -359,16 +359,16 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
     {
        	int saveLevel = readLevel;
 
-		if (displayPaths && (strlen (curPath) + strlen ((char *)curNode -> name)) < 1022)
+		if (displayPaths)
 		{
+			if ((strlen (curPath) + strlen ((char *)curNode -> name)) > 1022)
+			{
+				fprintf (stderr, "XML path too long to display\n");
+				break;
+			}
 			strcpy (fullPath, curPath);
 			strcat (fullPath, "/");
 			strcat (fullPath, (char *)curNode -> name);
-		}
-		else
-		{
-			fprintf (stderr, "XML path too long to display\n");
-			break;
 		}
 
         if (curNode->type == XML_ELEMENT_NODE) 
