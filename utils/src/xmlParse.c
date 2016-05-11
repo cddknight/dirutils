@@ -289,22 +289,20 @@ void parsePath (char *path)
  */
 char *rmWhiteSpace (char *inBuff, char *outBuff, int maxLen)
 {
-	int lastChar = 0, i = 0, j = 0;
+	int lastCharWS = 1, lastSave = 0, i = 0, j = 0;
 	
 	while (inBuff[i] && j < maxLen)
 	{
-		if (inBuff[i] > ' ')
+		if (!lastCharWS || inBuff[i] > ' ')
 		{
-			lastChar = i + 1;
-		}
-		if (lastChar)
-		{
+			lastCharWS = inBuff[i] > ' ' ? 0 : 1;
 			outBuff[j] = inBuff[i];
 			outBuff[++j] = 0;
+			if (!lastCharWS) lastSave = j;
 		}
 		++i;
 	}
-	outBuff[j] = 0;
+	outBuff[lastSave] = 0;
 	return outBuff;
 }
 
