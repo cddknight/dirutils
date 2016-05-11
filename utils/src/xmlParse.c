@@ -350,7 +350,7 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 {
 	xmlChar *key;
     xmlNode *curNode = NULL;
-    char tempBuff[81], fullPath[1024];
+    char tempBuff[1024], fullPath[1024];
 	int i;
 
     for (curNode = aNode; curNode; curNode = curNode->next) 
@@ -384,7 +384,7 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 				{
 					printf ("%s=%s\n", 
 							(displayPaths ? fullPath : (char *)curNode -> name), 
-							key == NULL ? "(null)" : rmWhiteSpace ((char *)key, tempBuff, 80));
+							key == NULL ? "(null)" : rmWhiteSpace ((char *)key, tempBuff, 1020));
 				}
 				else
 				{
@@ -398,7 +398,7 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 					if (key != NULL)
 					{
 						displayInColumn (COL_KEY, "%s", key == NULL ? "(null)" : 
-								rmWhiteSpace ((char *)key, tempBuff, 80));
+								rmWhiteSpace ((char *)key, tempBuff, 1020));
 					}											
 					for (attr = curNode -> properties; attr != NULL; attr = attr -> next)
 					{
