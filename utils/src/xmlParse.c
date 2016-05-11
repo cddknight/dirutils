@@ -60,7 +60,7 @@ void processStdin (void);
 COLUMN_DESC colParseDescs[6] =
 {
 	{	10,		5,	0,	2,	0x01,	0,	"Depth",		0	},	/* 0 */
-	{	40,		5,	0,	2,	0x02,	0,	"Name",			2	},	/* 1 */
+	{	255,	5,	0,	2,	0x02,	0,	"Name",			2	},	/* 1 */
 	{	40, 	5,	0,	2, 	0x04,	0,	"Attribute",	3	},	/* 3 */
 	{	255, 	5,	0,	2, 	0x04,	0,	"Value",		4	},	/* 3 */
 	{	255,	5,	0,	0,	0x06,	0,	"Key",			2	},	/* 2 */
@@ -89,6 +89,7 @@ int filesFound = 0;
 int displayOptions = DISPLAY_HEADINGS | DISPLAY_HEADINGS_NB;
 int displayQuiet = 0;
 int displayDebug = 0;
+int displayPaths = 0;
 int levels = 0;
 char *levelName[20];
 char xsdPath[PATH_SIZE];
@@ -127,6 +128,7 @@ void helpThem(char *progName)
 	printf ("    -C . . . . . Display output in colour.\n");
 	printf ("    -d . . . . . Output parser debug messages.\n");
 	printf ("    -q . . . . . Quite mode, output name=key pairs.\n");
+	printf ("    -P . . . . . Output the full path.\n");
 	printf ("    -p <path>  . Path to search (eg: /sensors/light).\n");
 	printf ("    -s <xsd> . . Path to xsd schema validation file.\n");
 }
@@ -157,7 +159,7 @@ int main (int argc, char *argv[])
 	displayGetWindowSize ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "Cdqp:s:?")) != -1)
+	while ((i = getopt(argc, argv, "CdqPp:s:?")) != -1)
 	{
 		switch (i) 
 		{
@@ -172,6 +174,10 @@ int main (int argc, char *argv[])
 		case 'q':
 			displayOptions ^= DISPLAY_HEADINGS;
 			displayQuiet ^= 1;
+			break;
+			
+		case 'P':
+			displayPaths ^= 1;
 			break;
 			
 		case 'p':
@@ -342,16 +348,28 @@ int xmlChildElementCount (xmlNode *curNode)
  *  \result None.
  */
 static void
-processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
+processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 {
 	xmlChar *key;
     xmlNode *curNode = NULL;
-    char tempBuff[81];
+    char tempBuff[81], fullPath[1024];
 	int i;
 
     for (curNode = aNode; curNode; curNode = curNode->next) 
     {
        	int saveLevel = readLevel;
+
+		if (displayPaths && (strlen (curPath) + strlen ((char *)curNode -> name)) < 1022)
+		{
+			strcpy (fullPath, curPath);
+			strcat (fullPath, "/");
+			strcat (fullPath, (char *)curNode -> name);
+		}
+		else
+		{
+			fprintf (stderr, "XML path too long to display\n");
+			break;
+		}
 
         if (curNode->type == XML_ELEMENT_NODE) 
         {
@@ -366,8 +384,9 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 				key = xmlNodeListGetString (doc, curNode -> xmlChildrenNode, 1);
 				if (displayQuiet) 
 				{
-					printf ("%s=%s\n", (char *)curNode -> name, key == NULL ? "(null)" : 
-							rmWhiteSpace ((char *)key, tempBuff, 80));
+					printf ("%s=%s\n", 
+							(displayPaths ? fullPath : (char *)curNode -> name), 
+							key == NULL ? "(null)" : rmWhiteSpace ((char *)key, tempBuff, 80));
 				}
 				else
 				{
@@ -377,7 +396,7 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 					tempBuff[i] = count ? '+' : '-';
 					tempBuff[i + 1] = 0;
 					displayInColumn (COL_DEPTH, tempBuff);
-					displayInColumn (COL_NAME, "%s", (char *)curNode -> name);
+					displayInColumn (COL_NAME, "%s", (displayPaths ? fullPath : (char *)curNode -> name));
 					if (key != NULL)
 					{
 						displayInColumn (COL_KEY, "%s", key == NULL ? "(null)" : 
@@ -394,7 +413,7 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, int readLevel)
 		    	xmlFree (key);
 		    }
         }
-        processElementNames (doc, curNode->children, readLevel);
+        processElementNames (doc, curNode->children, fullPath, readLevel);
         readLevel = saveLevel;
     }
 }
@@ -502,7 +521,7 @@ int processFile (char *xmlFile)
 		{
 			if ((rootElement = xmlDocGetRootElement (doc)) != NULL)
 			{
-				processElementNames (doc, rootElement, 0);
+				processElementNames (doc, rootElement, "", 0);
 				retn = 1;
 			}
 		}
@@ -648,7 +667,7 @@ void processStdin ()
 					{
 						if ((rootElement = xmlDocGetRootElement (doc)) != NULL)
 						{
-							processElementNames (doc, rootElement, 0);
+							processElementNames (doc, rootElement, "", 0);
 						}
 					}
 					xmlFreeDoc(doc);
