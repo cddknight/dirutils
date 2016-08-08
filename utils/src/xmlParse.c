@@ -53,6 +53,14 @@ void processStdin (void);
 #define COL_ERROR	5
 #define COL_COUNT	6
 
+#define DISP_DEPTH	0x0001
+#define DISP_NAME	0x0002
+#define DISP_ATTR	0x0004
+#define DISP_VALUE	0x0008
+#define DISP_KEY	0x0010
+#define DISP_ERROR	0x0020
+#define DISP_ALL	0x003F
+
 /*----------------------------------------------------------------------------*
  * Globals                                                                    *
  * 00 00 00 00 00 00 00 00-08 13 50 00 00 00 00 00 : ..........P.....         *
@@ -61,10 +69,10 @@ COLUMN_DESC colParseDescs[6] =
 {
 	{	20,		5,	0,	2,	0x01,	0,	"Depth",		0	},	/* 0 */
 	{	255,	5,	0,	2,	0x02,	0,	"Name",			2	},	/* 1 */
-	{	40, 	5,	0,	2, 	0x04,	0,	"Attribute",	3	},	/* 3 */
+	{	40, 	5,	0,	2, 	0x04,	0,	"Attribute",	3	},	/* 2 */
 	{	255, 	5,	0,	2, 	0x04,	0,	"Value",		4	},	/* 3 */
-	{	255,	5,	0,	0,	0x06,	0,	"Key",			2	},	/* 2 */
-	{	255,	5,	0,	0,	0x01,	0,	"Error",		1	},	/* 4 */
+	{	255,	5,	0,	0,	0x06,	0,	"Key",			2	},	/* 4 */
+	{	255,	5,	0,	0,	0x01,	0,	"Error",		1	},	/* 5 */
 };
 
 COLUMN_DESC *ptrParseColumn[6] =
@@ -90,6 +98,7 @@ int displayOptions = DISPLAY_HEADINGS | DISPLAY_HEADINGS_NB;
 int displayQuiet = 0;
 int displayDebug = 0;
 int displayPaths = 0;
+int displayCols = DISP_ALL;
 int levels = 0;
 char *levelName[20];
 char xsdPath[PATH_SIZE];
@@ -126,6 +135,7 @@ void helpThem(char *progName)
 {
 	printf ("Enter the command: %s [-Cqp <path>] <filename>\n", basename (progName));
 	printf ("    -C . . . . . Display output in colour.\n");
+	printf ("    -D[dnavke] . Toggle display columns.\n");
 	printf ("    -d . . . . . Output parser debug messages.\n");
 	printf ("    -q . . . . . Quite mode, output name=key pairs.\n");
 	printf ("    -P . . . . . Output the full path.\n");
@@ -148,7 +158,7 @@ void helpThem(char *progName)
 int main (int argc, char *argv[])
 {
 	void *fileList = NULL;
-	int i, found = 0;
+	int i, j, found = 0;
 
 	if (strcmp (directoryVersion(), VERSION) != 0)
 	{
@@ -159,7 +169,7 @@ int main (int argc, char *argv[])
 	displayGetWindowSize ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "CdqPp:s:?")) != -1)
+	while ((i = getopt(argc, argv, "CdqPp:s:D:?")) != -1)
 	{
 		switch (i) 
 		{
@@ -167,6 +177,35 @@ int main (int argc, char *argv[])
 			displayOptions ^= DISPLAY_COLOURS;
 			break;
 			
+		case 'D':
+			j = 0;
+			while (optarg[j])
+			{
+				switch (optarg[j])
+				{
+				case 'd':
+					displayCols ^= DISP_DEPTH;
+					break;
+				case 'n':
+					displayCols ^= DISP_NAME;
+					break;
+				case 'a':
+					displayCols ^= DISP_ATTR;
+					break;
+				case 'v':
+					displayCols ^= DISP_VALUE;
+					break;
+				case 'k':
+					displayCols ^= DISP_KEY;
+					break;
+				case 'e':
+					displayCols ^= DISP_ERROR;
+					break;
+				}
+				++j;
+			}
+			break;
+
 		case 'd':
 			displayDebug ^= 1;
 			break;
@@ -377,6 +416,7 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 			}
 			if (readLevel >= levels)
 			{
+				int shown = 0;	
 				xmlAttrPtr attr;
 				
 				key = xmlNodeListGetString (doc, curNode -> xmlChildrenNode, 1);
@@ -393,20 +433,44 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 					for (i = 0; i < readLevel - 1; ++i) tempBuff[i] = ' ';
 					tempBuff[i] = count ? '+' : '-';
 					tempBuff[i + 1] = 0;
-					displayInColumn (COL_DEPTH, tempBuff);
-					displayInColumn (COL_NAME, "%s", (displayPaths ? fullPath : (char *)curNode -> name));
-					if (key != NULL)
+					if (displayCols & DISP_DEPTH) 
+					{
+						displayInColumn (COL_DEPTH, tempBuff);
+						shown = 1;
+					}
+					if (displayCols & DISP_NAME)
+					{
+						displayInColumn (COL_NAME, "%s", (displayPaths ? fullPath : (char *)curNode -> name));
+						shown = 1;
+					}
+					if (key != NULL && displayCols & DISP_KEY)
 					{
 						displayInColumn (COL_KEY, "%s", key == NULL ? "(null)" : 
 								rmWhiteSpace ((char *)key, tempBuff, 1020));
+						shown = 1;
 					}											
 					for (attr = curNode -> properties; attr != NULL; attr = attr -> next)
 					{
-						displayInColumn (COL_ATTR, "%s", (char *)attr -> name);
-						displayInColumn (COL_VALUE, "%s", (char *)attr -> children -> content);
+						int shownX = 0;
+						if (displayCols & DISP_ATTR) 
+						{
+							displayInColumn (COL_ATTR, "%s", (char *)attr -> name);
+							shownX = 1;
+						}
+						if (displayCols & DISP_VALUE) 
+						{
+							displayInColumn (COL_VALUE, "%s", (char *)attr -> children -> content);
+							shownX = 1;
+						}
+						if (shownX)
+						{
+							displayNewLine (0);
+						}
+					}
+					if (shown)
+					{
 						displayNewLine (0);
 					}
-					displayNewLine (0);
 				}
 		    	xmlFree (key);
 		    }
@@ -436,14 +500,14 @@ void myErrorFunc (void *ctx, const char *msg, ...)
 		va_list arg_ptr;
 
 		va_start (arg_ptr, msg);
-		displayVInColumn (COL_ERROR, (char *)msg, arg_ptr);
+		if (displayCols & DISP_ERROR) displayVInColumn (COL_ERROR, (char *)msg, arg_ptr);
 		va_end (arg_ptr);
 //		displayNewLine(0);
 	}
 	else if (!shownError)
 	{
 		++shownError;
-		displayInColumn (COL_ERROR, "Parsing file failed");
+		if (displayCols & DISP_ERROR) displayInColumn (COL_ERROR, "Parsing file failed");
 		displayNewLine(0);
 	}
 	return;
