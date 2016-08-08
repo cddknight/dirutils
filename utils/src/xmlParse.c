@@ -95,14 +95,14 @@ COLUMN_DESC *ptrFileColumn[3] =
 
 int filesFound = 0;
 int displayOptions = DISPLAY_HEADINGS | DISPLAY_HEADINGS_NB;
-int displayQuiet = 0;
-int displayDebug = 0;
-int displayPaths = 0;
+bool displayQuiet = false;
+bool displayDebug = false;
+bool displayPaths = false;
 int displayCols = DISP_ALL;
 int levels = 0;
 char *levelName[20];
 char xsdPath[PATH_SIZE];
-int shownError = 0;
+bool shownError = false;
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -207,16 +207,16 @@ int main (int argc, char *argv[])
 			break;
 
 		case 'd':
-			displayDebug ^= 1;
+			displayDebug = !displayDebug;
 			break;
 			
 		case 'q':
 			displayOptions ^= DISPLAY_HEADINGS;
-			displayQuiet ^= 1;
+			displayQuiet = !displayQuiet;
 			break;
 			
 		case 'P':
-			displayPaths ^= 1;
+			displayPaths = !displayPaths;
 			break;
 			
 		case 'p':
@@ -329,17 +329,20 @@ void parsePath (char *path)
 char *rmWhiteSpace (char *inBuff, char *outBuff, int maxLen)
 {
 	int lastCharWS = 1, lastSave = 0, i = 0, j = 0;
-	
-	while (inBuff[i] && j < maxLen)
+
+	if (inBuff != NULL)
 	{
-		if (!lastCharWS || inBuff[i] > ' ')
+		while (inBuff[i] && j < maxLen)
 		{
-			lastCharWS = inBuff[i] > ' ' ? 0 : 1;
-			outBuff[j] = (lastCharWS ? ' ' : inBuff[i]);
-			outBuff[++j] = 0;
-			if (!lastCharWS) lastSave = j;
+			if (!lastCharWS || inBuff[i] > ' ')
+			{
+				lastCharWS = inBuff[i] > ' ' ? 0 : 1;
+				outBuff[j] = (lastCharWS ? ' ' : inBuff[i]);
+				outBuff[++j] = 0;
+				if (!lastCharWS) lastSave = j;
+			}
+			++i;
 		}
-		++i;
 	}
 	outBuff[lastSave] = 0;
 	return outBuff;
@@ -421,26 +424,33 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 				key = xmlNodeListGetString (doc, curNode -> xmlChildrenNode, 1);
 				if (displayQuiet) 
 				{
-					printf ("%s=%s\n", 
-							(displayPaths ? fullPath : (char *)curNode -> name), 
-							key == NULL ? "(null)" : rmWhiteSpace ((char *)key, tempBuff, 1020));
+					rmWhiteSpace ((char *)key, tempBuff, 1020);
+					if (tempBuff[0])
+					{
+						printf ("%s=%s\n", 
+								(displayPaths ? fullPath : (char *)curNode -> name), 
+								key == NULL ? "(null)" : tempBuff);
+					}
 				}
 				else
 				{
-					int count = 0, shown = 0;
-					count = xmlChildElementCount (curNode);
-					for (i = 0; i < readLevel - 1; ++i) tempBuff[i] = ' ';
-					tempBuff[i] = count ? '+' : '-';
-					tempBuff[i + 1] = 0;
+					bool shown = false;
 					if (displayCols & DISP_DEPTH) 
 					{
+						int count = xmlChildElementCount (curNode);
+						for (i = 0; i < readLevel - 1 && i < 1020; ++i) 
+						{
+							tempBuff[i] = ' ';
+						}
+						tempBuff[i] = count ? '+' : '-';
+						tempBuff[i + 1] = 0;
 						displayInColumn (COL_DEPTH, tempBuff);
-						shown = 1;
+						shown = true;
 					}
 					if (displayCols & DISP_NAME)
 					{
 						displayInColumn (COL_NAME, "%s", (displayPaths ? fullPath : (char *)curNode -> name));
-						shown = 1;
+						shown = true;
 					}
 					if (key != NULL && displayCols & DISP_KEY)
 					{
@@ -448,21 +458,21 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 						if (tempBuff[0])
 						{
 							displayInColumn (COL_KEY, "%s", key == NULL ? "(null)" : tempBuff);
-							shown = 1;
+							shown = true;
 						}
 					}											
 					for (attr = curNode -> properties; attr != NULL; attr = attr -> next)
 					{
-						int shownP = 0;
+						bool shownP = false;
 						if (displayCols & DISP_ATTR) 
 						{
 							displayInColumn (COL_ATTR, "%s", (char *)attr -> name);
-							shownP = 1;
+							shownP = true;
 						}
 						if (displayCols & DISP_VALUE) 
 						{
 							displayInColumn (COL_VALUE, "%s", (char *)attr -> children -> content);
-							shownP = 1;
+							shownP = true;
 						}
 						if (shownP)
 						{
@@ -499,18 +509,23 @@ void myErrorFunc (void *ctx, const char *msg, ...)
 {
 	if (displayDebug)
 	{
-		va_list arg_ptr;
+		if (displayCols & DISP_ERROR) 
+		{
+			va_list arg_ptr;
 
-		va_start (arg_ptr, msg);
-		if (displayCols & DISP_ERROR) displayVInColumn (COL_ERROR, (char *)msg, arg_ptr);
-		va_end (arg_ptr);
-//		displayNewLine(0);
+			va_start (arg_ptr, msg);
+			displayVInColumn (COL_ERROR, (char *)msg, arg_ptr);
+			va_end (arg_ptr);
+		}		
 	}
 	else if (!shownError)
 	{
-		++shownError;
-		if (displayCols & DISP_ERROR) displayInColumn (COL_ERROR, "Parsing file failed");
-		displayNewLine(0);
+		shownError = true;
+		if (displayCols & DISP_ERROR) 
+		{
+			displayInColumn (COL_ERROR, "Parsing file failed");
+			displayNewLine(0);
+		}
 	}
 	return;
 }
@@ -641,7 +656,7 @@ int showDir (DIR_ENTRY *file)
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
 		return 0;
 	}
-	shownError = 0;
+	shownError = false;
 	if (processFile (inFile))
 	{
 		++filesFound;
@@ -717,7 +732,7 @@ void processStdin ()
 	{
 		if (displayColumnInit (COL_COUNT, ptrParseColumn, displayOptions))
 		{
-			shownError = 0;		
+			shownError = false;		
 			xmlSetGenericErrorFunc (NULL, myErrorFunc);
 			if ((xmlBuffer = xmlCharStrndup(buffer, totalRead)) != NULL)
 			{
