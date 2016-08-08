@@ -416,7 +416,6 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 			}
 			if (readLevel >= levels)
 			{
-				int shown = 0;	
 				xmlAttrPtr attr;
 				
 				key = xmlNodeListGetString (doc, curNode -> xmlChildrenNode, 1);
@@ -428,7 +427,7 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 				}
 				else
 				{
-					int count = 0;
+					int count = 0, shown = 0;
 					count = xmlChildElementCount (curNode);
 					for (i = 0; i < readLevel - 1; ++i) tempBuff[i] = ' ';
 					tempBuff[i] = count ? '+' : '-';
@@ -445,24 +444,27 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 					}
 					if (key != NULL && displayCols & DISP_KEY)
 					{
-						displayInColumn (COL_KEY, "%s", key == NULL ? "(null)" : 
-								rmWhiteSpace ((char *)key, tempBuff, 1020));
-						shown = 1;
+						rmWhiteSpace ((char *)key, tempBuff, 1020);
+						if (tempBuff[0])
+						{
+							displayInColumn (COL_KEY, "%s", key == NULL ? "(null)" : tempBuff);
+							shown = 1;
+						}
 					}											
 					for (attr = curNode -> properties; attr != NULL; attr = attr -> next)
 					{
-						int shownX = 0;
+						int shownP = 0;
 						if (displayCols & DISP_ATTR) 
 						{
 							displayInColumn (COL_ATTR, "%s", (char *)attr -> name);
-							shownX = 1;
+							shownP = 1;
 						}
 						if (displayCols & DISP_VALUE) 
 						{
 							displayInColumn (COL_VALUE, "%s", (char *)attr -> children -> content);
-							shownX = 1;
+							shownP = 1;
 						}
-						if (shownX)
+						if (shownP)
 						{
 							displayNewLine (0);
 						}
