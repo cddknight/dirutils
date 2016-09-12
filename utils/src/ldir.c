@@ -290,7 +290,7 @@ void helpThem (char *progName)
 	printf ("         -ta . . . . . Show time of last access\n");
 	printf ("         -tc . . . . . Show time of last status change\n");
 	printf ("         -tm . . . . . Show time of last modification\n");
-	printf ("         -V  . . . . . Do not show version control directories.\n");
+	printf ("         -V  . . . . . Do not show version control directories\n");
 	printf ("         -w  . . . . . Show directory in wide format\n");
 	printf ("         -W  . . . . . Ignore screen width default to 255\n");
 	printf ("\nExpressions:\n");
