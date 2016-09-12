@@ -290,6 +290,7 @@ void helpThem (char *progName)
 	printf ("         -ta . . . . . Show time of last access\n");
 	printf ("         -tc . . . . . Show time of last status change\n");
 	printf ("         -tm . . . . . Show time of last modification\n");
+	printf ("         -V  . . . . . Do not show version control directories.\n");
 	printf ("         -w  . . . . . Show directory in wide format\n");
 	printf ("         -W  . . . . . Ignore screen width default to 255\n");
 	printf ("\nExpressions:\n");
@@ -616,7 +617,11 @@ void commandOption (char *option, char *progName)
 		case 'S':
 			sizeFormat = !sizeFormat;
 			break;
-			
+
+		case 'V':
+			dirType ^= HIDEVERCTL;
+			break;
+
 		case '?':
 			helpThem(progName);
 			exit (1);
@@ -1058,6 +1063,19 @@ int showDir (DIR_ENTRY *file)
 			if (file -> fileName[n - 1] == '~')
 				return 0;
 		}
+	}
+
+	/*------------------------------------------------------------------------*
+	 * Don't show files or directories that are used for version control.     *
+	 *------------------------------------------------------------------------*/
+	if (dirType & HIDEVERCTL)
+	{
+		if (strcmp (file -> fileName, "CVS") == 0)
+			return 0;
+		if (strcmp (file -> fileName, ".git") == 0)
+			return 0;
+		if (strcmp (file -> fileName, ".svn") == 0)
+			return 0;
 	}
 
 	/*------------------------------------------------------------------------*

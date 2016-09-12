@@ -123,6 +123,12 @@
 #define RECUDIR				0x0400
 
 /** 
+ *  @def HIDEVERCTL
+ *  @brief Tide the version control subdirectories.
+ */
+#define HIDEVERCTL			0x0800
+
+/** 
  *  @def MAX_COLUMNS
  *  @brief Maximum number of columns allowed.
  */

@@ -148,7 +148,8 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
 		    /*----------------------------------------------------------------*
 			 * Recursive directories, avoid '.' and '..'                      *
              *----------------------------------------------------------------*/
-			if (findFlags & RECUDIR && (dirList -> d_name[0] != '.' || findFlags & SHOWALL) &&
+			if (findFlags & RECUDIR && 
+					(dirList -> d_name[0] != '.' || findFlags & SHOWALL) && 
 					strcmp (dirList -> d_name, ".") && strcmp (dirList -> d_name, ".."))
 			{
 				struct stat tempStat;
@@ -164,6 +165,18 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
 				{
 					if (getEntryType (&tempStat) & ONLYDIRS)
 					{
+					    /*----------------------------------------------------*
+						 * Hide any directories linked with version control   *
+			             *----------------------------------------------------*/
+						if (findFlags & HIDEVERCTL)
+						{
+							if (strcmp (dirList -> d_name, "CVS") == 0 || 
+									strcmp (dirList -> d_name, ".git") == 0 || 
+									strcmp (dirList -> d_name, ".svn") == 0)
+							{
+								continue;
+							}
+						}
 						strcpy (tempPath, fullPath);
 						strcat_ch (tempPath, DIRSEP);
 						strcat (tempPath, dirList -> d_name);
