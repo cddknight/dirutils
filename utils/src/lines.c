@@ -26,8 +26,10 @@
 #include <time.h>
 #include <ctype.h>
 #include <dirent.h>
+#include <libgen.h>
 #include <sys/stat.h>
 #include <dircmd.h>
+#include <unistd.h>
 
 /*----------------------------------------------------------------------------*
  * Prototypes															      *
@@ -40,8 +42,8 @@ int showDir (DIR_ENTRY *file);
  *----------------------------------------------------------------------------*/
 COLUMN_DESC colLinesDescs[3] =
 {
-	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Lines",	0	},	/* 0 */
-	{	160,12,	0,	0,	0x07,	0,					"Filename",	1	},	/* 1 */
+	{	10,	10,	0,	3,	0x0A,	COL_ALIGN_RIGHT,	"Lines",	0	},	/* 0 */
+	{	160,12,	0,	0,	0x0E,	0,					"Filename",	1	},	/* 1 */
 };
 
 COLUMN_DESC *ptrLinesColumn[3] =
@@ -71,6 +73,25 @@ void version (void)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  H E L P  T H E M                                                                                                  *
+ *  ================                                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Function to display help information.
+ *  \param progName Name of the running program.
+ *  \result None.
+ */
+void helpThem(char *progName)
+{
+	printf ("Enter the command: %s [-Ccr] <filename>\n", basename (progName));
+	printf ("    -C . . . . . Display output in colour\n");
+	printf ("    -c . . . . . Directory case sensitive\n");
+	printf ("    -r . . . . . Search in subdirectories\n");
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  M A I N                                                                                                           *
  *  =======                                                                                                           *
  *                                                                                                                    *
@@ -84,7 +105,7 @@ void version (void)
 int main (int argc, char *argv[])
 {
 	void *fileList = NULL;
-	int i = 1, found = 0;
+	int i = 1, found = 0, dirType = ONLYFILES, displayColour = 0;;
 
 	if (strcmp (directoryVersion(), VERSION) != 0)
 	{
@@ -94,18 +115,32 @@ int main (int argc, char *argv[])
 
 	displayGetWindowSize ();
 
-	if (argc == 1)
+	while ((i = getopt(argc, argv, "Ccr?")) != -1)
 	{
-		version ();
-		printf ("Enter the command: %s <filename>\n", argv[0]);
-		exit (1);
+		switch (i) 
+		{
+		case 'C':
+			displayColour = DISPLAY_COLOURS;
+			break;
+			
+		case 'c':
+			dirType ^= USECASE;
+			break;
+			
+		case 'r':
+			dirType ^= RECUDIR;
+			break;
+
+		case '?':
+			helpThem (argv[0]);
+			exit (1);
+		}
 	}
-    /*------------------------------------------------------------------------*
-     * If we got a path then split it into a path and a file pattern to match *
-     * files with.                                                            *
-     *------------------------------------------------------------------------*/
-	while (i < argc)
-		found += directoryLoad (argv[i++], ONLYFILES, fileCompare, &fileList);
+
+    for (; optind < argc; ++optind)
+    {
+		found += directoryLoad (argv[optind], dirType, fileCompare, &fileList);
+	}
 
     /*------------------------------------------------------------------------*
      * Now we can sort the directory.                                         *
@@ -116,7 +151,7 @@ int main (int argc, char *argv[])
 	{
 		char numBuff[15];
 		
-		if (!displayColumnInit (2, ptrLinesColumn, DISPLAY_HEADINGS))
+		if (!displayColumnInit (2, ptrLinesColumn, DISPLAY_HEADINGS | displayColour))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 1;
