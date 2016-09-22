@@ -636,7 +636,7 @@ void commandOption (char *option, char *progName)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  \brief Load the settings from the (.
+ *  \brief Load the settings from the config files, /etc/ldirrc then HOME/.ldirrc .
  *  \param progName The name of the program being run.
  *  \result None.
  */
