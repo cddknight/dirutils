@@ -124,12 +124,10 @@ static int displayOptions;
  */
 void displayLine ()
 {
-	int i = 0, cols = displayGetWidth() - 1;
+	int i = 0, cols = displayGetWidth();
 	
 	for (; i < cols; i ++)
 		putchar ('-');
-		
-	putchar ('\n');
 }
 
 /**********************************************************************************************************************
@@ -869,7 +867,7 @@ static int calcDisplaySize (void)
 			retnSize += fullColDesc[i] -> gap;
 		}
 	}
-	return ++retnSize;
+	return retnSize;
 }
 
 /**********************************************************************************************************************
