@@ -33,16 +33,25 @@
  *  \brief The program starts here.
  *  \result 0 (zero) if all processed OK.
  */
-int main (void)
+int main (int argc, char *argv[])
 {
+	char dispChar = '-';
+
 	if (strcmp (directoryVersion(), VERSION) != 0)
 	{
 		fprintf (stderr, "Library (%s) does not match Utility (%s).\n", directoryVersion(), VERSION);
 		exit (1);
 	}
+	if (argc > 1)
+	{
+		if (argv[1][0] >= ' ')
+		{
+			dispChar = argv[1][0];
+		}
+	}
 
 	displayGetWindowSize ();
-	displayLine ();
+	displayLineChar (dispChar);
 	return 0;
 }
 

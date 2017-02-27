@@ -115,6 +115,31 @@ static int displayOptions;
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  D I S P L A Y  L I N E  C H A R                                                                                   *
+ *  ===============================                                                                                   *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Draw a line of the specified character across the screen.
+ *  \param lineChar Character to display.
+ *  \result None.
+ */
+void displayLineChar (char lineChar)
+{
+	int i = 0, cols = displayGetWidth();
+	
+	for (; i < cols; i ++)
+	{
+		putchar (lineChar);
+	}
+	if (newLine)
+	{
+		putchar (newLine);
+	}
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  D I S P L A Y  L I N E                                                                                            *
  *  ======================                                                                                            *
  *                                                                                                                    *
@@ -125,16 +150,7 @@ static int displayOptions;
  */
 void displayLine ()
 {
-	int i = 0, cols = displayGetWidth();
-	
-	for (; i < cols; i ++)
-	{
-		putchar ('-');
-	}
-	if (newLine)
-	{
-		putchar (newLine);
-	}
+	displayLineChar ('-');
 }
 
 /**********************************************************************************************************************

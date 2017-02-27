@@ -246,6 +246,7 @@ int MD5File (char *filename, unsigned char *md5Buffer);
  *  display.c
  */
 void displayLine (void);
+void displayLineChar (char dispChar);
 char *displayCommaNumber (long long number, char *outString);
 char *displayDateString (time_t showDate, char *outString);
 void displaySetDateFormat (char *format, int which);
