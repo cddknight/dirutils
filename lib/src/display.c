@@ -66,6 +66,7 @@ static time_t timeNow;
 static time_t timeDay;
 static time_t timeWeek;
 static time_t timeOld;
+static char newLine = '\n';
 
 char dateFormats[4][41] =
 {
@@ -127,7 +128,13 @@ void displayLine ()
 	int i = 0, cols = displayGetWidth();
 	
 	for (; i < cols; i ++)
+	{
 		putchar ('-');
+	}
+	if (newLine)
+	{
+		putchar (newLine);
+	}
 }
 
 /**********************************************************************************************************************
@@ -595,6 +602,7 @@ void displayGetWindowSize ()
 	{
 		nrows = ws.ws_row;
 		ncols = ws.ws_col;
+		newLine = 0;
 	}
 	else
 	{
@@ -610,14 +618,17 @@ void displayGetWindowSize ()
 			ncols = atoi (env);
 		}
 		if (ncols < 1 || ncols > 512)
+		{
 			ncols = 80;
-
+		}
 		if ((env = getenv("LINES")) != NULL)
 		{
 			nrows = atoi (env);
 		}
 		if (nrows < 1 || nrows > 512)
+		{
 			nrows = 24;
+		}
 	}
 }
 
@@ -637,6 +648,7 @@ void displayForceSize (int cols, int rows)
 {
 	nrows = rows;
 	ncols = cols;
+	newLine = '\n';
 }
 
 /**********************************************************************************************************************
