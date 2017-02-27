@@ -292,7 +292,7 @@ void helpThem (char *progName)
 	printf ("         -tm . . . . . Show time of last modification\n");
 	printf ("         -V  . . . . . Do not show version control directories\n");
 	printf ("         -w  . . . . . Show directory in wide format\n");
-	printf ("         -W  . . . . . Ignore screen width default to 255\n");
+	printf ("         -W[n] . . . . Ignore screen width default to 255\n");
 	printf ("\nExpressions:\n");
 	printf ("         & . . . . . . Logical AND, eg. %s \"c*&*c\"\n", progName);
 	printf ("         | . . . . . . Logical OR,  eg. %s \"c*|d*\"\n", progName);
@@ -418,7 +418,21 @@ void commandOption (char *option, char *progName)
 			break;
 
 		case 'W':
-			displayForceSize (255, 80);
+			{
+				int width = 0;
+			
+				k = 0;
+				while (option[j + k])
+				{
+					if (option[j + k] >= '0' && option[j + k] <= '9')
+						width = (width * 10) + (option[j + k] - '0');
+					else
+						break;
+					++k;
+				}
+				j += k;
+				displayForceSize (width == 0 ? 255 : width, 80);
+			}
 			break;
 
 		case 'p':
