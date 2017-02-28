@@ -1556,12 +1556,10 @@ int showDir (DIR_ENTRY *file)
 				if (showType & SHOW_MD5)
 				{
 					displayInColumn (columnTranslate[COL_MD5], "%s", displayMD5String (file, checkString));
-					printf ("Done displayMD5String (%s, %s)\n", fullName, checkString);
 				}
 				if (showType & SHOW_SHA256)
 				{
 					displayInColumn (columnTranslate[COL_SHA256], "%s", displaySHA256String (file, checkString));
-					printf ("Done displaySHA256String (%s, %s)\n", fullName, checkString);
 				}
 				if (showType & SHOW_EXTN)
 				{
@@ -1724,27 +1722,27 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 			{
 				int i;
 				
-				if (fileOne -> md5Sum == NULL)
+				if (fileOne -> sha256Sum == NULL)
 				{
-					if ((fileOne -> md5Sum = malloc (16)) != NULL)
+					if ((fileOne -> sha256Sum = malloc (16)) != NULL)
 					{
 						strcpy (fullName, fileOne -> fullPath);
 						strcat (fullName, fileOne -> fileName);
-						MD5File (fullName, fileOne -> md5Sum);
+						SHA256File (fullName, fileOne -> sha256Sum);
 					}
 				}
-				if (fileTwo -> md5Sum == NULL)
+				if (fileTwo -> sha256Sum == NULL)
 				{
-					if ((fileTwo -> md5Sum = malloc (16)) != NULL)
+					if ((fileTwo -> sha256Sum = malloc (16)) != NULL)
 					{
 						strcpy (fullName, fileTwo -> fullPath);
 						strcat (fullName, fileTwo -> fileName);
-						MD5File (fullName, fileTwo -> md5Sum);
+						SHA256File (fullName, fileTwo -> sha256Sum);
 					}
 				}
 				for (i = 0; i < 16 && retn == 0; ++i)
 				{
-					if (fileOne -> md5Sum[i] != fileTwo -> md5Sum[i])
+					if (fileOne -> sha256Sum[i] != fileTwo -> sha256Sum[i])
 						break;
 				}
 				if (i == 16)
