@@ -68,6 +68,7 @@ char *quoteCopy (char *dst, char *src);
 #define ORDER_LINK		7
 #define ORDER_CNXT		8
 #define ORDER_MD5S		9
+#define ORDER_SHAS		10
 
 #define SHOW_NORMAL		0
 #define SHOW_WIDE		1
@@ -90,12 +91,13 @@ char *quoteCopy (char *dst, char *src);
 #define SHOW_QUOTE		(1 << 17)
 #define SHOW_SELINUX	(1 << 18)
 #define SHOW_MD5		(1 << 19)
+#define SHOW_SHA256		(1 << 20)
 
 #define DATE_MOD		0
 #define DATE_ACC		1
 #define DATE_CHG		2
 
-#define MAX_COL_DESC	15
+#define MAX_COL_DESC	16
 #define MAX_W_COL_DESC	3
 #define EXTRA_COLOURS	8
 
@@ -143,6 +145,7 @@ int			dirColour = 0;
 #define		COL_TARGET		12
 #define		COL_CONTEXT		13
 #define		COL_MD5			14
+#define		COL_SHA256		15
 
 #define		COL_W_TYPE_L	0
 #define		COL_W_FILENAME	1
@@ -152,7 +155,7 @@ int columnTranslate[MAX_COL_DESC] =
 {
 	COL_TYPE, COL_RIGHTS, COL_N_LINKS, COL_OWNER, COL_GROUP, COL_SIZE, 
 	COL_DATE, COL_DAYS, COL_TIME, COL_FILENAME, COL_EXTN, COL_ARROW, 
-	COL_TARGET, COL_CONTEXT, COL_MD5
+	COL_TARGET, COL_CONTEXT, COL_MD5, COL_SHA256
 };
 
 COLUMN_DESC allColumnDescs[MAX_COL_DESC] =
@@ -175,7 +178,8 @@ COLUMN_DESC allColumnDescs[MAX_COL_DESC] =
 	{	2,	2,	0,	2,	0x01,	0,					NULL,		10	},	/* 11 */
 	{	255,12,	0,	2,	0x07,	0,					"Target",	9	},	/* 12 */
 	{	80,	8,	0,	2,	0x05,	0,					"Context",	12	},  /* 13 */
-	{	33,	33,	0,	2,	0x05,	0,					"MD5 Sum",	13	},  /* 13 */
+	{	33,	33,	0,	2,	0x05,	0,					"MD5 Sum",	13	},  /* 14 */
+	{	65,	65,	0,	2,	0x05,	0,					"SHA256",	14	},  /* 15 */
 };
 
 COLUMN_DESC wideColumnDescs[MAX_W_COL_DESC] =
@@ -207,6 +211,7 @@ char *colourNames[] =
 	"colour_type",		"colour_rights",	"colour_numlinks",	"colour_owner",		"colour_group",		
 	"colour_size",		"colour_date",		"colour_day",		"colour_time",		"colour_filename",	
 	"colour_extn",		"colour_linkptr",	"colour_target",	"colour_context",	"colour_md5",
+	"colour_sha256",
 
 	"colour_wide_col1",	"colour_wide_filename", "colour_wide_col2",
 
@@ -258,6 +263,7 @@ void helpThem (char *progName)
 	printf ("         -Dg . . . . . Show the group of the file\n");
 	printf ("         -Dl . . . . . Show the target of the link\n");
 	printf ("         -Dm . . . . . Show the MD5 checksum of the file\n");
+	printf ("         -Dh . . . . . Show the SHA256 checksum of the file\n");
 	printf ("         -Dn . . . . . Show the number of links\n");
 	printf ("         -Do . . . . . Show the owner of the file\n");
 	printf ("         -Dr . . . . . Show the user rights of the file\n");
@@ -271,6 +277,7 @@ void helpThem (char *progName)
 	printf ("         -o[g|G] . . . Order the files by group name\n");
 	printf ("         -o[l|L] . . . Order by the number of hard links\n");
 	printf ("         -o[m|M] . . . Order by the MD5 checksum\n");
+	printf ("         -o[h|H] . . . Order by the SHA256 checksum\n");
 	printf ("         -o[n|N] . . . Do not order, use directory order\n");
 	printf ("         -o[o|O] . . . Order the files by owners name\n");
 	printf ("         -o[s|S] . . . Order the files by size\n");
@@ -407,6 +414,13 @@ void commandOption (char *option, char *progName)
 			case 'M':
 				orderType = ORDER_MD5S;
 				showType |= (option[j] == 'M' ? SHOW_RORDER : 0);
+				j++;
+				break;
+
+			case 'h':
+			case 'H':
+				orderType = ORDER_SHAS;
+				showType |= (option[j] == 'H' ? SHOW_RORDER : 0);
 				j++;
 				break;
 			}
@@ -570,6 +584,10 @@ void commandOption (char *option, char *progName)
 						break;
 					case 'm':
 						showType ^= SHOW_MD5;
+						j++;
+						break;
+					case 'h':
+						showType ^= SHOW_SHA256;
 						j++;
 						break;
 					default:
@@ -1226,7 +1244,7 @@ int showDir (DIR_ENTRY *file)
 		char ownerString[81];
 		char groupString[81];
 		char contextString[81];
-		char md5String[33];
+		char checkString[65];
 		char rightsBuff[14];
 		char numBuff[21];
 		int fileAge = 0;
@@ -1537,7 +1555,13 @@ int showDir (DIR_ENTRY *file)
 				}
 				if (showType & SHOW_MD5)
 				{
-					displayInColumn (columnTranslate[COL_MD5], "%s", displayMD5String (file, md5String));
+					displayInColumn (columnTranslate[COL_MD5], "%s", displayMD5String (file, checkString));
+					printf ("Done displayMD5String (%s, %s)\n", fullName, checkString);
+				}
+				if (showType & SHOW_SHA256)
+				{
+					displayInColumn (columnTranslate[COL_SHA256], "%s", displaySHA256String (file, checkString));
+					printf ("Done displaySHA256String (%s, %s)\n", fullName, checkString);
 				}
 				if (showType & SHOW_EXTN)
 				{
@@ -1842,6 +1866,39 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 			}
 		}
 		break;
+		
+	case ORDER_SHAS:
+		if (fileOne -> sha256Sum == NULL)
+		{
+			if ((fileOne -> sha256Sum = malloc (32)) != NULL)
+			{
+				strcpy (fullName, fileOne -> fullPath);
+				strcat (fullName, fileOne -> fileName);
+				SHA256File (fullName, fileOne -> sha256Sum);
+			}
+		}
+		if (fileTwo -> sha256Sum == NULL)
+		{
+			if ((fileTwo -> sha256Sum = malloc (32)) != NULL)
+			{
+				strcpy (fullName, fileTwo -> fullPath);
+				strcat (fullName, fileTwo -> fileName);
+				SHA256File (fullName, fileTwo -> sha256Sum);
+			}
+		}
+		if (fileOne -> sha256Sum != NULL && fileTwo -> sha256Sum != NULL)
+		{
+			int i;
+			for (i = 0; i < 32 && retn == 0; ++i)
+			{
+				retn = (fileOne -> sha256Sum[i] < fileTwo -> sha256Sum[i] ? -1 :
+						fileOne -> sha256Sum[i] > fileTwo -> sha256Sum[i] ? 1 : 0);
+			}
+		}
+		break;
+	}
+	if (retn == 0)
+	{
 	}
 	if (retn == 0)
 	{

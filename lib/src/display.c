@@ -558,6 +558,45 @@ char *displayMD5String (DIR_ENTRY *file, char *outString)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  D I S P L A Y  M D 5 S T R I N G                                                                                  *
+ *  ================================                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Display the SHA256 checksum for a file.
+ *  \param file File to checksum (may have been done).
+ *  \param outString Output the string here .
+ *  \result None.
+ */
+char *displaySHA256String (DIR_ENTRY *file, char *outString)
+{
+	if (file -> sha256Sum == NULL)
+	{
+		if ((file -> sha256Sum = malloc (32)) != NULL)
+		{
+			char fullName[1024];
+			
+			strcpy (fullName, file -> fullPath);
+			strcat (fullName, file -> fileName);
+			if (!SHA256File (fullName, file -> sha256Sum))
+			{
+				free (file -> sha256Sum);
+				file -> sha256Sum = NULL;
+			}
+		}
+	}
+	outString[0] = 0;
+	if (file -> sha256Sum)
+	{
+		int i;
+		
+		for (i = 0; i < 32; ++i)
+			sprintf (&outString[i * 2], "%02x", (unsigned int)file -> sha256Sum[i]);
+	}
+	return outString;	
+}
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  D I S P L A Y  G E T  W I D T H                                                                                   *
  *  ===============================                                                                                   *
  *                                                                                                                    *

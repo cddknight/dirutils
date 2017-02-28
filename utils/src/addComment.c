@@ -318,7 +318,14 @@ void commentFlush(FILE * outFile)
 			firstWrite = 0;
 		}
 		else if (fwrite(comBuffer, 1, comBuffPos, outFile) != comBuffPos)
+		{
 			printf ("Buffer write problem!\n");
+		}
+		else
+		{
+/*			comBuffer[comBuffPos] = 0;
+			printf (">>>>%s<<<<\n", comBuffer);
+*/		}
 		comBuffPos = 0;
 	}
 }

@@ -208,6 +208,8 @@ struct dirEntry
 	char *partPath;
 	/** MD5 checksum if needed */
 	unsigned char *md5Sum;
+	/** SHA256 checksum if needed */
+	unsigned char *sha256Sum;
 	/** Directory information */
 	struct stat fileStat;
 	/** Has the CRC been calculated for this file */
@@ -241,6 +243,7 @@ int directoryProcess (int(*ProcFile)(DIR_ENTRY *f1), void **fileList);
  */
 int CRCFile (char *filename);
 int MD5File (char *filename, unsigned char *md5Buffer);
+int SHA256File (char *filename, unsigned char *md5Buffer);
 
 /*
  *  display.c
@@ -257,6 +260,7 @@ char *displayOwnerString (int ownerID, char *outString);
 char *displayGroupString (int groupID, char *outString);
 char *displayContextString (char *fullpath, char *outString);
 char *displayMD5String (DIR_ENTRY *file, char *outString);
+char *displaySHA256String (DIR_ENTRY *file, char *outString);
 void displayGetWindowSize (void);
 void displayForceSize (int cols, int rows);
 int displayGetWidth (void);

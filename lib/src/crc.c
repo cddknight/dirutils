@@ -22,10 +22,14 @@
  */
 #include <config.h>
 #include <stdio.h>
+
 #ifdef HAVE_OPENSSL_MD5_H
 #include <openssl/md5.h>
 #endif
-#include "dircmd.h"
+
+#ifdef HAVE_OPENSSL_SHA_H
+#include <openssl/sha.h>
+#endif
 
 static unsigned char tempBuff[4096];
 
@@ -137,9 +141,9 @@ int CRCFile (char *filename)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  \brief Create an md5 for a file.
- *  \param filename Name of the file to md5.
- *  \param md5Buffer Write the md5 value here (must be 16 bytes long).
+ *  \brief Create an MD5 for a file.
+ *  \param filename Name of the file to MD5.
+ *  \param md5Buffer Write the MD5 value here (must be 16 bytes long).
  *  \result 1 if file read.
  */
 int MD5File (char *filename, unsigned char *md5Buffer)
@@ -170,3 +174,42 @@ int MD5File (char *filename, unsigned char *md5Buffer)
 	return retn;
 }
 
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  S H A 2 5 6 F I L E                                                                                               *
+ *  ===================                                                                                               *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Create an SHA256 for a file.
+ *  \param filename Name of the file to SHA256.
+ *  \param shaBuffer Write the SHA256 value here (must be 32 bytes long).
+ *  \result 1 if file read.
+ */
+int SHA256File (char *filename, unsigned char *shaBuffer)
+{
+	int retn = 0;
+#ifdef HAVE_OPENSSL_SHA_H
+	FILE *inFile;
+	SHA256_CTX sha256c;
+	int read;
+
+	if (filename != NULL && shaBuffer != NULL)
+	{
+		if ((inFile = fopen (filename, "rb")) != NULL)
+		{
+			SHA256_Init (&sha256c);
+		
+			retn = 1;
+			while ((read = fread (tempBuff, 1, 4096, inFile)) != 0)
+				SHA256_Update (&sha256c, tempBuff, read);
+
+			fclose (inFile);
+			SHA256_Final (shaBuffer, &sha256c);
+		}
+	}
+#else
+	*shaBuffer = 0;
+#endif
+    return retn;
+}
