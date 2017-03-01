@@ -1725,7 +1725,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 				
 				if (fileOne -> sha256Sum == NULL)
 				{
-					if ((fileOne -> sha256Sum = malloc (16)) != NULL)
+					if ((fileOne -> sha256Sum = malloc (33)) != NULL)
 					{
 						strcpy (fullName, fileOne -> fullPath);
 						strcat (fullName, fileOne -> fileName);
@@ -1734,19 +1734,22 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 				}
 				if (fileTwo -> sha256Sum == NULL)
 				{
-					if ((fileTwo -> sha256Sum = malloc (16)) != NULL)
+					if ((fileTwo -> sha256Sum = malloc (33)) != NULL)
 					{
 						strcpy (fullName, fileTwo -> fullPath);
 						strcat (fullName, fileTwo -> fileName);
 						SHA256File (fullName, fileTwo -> sha256Sum);
 					}
 				}
-				for (i = 0; i < 16 && retn == 0; ++i)
+				for (i = 0; i < 32; ++i)
 				{
-					if (fileOne -> sha256Sum[i] != fileTwo -> sha256Sum[i])
-						break;
+					if (fileOne -> sha256Sum != NULL && fileTwo -> sha256Sum != NULL)
+					{
+						if (fileOne -> sha256Sum[i] != fileTwo -> sha256Sum[i])
+							break;
+					}
 				}
-				if (i == 16)
+				if (i == 32)
 				{
 					fileOne -> match = 1;
 					fileTwo -> match = 1;

@@ -534,7 +534,7 @@ char *displayMD5String (DIR_ENTRY *file, char *outString)
 {
 	if (file -> md5Sum == NULL)
 	{
-		if ((file -> md5Sum = malloc (16)) != NULL)
+		if ((file -> md5Sum = malloc (17)) != NULL)
 		{
 			char fullName[1024];
 			
@@ -578,7 +578,7 @@ char *displaySHA256String (DIR_ENTRY *file, char *outString)
 {
 	if (file -> sha256Sum == NULL)
 	{
-		if ((file -> sha256Sum = malloc (32)) != NULL)
+		if ((file -> sha256Sum = malloc (33)) != NULL)
 		{
 			char fullName[1024];
 			
