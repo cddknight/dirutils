@@ -1244,7 +1244,8 @@ int showDir (DIR_ENTRY *file)
 		char ownerString[81];
 		char groupString[81];
 		char contextString[81];
-		char checkString[65];
+		char md5String[65];
+		char shaString[65];
 		char rightsBuff[14];
 		char numBuff[21];
 		int fileAge = 0;
@@ -1555,11 +1556,11 @@ int showDir (DIR_ENTRY *file)
 				}
 				if (showType & SHOW_MD5)
 				{
-					displayInColumn (columnTranslate[COL_MD5], "%s", displayMD5String (file, checkString));
+					displayInColumn (columnTranslate[COL_MD5], "%s", displayMD5String (file, md5String));
 				}
 				if (showType & SHOW_SHA256)
 				{
-					displayInColumn (columnTranslate[COL_SHA256], "%s", displaySHA256String (file, checkString));
+					displayInColumn (columnTranslate[COL_SHA256], "%s", displaySHA256String (file, shaString));
 				}
 				if (showType & SHOW_EXTN)
 				{

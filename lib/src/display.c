@@ -516,6 +516,8 @@ char *displayContextString (char *fullpath, char *outString)
 	return outString;
 }
 
+static char hexCharVals[] = "0123456789abcdef";
+
 /**********************************************************************************************************************
  *                                                                                                                    *
  *  D I S P L A Y  M D 5 S T R I N G                                                                                  *
@@ -549,9 +551,13 @@ char *displayMD5String (DIR_ENTRY *file, char *outString)
 	if (file -> md5Sum)
 	{
 		int i;
-		
 		for (i = 0; i < 16; ++i)
-			sprintf (&outString[i * 2], "%02x", (unsigned int)file -> md5Sum[i]);
+		{
+			unsigned int ch = (unsigned int)file -> md5Sum[i];
+			outString[i*2] = hexCharVals[(ch >> 4) & 0x0F];
+			outString[(i*2)+1] = hexCharVals[ch & 0x0F];
+		}
+		outString[i*2] = 0;
 	}
 	return outString;	
 }
@@ -586,12 +592,16 @@ char *displaySHA256String (DIR_ENTRY *file, char *outString)
 		}
 	}
 	outString[0] = 0;
-	if (file -> sha256Sum)
+	if (file -> sha256Sum != NULL)
 	{
 		int i;
-		
 		for (i = 0; i < 32; ++i)
-			sprintf (&outString[i * 2], "%02x", (unsigned int)file -> sha256Sum[i]);
+		{
+			unsigned int ch = (unsigned int)file -> sha256Sum[i];
+			outString[i*2] = hexCharVals[(ch >> 4) & 0x0F];
+			outString[(i*2)+1] = hexCharVals[ch & 0x0F];
+		}
+		outString[i*2] = 0;
 	}
 	return outString;	
 }

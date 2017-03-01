@@ -204,6 +204,7 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
 				saveEntry -> fileName = malloc (strlen (dirList -> d_name) + 1);
 				saveEntry -> fullPath = malloc (strlen (fullPath) + 1);
 				saveEntry -> partPath = malloc (strlen (partPath) + 1);
+				saveEntry -> sha256Sum = NULL;
 				saveEntry -> md5Sum = NULL;
 
 				*endPath = 0;
