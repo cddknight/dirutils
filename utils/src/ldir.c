@@ -120,6 +120,8 @@ int 		showDate		= 	DATE_MOD;
 int			showFound		=	MAXINT;
 int			sizeFormat		=	1;
 char		dateType[41]	=	"Modified";
+char		md5Type[41]		=	"MD5 Sum (hex)";
+char		shaType[41]		=	"SHA256 Sum (hex)";
 time_t		timeNow			= 	0;
 char		*quoteMe		=	" *?|&;()<>#\t\\\"";
 
@@ -179,8 +181,8 @@ COLUMN_DESC allColumnDescs[MAX_COL_DESC] =
 	{	2,	2,	0,	2,	0x01,	0,					NULL,		10	},	/* 11 */
 	{	255,12,	0,	2,	0x07,	0,					"Target",	9	},	/* 12 */
 	{	80,	8,	0,	2,	0x05,	0,					"Context",	12	},  /* 13 */
-	{	33,	33,	0,	2,	0x05,	0,					"MD5 Sum",	13	},  /* 14 */
-	{	65,	65,	0,	2,	0x05,	0,					"SHA256",	14	},  /* 15 */
+	{	33,	33,	0,	2,	0x05,	0,					md5Type,	13	},  /* 14 */
+	{	65,	65,	0,	2,	0x05,	0,					shaType,	14	},  /* 15 */
 };
 
 COLUMN_DESC wideColumnDescs[MAX_W_COL_DESC] =
@@ -476,9 +478,17 @@ void commandOption (char *option, char *progName)
 
 		case 'B':
 			if (encode == DISPLAY_ENCODE_BASE64)
+			{
+				strcpy (md5Type, "MD5 Sum (hex)");
+				strcpy (shaType, "SHA256 Sum (hex)");
 				encode = DISPLAY_ENCODE_HEX;
+			}
 			else
+			{
+				strcpy (md5Type, "MD5 Sum (base64)");
+				strcpy (shaType, "SHA256 Sum (base64)");
 				encode = DISPLAY_ENCODE_BASE64;
+			}
 			break;
 
 		case 'c':
