@@ -126,6 +126,7 @@ char		*quoteMe		=	" *?|&;()<>#\t\\\"";
 int			coloursAlt[MAX_COL_DESC + MAX_W_COL_DESC];	
 int			colourType[EXTRA_COLOURS];
 int			dirColour = 0;
+int			encode = DISPLAY_ENCODE_HEX;
 
 /*----------------------------------------------------------------------------*
  * Column definitions                                                         *
@@ -254,6 +255,7 @@ void helpThem (char *progName)
 	printf ("         -a  . . . . . Show all files including hidden files\n");
 	printf ("         -A  . . . . . Show the age of the file\n");
 	printf ("         -b  . . . . . Show backup files ending with ~\n");
+	printf ("         -B  . . . . . Encode checksums in base64\n");
 	printf ("         -c  . . . . . Makes the directory case sensitive\n");
 	printf ("         -C  . . . . . Toggle colour display, defined in dirrc\n");
 	printf ("         -d[n] . . . . Display some, n > 0 first n, n < 0 last n\n");
@@ -470,6 +472,13 @@ void commandOption (char *option, char *progName)
 
 		case 'b':
 			showType ^= SHOW_BACKUP;
+			break;
+
+		case 'B':
+			if (encode == DISPLAY_ENCODE_BASE64)
+				encode = DISPLAY_ENCODE_HEX;
+			else
+				encode = DISPLAY_ENCODE_BASE64;
 			break;
 
 		case 'c':
@@ -1556,11 +1565,11 @@ int showDir (DIR_ENTRY *file)
 				}
 				if (showType & SHOW_MD5)
 				{
-					displayInColumn (columnTranslate[COL_MD5], "%s", displayMD5String (file, md5String));
+					displayInColumn (columnTranslate[COL_MD5], "%s", displayMD5String (file, md5String, encode));
 				}
 				if (showType & SHOW_SHA256)
 				{
-					displayInColumn (columnTranslate[COL_SHA256], "%s", displaySHA256String (file, shaString));
+					displayInColumn (columnTranslate[COL_SHA256], "%s", displaySHA256String (file, shaString, encode));
 				}
 				if (showType & SHOW_EXTN)
 				{
