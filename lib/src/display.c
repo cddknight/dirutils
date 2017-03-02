@@ -520,6 +520,89 @@ static char hexCharVals[] = "0123456789abcdef";
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  D I S P L A Y  E N C O D E  H E X                                                                                 *
+ *  =================================                                                                                 *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Encode a binary buffer into hex.
+ *  \param inBuff Buffer to be encoded.
+ *  \param outBuff Output buffer, it need to be 100% bigger than the input.
+ *  \param len Size of the input buffer.
+ *  \result String length of the output buffer.
+ */
+int displayEncodeHex (unsigned char *inBuff, char *outBuff, int len)
+{
+	int i;
+	for (i = 0; i < len; ++i)
+	{
+		unsigned int ch = inBuff[i];
+		outBuff[i * 2] = hexCharVals[(ch >> 4) & 0x0F];
+		outBuff[(i * 2) + 1] = hexCharVals[ch & 0x0F];
+	}
+	outBuff[i * 2] = 0;
+	return i * 2;
+}
+
+/*                       |123456789ABCDEF|123456789ABCDEF|123456789ABCDEF|123456789ABCDEF|1 */
+/*                       |123456789|123456789|123456789|123456789|123456789|123456789|12345 */
+char base64CharVals[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=!";
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I S P L A Y  E N C O D E  B A S E 6 4                                                                           *
+ *  =======================================                                                                           *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Encode a binary buffer into base64.
+ *  \param inBuff Buffer to be encoded.
+ *  \param outBuff Output buffer, it need to be 50% bigger than the input.
+ *  \param len Size of the input buffer.
+ *  \result String length of the output buffer.
+ */
+int displayEncodeBase64 (unsigned char *inBuff, char *outBuff, int len)
+{
+	int i, j = 0, k = 0;
+	
+	while (j < len)
+	{
+		int todo = len - j >= 3 ? 3 : len - j;
+		char outVal[4] = { 0, 0, 0, 0 };
+
+		outVal[0] = (inBuff[j] & 0xFC) >> 2;
+		outVal[1] = (inBuff[j] & 0x03) << 4;
+		if (todo > 1)
+		{
+			outVal[1] |= (inBuff[j + 1] & 0xF0) >> 4;
+			outVal[2] = (inBuff[j + 1] & 0x0F) << 2;
+			if (todo > 2)
+			{
+				outVal[2] |= (inBuff[j + 2] & 0xC0) >> 6;
+				outVal[3] = inBuff[j + 2] & 0x03F;
+			}
+			else
+			{
+				outVal[3] = 64;
+			}
+		}
+		else
+		{
+			outVal[2] = 64;
+			outVal[3] = 64;
+		}
+		for (i = 0; i < 4; ++i)
+		{
+			outBuff[k++] = base64CharVals[(int)outVal[i]];
+		}
+		outBuff[k] = 0;
+		j += 3;
+	}
+	return k;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  D I S P L A Y  M D 5 S T R I N G                                                                                  *
  *  ================================                                                                                  *
  *                                                                                                                    *
@@ -530,7 +613,7 @@ static char hexCharVals[] = "0123456789abcdef";
  *  \param outString Output the string here .
  *  \result None.
  */
-char *displayMD5String (DIR_ENTRY *file, char *outString)
+char *displayMD5String (DIR_ENTRY *file, char *outString, int encode)
 {
 	if (file -> md5Sum == NULL)
 	{
@@ -550,14 +633,16 @@ char *displayMD5String (DIR_ENTRY *file, char *outString)
 	outString[0] = 0;
 	if (file -> md5Sum)
 	{
-		int i;
-		for (i = 0; i < 16; ++i)
+		switch (encode)
 		{
-			unsigned int ch = (unsigned int)file -> md5Sum[i];
-			outString[i*2] = hexCharVals[(ch >> 4) & 0x0F];
-			outString[(i*2)+1] = hexCharVals[ch & 0x0F];
+		case DISPLAY_ENCODE_BASE64:
+			displayEncodeBase64	(file -> md5Sum, outString, 16);
+			break;
+
+		default:
+			displayEncodeHex (file -> md5Sum, outString, 16);
+			break;
 		}
-		outString[i*2] = 0;
 	}
 	return outString;	
 }
@@ -574,7 +659,7 @@ char *displayMD5String (DIR_ENTRY *file, char *outString)
  *  \param outString Output the string here .
  *  \result None.
  */
-char *displaySHA256String (DIR_ENTRY *file, char *outString)
+char *displaySHA256String (DIR_ENTRY *file, char *outString, int encode)
 {
 	if (file -> sha256Sum == NULL)
 	{
@@ -594,14 +679,16 @@ char *displaySHA256String (DIR_ENTRY *file, char *outString)
 	outString[0] = 0;
 	if (file -> sha256Sum != NULL)
 	{
-		int i;
-		for (i = 0; i < 32; ++i)
+		switch (encode)
 		{
-			unsigned int ch = (unsigned int)file -> sha256Sum[i];
-			outString[i*2] = hexCharVals[(ch >> 4) & 0x0F];
-			outString[(i*2)+1] = hexCharVals[ch & 0x0F];
+		case DISPLAY_ENCODE_BASE64:
+			displayEncodeBase64	(file -> sha256Sum, outString, 32);
+			break;
+
+		default:
+			displayEncodeHex (file -> sha256Sum, outString, 32);
+			break;
 		}
-		outString[i*2] = 0;
 	}
 	return outString;	
 }

@@ -41,98 +41,98 @@
 #include <sys/stat.h>
 
 #ifdef DOS
-	#define DIRSEP			'\\'
-	#define PATHSEP			';'
+	#define DIRSEP				'\\'
+	#define PATHSEP				';'
 #else
-	#define DIRSEP			'/'
-	#define PATHSEP			':'
+	#define DIRSEP				'/'
+	#define PATHSEP				':'
 #endif
 
-#define PATH_SIZE			PATH_MAX
+#define PATH_SIZE				PATH_MAX
 
 /** 
  *  @def ALLFILES
  *  @brief Match all file types in the directory.
  */
-#define ALLFILES			0x007F
+#define ALLFILES				0x007F
 
 /** 
  *  @def ONLYNEXCS
  *  @brief Match only non-executable files in the directory.
  */
-#define ONLYNEXCS			0x0001
+#define ONLYNEXCS				0x0001
 
 /** 
  *  @def ONLYDIRS
  *  @brief Match only sub-directories in the directory.
  */
-#define ONLYDIRS			0x0002
+#define ONLYDIRS				0x0002
 
 /** 
  *  @def ONLYLINKS
  *  @brief Match only links in the directory.
  */
-#define ONLYLINKS			0x0004
+#define ONLYLINKS				0x0004
 
 /** 
  *  @def ONLYEXECS
  *  @brief Match only executable files in the directory.
  */
-#define ONLYEXECS			0x0008
+#define ONLYEXECS				0x0008
 
 /** 
  *  @def ONLYFILES
  *  @brief Match only files in the directory.
  */
-#define ONLYFILES			0x0009
+#define ONLYFILES				0x0009
 
 /** 
  *  @def ONLYDEV
  *  @brief Match only DEVICES in the directory.
  */
-#define ONLYDEVS			0x0010
+#define ONLYDEVS				0x0010
 
 /** 
  *  @def ONLYDEV
  *  @brief Match only DEVICES in the directory.
  */
-#define ONLYSOCKS			0x0020
+#define ONLYSOCKS				0x0020
 
 /** 
  *  @def ONLYDEV
  *  @brief Match only DEVICES in the directory.
  */
-#define ONLYPIPES			0x0040
+#define ONLYPIPES				0x0040
 
 /** 
  *  @def USECASE
  *  @brief Do a case dependant compare.
  */
-#define USECASE				0x0100
+#define USECASE					0x0100
 
 /** 
  *  @def SHOWALL
  *  @brief Show all files even those starting with a dot.
  */
-#define SHOWALL				0x0200
+#define SHOWALL					0x0200
 
 /** 
  *  @def RECUDIR
  *  @brief Include subdirectories in the directory.
  */
-#define RECUDIR				0x0400
+#define RECUDIR					0x0400
 
 /** 
  *  @def HIDEVERCTL
  *  @brief Tide the version control subdirectories.
  */
-#define HIDEVERCTL			0x0800
+#define HIDEVERCTL				0x0800
 
 /** 
  *  @def MAX_COLUMNS
  *  @brief Maximum number of columns allowed.
  */
-#define MAX_COLUMNS			50
+#define MAX_COLUMNS				50
 
 /** 
  *  @def COL_ALIGN_RIGHT
@@ -140,7 +140,7 @@
  *
  *  Used in COLUMN_DESC::attrib.
  */
-#define COL_ALIGN_RIGHT		1	/* default left */
+#define COL_ALIGN_RIGHT			1	/* default left */
 
 /** 
  *  @def COL_CAN_DELETE
@@ -148,7 +148,7 @@
  *
  *  Used in COLUMN_DESC::attrib.
  */
-#define COL_CAN_DELETE		2	/* can delete column to save size */
+#define COL_CAN_DELETE			2	/* can delete column to save size */
 
 /** 
  *  @def DISPLAY_HEADINGS
@@ -156,13 +156,17 @@
  *
  *  Used in  displayColumnInit options.
  */
-#define DISPLAY_HEADINGS	0x0001
-#define DISPLAY_COLOURS		0x0002
-#define DISPLAY_HEADINGS_NT	0x0004
-#define DISPLAY_HEADINGS_NB	0x0008
+#define DISPLAY_HEADINGS		0x0001
+#define DISPLAY_COLOURS			0x0002
+#define DISPLAY_HEADINGS_NT		0x0004
+#define DISPLAY_HEADINGS_NB		0x0008
 
-#define DISPLAY_FIRST		1
-#define DISPLAY_INFO		2
+#define DISPLAY_FIRST			1
+#define DISPLAY_INFO			2
+
+#define DISPLAY_ENCODE_HEX		0	// Default
+#define DISPLAY_ENCODE_BASE64	1
+
 
 /**
  *  @struct columnDesc dircmd.h
@@ -259,8 +263,8 @@ char *displayRightsStringACL (DIR_ENTRY *file, char *outString);
 char *displayOwnerString (int ownerID, char *outString);
 char *displayGroupString (int groupID, char *outString);
 char *displayContextString (char *fullpath, char *outString);
-char *displayMD5String (DIR_ENTRY *file, char *outString);
-char *displaySHA256String (DIR_ENTRY *file, char *outString);
+char *displayMD5String (DIR_ENTRY *file, char *outString, int encode);
+char *displaySHA256String (DIR_ENTRY *file, char *outString, int encode);
 void displayGetWindowSize (void);
 void displayForceSize (int cols, int rows);
 int displayGetWidth (void);
