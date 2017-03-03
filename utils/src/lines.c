@@ -43,7 +43,7 @@ int showDir (DIR_ENTRY *file);
 COLUMN_DESC colLinesDescs[3] =
 {
 	{	10,	10,	0,	3,	0x0A,	COL_ALIGN_RIGHT,	"Lines",	0	},	/* 0 */
-	{	160,12,	0,	0,	0x0E,	0,					"Filename",	1	},	/* 1 */
+	{	255,12,	0,	0,	0x0E,	0,					"Filename",	1	},	/* 1 */
 };
 
 COLUMN_DESC *ptrLinesColumn[3] =
@@ -52,6 +52,9 @@ COLUMN_DESC *ptrLinesColumn[3] =
 	&colLinesDescs[1]
 };
 
+#define SHOW_PATH		1
+
+int showFlags = 0;
 int filesFound = 0;
 long totalLines = 0;
 
@@ -84,9 +87,10 @@ void version (void)
  */
 void helpThem(char *progName)
 {
-	printf ("Enter the command: %s [-Ccr] <filename>\n", basename (progName));
+	printf ("Enter the command: %s [-Ccpr] <filename>\n", basename (progName));
 	printf ("    -C . . . . . Display output in colour\n");
 	printf ("    -c . . . . . Directory case sensitive\n");
+	printf ("    -p . . . . . Show the path and filename\n");
 	printf ("    -r . . . . . Search in subdirectories\n");
 }
 
@@ -115,7 +119,7 @@ int main (int argc, char *argv[])
 
 	displayGetWindowSize ();
 
-	while ((i = getopt(argc, argv, "Ccr?")) != -1)
+	while ((i = getopt(argc, argv, "Ccpr?")) != -1)
 	{
 		switch (i) 
 		{
@@ -129,6 +133,10 @@ int main (int argc, char *argv[])
 			
 		case 'r':
 			dirType ^= RECUDIR;
+			break;
+
+		case 'p':
+			showFlags ^= SHOW_PATH;
 			break;
 
 		case '?':
@@ -209,7 +217,14 @@ int showDir (DIR_ENTRY *file)
 	totalLines += linesFound;
 	
 	displayInColumn (0, displayCommaNumber (linesFound, inBuffer));
-	displayInColumn (1, "%s", file -> fileName);
+	if (showFlags & SHOW_PATH)
+	{
+		displayInColumn (1, "%s", inFile);
+	}
+	else
+	{
+		displayInColumn (1, "%s", file -> fileName);
+	}
 	displayNewLine(0);
 
 	return (linesFound ? 1 : 0);
