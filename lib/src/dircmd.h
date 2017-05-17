@@ -232,92 +232,99 @@ struct dirEntry
  */
 typedef struct dirEntry DIR_ENTRY;
 
+#ifdef __cplusplus
+#define EXTERNC extern "C"
+#else
+#define EXTERNC
+#endif
+
 /*
  *  dircmd.c
  */
-char *directoryVersion(void);
-int directoryLoad (char *inPath, int findFlags,
+EXTERNC char *directoryVersion(void);
+EXTERNC int directoryLoad (char *inPath, int findFlags,
 		int(*Compare)(DIR_ENTRY *f1, DIR_ENTRY *f2),
 		void **fileList);
-int directorySort (void **fileList);
-int directoryProcess (int(*ProcFile)(DIR_ENTRY *f1), void **fileList);
+EXTERNC int directorySort (void **fileList);
+EXTERNC int directoryProcess (int(*ProcFile)(DIR_ENTRY *f1), void **fileList);
 
 /*
  *  crc.c
  */
-int CRCFile (char *filename);
-int MD5File (char *filename, unsigned char *md5Buffer);
-int SHA256File (char *filename, unsigned char *md5Buffer);
+EXTERNC int CRCFile (char *filename);
+EXTERNC int MD5File (char *filename, unsigned char *md5Buffer);
+EXTERNC int SHA256File (char *filename, unsigned char *md5Buffer);
 
 /*
  *  display.c
  */
-void displayLine (void);
-void displayLineChar (char dispChar);
-char *displayCommaNumber (long long number, char *outString);
-char *displayDateString (time_t showDate, char *outString);
-void displaySetDateFormat (char *format, int which);
-char *displayFileSize (long long size, char *outString);
-char *displayRightsString (int userRights, char *outString);
-char *displayRightsStringACL (DIR_ENTRY *file, char *outString);
-char *displayOwnerString (int ownerID, char *outString);
-char *displayGroupString (int groupID, char *outString);
-char *displayContextString (char *fullpath, char *outString);
-char *displayMD5String (DIR_ENTRY *file, char *outString, int encode);
-char *displaySHA256String (DIR_ENTRY *file, char *outString, int encode);
-void displayGetWindowSize (void);
-void displayForceSize (int cols, int rows);
-int displayGetWidth (void);
-int displayGetDepth (void);
-int displayColumnInit (int colCount, COLUMN_DESC *colDesc[], int options);
-int displayInColumn (int column, char *format, ...);
-int displayInColour (int column, int colour, char *format, ...);
-int displayVInColumn (int column, char *format, va_list arg_ptr);
-int displayVInColour (int column, int colour, char *format, va_list arg_ptr);
-void displayMatchWidth (void);
-void displaySomeLines (int lines);
-void displayAllLines (void);
-void displayNewLine (char flags);
-void displayDrawLine (char flags);
-void displayHeading (char flags);
-void displayBlank (char flags);
-void displayTidy (void);
+EXTERNC void displayLine (void);
+EXTERNC void displayLineChar (char dispChar);
+EXTERNC char *displayCommaNumber (long long number, char *outString);
+EXTERNC char *displayDateString (time_t showDate, char *outString);
+EXTERNC void displaySetDateFormat (char *format, int which);
+EXTERNC char *displayFileSize (long long size, char *outString);
+EXTERNC char *displayRightsString (int userRights, char *outString);
+EXTERNC char *displayRightsStringACL (DIR_ENTRY *file, char *outString);
+EXTERNC char *displayOwnerString (int ownerID, char *outString);
+EXTERNC char *displayGroupString (int groupID, char *outString);
+EXTERNC char *displayContextString (char *fullpath, char *outString);
+EXTERNC char *displayMD5String (DIR_ENTRY *file, char *outString, int encode);
+EXTERNC char *displaySHA256String (DIR_ENTRY *file, char *outString, int encode);
+EXTERNC void displayGetWindowSize (void);
+EXTERNC void displayForceSize (int cols, int rows);
+EXTERNC int displayGetWidth (void);
+EXTERNC int displayGetDepth (void);
+EXTERNC int displayColumnInit (int colCount, COLUMN_DESC *colDesc[], int options);
+EXTERNC int displayInColumn (int column, char *format, ...);
+EXTERNC int displayInColour (int column, int colour, char *format, ...);
+EXTERNC int displayVInColumn (int column, char *format, va_list arg_ptr);
+EXTERNC int displayVInColour (int column, int colour, char *format, va_list arg_ptr);
+EXTERNC void displayMatchWidth (void);
+EXTERNC void displaySomeLines (int lines);
+EXTERNC void displayAllLines (void);
+EXTERNC void displayNewLine (char flags);
+EXTERNC void displayDrawLine (char flags);
+EXTERNC void displayHeading (char flags);
+EXTERNC void displayBlank (char flags);
+EXTERNC void displayTidy (void);
 
 /*
  *  list.c
  */
-void *queueCreate (void);
-void  queueDelete (void *queueHandle);
-void *queueGet (void *queueHandle);
-void  queuePut (void *queueHandle, void *putData);
-void  queuePutSort (void *queueHandle, void *putData, 
+EXTERNC void *queueCreate (void);
+EXTERNC void  queueDelete (void *queueHandle);
+EXTERNC void *queueGet (void *queueHandle);
+EXTERNC void  queuePut (void *queueHandle, void *putData);
+EXTERNC void  queuePutSort (void *queueHandle, void *putData, 
 	  		int(*Compare)(const void *item1, const void *item2));
-void  queuePush (void *queueHandle, void *putData);
-void *queueRead (void *queueHandle, int item);
-void queueSetFreeData (void *queueHandle, unsigned long setData);
-unsigned long queueGetFreeData (void *queueHandle);
-unsigned long queueGetItemCount (void *queueHandle);
-void queueSort (void *queueHandle, 
+EXTERNC void  queuePush (void *queueHandle, void *putData);
+EXTERNC void *queueRead (void *queueHandle, int item);
+EXTERNC void queueSetFreeData (void *queueHandle, unsigned long setData);
+EXTERNC unsigned long queueGetFreeData (void *queueHandle);
+EXTERNC unsigned long queueGetItemCount (void *queueHandle);
+EXTERNC void queueSort (void *queueHandle, 
 			int(*Compare)(const void *item1, const void *item2));
 
 
 /*
  *  match.c
  */
-int matchLogic (char *str, char *ptn, int flags);
-int matchPattern (char *str, char *ptn, int flags);
+EXTERNC int matchLogic (char *str, char *ptn, int flags);
+EXTERNC int matchPattern (char *str, char *ptn, int flags);
 
 /*
  * config.c
  */
-int configLoad (const char *configFile);
-int configSave (const char *configFile);
-void configFree ();
-int configSetValue (const char *configName, char *configValue);
-int configSetIntValue (const char *configName, int configValue);
-int configSetBoolValue (const char *configName, bool configValue);
-int configGetValue (const char *configName, char *value, int maxLen);
-int configGetIntValue (const char *configName, int *value);
-int configGetBoolValue (const char *configName, bool *value);
+EXTERNC int configLoad (const char *configFile);
+EXTERNC int configSave (const char *configFile);
+EXTERNC void configFree ();
+EXTERNC int configSetValue (const char *configName, char *configValue);
+EXTERNC int configSetIntValue (const char *configName, int configValue);
+EXTERNC int configSetBoolValue (const char *configName, bool configValue);
+EXTERNC int configGetValue (const char *configName, char *value, int maxLen);
+EXTERNC int configGetIntValue (const char *configName, int *value);
+EXTERNC int configGetBoolValue (const char *configName, bool *value);
 
+#undef EXTERNC
 #endif
