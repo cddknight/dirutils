@@ -247,6 +247,7 @@ EXTERNC int directoryLoad (char *inPath, int findFlags,
 		void **fileList);
 EXTERNC int directorySort (void **fileList);
 EXTERNC int directoryProcess (int(*ProcFile)(DIR_ENTRY *f1), void **fileList);
+EXTERNC mode_t directoryTrueLinkType (DIR_ENTRY *f1);
 
 /*
  *  crc.c

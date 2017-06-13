@@ -98,7 +98,7 @@ static char *strcat_ch (char *buff, char ch)
  *  \param inPath The path to the directory to be process.
  *  \param partPath If it is recursive keep the subdirs to be added to t.
  *  \param findFlags Various options to select what files to read.
- *  \param f2 .
+ *  \param compare Function to compare two files.
  *  \param fileList Where to save the directory.
  *  \result The number of files found.
  */
@@ -257,7 +257,7 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
  *  \brief Read the contents of a directory into memory.
  *  \param inPath The path to the directory to be process.
  *  \param findFlags Various options to select what files to read.
- *  \param f2 .
+ *  \param compare Function to compare two files.
  *  \param fileList Where to save the directory.
  *  \result The number of files found.
  */
@@ -316,6 +316,58 @@ int directoryProcess (int(*ProcFile)(DIR_ENTRY *dirEntry),	void **fileList)
 	queueDelete (*fileList);
 	*fileList = NULL;
 	return filesProcessed;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I R E C T O R Y  T R U E  L I N K  T Y P E                                                                      *
+ *  ============================================                                                                      *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Follow the links to see what they point at.
+ *  \param dirEntry Directory entry to look for.
+ *  \result The last found type.
+ */
+mode_t directoryTrueLinkType (DIR_ENTRY *dirEntry)
+{
+	int err = 0, level = 0;
+	mode_t retn = dirEntry -> fileStat.st_mode;
+
+	while (S_ISLNK (retn) && !err)
+	{
+		int linkSize = 0;
+		char linkBuff[1025], fullName[PATH_SIZE];
+
+		if (level++ == 0)
+		{
+			strcpy (fullName, dirEntry -> fullPath);
+			strncat (fullName, dirEntry -> fileName, PATH_SIZE - 1);
+		}
+		if ((linkSize = readlink(fullName, linkBuff, 1024)) >= 0)
+		{
+			linkBuff[linkSize] = 0;
+			if (lstat (linkBuff, &dirEntry -> fileStat) == 0)
+			{
+				retn = dirEntry -> fileStat.st_mode;
+				if (S_ISLNK (dirEntry -> fileStat.st_mode))
+				{
+					strncpy (fullName, linkBuff, PATH_SIZE - 1);
+				}
+			}
+			else
+			{
+				/* Bad link */
+				err = 1;
+			}
+		}
+		else
+		{
+			/* Unable to read link */
+			err = 1;
+		}
+	}
+	return retn;			
 }
 
 /**********************************************************************************************************************

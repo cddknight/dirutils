@@ -220,7 +220,7 @@ int main (int argc, char *argv[])
 
     for (; optind < argc; ++optind)
     {
-		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
+		found += directoryLoad (argv[optind], ONLYFILES|ONLYLINKS, fileCompare, &fileList);
 	}
 
 	if (found)
@@ -277,6 +277,16 @@ int showDir (DIR_ENTRY *file)
 	unsigned char saveHex[4], saveChar[80];
 	FILE *readFile;
 	int j = 0, c = 1, read, filePosn = 0, l = 0;
+
+    /*------------------------------------------------------------------------*
+     * If the file is a link check it points to a regular file.               *
+     *------------------------------------------------------------------------*/
+	if (S_ISLNK (file -> fileStat.st_mode))	
+	{
+		mode_t type = directoryTrueLinkType (file);
+		if (!S_ISREG (type))
+			return 0;
+	}
 
     /*------------------------------------------------------------------------*
      * First display a table with the file name and size.                     *
