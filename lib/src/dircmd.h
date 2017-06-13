@@ -132,7 +132,7 @@
  *  @def MAX_COLUMNS
  *  @brief Maximum number of columns allowed.
  */
-#define MAX_COLUMNS				50
+#define MAX_COLUMNS				80
 
 /** 
  *  @def COL_ALIGN_RIGHT
