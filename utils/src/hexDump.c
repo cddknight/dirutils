@@ -238,7 +238,7 @@ int main (int argc, char *argv[])
 		directorySort (&fileList);
 		directoryProcess (showDir, &fileList);
 
-		if (!displayQuiet) 
+		if (!displayQuiet && filesFound) 
 		{
 			if (!displayColumnInit (2, ptrFileColumn, displayColour))
 			{
@@ -285,7 +285,10 @@ int showDir (DIR_ENTRY *file)
 	{
 		mode_t type = directoryTrueLinkType (file);
 		if (!S_ISREG (type))
+		{
+			fprintf (stderr, "ERROR: Link does not point to file\n");
 			return 0;
+		}
 	}
 
     /*------------------------------------------------------------------------*
