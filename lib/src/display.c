@@ -66,7 +66,6 @@ static time_t timeNow;
 static time_t timeDay;
 static time_t timeWeek;
 static time_t timeOld;
-static char newLine = '\n';
 
 char dateFormats[4][41] =
 {
@@ -132,10 +131,7 @@ void displayLineChar (char lineChar)
 	{
 		putchar (lineChar);
 	}
-	if (newLine)
-	{
-		putchar (newLine);
-	}
+	putchar ('\n');
 }
 
 /**********************************************************************************************************************
@@ -754,7 +750,6 @@ void displayGetWindowSize ()
 	{
 		nrows = ws.ws_row;
 		ncols = ws.ws_col;
-		newLine = 0;
 	}
 	else
 	{
@@ -800,7 +795,6 @@ void displayForceSize (int cols, int rows)
 {
 	nrows = rows;
 	ncols = cols;
-	newLine = '\n';
 }
 
 /**********************************************************************************************************************
