@@ -1199,7 +1199,11 @@ int showDir (DIR_ENTRY *file)
 			quoteCopy (displayName, file -> fileName);
 		else
 			strcpy (displayName, file -> fileName);
-			
+
+		if (S_ISDIR (file -> fileStat.st_mode))
+		{
+			strcat (displayName, "/");
+		}
 		displayInColumn (currentCol++, marker1);
 		displayInColour (currentCol++, colour, "%s", displayName);
 		displayInColumn (currentCol++, marker2);
