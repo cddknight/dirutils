@@ -114,6 +114,25 @@ static int displayOptions;
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  D I S P L A Y  I N I T                                                                                            *
+ *  ======================                                                                                            *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Initialise the display, replaces window size, fixes locale.
+ *  \result None.
+ */
+void displayInit()
+{
+	setlocale(LC_CTYPE, "");
+	setlocale(LC_TIME, "");
+	setlocale(LC_NUMERIC, "");
+
+	displayGetWindowSize();
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  D I S P L A Y  L I N E  C H A R                                                                                   *
  *  ===============================                                                                                   *
  *                                                                                                                    *
@@ -607,6 +626,7 @@ int displayEncodeBase64 (unsigned char *inBuff, char *outBuff, int len)
  *  \brief Display the MD5 checksum for a file.
  *  \param file File to checksum (may have been done).
  *  \param outString Output the string here .
+ *  \param encode String to encode.
  *  \result None.
  */
 char *displayMD5String (DIR_ENTRY *file, char *outString, int encode)
@@ -653,6 +673,7 @@ char *displayMD5String (DIR_ENTRY *file, char *outString, int encode)
  *  \brief Display the SHA256 checksum for a file.
  *  \param file File to checksum (may have been done).
  *  \param outString Output the string here .
+ *  \param encode String to encode.
  *  \result None.
  */
 char *displaySHA256String (DIR_ENTRY *file, char *outString, int encode)

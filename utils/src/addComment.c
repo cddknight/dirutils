@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
 		exit (1);
 	}
 
-	displayGetWindowSize();
+	displayInit();
 	rl_bind_key ('\t',rl_abort);		//disable auto-complete
 
 	while ((i = getopt(argc, argv, "hdipqmvl:w:c:C:?")) != -1)

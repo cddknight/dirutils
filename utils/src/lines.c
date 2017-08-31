@@ -117,7 +117,7 @@ int main (int argc, char *argv[])
 		exit (1);
 	}
 
-	displayGetWindowSize ();
+	displayInit ();
 
 	while ((i = getopt(argc, argv, "Ccpr?")) != -1)
 	{

@@ -166,7 +166,7 @@ int main (int argc, char *argv[])
 		exit (1);
 	}
 
-	displayGetWindowSize ();
+	displayInit ();
 	displayGetWidth();
 
 	while ((i = getopt(argc, argv, "CdqPp:s:D:?")) != -1)

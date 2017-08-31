@@ -784,7 +784,7 @@ int main (int argc, char *argv[])
 	}
 
 	timeNow = time (NULL);
-	displayGetWindowSize ();
+	displayInit ();
 	loadSettings (basename (argv[0]));
 
 	while (i < argc)

@@ -160,6 +160,7 @@
 #define DISPLAY_COLOURS			0x0002
 #define DISPLAY_HEADINGS_NT		0x0004
 #define DISPLAY_HEADINGS_NB		0x0008
+#define DISPLAY_IN_COLUMNS		0x0010
 
 #define DISPLAY_FIRST			1
 #define DISPLAY_INFO			2
@@ -259,6 +260,7 @@ EXTERNC int SHA256File (char *filename, unsigned char *md5Buffer);
 /*
  *  display.c
  */
+EXTERNC void displayInit (void);
 EXTERNC void displayLine (void);
 EXTERNC void displayLineChar (char dispChar);
 EXTERNC char *displayCommaNumber (long long number, char *outString);

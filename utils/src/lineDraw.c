@@ -50,7 +50,7 @@ int main (int argc, char *argv[])
 		}
 	}
 
-	displayGetWindowSize ();
+	displayInit ();
 	displayLineChar (dispChar);
 	return 0;
 }

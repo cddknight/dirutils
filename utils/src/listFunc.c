@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 		exit (1);
 	}
 
-	displayGetWindowSize();
+	displayInit();
 
 	/*------------------------------------------------------------------------*
      * If we got a path then split it into a path and a file pattern to match *
