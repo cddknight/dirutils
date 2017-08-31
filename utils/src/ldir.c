@@ -69,6 +69,7 @@ char *quoteCopy (char *dst, char *src);
 #define ORDER_CNXT		8
 #define ORDER_MD5S		9
 #define ORDER_SHAS		10
+#define ORDER_INOD		11
 
 #define SHOW_NORMAL		0
 #define SHOW_WIDE		1
@@ -92,12 +93,13 @@ char *quoteCopy (char *dst, char *src);
 #define SHOW_SELINUX	(1 << 18)
 #define SHOW_MD5		(1 << 19)
 #define SHOW_SHA256		(1 << 20)
+#define SHOW_INODE		(1 << 21)
 
 #define DATE_MOD		0
 #define DATE_ACC		1
 #define DATE_CHG		2
 
-#define MAX_COL_DESC	16
+#define MAX_COL_DESC	17
 #define MAX_W_COL_DESC	3
 #define EXTRA_COLOURS	8
 
@@ -149,6 +151,7 @@ int			encode = DISPLAY_ENCODE_HEX;
 #define		COL_CONTEXT		13
 #define		COL_MD5			14
 #define		COL_SHA256		15
+#define		COL_INODE		16
 
 #define		COL_W_TYPE_L	0
 #define		COL_W_FILENAME	1
@@ -158,7 +161,7 @@ int columnTranslate[MAX_COL_DESC] =
 {
 	COL_TYPE, COL_RIGHTS, COL_N_LINKS, COL_OWNER, COL_GROUP, COL_SIZE, 
 	COL_DATE, COL_DAYS, COL_TIME, COL_FILENAME, COL_EXTN, COL_ARROW, 
-	COL_TARGET, COL_CONTEXT, COL_MD5, COL_SHA256
+	COL_TARGET, COL_CONTEXT, COL_MD5, COL_SHA256, COL_INODE
 };
 
 COLUMN_DESC allColumnDescs[MAX_COL_DESC] =
@@ -183,6 +186,7 @@ COLUMN_DESC allColumnDescs[MAX_COL_DESC] =
 	{	80,	8,	0,	2,	0x05,	0,					"Context",	12	},  /* 13 */
 	{	33,	33,	0,	2,	0x05,	0,					md5Type,	13	},  /* 14 */
 	{	65,	65,	0,	2,	0x05,	0,					shaType,	14	},  /* 15 */
+	{	20,	6,	0,	2,	0x04,	COL_ALIGN_RIGHT,	"iNode",	15	},	/* 16 */
 };
 
 COLUMN_DESC wideColumnDescs[MAX_W_COL_DESC] =
@@ -214,7 +218,7 @@ char *colourNames[] =
 	"colour_type",		"colour_rights",	"colour_numlinks",	"colour_owner",		"colour_group",		
 	"colour_size",		"colour_date",		"colour_day",		"colour_time",		"colour_filename",	
 	"colour_extn",		"colour_linkptr",	"colour_target",	"colour_context",	"colour_md5",
-	"colour_sha256",
+	"colour_sha256",	"colour_inode",
 
 	"colour_wide_col1",	"colour_wide_filename", "colour_wide_col2",
 
@@ -265,6 +269,7 @@ void helpThem (char *progName)
 	printf ("         -Dd . . . . . Show the date of the file\n");
 	printf ("         -De . . . . . Show the file extension\n");
 	printf ("         -Dg . . . . . Show the group of the file\n");
+	printf ("         -Di . . . . . Show the inode of the file\n");
 	printf ("         -Dl . . . . . Show the target of the link\n");
 	printf ("         -Dm . . . . . Show the MD5 checksum of the file\n");
 	printf ("         -Dh . . . . . Show the SHA256 checksum of the file\n");
@@ -279,6 +284,7 @@ void helpThem (char *progName)
 	printf ("         -o[e|E] . . . Order the files by extension\n");
 	printf ("         -o[f|F] . . . Order by the file name (default)\n");
 	printf ("         -o[g|G] . . . Order the files by group name\n");
+	printf ("         -o[i|I] . . . Order by the iNode number\n");
 	printf ("         -o[l|L] . . . Order by the number of hard links\n");
 	printf ("         -o[m|M] . . . Order by the MD5 checksum\n");
 	printf ("         -o[h|H] . . . Order by the SHA256 checksum\n");
@@ -425,6 +431,13 @@ void commandOption (char *option, char *progName)
 			case 'H':
 				orderType = ORDER_SHAS;
 				showType |= (option[j] == 'H' ? SHOW_RORDER : 0);
+				j++;
+				break;
+
+			case 'i':
+			case 'I':
+				orderType = ORDER_INOD;
+				showType |= (option[j] == 'I' ? SHOW_RORDER : 0);
 				j++;
 				break;
 			}
@@ -607,6 +620,10 @@ void commandOption (char *option, char *progName)
 						break;
 					case 'h':
 						showType ^= SHOW_SHA256;
+						j++;
+						break;
+					case 'i':
+						showType ^= SHOW_INODE;
 						j++;
 						break;
 					default:
@@ -1351,6 +1368,10 @@ int showDir (DIR_ENTRY *file)
 				{
 					displayInColumn (columnTranslate[COL_CONTEXT], "%s", displayContextString (fullName, contextString));
 				}
+				if (showType & SHOW_INODE)
+				{
+					displayInColumn (columnTranslate[COL_INODE], "%s", displayCommaNumber (file -> fileStat.st_ino, numBuff));
+				}
 				if (showType & SHOW_EXTN)
 				{
 					char *extn = findExtn (displayName);
@@ -1430,6 +1451,10 @@ int showDir (DIR_ENTRY *file)
 				{
 					displayInColumn (columnTranslate[COL_CONTEXT], "%s", displayContextString (fullName, contextString));
 				}
+				if (showType & SHOW_INODE)
+				{
+					displayInColumn (columnTranslate[COL_INODE], "%s", displayCommaNumber (file -> fileStat.st_ino, numBuff));
+				}
 				displayInColour (columnTranslate[COL_FILENAME], colourType[0], "%s/", displayName);
 
 				if (showType & SHOW_DATE)
@@ -1506,6 +1531,10 @@ int showDir (DIR_ENTRY *file)
 				if (showType & SHOW_SELINUX)
 				{
 					displayInColumn (columnTranslate[COL_CONTEXT], "%s", displayContextString (fullName, contextString));
+				}
+				if (showType & SHOW_INODE)
+				{
+					displayInColumn (columnTranslate[COL_INODE], "%s", displayCommaNumber (file -> fileStat.st_ino, numBuff));
 				}
 				if (showType & SHOW_EXTN)
 				{
@@ -1584,6 +1613,10 @@ int showDir (DIR_ENTRY *file)
 				if (showType & SHOW_SHA256)
 				{
 					displayInColumn (columnTranslate[COL_SHA256], "%s", displaySHA256String (file, shaString, encode));
+				}
+				if (showType & SHOW_INODE)
+				{
+					displayInColumn (columnTranslate[COL_INODE], "%s", displayCommaNumber (file -> fileStat.st_ino, numBuff));
 				}
 				if (showType & SHOW_EXTN)
 				{
@@ -1845,6 +1878,11 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	case ORDER_LINK:
 		retn = (fileOne -> fileStat.st_nlink > fileTwo -> fileStat.st_nlink ? -1 :
 				fileOne -> fileStat.st_nlink < fileTwo -> fileStat.st_nlink ? 1 : 0);
+		break;
+
+	case ORDER_INOD:
+		retn = (fileOne -> fileStat.st_ino > fileTwo -> fileStat.st_ino ? -1 :
+				fileOne -> fileStat.st_ino < fileTwo -> fileStat.st_ino ? 1 : 0);
 		break;
 
 	case ORDER_CNXT:
