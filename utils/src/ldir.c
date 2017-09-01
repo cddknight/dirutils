@@ -545,7 +545,7 @@ void commandOption (char *option, char *progName)
 		case 'T':
 			{
 				int len = 0;
-				showType ^= SHOW_IN_AGE;
+				showType |= SHOW_IN_AGE;
 				switch (option[j++])
 				{
 				case 'l':
