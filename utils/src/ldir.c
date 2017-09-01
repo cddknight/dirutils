@@ -94,6 +94,7 @@ char *quoteCopy (char *dst, char *src);
 #define SHOW_MD5		(1 << 19)
 #define SHOW_SHA256		(1 << 20)
 #define SHOW_INODE		(1 << 21)
+#define SHOW_IN_AGE		(1 << 22)
 
 #define DATE_MOD		0
 #define DATE_ACC		1
@@ -125,6 +126,8 @@ char		dateType[41]	=	"Modified";
 char		md5Type[41]		=	"MD5 Sum (hex)";
 char		shaType[41]		=	"SHA256 Sum (hex)";
 time_t		timeNow			= 	0;
+time_t		maxFileAge		=	-1;
+time_t		minFileAge		=	-1;
 char		*quoteMe		=	" *?|&;()<>#\t\\\"";
 
 int			coloursAlt[MAX_COL_DESC + MAX_W_COL_DESC];	
@@ -258,63 +261,121 @@ void helpThem (char *progName)
 	version ();
 	printf ("%s -[Options] [FileNames] [FileNames]...\n", progName);
 	printf ("\nOptions:\n");
-	printf ("         -a  . . . . . Show all files including hidden files\n");
-	printf ("         -A  . . . . . Show the age of the file\n");
-	printf ("         -b  . . . . . Show backup files ending with ~\n");
-	printf ("         -B  . . . . . Encode checksums in base64\n");
-	printf ("         -c  . . . . . Makes the directory case sensitive\n");
-	printf ("         -C  . . . . . Toggle colour display, defined in dirrc\n");
-	printf ("         -d[n] . . . . Display some, n > 0 first n, n < 0 last n\n");
-	printf ("         -Dc . . . . . Show the context of the file\n");
-	printf ("         -Dd . . . . . Show the date of the file\n");
-	printf ("         -De . . . . . Show the file extension\n");
-	printf ("         -Dg . . . . . Show the group of the file\n");
-	printf ("         -Di . . . . . Show the inode of the file\n");
-	printf ("         -Dl . . . . . Show the target of the link\n");
-	printf ("         -Dm . . . . . Show the MD5 checksum of the file\n");
-	printf ("         -Dh . . . . . Show the SHA256 checksum of the file\n");
-	printf ("         -Dn . . . . . Show the number of links\n");
-	printf ("         -Do . . . . . Show the owner of the file\n");
-	printf ("         -Dr . . . . . Show the user rights of the file\n");
-	printf ("         -Ds . . . . . Show the size of the file\n");
-	printf ("         -Dt . . . . . Show the type of the file\n");
-	printf ("         -m  . . . . . Show only duplicated files\n");
-	printf ("         -M  . . . . . Show only files with no duplicate\n");
-	printf ("         -o[c|C] . . . Order the files by context\n");
-	printf ("         -o[e|E] . . . Order the files by extension\n");
-	printf ("         -o[f|F] . . . Order by the file name (default)\n");
-	printf ("         -o[g|G] . . . Order the files by group name\n");
-	printf ("         -o[i|I] . . . Order by the iNode number\n");
-	printf ("         -o[l|L] . . . Order by the number of hard links\n");
-	printf ("         -o[m|M] . . . Order by the MD5 checksum\n");
-	printf ("         -o[h|H] . . . Order by the SHA256 checksum\n");
-	printf ("         -o[n|N] . . . Do not order, use directory order\n");
-	printf ("         -o[o|O] . . . Order the files by owners name\n");
-	printf ("         -o[s|S] . . . Order the files by size\n");
-	printf ("         -o[t|T] . . . Order the files by time and date\n");
-	printf ("         -p  . . . . . Show the full path to the file\n");
-	printf ("         -q  . . . . . Quiet mode, only paths and file names\n");
-	printf ("         -Q  . . . . . Quote special chars\n");
-	printf ("         -r  . . . . . Recursive directory listing\n"); 
-	printf ("         -sd . . . . . Show only dirs\n");
-	printf ("         -sf . . . . . Show only files\n");
-	printf ("         -sl . . . . . Show only links\n");
-	printf ("         -sp . . . . . Show only pipes\n");
-	printf ("         -ss . . . . . Show only sockets\n");
-	printf ("         -sv . . . . . Show only devices\n");
-	printf ("         -sx . . . . . Show only executable files\n");
-	printf ("         -S  . . . . . Show the file size in full\n");
-	printf ("         -ta . . . . . Show time of last access\n");
-	printf ("         -tc . . . . . Show time of last status change\n");
-	printf ("         -tm . . . . . Show time of last modification\n");
-	printf ("         -V  . . . . . Do not show version control directories\n");
-	printf ("         -w  . . . . . Show directory in wide format\n");
-	printf ("         -W[n] . . . . Ignore screen width default to 255\n");
+	printf ("         -a  . . . . . . . . . . Show all files including hidden files\n");
+	printf ("         -A  . . . . . . . . . . Show the age of the file\n");
+	printf ("         -b  . . . . . . . . . . Show backup files ending with ~\n");
+	printf ("         -B  . . . . . . . . . . Encode checksums in base64\n");
+	printf ("         -c  . . . . . . . . . . Makes the directory case sensitive\n");
+	printf ("         -C  . . . . . . . . . . Toggle colour display, defined in dirrc\n");
+	printf ("         -d[n] . . . . . . . . . Display some, n > 0 first n, n < 0 last n\n");
+	printf ("         -Dc . . . . . . . . . . Show the context of the file\n");
+	printf ("         -Dd . . . . . . . . . . Show the date of the file\n");
+	printf ("         -De . . . . . . . . . . Show the file extension\n");
+	printf ("         -Dg . . . . . . . . . . Show the group of the file\n");
+	printf ("         -Di . . . . . . . . . . Show the inode of the file\n");
+	printf ("         -Dl . . . . . . . . . . Show the target of the link\n");
+	printf ("         -Dm . . . . . . . . . . Show the MD5 checksum of the file\n");
+	printf ("         -Dh . . . . . . . . . . Show the SHA256 checksum of the file\n");
+	printf ("         -Dn . . . . . . . . . . Show the number of links\n");
+	printf ("         -Do . . . . . . . . . . Show the owner of the file\n");
+	printf ("         -Dr . . . . . . . . . . Show the user rights of the file\n");
+	printf ("         -Ds . . . . . . . . . . Show the size of the file\n");
+	printf ("         -Dt . . . . . . . . . . Show the type of the file\n");
+	printf ("         -m  . . . . . . . . . . Show only duplicated files\n");
+	printf ("         -M  . . . . . . . . . . Show only files with no duplicate\n");
+	printf ("         -o[c|C] . . . . . . . . Order the files by context\n");
+	printf ("         -o[e|E] . . . . . . . . Order the files by extension\n");
+	printf ("         -o[f|F] . . . . . . . . Order by the file name (default)\n");
+	printf ("         -o[g|G] . . . . . . . . Order the files by group name\n");
+	printf ("         -o[i|I] . . . . . . . . Order by the iNode number\n");
+	printf ("         -o[l|L] . . . . . . . . Order by the number of hard links\n");
+	printf ("         -o[m|M] . . . . . . . . Order by the MD5 checksum\n");
+	printf ("         -o[h|H] . . . . . . . . Order by the SHA256 checksum\n");
+	printf ("         -o[n|N] . . . . . . . . Do not order, use directory order\n");
+	printf ("         -o[o|O] . . . . . . . . Order the files by owners name\n");
+	printf ("         -o[s|S] . . . . . . . . Order the files by size\n");
+	printf ("         -o[t|T] . . . . . . . . Order the files by time and date\n");
+	printf ("         -p  . . . . . . . . . . Show the full path to the file\n");
+	printf ("         -q  . . . . . . . . . . Quiet mode, only paths and file names\n");
+	printf ("         -Q  . . . . . . . . . . Quote special chars\n");
+	printf ("         -r  . . . . . . . . . . Recursive directory listing\n"); 
+	printf ("         -sd . . . . . . . . . . Show only dirs\n");
+	printf ("         -sf . . . . . . . . . . Show only files\n");
+	printf ("         -sl . . . . . . . . . . Show only links\n");
+	printf ("         -sp . . . . . . . . . . Show only pipes\n");
+	printf ("         -ss . . . . . . . . . . Show only sockets\n");
+	printf ("         -sv . . . . . . . . . . Show only devices\n");
+	printf ("         -sx . . . . . . . . . . Show only executable files\n");
+	printf ("         -S  . . . . . . . . . . Show the file size in full\n");
+	printf ("         -ta . . . . . . . . . . Show time of last access\n");
+	printf ("         -tc . . . . . . . . . . Show time of last status change\n");
+	printf ("         -tm . . . . . . . . . . Show time of last modification\n");
+	printf ("         -T[g|l]NNhNNmNNs  . . . Check time greater or less than specified\n");
+	printf ("         -V  . . . . . . . . . . Do not show version control directories\n");
+	printf ("         -w  . . . . . . . . . . Show directory in wide format\n");
+	printf ("         -W[n] . . . . . . . . . Ignore screen width default to 255\n");
 	printf ("\nExpressions:\n");
-	printf ("         & . . . . . . Logical AND, eg. %s \"c*&*c\"\n", progName);
-	printf ("         | . . . . . . Logical OR,  eg. %s \"c*|d*\"\n", progName);
-	printf ("         ^ . . . . . . Logical NOT, eg. %s \"c*&^*c\"\n", progName);
+	printf ("         & . . . . . . . . . . . Logical AND, eg. %s \"c*&*c\"\n", progName);
+	printf ("         | . . . . . . . . . . . Logical OR,  eg. %s \"c*|d*\"\n", progName);
+	printf ("         ^ . . . . . . . . . . . Logical NOT, eg. %s \"c*&^*c\"\n", progName);
 	displayLine ();
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  P A R S E  T I M E                                                                                                *
+ *  ==================                                                                                                *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Convert a string in the format XXhXXmXXs in to seconds.
+ *  \param timeStr String to convert.
+ *  \param len Return the number of character used.
+ *  \result The number of seconds specified in the string.
+ */
+int parseTime (char *timeStr, int *len)
+{
+	int l = 0, running = 0, current = 0, done = 0;
+	while (timeStr[l] && !done)
+	{
+		switch (timeStr[l])
+		{
+		case 'h':
+			running += (current * 3600);
+			current = 0;
+			break;
+		case 'm':
+			running += (current * 60);
+			current = 0;
+			break;
+		case 's':
+			running += current;
+			current = 0;
+			done = 1;
+			break;
+		default:
+			if (timeStr[l] >= '0' && timeStr[l] <= '9')
+			{
+				current = (current * 10) + (timeStr[l] - '0');
+			}
+			else
+			{
+				done = 1;
+				continue;
+			}
+			break;
+		}
+		++l;
+	}
+	if (current)
+	{
+		running += current;
+	}
+	if (len != NULL)
+	{
+		*len = l;
+	}
+	return running;
 }
 
 /**********************************************************************************************************************
@@ -480,6 +541,23 @@ void commandOption (char *option, char *progName)
 			if (option[j - 1] == 'M')
 				showType |= SHOW_NO_MATCH;
 			break;
+
+		case 'T':
+			{
+				int len = 0;
+				showType ^= SHOW_IN_AGE;
+				switch (option[j++])
+				{
+				case 'l':
+					maxFileAge = timeNow - parseTime(&option[j], &len);
+					break;			
+				case 'g':	
+					minFileAge = timeNow - parseTime(&option[j], &len);
+					break;			
+				}
+				j += len;
+			}
+			break;		
 			
 		case 'a':
 			dirType ^= SHOWALL;
@@ -704,7 +782,7 @@ void commandOption (char *option, char *progName)
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  \brief Load the settings from the config files, /etc/ldirrc then HOME/.ldirrc .
+ *  \brief Load the settings from the config files, /etc/ldirrc then HOME/.
  *  \param progName The name of the program being run.
  *  \result None.
  */
@@ -1106,6 +1184,8 @@ char *findExtn (char *fileName)
  */
 int showDir (DIR_ENTRY *file)
 {
+	int fileAge = 0;
+
 	/*------------------------------------------------------------------------*
 	 * Only show files that have matches, or only show files with no match.   *
 	 *------------------------------------------------------------------------*/
@@ -1143,6 +1223,30 @@ int showDir (DIR_ENTRY *file)
 		if (strcmp (file -> fileName, ".git") == 0)
 			return 0;
 		if (strcmp (file -> fileName, ".svn") == 0)
+			return 0;
+	}
+
+	switch (showDate)
+	{
+	case DATE_MOD:
+		fileAge = file -> fileStat.st_mtime;
+		break;
+	case DATE_ACC:
+		fileAge = file -> fileStat.st_atime;
+		break;
+	case DATE_CHG:
+		fileAge = file -> fileStat.st_ctime;
+		break;
+	}
+		
+	/*------------------------------------------------------------------------*
+	 * Don't show files or directories that are outside time values.          *
+	 *------------------------------------------------------------------------*/
+	if (showType & SHOW_IN_AGE)
+	{
+		if (maxFileAge != -1 && fileAge < maxFileAge)		// Too old
+			return 0;
+		if (minFileAge != -1 && fileAge > minFileAge)		// Too young
 			return 0;
 	}
 
@@ -1288,7 +1392,6 @@ int showDir (DIR_ENTRY *file)
 		char shaString[65];
 		char rightsBuff[14];
 		char numBuff[21];
-		int fileAge = 0;
 		
 		if (showType & SHOW_QUOTE)
 		{
