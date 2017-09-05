@@ -310,7 +310,7 @@ void helpThem (char *progName)
 	printf ("         -ta . . . . . . . . . . Show time of last access\n");
 	printf ("         -tc . . . . . . . . . . Show time of last status change\n");
 	printf ("         -tm . . . . . . . . . . Show time of last modification\n");
-	printf ("         -T[g|l]NNhNNmNNs  . . . Check time greater or less than specified\n");
+	printf ("         -T[g|l]NdNhNmNs . . . . Check time greater or less than specified\n");
 	printf ("         -V  . . . . . . . . . . Do not show version control directories\n");
 	printf ("         -w  . . . . . . . . . . Show directory in wide format\n");
 	printf ("         -W[n] . . . . . . . . . Ignore screen width default to 255\n");
@@ -340,8 +340,12 @@ int parseTime (char *timeStr, int *len)
 	{
 		switch (timeStr[l])
 		{
+		case 'd':
+			running += (current * (24 * 60 * 60));
+			current = 0;
+			break;
 		case 'h':
-			running += (current * 3600);
+			running += (current * (60 * 60));
 			current = 0;
 			break;
 		case 'm':
