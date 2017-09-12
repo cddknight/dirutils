@@ -1,6 +1,6 @@
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  N D I R . C                                                                                                       *
+ *  L D I R . C                                                                                                       *
  *  ===========                                                                                                       *
  *                                                                                                                    *
  *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
@@ -19,6 +19,7 @@
 /**
  *  \file
  *  \brief Chris Knight's own directory program.
+ *  \version $Id$
  */
 #include <stdio.h>
 #include <stdlib.h>
