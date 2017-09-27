@@ -13,7 +13,7 @@ BuildRequires: libselinux-devel
 %define debug_package %{nil}
 
 %description
-dircmd consists of a general porpose directory library.
+dircmd consists of a general purpose directory library.
  
 %package devel
 Summary: libdircmd development files

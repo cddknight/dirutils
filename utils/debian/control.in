@@ -9,9 +9,9 @@ Homepage: www.theknight.co.uk
 Package: @PACKAGE@
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: DirCmd consists of a general porpose directory library.
+Description: DirCmd consists of a general purpose directory library.
 
 Package: @PACKAGE@-doc
 Architecture: any
-Description: DirCmd consists of a general porpose directory library.
+Description: DirCmd consists of a general purpose directory library.
 

@@ -12,7 +12,7 @@ BuildRequires: ncurses-devel readline-devel libselinux-devel libxml2-devel libac
 %define debug_package %{nil}
 
 %description
-dirutils consists of a general porpose directory library and a number
+dirutils consists of a general purpose directory library and a number
 of utilities that make use of that library.
  
 %prep
