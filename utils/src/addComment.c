@@ -8,7 +8,7 @@
  *  redistribute or modify this under the terms of any later version of the General Public License.                   *
  *                                                                                                                    *
  *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the                *
- *  impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   *
+ *  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for  *
  *  more details.                                                                                                     *
  *                                                                                                                    *
  *  You should have received a copy of the GNU General Public License along with this program (in the file            *
@@ -723,7 +723,7 @@ int displayBox(int type, int count, FILE *outFile)
 					 "of the General Public License.", 0, 0, 0, outFile);
 			boxLine ("", 0, 0, 0, outFile);
 			boxLine ("This is distributed in the hope that it will be useful, but WITHOUT "
-					 "ANY WARRANTY; without even the impliedwarranty of MERCHANTABILITY or "
+					 "ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
 					 "FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License "
 					 "for more details.", 0, 0, 0, outFile);
 			boxLine ("", 0, 0, 0, outFile);
