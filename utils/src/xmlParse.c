@@ -755,8 +755,9 @@ void processStdin ()
 {
 	int readSize, buffSize = 0, totalRead = 0, notValid = 0;
 	char *buffer;
-	xmlDoc *doc = NULL;
-	xmlNode *rootElement = NULL;
+	xmlDocPtr xDoc = NULL;
+	xmlNodePtr rootElement = NULL;
+	htmlDocPtr hDoc = NULL;
 	xmlChar *xmlBuffer = NULL;
 	
 	buffer = (char *)malloc(buffSize = READSIZE);
@@ -782,20 +783,34 @@ void processStdin ()
 			xmlSetGenericErrorFunc (NULL, myErrorFunc);
 			if ((xmlBuffer = xmlCharStrndup(buffer, totalRead)) != NULL)
 			{
-				if ((doc = xmlParseDoc(xmlBuffer)) != NULL)
+				if (fileType == 1)
 				{
-					if (xsdPath[0])
+					if ((hDoc = htmlParseDoc(xmlBuffer, NULL)) != NULL)
 					{
-						notValid = validateDocument (doc);
-					}
-					if (!notValid)
-					{
-						if ((rootElement = xmlDocGetRootElement (doc)) != NULL)
+						if ((rootElement = xmlDocGetRootElement (hDoc)) != NULL)
 						{
-							processElementNames (doc, rootElement, "", 0);
+							processElementNames (hDoc, rootElement, "", 0);
 						}
+						xmlFreeDoc(xDoc);
 					}
-					xmlFreeDoc(doc);
+				}
+				else
+				{
+					if ((xDoc = xmlParseDoc(xmlBuffer)) != NULL)
+					{
+						if (xsdPath[0])
+						{
+							notValid = validateDocument (xDoc);
+						}
+						if (!notValid)
+						{
+							if ((rootElement = xmlDocGetRootElement (xDoc)) != NULL)
+							{
+								processElementNames (xDoc, rootElement, "", 0);
+							}
+						}
+						xmlFreeDoc(xDoc);
+					}
 				}
 				xmlFree (xmlBuffer);
 			}
