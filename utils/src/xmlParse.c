@@ -35,7 +35,7 @@
 #include <libxml/tree.h>
 #include <libxml/valid.h>
 #include <libxml/xmlschemas.h>
-
+#include <libxml/HTMLparser.h>
 /*----------------------------------------------------------------------------*
  * Prototypes															      *
  *----------------------------------------------------------------------------*/
@@ -93,6 +93,7 @@ COLUMN_DESC *ptrFileColumn[3] =
 };
 
 int filesFound = 0;
+int fileType = 0;
 int displayOptions = DISPLAY_HEADINGS | DISPLAY_HEADINGS_NB;
 bool displayQuiet = false;
 bool displayDebug = false;
@@ -132,7 +133,8 @@ void version (void)
  */
 void helpThem(char *progName)
 {
-	printf ("Enter the command: %s [-Cqp <path>] <filename>\n", basename (progName));
+	printf ("Enter the command: %s [-hCDdqPps] [<path>] [<xsd] <filename>\n", basename (progName));
+	printf ("    -h . . . . . Use the HTML parser\n");
 	printf ("    -C . . . . . Display output in colour.\n");
 	printf ("    -D[dnavke] . Toggle display columns.\n");
 	printf ("    -d . . . . . Output parser debug messages.\n");
@@ -168,10 +170,14 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "CdqPp:s:D:?")) != -1)
+	while ((i = getopt(argc, argv, "hCdqPp:s:D:?")) != -1)
 	{
 		switch (i) 
 		{
+		case 'h':
+			fileType = 1;
+			break;
+
 		case 'C':
 			displayOptions ^= DISPLAY_COLOURS;
 			break;
@@ -383,6 +389,7 @@ int xmlChildElementCount (xmlNode *curNode)
  *  \brief Process each of the elements in the file.
  *  \param doc Document to read.
  *  \param aNode Current node.
+ *  \param curPath Current path, added to recusivly.
  *  \param readLevel 0 current, 1 today, 2 tomorrow.
  *  \result None.
  */
@@ -580,13 +587,13 @@ int validateDocument (xmlDocPtr doc)
 /**
  *  \brief Process the down loaded buffer.
  *  \param xmlFile File to parse.
- *  \result None.
+ *  \result 1 if the file was processed.
  */
 int processFile (char *xmlFile)
 {
 	int retn = 0, notValid = 0;
-	xmlDoc *doc = NULL;
-	xmlNode *rootElement = NULL;
+	xmlDocPtr doc = NULL;
+	xmlNodePtr	 rootElement = NULL;
 
 	xmlSetGenericErrorFunc (NULL, myErrorFunc);
 	if ((doc = 	xmlParseFile (xmlFile)) != NULL)
@@ -611,6 +618,37 @@ int processFile (char *xmlFile)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  P R O C E S S  H T M L F I L E                                                                                    *
+ *  ==============================                                                                                    *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Process an HTML file.
+ *  \param htmlFile File to open.
+ *  \result 1 if the file was processed.
+ */
+int processHTMLFile (char *htmlFile)
+{
+	int retn = 0, notValid = 0;
+	htmlDocPtr doc = NULL;
+	htmlNodePtr rootElement = NULL;
+
+	xmlSetGenericErrorFunc (NULL, myErrorFunc);
+	if ((doc = 	htmlParseFile (htmlFile, NULL)) != NULL)
+	{
+		if ((rootElement = xmlDocGetRootElement (doc)) != NULL)
+		{
+			processElementNames (doc, rootElement, "", 0);
+			retn = 1;
+		}
+        xmlFreeDoc(doc);
+	}
+	xmlCleanupParser();
+	return retn;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  S H O W  D I R                                                                                                    *
  *  ==============                                                                                                    *
  *                                                                                                                    *
@@ -622,6 +660,7 @@ int processFile (char *xmlFile)
  */
 int showDir (DIR_ENTRY *file)
 {
+	int procRetn = 0;
 	char inFile[PATH_SIZE];
 
     /*------------------------------------------------------------------------*
@@ -656,7 +695,15 @@ int showDir (DIR_ENTRY *file)
 		return 0;
 	}
 	shownError = false;
-	if (processFile (inFile))
+	if (fileType == 1)
+	{
+		procRetn = processHTMLFile (inFile);
+	}
+	else
+	{
+		procRetn = processFile (inFile);
+	}
+	if (procRetn)
 	{
 		++filesFound;
 	}
