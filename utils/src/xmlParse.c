@@ -92,8 +92,8 @@ COLUMN_DESC *ptrFileColumn[4] =
 	&fileDescs[0],  &fileDescs[1],  &fileDescs[2],  &fileDescs[3]
 };
 
-int filesFound = 0;
 int fileType = 0;
+int filesFound = 0;
 int displayOptions = DISPLAY_HEADINGS | DISPLAY_HEADINGS_NB;
 bool displayQuiet = false;
 bool displayDebug = false;
@@ -133,8 +133,9 @@ void version (void)
  */
 void helpThem(char *progName)
 {
-	printf ("Enter the command: %s [-hCDdqPps] [<path>] [<xsd] <filename>\n", basename (progName));
-	printf ("    -h . . . . . Use the HTML parser\n");
+	printf ("Enter the command: %s [-xhCDdqPps] [<path>] [<xsd] <filename>\n", basename (progName));
+	printf ("    -x . . . . . Force the use of the XML parser\n");
+	printf ("    -h . . . . . Force the use of the HTML parser\n");
 	printf ("    -C . . . . . Display output in colour.\n");
 	printf ("    -D[dnavke] . Toggle display columns.\n");
 	printf ("    -d . . . . . Output parser debug messages.\n");
@@ -142,6 +143,81 @@ void helpThem(char *progName)
 	printf ("    -P . . . . . Output the full path.\n");
 	printf ("    -p <path>  . Path to search (eg: /sensors/light).\n");
 	printf ("    -s <xsd> . . Path to xsd schema validation file.\n");
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  S E A R C H  S T R                                                                                                *
+ *  ==================                                                                                                *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Seach for a string in a string.
+ *  \param find String to look for.
+ *  \param buffer Buffer to look in.
+ *  \param len Length of the buffer.
+ *  \result Pointer to string in the buffer if found, NULL if not.
+ */
+char *searchStr (char *find, char *buffer, int len)
+{
+	int i = 0, j = 0;
+
+	if (find[0])
+	{
+		while (i < len)
+		{
+			if (find[j] == buffer[i])
+			{
+				if (find[++j] == 0)
+				{
+					return (&buffer[i - (j - 1)]);
+				}
+			}
+			else
+			{
+				if (find[j = 0] == buffer[i])
+					++j;
+			}
+			++i;
+		}
+	}
+	return NULL;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  T E S T  F I L E                                                                                                  *
+ *  ================                                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Test to see if a file contains HTML.
+ *  \param fileName File to test.
+ *  \result 1 if html is found, 0 if not.
+ */
+int testFile (char *fileName)
+{
+	FILE *inFile;
+	int retn = 0;
+	char buffer[2049];
+
+	if ((inFile = fopen (fileName, "r")) != NULL)
+	{
+		int readSize;
+		if ((readSize = fread (buffer, 1, 2048, inFile)) > 0)
+		{
+			if (searchStr ("<!DOCTYPE html", buffer, readSize) != NULL)
+			{
+				retn = 1;
+			}
+			else if (searchStr ("<html", buffer, readSize) != NULL)
+			{
+				retn = 1;
+			}
+		}
+		fclose (inFile);
+	}
+	return retn;
 }
 
 /**********************************************************************************************************************
@@ -170,12 +246,16 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "hCdqPp:s:D:?")) != -1)
+	while ((i = getopt(argc, argv, "hxCdqPp:s:D:?")) != -1)
 	{
 		switch (i) 
 		{
-		case 'h':
+		case 'x':
 			fileType = 1;
+			break;
+
+		case 'h':
+			fileType = 2;
 			break;
 
 		case 'C':
@@ -663,7 +743,7 @@ int processHTMLFile (char *htmlFile)
  */
 int showDir (DIR_ENTRY *file)
 {
-	int procRetn = 0;
+	int procRetn = 0, useType = fileType;
 	char inFile[PATH_SIZE];
 
     /*------------------------------------------------------------------------*
@@ -674,11 +754,21 @@ int showDir (DIR_ENTRY *file)
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
 		return 0;
 	}
+
+    /*------------------------------------------------------------------------*
+     * Open the file and display a table containing the hex dump.             *
+     *------------------------------------------------------------------------*/
+	strcpy (inFile, file -> fullPath);
+	strcat (inFile, file -> fileName);
+	if (useType == 0)
+	{
+		useType = testFile (inFile) ? 2 : 1;
+	}
 	if (!displayQuiet) 
 	{
 		char tempBuff[121];
 
-		displayInColumn (0, "%s", (fileType == 1 ? "HTML" : "XML"));
+		displayInColumn (0, "%s", (useType == 2 ? "HTML" : "XML"));
 		displayInColumn (1, "%s", file -> fileName);
 		displayInColumn (2,	displayFileSize (file -> fileStat.st_size, tempBuff));
 		displayInColumn (3, displayDateString (file -> fileStat.st_mtime, tempBuff));
@@ -687,19 +777,13 @@ int showDir (DIR_ENTRY *file)
 	}
 	displayTidy ();
 
-    /*------------------------------------------------------------------------*
-     * Open the file and display a table containing the hex dump.             *
-     *------------------------------------------------------------------------*/
-	strcpy (inFile, file -> fullPath);
-	strcat (inFile, file -> fileName);
-
 	if (!displayColumnInit (COL_COUNT, ptrParseColumn, displayOptions))
 	{
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
 		return 0;
 	}
 	shownError = false;
-	if (fileType == 1)
+	if (useType == 2)
 	{
 		procRetn = processHTMLFile (inFile);
 	}
@@ -764,23 +848,6 @@ void processStdin ()
 	htmlDocPtr hDoc = NULL;
 	xmlChar *xmlBuffer = NULL;
 	
-    /*------------------------------------------------------------------------*
-     * First display a table with the file name and size.                     *
-     *------------------------------------------------------------------------*/
-	if (!displayColumnInit (2, ptrFileColumn, displayOptions))
-	{
-		fprintf (stderr, "ERROR in: displayColumnInit\n");
-		return;
-	}
-	if (!displayQuiet) 
-	{
-		displayInColumn (0, "%s", (fileType == 1 ? "HTML" : "XML"));
-		displayInColumn (1, "stdin");
-		displayNewLine (DISPLAY_INFO);
-		displayAllLines ();		
-	}
-	displayTidy ();
-
 	buffer = (char *)malloc(buffSize = READSIZE);
 	do
 	{
@@ -798,6 +865,45 @@ void processStdin ()
 
 	if (buffer && totalRead)
 	{
+	    /*----------------------------------------------------------------------------*
+	     * Work out the type of input by looking for HTML strings.                    *
+	     *----------------------------------------------------------------------------*/
+		if (fileType == 0)
+		{
+			if (searchStr ("<!DOCTYPE html", buffer, totalRead) != NULL)
+			{
+				fileType = 2;
+			}
+			else if (searchStr ("<html", buffer, totalRead) != NULL)
+			{
+				fileType = 2;
+			}
+			else
+			{
+				fileType = 1;
+			}
+		}
+
+		if (!displayQuiet) 
+		{
+		    /*------------------------------------------------------------------------*
+		     * Display a table with the type, like this was a normal file.            *
+		     *------------------------------------------------------------------------*/
+			if (!displayColumnInit (2, ptrFileColumn, displayOptions))
+			{
+				fprintf (stderr, "ERROR in: displayColumnInit\n");
+				return;
+			}
+			displayInColumn (0, "%s", (fileType == 2 ? "HTML" : "XML"));
+			displayInColumn (1, "stdin");
+			displayNewLine (DISPLAY_INFO);
+			displayAllLines ();		
+			displayTidy ();
+		}
+
+	    /*----------------------------------------------------------------------------*
+	     * Display the formatted output.                                              *
+	     *----------------------------------------------------------------------------*/
 		if (displayColumnInit (COL_COUNT, ptrParseColumn, displayOptions))
 		{
 			shownError = false;		
