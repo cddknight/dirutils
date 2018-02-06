@@ -756,8 +756,9 @@ void processStdin ()
 {
 	int readSize, buffSize = 0, totalRead = 0, notValid = 0;
 	char *buffer;
-	xmlDoc *doc = NULL;
-	xmlNode *rootElement = NULL;
+	xmlDocPtr xDoc = NULL;
+	xmlNodePtr rootElement = NULL;
+	htmlDocPtr hDoc = NULL;
 	xmlChar *xmlBuffer = NULL;
 	
     /*------------------------------------------------------------------------*
@@ -802,31 +803,31 @@ void processStdin ()
 			{
 				if (fileType == 1)
 				{
-					if ((doc = htmlParseDoc(xmlBuffer, NULL)) != NULL)
+					if ((hDoc = htmlParseDoc(xmlBuffer, NULL)) != NULL)
 					{
-						if ((rootElement = xmlDocGetRootElement (doc)) != NULL)
+						if ((rootElement = xmlDocGetRootElement (hDoc)) != NULL)
 						{
-							processElementNames (doc, rootElement, "", 0);
+							processElementNames (hDoc, rootElement, "", 0);
 						}
-						xmlFreeDoc(doc);
+						xmlFreeDoc(hDoc);
 					}
 				}
 				else
 				{
-					if ((doc = xmlParseDoc(xmlBuffer)) != NULL)
+					if ((xDoc = xmlParseDoc(xmlBuffer)) != NULL)
 					{
 						if (xsdPath[0])
 						{
-							notValid = validateDocument (doc);
+							notValid = validateDocument (xDoc);
 						}
 						if (!notValid)
 						{
-							if ((rootElement = xmlDocGetRootElement (doc)) != NULL)
+							if ((rootElement = xmlDocGetRootElement (xDoc)) != NULL)
 							{
-								processElementNames (doc, rootElement, "", 0);
+								processElementNames (xDoc, rootElement, "", 0);
 							}
 						}
-						xmlFreeDoc(doc);
+						xmlFreeDoc(xDoc);
 					}
 				}
 				xmlFree (xmlBuffer);
