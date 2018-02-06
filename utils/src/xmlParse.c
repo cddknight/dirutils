@@ -79,17 +79,17 @@ COLUMN_DESC *ptrParseColumn[6] =
 	&colParseDescs[0],  &colParseDescs[1],  &colParseDescs[2],  &colParseDescs[3],  &colParseDescs[4],  &colParseDescs[5]
 };
 
-COLUMN_DESC fileDescs[3] =
+COLUMN_DESC fileDescs[4] =
 {
-	{	255,	8,	0,	2,	0x07,	0,	"Filename",	1	},	/* 0 */
-	{	20,		4,	0,	2,	0x07,	0,	"Size",		2	},	/* 1 */
-	{	255,	12,	0,	0,	0x02,	0,	"Modified",	3	},	/* 2 */
-
+	{	5,		5,	0,	2,	0x02,	0,	"Type",		1	},	/* 1 */
+	{	255,	8,	0,	2,	0x07,	0,	"Filename",	2	},	/* 2 */
+	{	20,		4,	0,	2,	0x07,	0,	"Size",		3	},	/* 3 */
+	{	81,		12,	0,	0,	0x02,	0,	"Modified",	4	},	/* 4 */
 };
 
-COLUMN_DESC *ptrFileColumn[3] =
+COLUMN_DESC *ptrFileColumn[4] =
 {
-	&fileDescs[0],  &fileDescs[1],  &fileDescs[2]
+	&fileDescs[0],  &fileDescs[1],  &fileDescs[2],  &fileDescs[3]
 };
 
 int filesFound = 0;
@@ -258,13 +258,13 @@ int main (int argc, char *argv[])
 
 		if (!displayQuiet) 
 		{
-			if (!displayColumnInit (2, ptrFileColumn, displayOptions & ~DISPLAY_HEADINGS))
+			if (!displayColumnInit (3, ptrFileColumn, displayOptions & ~DISPLAY_HEADINGS))
 			{
 				fprintf (stderr, "ERROR in: displayColumnInit\n");
 				return 0;
 			}
 			displayDrawLine (0);
-			displayInColumn (0, "%d %s shown\n", filesFound, filesFound == 1 ? "File" : "Files");
+			displayInColumn (1, "%d %s shown\n", filesFound, filesFound == 1 ? "File" : "Files");
 			displayNewLine(DISPLAY_INFO);
 			displayAllLines ();		
 		}
@@ -666,7 +666,7 @@ int showDir (DIR_ENTRY *file)
     /*------------------------------------------------------------------------*
      * First display a table with the file name and size.                     *
      *------------------------------------------------------------------------*/
-	if (!displayColumnInit (3, ptrFileColumn, displayOptions))
+	if (!displayColumnInit (4, ptrFileColumn, displayOptions))
 	{
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
 		return 0;
@@ -675,9 +675,10 @@ int showDir (DIR_ENTRY *file)
 	{
 		char tempBuff[121];
 
-		displayInColumn (0, "%s", file -> fileName);
-		displayInColumn (1,	displayFileSize (file -> fileStat.st_size, tempBuff));
-		displayInColumn (2, displayDateString (file -> fileStat.st_mtime, tempBuff));
+		displayInColumn (0, "%s", (fileType == 1 ? "HTML" : "XML"));
+		displayInColumn (1, "%s", file -> fileName);
+		displayInColumn (2,	displayFileSize (file -> fileStat.st_size, tempBuff));
+		displayInColumn (3, displayDateString (file -> fileStat.st_mtime, tempBuff));
 		displayNewLine (DISPLAY_INFO);
 		displayAllLines ();		
 	}
@@ -759,6 +760,23 @@ void processStdin ()
 	xmlNode *rootElement = NULL;
 	xmlChar *xmlBuffer = NULL;
 	
+    /*------------------------------------------------------------------------*
+     * First display a table with the file name and size.                     *
+     *------------------------------------------------------------------------*/
+	if (!displayColumnInit (2, ptrFileColumn, displayOptions))
+	{
+		fprintf (stderr, "ERROR in: displayColumnInit\n");
+		return;
+	}
+	if (!displayQuiet) 
+	{
+		displayInColumn (0, "%s", (fileType == 1 ? "HTML" : "XML"));
+		displayInColumn (1, "stdin");
+		displayNewLine (DISPLAY_INFO);
+		displayAllLines ();		
+	}
+	displayTidy ();
+
 	buffer = (char *)malloc(buffSize = READSIZE);
 	do
 	{
@@ -782,20 +800,34 @@ void processStdin ()
 			xmlSetGenericErrorFunc (NULL, myErrorFunc);
 			if ((xmlBuffer = xmlCharStrndup(buffer, totalRead)) != NULL)
 			{
-				if ((doc = xmlParseDoc(xmlBuffer)) != NULL)
+				if (fileType == 1)
 				{
-					if (xsdPath[0])
-					{
-						notValid = validateDocument (doc);
-					}
-					if (!notValid)
+					if ((doc = htmlParseDoc(xmlBuffer, NULL)) != NULL)
 					{
 						if ((rootElement = xmlDocGetRootElement (doc)) != NULL)
 						{
 							processElementNames (doc, rootElement, "", 0);
 						}
+						xmlFreeDoc(doc);
 					}
-					xmlFreeDoc(doc);
+				}
+				else
+				{
+					if ((doc = xmlParseDoc(xmlBuffer)) != NULL)
+					{
+						if (xsdPath[0])
+						{
+							notValid = validateDocument (doc);
+						}
+						if (!notValid)
+						{
+							if ((rootElement = xmlDocGetRootElement (doc)) != NULL)
+							{
+								processElementNames (doc, rootElement, "", 0);
+							}
+						}
+						xmlFreeDoc(doc);
+					}
 				}
 				xmlFree (xmlBuffer);
 			}
