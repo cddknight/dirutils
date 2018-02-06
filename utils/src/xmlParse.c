@@ -44,21 +44,25 @@ int showDir (DIR_ENTRY *file);
 void parsePath (char *path);
 void processStdin (void);
 
-#define COL_DEPTH	0
-#define COL_NAME	1
-#define COL_ATTR	2
-#define COL_VALUE	3
-#define COL_KEY		4
-#define COL_ERROR	5
-#define COL_COUNT	6
+#define FILE_UNKNOWN	0
+#define FILE_XML		1
+#define FILE_HTML		2
 
-#define DISP_DEPTH	0x0001
-#define DISP_NAME	0x0002
-#define DISP_ATTR	0x0004
-#define DISP_VALUE	0x0008
-#define DISP_KEY	0x0010
-#define DISP_ERROR	0x0020
-#define DISP_ALL	0x003F
+#define COL_DEPTH		0
+#define COL_NAME		1
+#define COL_ATTR		2
+#define COL_VALUE		3
+#define COL_KEY			4
+#define COL_ERROR		5
+#define COL_COUNT		6
+
+#define DISP_DEPTH		0x0001
+#define DISP_NAME		0x0002
+#define DISP_ATTR		0x0004
+#define DISP_VALUE		0x0008
+#define DISP_KEY		0x0010
+#define DISP_ERROR		0x0020
+#define DISP_ALL		0x003F
 
 /*----------------------------------------------------------------------------*
  * Globals                                                                    *
@@ -92,8 +96,8 @@ COLUMN_DESC *ptrFileColumn[4] =
 	&fileDescs[0],  &fileDescs[1],  &fileDescs[2],  &fileDescs[3]
 };
 
-int fileType = 0;
 int filesFound = 0;
+int fileType = FILE_UNKNOWN;
 int displayOptions = DISPLAY_HEADINGS | DISPLAY_HEADINGS_NB;
 bool displayQuiet = false;
 bool displayDebug = false;
@@ -251,11 +255,11 @@ int main (int argc, char *argv[])
 		switch (i) 
 		{
 		case 'x':
-			fileType = 1;
+			fileType = FILE_XML;
 			break;
 
 		case 'h':
-			fileType = 2;
+			fileType = FILE_HTML;
 			break;
 
 		case 'C':
@@ -760,15 +764,15 @@ int showDir (DIR_ENTRY *file)
      *------------------------------------------------------------------------*/
 	strcpy (inFile, file -> fullPath);
 	strcat (inFile, file -> fileName);
-	if (useType == 0)
+	if (useType == FILE_UNKNOWN)
 	{
-		useType = testFile (inFile) ? 2 : 1;
+		useType = testFile (inFile) ? FILE_HTML : FILE_XML;
 	}
 	if (!displayQuiet) 
 	{
 		char tempBuff[121];
 
-		displayInColumn (0, "%s", (useType == 2 ? "HTML" : "XML"));
+		displayInColumn (0, "%s", (useType == FILE_HTML ? "HTML" : "XML"));
 		displayInColumn (1, "%s", file -> fileName);
 		displayInColumn (2,	displayFileSize (file -> fileStat.st_size, tempBuff));
 		displayInColumn (3, displayDateString (file -> fileStat.st_mtime, tempBuff));
@@ -783,7 +787,7 @@ int showDir (DIR_ENTRY *file)
 		return 0;
 	}
 	shownError = false;
-	if (useType == 2)
+	if (useType == FILE_HTML)
 	{
 		procRetn = processHTMLFile (inFile);
 	}
@@ -868,19 +872,19 @@ void processStdin ()
 	    /*----------------------------------------------------------------------------*
 	     * Work out the type of input by looking for HTML strings.                    *
 	     *----------------------------------------------------------------------------*/
-		if (fileType == 0)
+		if (fileType == FILE_UNKNOWN)
 		{
 			if (searchStr ("<!DOCTYPE html", buffer, totalRead) != NULL)
 			{
-				fileType = 2;
+				fileType = FILE_HTML;
 			}
 			else if (searchStr ("<html", buffer, totalRead) != NULL)
 			{
-				fileType = 2;
+				fileType = FILE_HTML;
 			}
 			else
 			{
-				fileType = 1;
+				fileType = FILE_XML;
 			}
 		}
 
@@ -894,7 +898,7 @@ void processStdin ()
 				fprintf (stderr, "ERROR in: displayColumnInit\n");
 				return;
 			}
-			displayInColumn (0, "%s", (fileType == 2 ? "HTML" : "XML"));
+			displayInColumn (0, "%s", (fileType == FILE_HTML ? "HTML" : "XML"));
 			displayInColumn (1, "stdin");
 			displayNewLine (DISPLAY_INFO);
 			displayAllLines ();		
@@ -910,7 +914,7 @@ void processStdin ()
 			xmlSetGenericErrorFunc (NULL, myErrorFunc);
 			if ((xmlBuffer = xmlCharStrndup(buffer, totalRead)) != NULL)
 			{
-				if (fileType == 1)
+				if (fileType == FILE_HTML)
 				{
 					if ((hDoc = htmlParseDoc(xmlBuffer, NULL)) != NULL)
 					{
