@@ -137,16 +137,20 @@ void version (void)
  */
 void helpThem(char *progName)
 {
-	printf ("Enter the command: %s [-xhCDdqPps] [<path>] [<xsd] <filename>\n", basename (progName));
-	printf ("    -x . . . . . Force the use of the XML parser.\n");
-	printf ("    -h . . . . . Force the use of the HTML parser.\n");
-	printf ("    -C . . . . . Display output in colour.\n");
-	printf ("    -D[dnavke] . Toggle display columns.\n");
-	printf ("    -d . . . . . Output parser debug messages.\n");
-	printf ("    -q . . . . . Quite mode, output name=key pairs.\n");
-	printf ("    -P . . . . . Output the full path.\n");
-	printf ("    -p <path>  . Path to search (eg: /sensors/light).\n");
-	printf ("    -s <xsd> . . Path to xsd schema validation file.\n");
+	version();
+
+	printf ("%s -[Options] <FileName>\n", basename (progName));
+	printf ("\nOptions:\n");
+	printf ("    -x . . . . . . . Force the use of the XML parser.\n");
+	printf ("    -h . . . . . . . Force the use of the HTML parser.\n");
+	printf ("    -C . . . . . . . Display output in colour.\n");
+	printf ("    -D[dnavke] . . . Toggle display columns.\n");
+	printf ("    -d . . . . . . . Output parser debug messages.\n");
+	printf ("    -q . . . . . . . Quite mode, output name=key pairs.\n");
+	printf ("    -P . . . . . . . Output the full path.\n");
+	printf ("    -p <path>  . . . Path to search (eg: /sensors/light).\n");
+	printf ("    -s <xsd> . . . . Path to xsd schema validation file.\n");
+	displayLine ();
 }
 
 /**********************************************************************************************************************
