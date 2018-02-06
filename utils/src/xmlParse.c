@@ -477,8 +477,11 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 						}
 						if (displayCols & DISP_VALUE) 
 						{
-							displayInColumn (COL_VALUE, "%s", (char *)attr -> children -> content);
-							shownP = true;
+							if (attr -> children)
+							{
+								displayInColumn (COL_VALUE, "%s", (char *)attr -> children -> content);
+								shownP = true;
+							}
 						}
 						if (shownP)
 						{
