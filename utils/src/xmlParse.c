@@ -489,7 +489,7 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
     {
        	int saveLevel = readLevel;
 
-		if (displayPaths)
+		if (displayPaths && curNode -> name != NULL)
 		{
 			if ((strlen (curPath) + strlen ((char *)curNode -> name)) > 1022)
 			{
