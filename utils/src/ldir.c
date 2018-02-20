@@ -1248,9 +1248,9 @@ int showDir (DIR_ENTRY *file)
 	 *------------------------------------------------------------------------*/
 	if (showType & SHOW_IN_AGE)
 	{
-		if (maxFileAge != -1 && fileAge < maxFileAge)		// Too old
+		if (maxFileAge != -1 && fileAge < maxFileAge)		/* Too old */
 			return 0;
-		if (minFileAge != -1 && fileAge > minFileAge)		// Too young
+		if (minFileAge != -1 && fileAge > minFileAge)		/* Too young */
 			return 0;
 	}
 

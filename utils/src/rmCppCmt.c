@@ -1,15 +1,15 @@
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  F I N D  F U N N Y . C                                                                                            *
- *  ======================                                                                                            *
+ *  M O D C R . C                                                                                                     *
+ *  =============                                                                                                     *
  *                                                                                                                    *
  *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
  *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
  *  redistribute or modify this under the terms of any later version of the General Public License.                   *
  *                                                                                                                    *
- *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied        *
- *  warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more     *
- *  details.                                                                                                          *
+ *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the                *
+ *  impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   *
+ *  more details.                                                                                                     *
  *                                                                                                                    *
  *  You should have received a copy of the GNU General Public License along with this program (in the file            *
  *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
@@ -18,7 +18,7 @@
  **********************************************************************************************************************/
 /**
  *  \file
- *  \brief Find funny chars.
+ *  \brief Add CR's to LF's to make a file DOS compatable.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,8 +26,10 @@
 #include <time.h>
 #include <ctype.h>
 #include <dirent.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <dircmd.h>
+#include <libgen.h>
 
 /*----------------------------------------------------------------------------*
  * Prototypes															      *
@@ -38,22 +40,20 @@ int showDir (DIR_ENTRY *file);
 /*----------------------------------------------------------------------------*
  * Globals                                                                    *
  *----------------------------------------------------------------------------*/
-COLUMN_DESC colLinesDescs[4] =
+COLUMN_DESC colChangeDescs[3] =
 {
-	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Line",	0	},	/* 0 */
-	{	10,	10,	0,	3,	0x07,	0,					"Funny",	1	},	/* 1 */
-	{	160,12,	0,	0,	0x07,	0,					"Filename",	2	},	/* 2 */
+	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Removed",	1	},	/* 0 */
+	{	160,12,	0,	0,	0x07,	0,					"Filename",	0	},	/* 1 */
 };
 
-COLUMN_DESC *ptrLinesColumn[4] =
+COLUMN_DESC *ptrChangeColumn[3] =
 {
-	&colLinesDescs[0],
-	&colLinesDescs[1],
-	&colLinesDescs[2]
+	&colChangeDescs[0],
+	&colChangeDescs[1]
 };
 
 int filesFound = 0;
-long totalFunny = 0;
+int totalLines = 0;
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -62,13 +62,30 @@ long totalFunny = 0;
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  \brief Display the version of the application.
+ *  \brief Print the version of the application.
  *  \result None.
  */
 void version (void)
 {
-	printf ("TheKnight: Find funny chars in a File, Version %s\n", directoryVersion());
+	printf ("TheKnight: Remove C++ comments, Version %s\n", directoryVersion());
 	displayLine ();
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  H E L P  T H E M                                                                                                  *
+ *  ================                                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Display help information.
+ *  \param name Name of the application.
+ *  \result None.
+ */
+void helpThem (char *name)
+{
+	version ();
+	printf ("Enter the command: %s <filename>\n", basename(name));
 }
 
 /**********************************************************************************************************************
@@ -86,7 +103,7 @@ void version (void)
 int main (int argc, char *argv[])
 {
 	void *fileList = NULL;
-	int i = 1, found = 0;
+	int i, found = 0;
 
 	if (strcmp (directoryVersion(), VERSION) != 0)
 	{
@@ -95,21 +112,24 @@ int main (int argc, char *argv[])
 	}
 
 	displayInit ();
+	displayGetWidth();
 
-	if (argc == 1)
+	while ((i = getopt(argc, argv, "?")) != -1)
 	{
-		version ();
-		printf ("Enter the command: %s <filename>\n", argv[0]);
-		exit (1);
+		switch (i) 
+		{
+		case '?':
+			helpThem (argv[0]);
+			exit (1);
+		}
 	}
-    /*------------------------------------------------------------------------*
-     * If we got a path then split it into a path and a file pattern to match *
-     * files with.                                                            *
-     *------------------------------------------------------------------------*/
-	while (i < argc)
-		found += directoryLoad (argv[i++], ONLYFILES, fileCompare, &fileList);
 
-    /*------------------------------------------------------------------------*
+    for (; optind < argc; ++optind)
+    {
+		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
+	}
+
+	/*------------------------------------------------------------------------*
      * Now we can sort the directory.                                         *
      *------------------------------------------------------------------------*/
 	directorySort (&fileList);
@@ -118,7 +138,7 @@ int main (int argc, char *argv[])
 	{
 		char numBuff[15];
 		
-		if (!displayColumnInit (3, ptrLinesColumn, DISPLAY_HEADINGS))
+		if (!displayColumnInit (2, ptrChangeColumn, DISPLAY_HEADINGS))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 1;
@@ -126,11 +146,11 @@ int main (int argc, char *argv[])
 		directoryProcess (showDir, &fileList);
 		
 		displayDrawLine (0);
-		displayInColumn (1, displayCommaNumber (totalFunny, numBuff));
-		displayInColumn (2, "Funnies");
+		displayInColumn (0, displayCommaNumber (totalLines, numBuff));
+		displayInColumn (1, "Comments removed");
 		displayNewLine(DISPLAY_INFO);
-		displayInColumn (1, displayCommaNumber (filesFound, numBuff));
-		displayInColumn (2, "Files Found");
+		displayInColumn (0, displayCommaNumber (filesFound, numBuff));
+		displayInColumn (1, "Files changed");
 		displayNewLine(DISPLAY_INFO);
 		displayAllLines ();		
 
@@ -151,62 +171,88 @@ int main (int argc, char *argv[])
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  \brief Count the lines in a file.
- *  \param file File to count lines in.
- *  \result 1 if all OK.
+ *  \brief Convert the file that was found.
+ *  \param file File to convert.
+ *  \result 1 if file changed.
  */
 int showDir (DIR_ENTRY *file)
 {
-	char inBuffer[2049], tempBuffer[41], inFile[PATH_SIZE];
-	long linesFound = 0, fileTotal = 0;
-	FILE *readFile;
+	char inBuffer[1025], outBuffer[2049], inFile[PATH_SIZE], outFile[PATH_SIZE];
+	int linesFixed = 0, i, j, bytesIn;
+	FILE *readFile, *writeFile;
 
 	strcpy (inFile, file -> fullPath);
 	strcat (inFile, file -> fileName);
+	strcpy (outFile, file -> fullPath);
+	strcat (outFile, "modcmt$$$.000");
 
 	if ((readFile = fopen (inFile, "rb")) != NULL)
 	{
-		filesFound ++;
-
-		while (fgets (inBuffer, 2048, readFile))
+		if ((writeFile = fopen (outFile, "wb")) != NULL)
 		{
-			int i = 0;
-			while (inBuffer[i])
+			while (fgets (inBuffer, 1024, readFile) != NULL)
 			{
-				switch (inBuffer[i])
+				char lastSeen = 0, inCmt = 0;
+
+				bytesIn = strlen (inBuffer);
+				for (i = j = 0; i < bytesIn; i++)
 				{
-				case '\t': /* tab */
-					break;
-				case '\n': /* CR */
-					++linesFound;
-					break;
-				default:
-					if (inBuffer[i] < ' ' || inBuffer[i] >= 127)
+					if (inBuffer[i] == '/' && lastSeen == '/' && inCmt == 0)
 					{
-						displayInColumn (0, displayCommaNumber (linesFound, tempBuffer));
-						displayInColumn (1, "0x%02X", inBuffer[i] & 0xFF);
-						displayInColumn (2, "%s", file -> fileName);
-						displayNewLine(0);
-						++fileTotal;
+						outBuffer[j++] = '*';
+						linesFixed++;
+						inCmt = 1;
 					}
-					break;
+					else if (inBuffer[i] == 13 || inBuffer[i] == 10 && inCmt == 1)
+					{
+						if (lastSeen > ' ')
+						{
+							outBuffer[j++] = ' ';
+						}
+						outBuffer[j++] = '*';
+						outBuffer[j++] = '/';
+						outBuffer[j++] = inBuffer[i];
+						inCmt = 0;
+					}
+					else
+					{
+						outBuffer[j++] = inBuffer[i];
+					}
+					lastSeen = inBuffer[i];
 				}
-				++i;
+				if (j)
+				{
+					if (!fwrite (outBuffer, j, 1, writeFile))
+					{
+						linesFixed = 0;
+						break;
+					}
+				}
 			}
-		}
-		if (fileTotal == 0)
-		{
-			displayInColumn (1, "None");
-			displayInColumn (2, "%s", file -> fileName);
-			displayNewLine(0);
-		}
-		else
-		{
-			totalFunny += fileTotal;
+			fclose (writeFile);
 		}
 		fclose (readFile);
+
+		if (linesFixed)
+		{
+			unlink (inFile);
+			rename (outFile, inFile);
+			totalLines += linesFixed;
+			filesFound ++;
+		}
+		else
+			unlink (outFile);
+
+		displayInColumn (0, displayCommaNumber (linesFixed, inBuffer));
+		displayInColumn (1, "%s", file -> fileName);
 	}
-	return (linesFound ? 1 : 0);
+	else
+	{
+		displayInColumn (0, "Failed");
+		displayInColumn (1, "%s", file -> fileName);
+	}
+	displayNewLine (0);
+	return linesFixed ? 1 : 0;
 }
 
 /**********************************************************************************************************************
@@ -219,7 +265,7 @@ int showDir (DIR_ENTRY *file)
  *  \brief Compare two files for sorting.
  *  \param fileOne First file.
  *  \param fileTwo Second file.
- *  \result 0, 1 or -1 depending on order.
+ *  \result 0, 1 or -1 depending on compare.
  */
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 {
@@ -235,4 +281,3 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	}
 	return strcasecmp (fileOne -> fileName, fileTwo -> fileName);
 }
-
