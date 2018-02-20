@@ -720,7 +720,7 @@ int processFile (char *xmlFile)
  */
 int processHTMLFile (char *htmlFile)
 {
-	int retn = 0, notValid = 0;
+	int retn = 0;
 	htmlDocPtr doc = NULL;
 	htmlNodePtr rootElement = NULL;
 

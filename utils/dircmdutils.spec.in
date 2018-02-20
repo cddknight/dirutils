@@ -37,6 +37,7 @@ install -s -m 755 lines $RPM_BUILD_ROOT%{_bindir}/lines
 install -s -m 755 listFunc $RPM_BUILD_ROOT%{_bindir}/listFunc
 install -s -m 755 pfile $RPM_BUILD_ROOT%{_bindir}/pfile
 install -s -m 755 modcr $RPM_BUILD_ROOT%{_bindir}/modcr
+install -s -m 755 rmCppCmt $RPM_BUILD_ROOT%{_bindir}/rmCppCmt
 install -s -m 755 xmlParse $RPM_BUILD_ROOT%{_bindir}/xmlParse
 install -m 644 ldirrc $RPM_BUILD_ROOT%{_sysconfdir}/ldirrc
 
@@ -59,6 +60,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/listFunc
 %{_bindir}/pfile
 %{_bindir}/modcr
+%{_bindir}/rmCppCmt
 %{_bindir}/xmlParse
 %config(noreplace) %{_sysconfdir}/ldirrc
 

@@ -203,7 +203,7 @@ int showDir (DIR_ENTRY *file)
 						linesFixed++;
 						inCmt = 1;
 					}
-					else if (inBuffer[i] == 13 || inBuffer[i] == 10 && inCmt == 1)
+					else if ((inBuffer[i] == 13 || inBuffer[i] == 10) && inCmt == 1)
 					{
 						if (lastSeen > ' ')
 						{
