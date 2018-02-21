@@ -192,11 +192,17 @@ int showDir (DIR_ENTRY *file)
 		{
 			while (fgets (inBuffer, 1024, readFile) != NULL)
 			{
-				char lastSeen = 0, inCmt = 0;
+				char lastSeen = 0, inCmt = 0, hasQuote = 0;
 
 				bytesIn = strlen (inBuffer);
-				for (i = j = 0; i < bytesIn; i++)
+				for (i = j = 0; i < bytesIn && !hasQuote; i++)
 				{
+					/* Lines with quotes ouside CPP comments could contain false matches */
+					/* so these lines are skipped and you should fix by hand. */
+					if (inBuffer[i] == '"' || inBuffer[i] == '\'' && inCmt == 0)
+					{
+						hasQuote = 1;
+					}
 					if (inBuffer[i] == '/' && lastSeen == '/' && inCmt == 0)
 					{
 						outBuffer[j++] = '*';
@@ -220,9 +226,18 @@ int showDir (DIR_ENTRY *file)
 					}
 					lastSeen = inBuffer[i];
 				}
-				if (j)
+				if (j || hasQuote)
 				{
-					if (!fwrite (outBuffer, j, 1, writeFile))
+					int writeSize = 0;
+					if (hasQuote)
+					{
+						writeSize = fwrite (inBuffer, strlen (inBuffer), 1, writeFile);
+					}
+					else
+					{
+						writeSize = fwrite (outBuffer, j, 1, writeFile);
+					}
+					if (writeSize == 0)
 					{
 						linesFixed = 0;
 						break;
@@ -241,8 +256,9 @@ int showDir (DIR_ENTRY *file)
 			filesFound ++;
 		}
 		else
+		{
 			unlink (outFile);
-
+		}
 		displayInColumn (0, displayCommaNumber (linesFixed, inBuffer));
 		displayInColumn (1, "%s", file -> fileName);
 	}
