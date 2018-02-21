@@ -199,7 +199,7 @@ int showDir (DIR_ENTRY *file)
 				{
 					/* Lines with quotes ouside CPP comments could contain false matches */
 					/* so these lines are skipped and you should fix by hand. */
-					if (inBuffer[i] == '"' || inBuffer[i] == '\'' && inCmt == 0)
+					if ((inBuffer[i] == '"' || inBuffer[i] == '\'') && inCmt == 0)
 					{
 						hasQuote = 1;
 					}
