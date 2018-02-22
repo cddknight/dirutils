@@ -1,15 +1,15 @@
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  M O D C R . C                                                                                                     *
- *  =============                                                                                                     *
+ *  R M  C P P  C M T . C                                                                                             *
+ *  =====================                                                                                             *
  *                                                                                                                    *
  *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
  *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
  *  redistribute or modify this under the terms of any later version of the General Public License.                   *
  *                                                                                                                    *
- *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the                *
- *  impliedwarranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for   *
- *  more details.                                                                                                     *
+ *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied        *
+ *  warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more     *
+ *  details.                                                                                                          *
  *                                                                                                                    *
  *  You should have received a copy of the GNU General Public License along with this program (in the file            *
  *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
@@ -52,6 +52,7 @@ COLUMN_DESC *ptrChangeColumn[3] =
 	&colChangeDescs[1]
 };
 
+int careful = 0;
 int filesFound = 0;
 int totalLines = 0;
 
@@ -114,10 +115,14 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "?")) != -1)
+	while ((i = getopt(argc, argv, "c?")) != -1)
 	{
 		switch (i) 
 		{
+		case 'c':
+			careful = 1;
+			break;
+
 		case '?':
 			helpThem (argv[0]);
 			exit (1);
@@ -190,46 +195,73 @@ int showDir (DIR_ENTRY *file)
 	{
 		if ((writeFile = fopen (outFile, "wb")) != NULL)
 		{
+			int inCCmt = 0;
 			while (fgets (inBuffer, 1024, readFile) != NULL)
 			{
-				char lastSeen = 0, inCmt = 0, hasQuote = 0;
+				char lastSeen = 0, inCPPCmt = 0, inQuote = 0, dontChange = 0;
 
 				bytesIn = strlen (inBuffer);
-				for (i = j = 0; i < bytesIn && !hasQuote; i++)
+				for (i = j = 0; i < bytesIn; ++i)
 				{
-					/* Lines with quotes ouside CPP comments could contain false matches */
-					/* so these lines are skipped and you should fix by hand. */
-					if ((inBuffer[i] == '"' || inBuffer[i] == '\'') && inCmt == 0)
+					if (!inCPPCmt)
 					{
-						hasQuote = 1;
-					}
-					if (inBuffer[i] == '/' && lastSeen == '/' && inCmt == 0)
-					{
-						outBuffer[j++] = '*';
-						linesFixed++;
-						inCmt = 1;
-					}
-					else if ((inBuffer[i] == 13 || inBuffer[i] == 10) && inCmt == 1)
-					{
-						if (lastSeen > ' ')
+						if ((inBuffer[i] == '"' || inBuffer[i] == '\'') && !inCCmt)
 						{
-							outBuffer[j++] = ' ';
+							/* Lines with quotes ouside CPP comments could contain false matches so */
+							/* these lines can be skipped with -c on the command line. */
+							if (careful)
+							{
+								dontChange = 1;
+								break; 
+							}
+							inQuote = !inQuote;
 						}
-						outBuffer[j++] = '*';
-						outBuffer[j++] = '/';
-						outBuffer[j++] = inBuffer[i];
-						inCmt = 0;
+						else if (inBuffer[i] == '*' && lastSeen == '/' && !inQuote)
+						{
+							inCCmt = 1;
+						}
+						else if (inBuffer[i] == '/' && lastSeen == '*' && inCCmt)
+						{
+							inCCmt = 0;
+						}
+						if (inBuffer[i] == '/' && lastSeen == '/' && !inQuote && !inCCmt)
+						{
+							outBuffer[j++] = '*';
+							linesFixed++;
+							inCPPCmt = 1;
+						}
+						else
+						{
+							outBuffer[j++] = inBuffer[i];
+						}
 					}
 					else
 					{
-						outBuffer[j++] = inBuffer[i];
+						if (inBuffer[i] == '/' && lastSeen == '*')
+						{
+						}
+						else if (inBuffer[i] == 13 || inBuffer[i] == 10)
+						{
+							if (lastSeen > ' ')
+							{
+								outBuffer[j++] = ' ';
+							}
+							outBuffer[j++] = '*';
+							outBuffer[j++] = '/';
+							outBuffer[j++] = inBuffer[i];
+							inCPPCmt = 0;
+						}
+						else
+						{
+							outBuffer[j++] = inBuffer[i];
+						}
 					}
 					lastSeen = inBuffer[i];
 				}
-				if (j || hasQuote)
+				if (j || dontChange)
 				{
 					int writeSize = 0;
-					if (hasQuote)
+					if (dontChange)
 					{
 						writeSize = fwrite (inBuffer, strlen (inBuffer), 1, writeFile);
 					}
