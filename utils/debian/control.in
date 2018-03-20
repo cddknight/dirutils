@@ -1,7 +1,7 @@
 Source: @PACKAGE@
 Priority: extra
 Maintainer: Chris Knight (Developer) <chris@theknight.co.uk>
-Build-Depends: debhelper (>= 8.0.0), autotools-dev
+Build-Depends: debhelper (>= 10.0.0), autotools-dev
 Standards-Version: 3.9.4
 Section: utils
 Homepage: www.theknight.co.uk
