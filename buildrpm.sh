@@ -2,7 +2,7 @@
 
 START_PWD=${PWD}
 
-for DIR in lib utils
+for DIR in libdircmd utils
 do
 	if [ -d ${DIR} ]
 	then
