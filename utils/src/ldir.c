@@ -37,6 +37,7 @@
 #include <sys/stat.h>
 #include <dircmd.h>
 #include <errno.h>
+#include <getopt.h>
 
 extern int errno;
 
@@ -261,63 +262,63 @@ void helpThem (char *progName)
 	version ();
 	printf ("%s -[Options] [FileNames] [FileNames]...\n", progName);
 	printf ("\nOptions:\n");
-	printf ("         -a  . . . . . . . . . . Show all files including hidden files\n");
-	printf ("         -A  . . . . . . . . . . Show the age of the file\n");
-	printf ("         -b  . . . . . . . . . . Show backup files ending with ~\n");
-	printf ("         -B  . . . . . . . . . . Encode checksums in base64\n");
-	printf ("         -c  . . . . . . . . . . Makes the directory case sensitive\n");
-	printf ("         -C  . . . . . . . . . . Toggle colour display, defined in dirrc\n");
-	printf ("         -d[n] . . . . . . . . . Display some, n > 0 first n, n < 0 last n\n");
-	printf ("         -Dc . . . . . . . . . . Show the context of the file\n");
-	printf ("         -Dd . . . . . . . . . . Show the date of the file\n");
-	printf ("         -De . . . . . . . . . . Show the file extension\n");
-	printf ("         -Dg . . . . . . . . . . Show the group of the file\n");
-	printf ("         -Di . . . . . . . . . . Show the inode of the file\n");
-	printf ("         -Dl . . . . . . . . . . Show the target of the link\n");
-	printf ("         -Dm . . . . . . . . . . Show the MD5 checksum of the file\n");
-	printf ("         -Dh . . . . . . . . . . Show the SHA256 checksum of the file\n");
-	printf ("         -Dn . . . . . . . . . . Show the number of links\n");
-	printf ("         -Do . . . . . . . . . . Show the owner of the file\n");
-	printf ("         -Dr . . . . . . . . . . Show the user rights of the file\n");
-	printf ("         -Ds . . . . . . . . . . Show the size of the file\n");
-	printf ("         -Dt . . . . . . . . . . Show the type of the file\n");
-	printf ("         -m  . . . . . . . . . . Show only duplicated files\n");
-	printf ("         -M  . . . . . . . . . . Show only files with no duplicate\n");
-	printf ("         -o[c|C] . . . . . . . . Order the files by context\n");
-	printf ("         -o[e|E] . . . . . . . . Order the files by extension\n");
-	printf ("         -o[f|F] . . . . . . . . Order by the file name (default)\n");
-	printf ("         -o[g|G] . . . . . . . . Order the files by group name\n");
-	printf ("         -o[i|I] . . . . . . . . Order by the iNode number\n");
-	printf ("         -o[l|L] . . . . . . . . Order by the number of hard links\n");
-	printf ("         -o[m|M] . . . . . . . . Order by the MD5 checksum\n");
-	printf ("         -o[h|H] . . . . . . . . Order by the SHA256 checksum\n");
-	printf ("         -o[n|N] . . . . . . . . Do not order, use directory order\n");
-	printf ("         -o[o|O] . . . . . . . . Order the files by owners name\n");
-	printf ("         -o[s|S] . . . . . . . . Order the files by size\n");
-	printf ("         -o[t|T] . . . . . . . . Order the files by time and date\n");
-	printf ("         -p  . . . . . . . . . . Show the full path to the file\n");
-	printf ("         -q  . . . . . . . . . . Quiet mode, only paths and file names\n");
-	printf ("         -Q  . . . . . . . . . . Quote special chars\n");
-	printf ("         -r  . . . . . . . . . . Recursive directory listing\n"); 
-	printf ("         -sd . . . . . . . . . . Show only dirs\n");
-	printf ("         -sf . . . . . . . . . . Show only files\n");
-	printf ("         -sl . . . . . . . . . . Show only links\n");
-	printf ("         -sp . . . . . . . . . . Show only pipes\n");
-	printf ("         -ss . . . . . . . . . . Show only sockets\n");
-	printf ("         -sv . . . . . . . . . . Show only devices\n");
-	printf ("         -sx . . . . . . . . . . Show only executable files\n");
-	printf ("         -S  . . . . . . . . . . Show the file size in full\n");
-	printf ("         -ta . . . . . . . . . . Show time of last access\n");
-	printf ("         -tc . . . . . . . . . . Show time of last status change\n");
-	printf ("         -tm . . . . . . . . . . Show time of last modification\n");
-	printf ("         -T[g|l]NdNhNmNs . . . . Check time greater or less than specified\n");
-	printf ("         -V  . . . . . . . . . . Do not show version control directories\n");
-	printf ("         -w  . . . . . . . . . . Show directory in wide format\n");
-	printf ("         -W[n] . . . . . . . . . Ignore screen width default to 255\n");
+	printf ("         --all . . . . . . . -a  . . . . . . Show all files including hidden files\n");
+	printf ("         --age . . . . . . . -A  . . . . . . Show the age of the file\n");
+	printf ("         --backup  . . . . . -b  . . . . . . Show backup files ending with ~\n");
+	printf ("         --base64  . . . . . -B  . . . . . . Encode checksums in base64\n");
+	printf ("         --case4 . . . . . . -c  . . . . . . Makes the directory case sensitive\n");
+	printf ("         --colour  . . . . . -C  . . . . . . Toggle colour display, defined in dirrc\n");
+	printf ("         --number #  . . . . -d# . . . . . . Display some, # > 0 first #, # < 0 last n\n");
+	printf ("         --display c . . . . -Dc . . . . . . Show the context of the file\n");
+	printf ("         --display d . . . . -Dd . . . . . . Show the date of the file\n");
+	printf ("         --display e . . . . -De . . . . . . Show the file extension\n");
+	printf ("         --display g . . . . -Dg . . . . . . Show the group of the file\n");
+	printf ("         --display i . . . . -Di . . . . . . Show the inode of the file\n");
+	printf ("         --display l . . . . -Dl . . . . . . Show the target of the link\n");
+	printf ("         --display m . . . . -Dm . . . . . . Show the MD5 checksum of the file\n");
+	printf ("         --display h . . . . -Dh . . . . . . Show the SHA256 checksum of the file\n");
+	printf ("         --display n . . . . -Dn . . . . . . Show the number of links\n");
+	printf ("         --display o . . . . -Do . . . . . . Show the owner of the file\n");
+	printf ("         --display r . . . . -Dr . . . . . . Show the user rights of the file\n");
+	printf ("         --display s . . . . -Ds . . . . . . Show the size of the file\n");
+	printf ("         --display t . . . . -Dt . . . . . . Show the type of the file\n");
+	printf ("         --matching  . . . . -m  . . . . . . Show only duplicated files\n");
+	printf ("         --unique  . . . . . -M  . . . . . . Show only files with no duplicate\n");
+	printf ("         --order c . . . . . -oC . . . . . . Order the files by context\n");
+	printf ("         --order e . . . . . -oE . . . . . . Order the files by extension\n");
+	printf ("         --order f . . . . . -oF . . . . . . Order by the file name (default)\n");
+	printf ("         --order g . . . . . -oG . . . . . . Order the files by group name\n");
+	printf ("         --order i . . . . . -oI . . . . . . Order by the iNode number\n");
+	printf ("         --order l . . . . . -oL . . . . . . Order by the number of hard links\n");
+	printf ("         --order m . . . . . -oM . . . . . . Order by the MD5 checksum\n");
+	printf ("         --order h . . . . . -oH . . . . . . Order by the SHA256 checksum\n");
+	printf ("         --order n . . . . . -oN . . . . . . Do not order, use directory order\n");
+	printf ("         --order o . . . . . -oO . . . . . . Order the files by owners name\n");
+	printf ("         --order s . . . . . -oS . . . . . . Order the files by size\n");
+	printf ("         --order t . . . . . -oT . . . . . . Order the files by time and date\n");
+	printf ("         --path  . . . . . . -p  . . . . . . Show the full path to the file\n");
+	printf ("         --quiet . . . . . . -q  . . . . . . Quiet mode, only paths and file names\n");
+	printf ("         --quote . . . . . . -Q  . . . . . . Quote special chars\n");
+	printf ("         --recursive . . . . -r  . . . . . . Recursive directory listing\n"); 
+	printf ("         --show d  . . . . . -sd . . . . . . Show only directories\n");
+	printf ("         --show f  . . . . . -sf . . . . . . Show only files\n");
+	printf ("         --show l  . . . . . -sl . . . . . . Show only links\n");
+	printf ("         --show p  . . . . . -sp . . . . . . Show only pipes\n");
+	printf ("         --show s  . . . . . -ss . . . . . . Show only sockets\n");
+	printf ("         --show v  . . . . . -sv . . . . . . Show only devices\n");
+	printf ("         --show x  . . . . . -sx . . . . . . Show only executable files\n");
+	printf ("         --size  . . . . . . -S  . . . . . . Show the file size in full\n");
+	printf ("         --date a  . . . . . -ta . . . . . . Show time of last access\n");
+	printf ("         --date c  . . . . . -tc . . . . . . Show time of last status change\n");
+	printf ("         --date m  . . . . . -tm . . . . . . Show time of last modification\n");
+	printf ("         --time g{time}  . . -Tl{time} . . . Greater/Less than #d#h#m#s\n");
+	printf ("         --nocvs . . . . . . -V  . . . . . . Do not show version control directories\n");
+	printf ("         --wide  . . . . . . -w  . . . . . . Show directory in wide format\n");
+	printf ("         --width # . . . . . -W# . . . . . . Ignore screen width default to 255\n");
 	printf ("\nExpressions:\n");
-	printf ("         & . . . . . . . . . . . Logical AND, eg. %s \"c*&*c\"\n", progName);
-	printf ("         | . . . . . . . . . . . Logical OR,  eg. %s \"c*|d*\"\n", progName);
-	printf ("         ^ . . . . . . . . . . . Logical NOT, eg. %s \"c*&^*c\"\n", progName);
+	printf ("         & . . . . . . . . . Logical AND, eg. %s \"c*&*c\"\n", progName);
+	printf ("         | . . . . . . . . . Logical OR,  eg. %s \"c*|d*\"\n", progName);
+	printf ("         ^ . . . . . . . . . Logical NOT, eg. %s \"c*&^*c\"\n", progName);
 	displayLine ();
 }
 
@@ -394,208 +395,213 @@ int parseTime (char *timeStr, int *len)
  *  \param progName The name of the program being run.
  *  \result None.
  */
-void commandOption (char *option, char *progName)
+void commandOption (char option, char *optionVal, char *progName)
 {
 	int j = 0, k;
-	
-	while (option[j])
+
+	switch (option)
 	{
-		switch (option[j++])
+	case 'C':
+		if (dirColour == DISPLAY_COLOURS)
+			dirColour = 0;
+		else
 		{
-		case 'C':
-			if (dirColour == DISPLAY_COLOURS)
-				dirColour = 0;
-			else
+			for (k = 0; k < MAX_COL_DESC; k++)
 			{
-				for (k = 0; k < MAX_COL_DESC; k++)
-				{
-					allColumnDescs[k].colour = coloursAlt[k];
-				}
-				for (k = 0; k < MAX_W_COL_DESC; k++)
-				{
-					wideColumnDescs[k].colour = coloursAlt[k + MAX_COL_DESC];
-				}
-				dirColour = DISPLAY_COLOURS;
+				allColumnDescs[k].colour = coloursAlt[k];
 			}
-			break;
-			
-		case 'o':
-			switch (option[j])
+			for (k = 0; k < MAX_W_COL_DESC; k++)
+			{
+				wideColumnDescs[k].colour = coloursAlt[k + MAX_COL_DESC];
+			}
+			dirColour = DISPLAY_COLOURS;
+		}
+		break;
+		
+	case 'o':
+		if (optionVal != NULL)
+		{
+			switch (optionVal[j])
 			{
 			case 'f':
 			case 'F':
 				orderType = ORDER_NAME;
-				showType |= (option[j] == 'F' ? SHOW_RORDER : 0);
+				showType |= (optionVal[j] == 'F' ? SHOW_RORDER : 0);
 				j++;
 				break;
 
 			case 'e':
 			case 'E':
 				orderType = ORDER_EXTN;
-				showType |= (option[j] == 'E' ? SHOW_RORDER : 0);
+				showType |= (optionVal[j] == 'E' ? SHOW_RORDER : 0);
 				j++;
 				break;
 				
 			case 's':
 			case 'S':
 				orderType = ORDER_SIZE;
-				showType |= (option[j] == 'S' ? SHOW_RORDER : 0);
+				showType |= (optionVal[j] == 'S' ? SHOW_RORDER : 0);
 				j++;
 				break;
 				
 			case 't':
 			case 'T':
 				orderType = ORDER_DATE;
-				showType |= (option[j] == 'T' ? SHOW_RORDER : 0);
+				showType |= (optionVal[j] == 'T' ? SHOW_RORDER : 0);
 				j++;
 				break;
 				
 			case 'n':
 			case 'N':
 				orderType = ORDER_NONE;
-				showType |= (option[j] == 'N' ? SHOW_RORDER : 0);
+				showType |= (optionVal[j] == 'N' ? SHOW_RORDER : 0);
 				j++;
 				break;
 
 			case 'o':
 			case 'O':
 				orderType = ORDER_OWNR;
-				showType |= (option[j] == 'O' ? SHOW_RORDER : 0);
+				showType |= (optionVal[j] == 'O' ? SHOW_RORDER : 0);
 				j++;
 				break;
 
 			case 'g':
 			case 'G':
 				orderType = ORDER_GRUP;
-				showType |= (option[j] == 'G' ? SHOW_RORDER : 0);
+				showType |= (optionVal[j] == 'G' ? SHOW_RORDER : 0);
 				j++;
 				break;
 
 			case 'l':
 			case 'L':
 				orderType = ORDER_LINK;
-				showType |= (option[j] == 'L' ? SHOW_RORDER : 0);
+				showType |= (optionVal[j] == 'L' ? SHOW_RORDER : 0);
 				j++;
 				break;
 
 			case 'c':
 			case 'C':
 				orderType = ORDER_CNXT;
-				showType |= (option[j] == 'C' ? SHOW_RORDER : 0);
+				showType |= (optionVal[j] == 'C' ? SHOW_RORDER : 0);
 				j++;
 				break;
 
 			case 'm':
 			case 'M':
 				orderType = ORDER_MD5S;
-				showType |= (option[j] == 'M' ? SHOW_RORDER : 0);
+				showType |= (optionVal[j] == 'M' ? SHOW_RORDER : 0);
 				j++;
 				break;
 
 			case 'h':
 			case 'H':
 				orderType = ORDER_SHAS;
-				showType |= (option[j] == 'H' ? SHOW_RORDER : 0);
+				showType |= (optionVal[j] == 'H' ? SHOW_RORDER : 0);
 				j++;
 				break;
 
 			case 'i':
 			case 'I':
 				orderType = ORDER_INOD;
-				showType |= (option[j] == 'I' ? SHOW_RORDER : 0);
+				showType |= (optionVal[j] == 'I' ? SHOW_RORDER : 0);
 				j++;
 				break;
 			}
-			break;
+		}
+		break;
 
-		case 'w':
-			showType &= ~SHOW_PATH;
-			showType |= SHOW_WIDE;
-			break;
+	case 'w':
+		showType &= ~SHOW_PATH;
+		showType |= SHOW_WIDE;
+		break;
 
-		case 'W':
+	case 'W':
+		if (optionVal != NULL)
+		{
+			int width = 0;
+		
+			k = 0;
+			while (optionVal[j + k])
 			{
-				int width = 0;
-			
-				k = 0;
-				while (option[j + k])
-				{
-					if (option[j + k] >= '0' && option[j + k] <= '9')
-						width = (width * 10) + (option[j + k] - '0');
-					else
-						break;
-					++k;
-				}
-				j += k;
-				displayForceSize (width == 0 ? 255 : width, 80);
+				if (optionVal[j + k] >= '0' && optionVal[j + k] <= '9')
+					width = (width * 10) + (optionVal[j + k] - '0');
+				else
+					break;
+				++k;
 			}
-			break;
+			j += k;
+			displayForceSize (width == 0 ? 255 : width, 80);
+		}
+		break;
 
-		case 'p':
-			showType &= ~SHOW_WIDE;
-			showType |= SHOW_PATH;
-			break;
+	case 'p':
+		showType &= ~SHOW_WIDE;
+		showType |= SHOW_PATH;
+		break;
 
-		case 'm':
-		case 'M':
-			showType |= SHOW_MATCH;
-			orderType = ORDER_SIZE;
-			dirType &= ~(ONLYDIRS|ONLYLINKS|ONLYDEVS|ONLYSOCKS|ONLYPIPES);
-			dirType |= ONLYFILES;
-			if (option[j - 1] == 'M')
-				showType |= SHOW_NO_MATCH;
-			break;
+	case 'm':
+	case 'M':
+		showType |= SHOW_MATCH;
+		orderType = ORDER_SIZE;
+		dirType &= ~(ONLYDIRS|ONLYLINKS|ONLYDEVS|ONLYSOCKS|ONLYPIPES);
+		dirType |= ONLYFILES;
+		if (option == 'M')
+			showType |= SHOW_NO_MATCH;
+		break;
 
-		case 'T':
+	case 'T':
+		if (optionVal != NULL)
+		{
+			int len = 0;
+			showType |= SHOW_IN_AGE;
+			switch (optionVal[j++])
 			{
-				int len = 0;
-				showType |= SHOW_IN_AGE;
-				switch (option[j++])
-				{
-				case 'l':
-					maxFileAge = timeNow - parseTime(&option[j], &len);
-					break;			
-				case 'g':	
-					minFileAge = timeNow - parseTime(&option[j], &len);
-					break;			
-				}
-				j += len;
+			case 'l':
+				maxFileAge = timeNow - parseTime(&optionVal[j], &len);
+				break;			
+			case 'g':	
+				minFileAge = timeNow - parseTime(&optionVal[j], &len);
+				break;			
 			}
-			break;		
-			
-		case 'a':
-			dirType ^= SHOWALL;
-			break;
+			j += len;
+		}
+		break;		
+		
+	case 'a':
+		dirType ^= SHOWALL;
+		break;
 
-		case 'b':
-			showType ^= SHOW_BACKUP;
-			break;
+	case 'b':
+		showType ^= SHOW_BACKUP;
+		break;
 
-		case 'B':
-			if (encode == DISPLAY_ENCODE_BASE64)
-			{
-				strcpy (md5Type, "MD5 Sum (hex)");
-				strcpy (shaType, "SHA256 Sum (hex)");
-				encode = DISPLAY_ENCODE_HEX;
-			}
-			else
-			{
-				strcpy (md5Type, "MD5 Sum (base64)");
-				strcpy (shaType, "SHA256 Sum (base64)");
-				encode = DISPLAY_ENCODE_BASE64;
-			}
-			break;
+	case 'B':
+		if (encode == DISPLAY_ENCODE_BASE64)
+		{
+			strcpy (md5Type, "MD5 Sum (hex)");
+			strcpy (shaType, "SHA256 Sum (hex)");
+			encode = DISPLAY_ENCODE_HEX;
+		}
+		else
+		{
+			strcpy (md5Type, "MD5 Sum (base64)");
+			strcpy (shaType, "SHA256 Sum (base64)");
+			encode = DISPLAY_ENCODE_BASE64;
+		}
+		break;
 
-		case 'c':
-			dirType ^= USECASE;
-			break;
-			
-		case 'r':
-			dirType ^= RECUDIR;
-			break;
+	case 'c':
+		dirType ^= USECASE;
+		break;
+		
+	case 'r':
+		dirType ^= RECUDIR;
+		break;
 
-		case 's':
-			switch (option[j])
+	case 's':
+		if (optionVal != NULL)
+		{
+			switch (optionVal[j])
 			{
 			case 'd':
 				dirType &= ~(ONLYFILES|ONLYLINKS|ONLYDEVS|ONLYSOCKS|ONLYPIPES);
@@ -639,99 +645,102 @@ void commandOption (char *option, char *progName)
 				j++;
 				break;
 			}
-			break;
-			
-		case 'q':
-			showType ^= SHOW_QUIET;
-			break;
+		}
+		break;
+		
+	case 'q':
+		showType ^= SHOW_QUIET;
+		break;
 
-		case 'Q':
-			showType ^= SHOW_QUOTE;
-			break;
+	case 'Q':
+		showType ^= SHOW_QUOTE;
+		break;
 
-		case 'D':
-			{
-				int done = 0;
-				while (!done)
-				{					
-					switch (option[j])
-					{
-					case 'd':
-						showType ^= SHOW_DATE;
-						j++;
-						break;
-					case 'e':
-						showType ^= SHOW_EXTN;
-						j++;
-						break;
-					case 'o':
-						showType ^= SHOW_OWNER;
-						j++;
-						break;
-					case 'g':
-						showType ^= SHOW_GROUP;
-						j++;
-						break;
-					case 'r':
-						showType ^= SHOW_RIGHTS;
-						j++;
-						break;
-					case 's':
-						showType ^= SHOW_SIZE;
-						j++;
-						break;
-					case 't':
-						showType ^= SHOW_TYPE;
-						j++;
-						break;
-					case 'l':
-						showType ^= SHOW_LINK;
-						j++;
-						break;
-					case 'n':
-						showType ^= SHOW_NUM_LINKS;
-						j++;
-						break;
-					case 'c':
-						showType ^= SHOW_SELINUX;
-						j++;
-						break;
-					case 'm':
-						showType ^= SHOW_MD5;
-						j++;
-						break;
-					case 'h':
-						showType ^= SHOW_SHA256;
-						j++;
-						break;
-					case 'i':
-						showType ^= SHOW_INODE;
-						j++;
-						break;
-					default:
-						done = 1;
-						break;
-					}
+	case 'D':
+		if (optionVal != NULL)
+		{
+			int done = 0;
+			while (!done)
+			{					
+				switch (optionVal[j])
+				{
+				case 'd':
+					showType ^= SHOW_DATE;
+					j++;
+					break;
+				case 'e':
+					showType ^= SHOW_EXTN;
+					j++;
+					break;
+				case 'o':
+					showType ^= SHOW_OWNER;
+					j++;
+					break;
+				case 'g':
+					showType ^= SHOW_GROUP;
+					j++;
+					break;
+				case 'r':
+					showType ^= SHOW_RIGHTS;
+					j++;
+					break;
+				case 's':
+					showType ^= SHOW_SIZE;
+					j++;
+					break;
+				case 't':
+					showType ^= SHOW_TYPE;
+					j++;
+					break;
+				case 'l':
+					showType ^= SHOW_LINK;
+					j++;
+					break;
+				case 'n':
+					showType ^= SHOW_NUM_LINKS;
+					j++;
+					break;
+				case 'c':
+					showType ^= SHOW_SELINUX;
+					j++;
+					break;
+				case 'm':
+					showType ^= SHOW_MD5;
+					j++;
+					break;
+				case 'h':
+					showType ^= SHOW_SHA256;
+					j++;
+					break;
+				case 'i':
+					showType ^= SHOW_INODE;
+					j++;
+					break;
+				default:
+					done = 1;
+					break;
 				}
 			}
-			break;
+		}
+		break;
 
-		case 'A':
-			showType ^= SHOW_AGE;
-			break;
+	case 'A':
+		showType ^= SHOW_AGE;
+		break;
 
-		case 'd':
+	case 'd':
+		if (optionVal != NULL)
 		{
 			int m = 1;
 			
 			k = 0;
 			showFound = 0;
-			while (option[j + k])
+			while (optionVal[j + k])
 			{
-				if (k == 0 && option[j] == '-')
+				if (k == 0 && optionVal[j] == '-')
 					m = -1;
-				else if (option[j + k] >= '0' && option[j + k] <= '9')
-					showFound = (showFound * 10) + (option[j + k] - '0');
+				else if (optionVal[j + k] >= '0' && optionVal[j + k] <= '9')
+					showFound = (showFound * 10) + (optionVal[j + k] - '0');
 				else
 					break;
 				k++;
@@ -740,9 +749,11 @@ void commandOption (char *option, char *progName)
 			j += k;
 		}
 		break;
-		
-		case 't':
-			switch (option[j])
+	
+	case 't':
+		if (optionVal != NULL)
+		{
+			switch (optionVal[j])
 			{
 			case 'm':
 				strcpy (dateType, "Mofified");
@@ -820,17 +831,21 @@ void loadSettings (char *progName)
 		{
 			if (value[i] > ' ')
 			{
-				configPath[j ++] = value[i];
+				configPath[j++] = value[i];
 				configPath[j] = 0;
 			}
 			else if (j)
 			{
-				commandOption (configPath, progName);
+				commandOption (configPath[0], &configPath[1], progName);
 				j = 0;
 			}
 			i++;
 		}
 		while (value[i - 1] != 0);
+		if (j)
+		{
+			commandOption (configPath[0], &configPath[1], progName);
+		}
 	}
 	for (i = 0; i < 4; i++)
 	{
@@ -855,9 +870,37 @@ void loadSettings (char *progName)
  */
 int main (int argc, char *argv[])
 {
-	int i = 1, found = 0, foundDir = 0;
+	int i = 1, found = 0, foundDir = 0, c;
 	void *fileList = NULL;
 	char defaultDir[PATH_SIZE];
+
+	static struct option long_options[] =
+	{
+		{ "all", no_argument, 0, 'a' },
+		{ "age", no_argument, 0, 'A' },
+		{ "backup", no_argument, 0, 'b' },
+		{ "base64", no_argument, 0, 'B' },
+		{ "case", no_argument, 0, 'c' },
+		{ "colour", no_argument, 0, 'C' },
+		{ "number", required_argument, 0, 'd' },
+		{ "display", required_argument, 0, 'D' },
+		{ "matching", no_argument, 0, 'm' },
+		{ "unique", no_argument, 0, 'M' },
+		{ "order", required_argument, 0, 'o' },
+		{ "path", no_argument, 0, 'p' },
+		{ "quiet", no_argument, 0, 'q' },
+		{ "quote", no_argument, 0, 'Q' },
+		{ "recursive", no_argument, 0, 'r' },
+		{ "show", required_argument, 0, 's' },
+		{ "size", no_argument, 0, 'S' },
+		{ "date", required_argument, 0, 't' },
+		{ "time", required_argument, 0, 'T' },
+		{ "nocvs", no_argument, 0, 'V' },
+		{ "wide", no_argument, 0, 'w' },
+		{ "width", required_argument, 0, 'W' },
+		{ "help", no_argument, 0, '?' },
+		{0, 0, 0, 0}
+	};
 
 	if (strcmp (directoryVersion(), VERSION) != 0)
 	{
@@ -869,22 +912,46 @@ int main (int argc, char *argv[])
 	displayInit ();
 	loadSettings (basename (argv[0]));
 
-	while (i < argc)
+	while (1)
 	{
-		if (argv[i][0] == '-')
-		{
-			commandOption (&argv[i][1], basename (argv[0]));
-		}
-		else
-			foundDir = 1;
+	    /*--------------------------------------------------------------------*
+		 * getopt_long stores the option index here.                          *
+	     *--------------------------------------------------------------------*/
+		int option_index = 0;
 
-		i++;
+		c = getopt_long (argc, argv, "aAbBcCd:D:mMo:pqQrs:St:T:VwW:", long_options, &option_index);
+
+	    /*--------------------------------------------------------------------*
+		 * Detect the end of the options.                                     *
+	     *--------------------------------------------------------------------*/
+		if (c == -1) break;
+
+		switch (c)
+		{
+		case 'd':
+		case 'D':
+		case 'o':
+		case 's':
+		case 'T':
+		case 'W':
+			commandOption (c, optarg, basename (argv[0]));
+			break;
+
+		default:
+			commandOption (c, NULL, basename (argv[0]));
+			break;
+
+		}
 	}
-	i = 1;
 
     /*------------------------------------------------------------------------*
-     * If there was no path then do a directory of the current dir            *
+	 * Print any remaining command line arguments (not options).              *
      *------------------------------------------------------------------------*/
+	while (optind < argc)
+	{
+		found += directoryLoad (argv[optind++], dirType, fileCompare, &fileList);
+		foundDir = 1;
+	}
 	if (!foundDir)
 	{
 		if (getcwd (defaultDir, 500) == NULL)
@@ -893,21 +960,6 @@ int main (int argc, char *argv[])
 		}
 		strcat (defaultDir, DIRDEF);
 		found = directoryLoad (defaultDir, dirType, fileCompare, &fileList);
-	}
-	else
-	{
-        /*--------------------------------------------------------------------*
-         * If we got a path then split it into a path and a file pattern to   *
-		 * match files with.                                                  *
-         *--------------------------------------------------------------------*/
-		while (i < argc)
-		{
-			if (argv[i][0] != '-')
-			{
-				found += directoryLoad (argv[i], dirType, fileCompare, &fileList);
-			}
-			i++;
-		}
 	}
 	directorySort (&fileList);
 	
