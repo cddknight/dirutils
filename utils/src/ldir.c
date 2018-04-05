@@ -870,7 +870,7 @@ void loadSettings (char *progName)
  */
 int main (int argc, char *argv[])
 {
-	int i = 1, found = 0, foundDir = 0, c;
+	int found = 0, foundDir = 0, c;
 	void *fileList = NULL;
 	char defaultDir[PATH_SIZE];
 
