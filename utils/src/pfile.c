@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <libgen.h>
 #include <sys/stat.h>
+#include <getopt.h>
 #include <dircmd.h>
 
 /*----------------------------------------------------------------------------*
@@ -133,8 +134,22 @@ void version ()
 int main (int argc, char *argv[])
 {
 	char *envPtr = getenv ("PATH");
-	int i = 1, j, found = 0;
+	int c, found = 0;
 	void *fileList = NULL;
+
+	static struct option long_options[] =
+	{
+		{ "all", no_argument, 0, 'a' },
+		{ "case", no_argument, 0, 'c' },
+		{ "colour", no_argument, 0, 'C' },
+		{ "full", no_argument, 0, 'f' },
+		{ "order", required_argument, 0, 'o' },
+		{ "quiet", no_argument, 0, 'q' },
+		{ "show", required_argument, 0, 's' },
+		{ "exe", no_argument, 0, 'x' },
+		{ "help", no_argument, 0, '?' },
+		{0, 0, 0, 0}
+	};
 
 	if (strcmp (directoryVersion(), VERSION) != 0)
 	{
@@ -151,155 +166,147 @@ int main (int argc, char *argv[])
 		exit (1);
 	}
 
-    /*------------------------------------------------------------------------*
-     * Look for any command line switches                                     *
-     *------------------------------------------------------------------------*/
-	while (i < argc)
+	while (1)
 	{
-		if (argv[i][0] == '-')
+	    /*--------------------------------------------------------------------*
+		 * getopt_long stores the option index here.                          *
+	     *--------------------------------------------------------------------*/
+		int option_index = 0;
+
+		c = getopt_long (argc, argv, "acCfo:qs:x?", long_options, &option_index);
+
+	    /*--------------------------------------------------------------------*
+		 * Detect the end of the options.                                     *
+	     *--------------------------------------------------------------------*/
+		if (c == -1) break;
+
+		switch (c)
 		{
-			j = 1;
-			while (argv[i][j])
+		case 'o':
+			switch (optarg[0])
 			{
-				switch (argv[i][j++])
-				{
-				case 'o':
-					switch (argv[i][j])
-					{
-					case 's':
-					case 'S':
-						orderType = ORDER_SIZE;
-						showType |= (argv[i][j] == 'S' ? SHOW_RORDER : 0);
-						j++;
-						break;
-						
-					case 't':
-					case 'T':
-						orderType = ORDER_DATE;
-						showType |= (argv[i][j] == 'T' ? SHOW_RORDER : 0);
-						j++;
-						break;
-						
-					case 'n':
-					case 'N':
-						orderType = ORDER_NONE;
-						showType |= (argv[i][j] == 'N' ? SHOW_RORDER : 0);
-						j++;
-						break;
-					}
-					break;
-
-				case 'a':
-					showType |= SHOW_DOT;
-					break;
-
-				case 'c':
-					dirType |= USECASE;
-					break;
-
-				case 'C':
-					displayColour ^= DISPLAY_COLOURS;
-					break;
-					
-				case 'f':
-					showType |= SHOW_FULL;
-					break;					
-
-				case 's':
-					switch (argv[i][j])
-					{
-					case 'd':
-						dirType &= ~(ONLYFILES|ONLYLINKS);
-						dirType |= ONLYDIRS;
-						j++;
-						break;
-
-					case 'f':
-						dirType &= ~(ONLYDIRS|ONLYLINKS);
-						dirType |= ONLYFILES;
-						j++;
-						break;
-
-					case 'l':	
-						dirType &= ~(ONLYDIRS|ONLYFILES);
-						dirType |= ONLYLINKS;
-						j++;
-						break;
-						
-					case 'x':	
-						dirType &= ~(ONLYDIRS|ONLYLINKS|ONLYFILES);
-						dirType |= ONLYEXECS;
-						j++;
-						break;
-					}
-					break;
-					
-				case 'q':
-					showType |= SHOW_QUIET;
-					break;
-					
-				case 'x':
-					showType |= SHOW_EXE;
-					break;
-					
-				case '?':
-					version ();
-					printf ("%s -[Options] [FileNames] [FileNames]...\n\n", basename (argv[0]));
-					printf ("Options: \n");
-					printf ("         -a  . . . . . Include hidden files and directories\n");
-					printf ("         -c  . . . . . Makes the directory case sensitive\n");
-					printf ("         -f  . . . . . Show full file details\n");
-					printf ("         -o[t|T] . . . Order the files by time and date\n");
-					printf ("         -o[s|S] . . . Order the files by size\n");
-					printf ("         -o[n|N] . . . Do not order use directory order\n");
-					printf ("         -q  . . . . . Quiet mode, only file names\n");
-					printf ("         -sd . . . . . Show only dirs, not files and links\n");
-					printf ("         -sf . . . . . Show only files, not dirs and links\n");
-					printf ("         -sl . . . . . Show only links, not files and dirs\n");
-					printf ("         -sx . . . . . Show only executable files\n");
-					printf ("         -x  . . . . . Also search for .exe files\n");
-					displayLine ();
-					exit (1);
-				}
+			case 's':
+			case 'S':
+				orderType = ORDER_SIZE;
+				showType |= (optarg[0] == 'S' ? SHOW_RORDER : 0);
+				break;
+				
+			case 't':
+			case 'T':
+				orderType = ORDER_DATE;
+				showType |= (optarg[0] == 'T' ? SHOW_RORDER : 0);
+				break;
+				
+			case 'n':
+			case 'N':
+				orderType = ORDER_NONE;
+				showType |= (optarg[0] == 'N' ? SHOW_RORDER : 0);
+				break;
 			}
+			break;
+
+		case 'a':
+			showType |= SHOW_DOT;
+			break;
+
+		case 'c':
+			dirType |= USECASE;
+			break;
+
+		case 'C':
+			displayColour ^= DISPLAY_COLOURS;
+			break;
+			
+		case 'f':
+			showType |= SHOW_FULL;
+			break;					
+
+		case 's':
+			switch (optarg[0])
+			{
+			case 'd':
+				dirType &= ~(ONLYFILES|ONLYLINKS);
+				dirType |= ONLYDIRS;
+				break;
+
+			case 'f':
+				dirType &= ~(ONLYDIRS|ONLYLINKS);
+				dirType |= ONLYFILES;
+				break;
+
+			case 'l':	
+				dirType &= ~(ONLYDIRS|ONLYFILES);
+				dirType |= ONLYLINKS;
+				break;
+				
+			case 'x':	
+				dirType &= ~(ONLYDIRS|ONLYLINKS|ONLYFILES);
+				dirType |= ONLYEXECS;
+				break;
+			}
+			break;
+			
+		case 'q':
+			showType |= SHOW_QUIET;
+			break;
+			
+		case 'x':
+			showType |= SHOW_EXE;
+			break;
+			
+		case '?':
+			version ();
+			printf ("%s -[Options] [FileName] [FileName]...\n\n", basename (argv[0]));
+			printf ("Options: \n");
+			printf ("         --all  . . . . -a  . . . Include hidden files and directories\n");
+			printf ("         --case . . . . -c  . . . Makes the directory case sensitive\n");
+			printf ("         --colour . . . -C  . . . Show in colour\n");
+			printf ("         --full . . . . -f  . . . Show full file details\n");
+			printf ("         --order t  . . -oT . . . Order the files by time and date\n");
+			printf ("         --order s  . . -oS . . . Order the files by size\n");
+			printf ("         --order n  . . -oN . . . Do not order use find order\n");
+			printf ("         --quiet  . . . -q  . . . Quiet mode, only file names\n");
+			printf ("         --show d . . . -sd . . . Show only dirs, not files and links\n");
+			printf ("         --show f . . . -sf . . . Show only files, not dirs and links\n");
+			printf ("         --show l . . . -sl . . . Show only links, not files and dirs\n");
+			printf ("         --show x . . . -sx . . . Show only executable files\n");
+			printf ("         --exe  . . . . -x  . . . Also search for .exe files\n");
+			printf ("         --help . . . . -?  . . . Show this help message\n");
+			displayLine ();
+			exit (1);
 		}
-		i++;
 	}
-	i = 1;
-	
-	while (i < argc)
-	{
-		if (argv[i][0] != '-')
-		{
-			int j = 0, k = 0;
 
-			while (1)
+	while (optind < argc)
+	{
+		int k = 0, j = 0;
+		while (1)
+		{
+			if (!envPtr[j] || envPtr[j] == PATHSEP)
 			{
-				if (!envPtr[j] || envPtr[j] == PATHSEP)
+				if (k)
 				{
-					if (k)
+					findFilePath[k++] = DIRSEP;
+					findFilePath[k] = 0;
+					strcat (findFilePath, argv[optind]);
+					found += directoryLoad (findFilePath, dirType, fileCompare, &fileList);
+							
+					if (showType & SHOW_EXE)
 					{
-						findFilePath[k++] = DIRSEP;
-						findFilePath[k] = 0;
-						strcat (findFilePath, argv[i]);
+						strcat (findFilePath, ".exe");
 						found += directoryLoad (findFilePath, dirType, fileCompare, &fileList);
-								
-						if (showType & SHOW_EXE)
-						{
-							strcat (findFilePath, ".exe");
-							found += directoryLoad (findFilePath, dirType, 
-									fileCompare, &fileList);
-						}
-						k = 0;
 					}
-					if (!envPtr[j++])
-						break;
+					k = 0;
 				}
-				else
-					findFilePath[k++] = envPtr[j++];
+				if (!envPtr[j++])
+					break;
+			}
+			else
+			{
+				findFilePath[k++] = envPtr[j++];
 			}
 		}
-		i++;
+		++optind;
 	}
 
 	if (found)
