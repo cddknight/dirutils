@@ -521,7 +521,7 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 					rmWhiteSpace ((char *)key, tempBuff, 1020);
 					if (tempBuff[0])
 					{
-						printf ("%s=%s\n", 
+						printf ("%s=\"%s\"\n", 
 								(displayPaths ? fullPath : (char *)curNode -> name), 
 								key == NULL ? "(null)" : tempBuff);
 					}
