@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = dist-bzip2
-bin_PROGRAMS = ldir addComment casedir casefile findFunny hexDump inQuote lineDraw lines listFunc memTest modcr pfile procMonitor rmCppCmt xmlParse
+bin_PROGRAMS = ldir addComment casedir casefile findFunny hexDump inQuote lineDraw lines listFunc memTest modcr pfile procMonitor rmCppCmt tabSpace xmlParse
 AM_CPPFLAGS = -D_FILE_OFFSET_BITS=64 $(DEPS_CFLAGS)
 LIBS = $(DEPS_LIBS)
 ldir_SOURCES = src/ldir.c
@@ -18,6 +18,7 @@ modcr_SOURCES = src/modcr.c
 pfile_SOURCES = src/pfile.c
 procMonitor_SOURCES = src/procMonitor.c
 rmCppCmt_SOURCES = src/rmCppCmt.c
+tabSpace_SOURCES = src/tabSpace.c
 xmlParse_SOURCES = src/xmlParse.c
 xmlParse_LDADD = -lxml2
 EXTRA_DIST = ldirrc
