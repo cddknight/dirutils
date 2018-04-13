@@ -193,8 +193,8 @@ int main (int argc, char *argv[])
  */
 int showDir (DIR_ENTRY *file)
 {
-	char inBuffer[1025], outBuffer[2049], inFile[PATH_SIZE], outFile[PATH_SIZE];
-	int linesFixed = 0, i, j, bytesIn;
+	char inBuffer[1025], outBuffer[4096], inFile[PATH_SIZE], outFile[PATH_SIZE];
+	int linesFixed = 0;
 	FILE *readFile, *writeFile;
 
 	strcpy (inFile, file -> fullPath);
