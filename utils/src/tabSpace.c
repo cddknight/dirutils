@@ -53,7 +53,9 @@ COLUMN_DESC *ptrChangeColumn[3] =
 };
 
 int tabSize = 8;
+int debugMode = 0;
 int spaceToTab = 0;
+int modComment = 0;
 int filesFound = 0;
 int totalLines = 0;
 
@@ -87,7 +89,11 @@ void version (void)
 void helpThem (char *name)
 {
 	version ();
-	printf ("Enter the command: %s <filename>\n", basename(name));
+	printf ("Enter the command: %s [options] <filename>\n", basename(name));
+	printf ("Options: \n");
+	printf ("     -c . . . Modify comments as well as code.\n");
+	printf ("     -s . . . Convert spaces to tabs, default is tabs to spaces.\n");
+	printf ("     -tN  . . Set the desired tab size, defaults to 8.\n");
 }
 
 /**********************************************************************************************************************
@@ -116,10 +122,18 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "cst:?")) != -1)
+	while ((i = getopt(argc, argv, "cdst:?")) != -1)
 	{
 		switch (i) 
 		{
+		case 'c':
+			modComment = 1;
+			break;
+
+		case 'd':
+			debugMode = 1;
+			break;
+
 		case 's':
 			spaceToTab = 1;
 			break;
@@ -182,6 +196,70 @@ int main (int argc, char *argv[])
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  T E S T  C H A R                                                                                                  *
+ *  ================                                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Test to see if we are going into or out of a comment.
+ *  \param thisChar The last character read from the file.
+ *  \param lastChar The character before this one (zero on first read).
+ *  \param current Current state.
+ *  \param line Current line number.
+ *  \result New state.
+ */
+int testChar (char thisChar, char lastChar, int current, int line)
+{
+	int retn = current;
+	static int isDouble = 0;
+
+	if (current)
+	{
+		if (isDouble)
+		{
+			lastChar = 0;
+			isDouble = 0;
+		}
+		else if (thisChar == '\\' && lastChar == '\\' && (current == 1 || current == 2))
+		{
+			isDouble = 1;
+		}
+		if (current == 1 && thisChar == '\'' && lastChar != '\\') retn = 0;
+		else if (current == 2 && thisChar == '"' && lastChar != '\\') retn = 0;
+		else if (current == 3 && thisChar == 13) retn = 0;
+		else if (current == 4 && thisChar == '/' && lastChar == '*') retn = 0;
+		if (retn == 0) isDouble = 0;
+	}
+	else
+	{
+		if (thisChar == '\'') retn = 1;
+		else if (thisChar == '"') retn = 2;
+		else if (!modComment)
+		{
+			if (thisChar == '/' && lastChar == '/') retn = 3;
+			else if (thisChar == '*' && lastChar == '/') retn = 4;
+		}
+	}
+	if (debugMode && retn != current)
+	{
+		char lastC[5], thisC[5];
+		if (lastChar <= ' ' || lastChar >= 127)
+			sprintf (lastC, "%02X", lastChar & 0xFF);
+		else
+			sprintf (lastC, "%c", lastChar);
+
+		if (thisChar <= ' ' || thisChar >= 127)
+			sprintf (thisC, "%02X", thisChar & 0xFF);
+		else
+			sprintf (thisC, "%c", thisChar);
+
+		printf ("Line: %d, Last mode: %d, New mode: %d, (%s)(%s)\n", line + 1, current, retn, lastC, thisC);
+	}
+	return retn;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  S H O W  D I R                                                                                                    *
  *  ==============                                                                                                    *
  *                                                                                                                    *
@@ -193,8 +271,8 @@ int main (int argc, char *argv[])
  */
 int showDir (DIR_ENTRY *file)
 {
-	char inBuffer[1025], outBuffer[4096], inFile[PATH_SIZE], outFile[PATH_SIZE];
-	int linesFixed = 0;
+	char inBuffer[1025], outBuffer[4096], inFile[PATH_SIZE], outFile[PATH_SIZE], lastChar = 0;
+	int linesFixed = 0, inComOrQuo = 0;
 	FILE *readFile, *writeFile;
 
 	strcpy (inFile, file -> fullPath);
@@ -211,11 +289,11 @@ int showDir (DIR_ENTRY *file)
 				int inPos = 0, outPos = 0, curPosn = 0, nextPosn = 0;
 				while (inBuffer[inPos])
 				{
-					if (inBuffer[inPos] == ' ')
+					if (inBuffer[inPos] == ' ' && !inComOrQuo)
 					{
 						++nextPosn;
 					}
-					else if (inBuffer[inPos] == '\t')
+					else if (inBuffer[inPos] == '\t' && !inComOrQuo)
 					{
 						nextPosn = ((nextPosn + tabSize) / tabSize) * tabSize;						
 					}
@@ -226,7 +304,7 @@ int showDir (DIR_ENTRY *file)
 							int one = (curPosn + 1 == nextPosn ? 1 : 0);
 							while (curPosn < nextPosn)
 							{
-								if (((curPosn + tabSize) / tabSize) * tabSize < nextPosn && !one)
+								if (((curPosn + tabSize) / tabSize) * tabSize <= nextPosn && !one)
 								{
 									outBuffer[outPos++] = '\t';
 									curPosn = ((curPosn + tabSize) / tabSize) * tabSize;
@@ -248,7 +326,9 @@ int showDir (DIR_ENTRY *file)
 						}
 						outBuffer[outPos++] = inBuffer[inPos];
 						nextPosn = ++curPosn;
+						inComOrQuo = testChar (inBuffer[inPos], lastChar, inComOrQuo, linesFixed);
 					}
+					lastChar = inBuffer[inPos];
 					++inPos;
 				}
 				if (outPos)
