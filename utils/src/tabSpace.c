@@ -223,9 +223,10 @@ int showDir (DIR_ENTRY *file)
 					{
 						if (spaceToTab)
 						{
+							int one = (curPosn + 1 == nextPosn ? 1 : 0);
 							while (curPosn < nextPosn)
 							{
-								if (((curPosn + tabSize) / tabSize) * tabSize < nextPosn)
+								if (((curPosn + tabSize) / tabSize) * tabSize < nextPosn && !one)
 								{
 									outBuffer[outPos++] = '\t';
 									curPosn = ((curPosn + tabSize) / tabSize) * tabSize;
