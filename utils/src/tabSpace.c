@@ -42,8 +42,8 @@ int showDir (DIR_ENTRY *file);
  *----------------------------------------------------------------------------*/
 COLUMN_DESC colChangeDescs[3] =
 {
-	{ 10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Changed",		1 },	/* 0 */
-	{ 160,	12,	0,	0,	0x07,	0,					"Filename",		0 }		/* 1 */
+	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Changed",	1	},	/* 0 */
+	{	160,12,	0,	0,	0x07,	0,					"Filename",	0	},	/* 1 */
 };
 
 COLUMN_DESC *ptrChangeColumn[3] =
@@ -272,7 +272,7 @@ int testChar (char thisChar, char lastChar, int current, int line)
 int showDir (DIR_ENTRY *file)
 {
 	char inBuffer[1025], outBuffer[4096], inFile[PATH_SIZE], outFile[PATH_SIZE], lastChar = 0;
-	int linesFixed = 0, inComOrQuo = 0;
+	int linesFixed = 0, linesRead = 0, inComOrQuo = 0;
 	FILE *readFile, *writeFile;
 
 	strcpy (inFile, file -> fullPath);
@@ -287,6 +287,7 @@ int showDir (DIR_ENTRY *file)
 			while (fgets (inBuffer, 1024, readFile) != NULL)
 			{
 				int inPos = 0, outPos = 0, curPosn = 0, nextPosn = 0;
+				++linesRead;
 				while (inBuffer[inPos])
 				{
 					if (inBuffer[inPos] == ' ' && !inComOrQuo)
@@ -326,7 +327,14 @@ int showDir (DIR_ENTRY *file)
 						}
 						outBuffer[outPos++] = inBuffer[inPos];
 						nextPosn = ++curPosn;
-						inComOrQuo = testChar (inBuffer[inPos], lastChar, inComOrQuo, linesFixed);
+						inComOrQuo = testChar (inBuffer[inPos], lastChar, inComOrQuo, linesRead);
+					}
+					/* If line out is too big, just output the original line */
+					if (outPos + nextPosn > 4090)
+					{
+						fwrite (inBuffer, strlen(inBuffer), 1, writeFile);
+						outPos = 0;
+						break;
 					}
 					lastChar = inBuffer[inPos];
 					++inPos;
@@ -335,7 +343,10 @@ int showDir (DIR_ENTRY *file)
 				{
 					outBuffer[outPos] = 0;
 					fwrite (outBuffer, outPos, 1, writeFile);
-					++linesFixed;
+					if (strncmp (outBuffer, inBuffer, outPos))
+					{ 
+						++linesFixed;
+					}
 				}
 			}
 			fclose (writeFile);
@@ -347,7 +358,7 @@ int showDir (DIR_ENTRY *file)
 			unlink (inFile);
 			rename (outFile, inFile);
 			totalLines += linesFixed;
-			filesFound ++;
+			++filesFound;
 		}
 		else
 		{
