@@ -32,16 +32,16 @@
 #include <dircmd.h>
 
 /*----------------------------------------------------------------------------*
- * Prototypes															      *
+ * Prototypes                                                                 *
  *----------------------------------------------------------------------------*/
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo);
 int showDir (DIR_ENTRY *file);
 
 /*----------------------------------------------------------------------------*
- * Defines   															      *
+ * Defines                                                                    *
  *----------------------------------------------------------------------------*/
-#define CASE_LOWER  0
-#define CASE_UPPER  1
+#define CASE_LOWER	0
+#define CASE_UPPER	1
 #define CASE_PROPER 2
 
 /*----------------------------------------------------------------------------*
@@ -49,8 +49,8 @@ int showDir (DIR_ENTRY *file);
  *----------------------------------------------------------------------------*/
 COLUMN_DESC colChangeDescs[3] =
 {
-	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Lines",	1	},	/* 0 */
-	{	160,12,	0,	0,	0x07,	0,					"Filename",	0	},	/* 1 */
+	{	10, 10, 0,	3,	0x07,	COL_ALIGN_RIGHT,	"Lines",	1	},	/* 0 */
+	{	160,12, 0,	0,	0x07,	0,					"Filename", 0	},	/* 1 */
 };
 
 COLUMN_DESC *ptrChangeColumn[3] =
@@ -131,8 +131,8 @@ int main (int argc, char *argv[])
 		}
 	}
 
-    for (; optind < argc; ++optind)
-    {
+	for (; optind < argc; ++optind)
+	{
 		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
 	}
 
@@ -206,21 +206,21 @@ int showDir (DIR_ENTRY *file)
 				{
 					byteIn = inBuffer[i];
 					
-				    switch (useCase)
+					switch (useCase)
 					{
 					case CASE_UPPER:
-					    if (islower (byteIn))
-						    inBuffer[i] = toupper(byteIn);
+						if (islower (byteIn))
+							inBuffer[i] = toupper(byteIn);
 						break;
 					case CASE_LOWER:
-					    if (isupper (byteIn))
-						    inBuffer[i] = tolower(byteIn);
+						if (isupper (byteIn))
+							inBuffer[i] = tolower(byteIn);
 						break;
 					case CASE_PROPER:
-					    if (isalpha(lastChar))
-						    inBuffer[i] = tolower(byteIn);
+						if (isalpha(lastChar))
+							inBuffer[i] = tolower(byteIn);
 						else
-						    inBuffer[i] = toupper(byteIn);
+							inBuffer[i] = toupper(byteIn);
 						break;
 					}
 					

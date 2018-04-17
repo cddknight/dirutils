@@ -32,7 +32,7 @@
 #include <dircmd.h>
 
 /*----------------------------------------------------------------------------*
- * Prototypes															      *
+ * Prototypes                                                                 *
  *----------------------------------------------------------------------------*/
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo);
 int showDir (DIR_ENTRY *file);
@@ -42,11 +42,11 @@ int showDir (DIR_ENTRY *file);
  *----------------------------------------------------------------------------*/
 COLUMN_DESC colChangeDescs[] =
 {
-	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Max",		1	},	/* 0 */
-	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Min",		1	},	/* 1 */
-	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Pressure",	1	},	/* 2 */
-	{	160,12,	0,	3,	0x07,	0,					"Filename", 0	},	/* 3 */
-	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Average",	1	},	/* 4 */
+	{	10, 10, 0,	3,	0x07,	COL_ALIGN_RIGHT,	"Max",		1	},	/* 0 */
+	{	10, 10, 0,	3,	0x07,	COL_ALIGN_RIGHT,	"Min",		1	},	/* 1 */
+	{	10, 10, 0,	3,	0x07,	COL_ALIGN_RIGHT,	"Pressure", 1	},	/* 2 */
+	{	160,12, 0,	3,	0x07,	0,					"Filename", 0	},	/* 3 */
+	{	10, 10, 0,	3,	0x07,	COL_ALIGN_RIGHT,	"Average",	1	},	/* 4 */
 };
 
 COLUMN_DESC *ptrChangeColumn[] =
@@ -58,6 +58,7 @@ COLUMN_DESC *ptrChangeColumn[] =
 };
 
 int inputMode = 0;
+int outputAll = 0;
 int outputMode = 0;
 int filesFound = 0;
 int totalProcessed = 0;
@@ -112,14 +113,18 @@ int main (int argc, char *argv[])
 		printf ("Enter the command: %s [-<mode>] <file pattern>\n", argv[0]);
 		exit (1);
 	}
-    /*------------------------------------------------------------------------*
+	/*------------------------------------------------------------------------*
      * If we got a path then split it into a path and a file pattern to match *
      * files with.                                                            *
      *------------------------------------------------------------------------*/
-	while ((i = getopt(argc, argv, "pwtT?")) != -1)
+	while ((i = getopt(argc, argv, "apwtT?")) != -1)
 	{
 		switch (i) 
 		{
+		case 'a':
+			outputAll = 1;
+			break;
+
 		case 't':
 			outputMode = 2;
 			break;
@@ -148,12 +153,12 @@ int main (int argc, char *argv[])
 		}
 	}
 
-    for (; optind < argc; ++optind)
-    {
+	for (; optind < argc; ++optind)
+	{
 		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
 	}
 
-    /*------------------------------------------------------------------------*
+	/*------------------------------------------------------------------------*
      * Now we can sort the directory.                                         *
      *------------------------------------------------------------------------*/
 	directorySort (&fileList);
@@ -211,14 +216,14 @@ void processValues (float *values, int *readVal, int count, int getTime)
 		if (readVal[i])
 		{
 			/**********************************************************************************************************
-		     * When processing months all the values should be averaged. When processing days the monthly max and min *
-			 * values are calculated and the averages are averaged.                                                   *
-			 **********************************************************************************************************/
+             * When processing months all the values should be averaged. When processing days the monthly max and min *
+             * values are calculated and the averages are averaged.                                                   *
+             **********************************************************************************************************/
 			int mode = (getTime ? i % 3 : 2);
 
 			switch (mode)
 			{
-			case 0:	/* Min */
+			case 0: /* Min */
 				if (savedRead[i] == 0)
 				{
 					savedValues[i] = values[i];

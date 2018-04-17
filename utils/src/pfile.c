@@ -46,7 +46,7 @@ int showDir (DIR_ENTRY *file);
 #define ORDER_DATE	2
 #define ORDER_SIZE	3
 
-#define SHOW_NORMAL	0
+#define SHOW_NORMAL 0
 #define SHOW_FULL	1
 #define SHOW_DOT	2
 #define SHOW_PATH	4
@@ -62,17 +62,17 @@ COLUMN_DESC colNormDescs[10] =
 {
 	{	5,	5,	0,	3,	0x03,	COL_ALIGN_RIGHT,	"Type",		8	},	/*  0 */
 #ifdef HAVE_SYS_ACL_H
-	{	11,	11,	0,	3,	0x02,	0,					"Rights",	3	},	/*  1 */
+	{	11, 11, 0,	3,	0x02,	0,					"Rights",	3	},	/*  1 */
 #else
-	{	10,	10,	0,	3,	0x02,	0,					"Rights",	3	},	/*  1 */
+	{	10, 10, 0,	3,	0x02,	0,					"Rights",	3	},	/*  1 */
 #endif
-	{	20,	6,	0,	1,	0x05,	0,					"Owner",	4	},	/*  2 */
-	{	20,	6,	0,	3,	0x05,	0,					"Group",	5	},	/*  3 */
+	{	20, 6,	0,	1,	0x05,	0,					"Owner",	4	},	/*  2 */
+	{	20, 6,	0,	3,	0x05,	0,					"Group",	5	},	/*  3 */
 	{	7,	7,	0,	3,	0x06,	COL_ALIGN_RIGHT,	"Size",		1	},	/*  4 */
-	{	160,12,	0,	3,	0x02,	COL_ALIGN_RIGHT,	"Modified",	2	},	/*  5 */
-	{	160,12,	0,	3,	0x07,	0,					"Filename",	0	},	/*  6 */
+	{	160,12, 0,	3,	0x02,	COL_ALIGN_RIGHT,	"Modified", 2	},	/*  5 */
+	{	160,12, 0,	3,	0x07,	0,					"Filename", 0	},	/*  6 */
 	{	3,	3,	0,	3,	0x01,	0,					NULL,		7	},	/*  7 */
-	{	160,12,	0,	0,	0x07,	0,					"Target",	6	},	/*  8 */
+	{	160,12, 0,	0,	0x07,	0,					"Target",	6	},	/*  8 */
 };
 
 COLUMN_DESC *ptrFullColumn[10] =
@@ -97,10 +97,10 @@ long		dirsFound	= 0;
 long		filesFound	= 0;
 long		linksFound	= 0;
 long long	totalSize	= 0;
-int 		orderType	= ORDER_NONE;
-int 		showType	= SHOW_NORMAL;
+int			orderType	= ORDER_NONE;
+int			showType	= SHOW_NORMAL;
 int			dirType		= ONLYEXECS|ONLYLINKS;
-char 		findFilePath[PATH_SIZE];
+char		findFilePath[PATH_SIZE];
 int			displayColour = 0;
 
 /**********************************************************************************************************************
@@ -168,14 +168,14 @@ int main (int argc, char *argv[])
 
 	while (1)
 	{
-	    /*--------------------------------------------------------------------*
+		/*--------------------------------------------------------------------*
 		 * getopt_long stores the option index here.                          *
 	     *--------------------------------------------------------------------*/
 		int option_index = 0;
 
 		c = getopt_long (argc, argv, "acCfo:qs:x?", long_options, &option_index);
 
-	    /*--------------------------------------------------------------------*
+		/*--------------------------------------------------------------------*
 		 * Detect the end of the options.                                     *
 	     *--------------------------------------------------------------------*/
 		if (c == -1) break;
@@ -311,7 +311,7 @@ int main (int argc, char *argv[])
 
 	if (found)
 	{
-	    /*--------------------------------------------------------------------*
+		/*--------------------------------------------------------------------*
 	     * Now we can sort the directory.                                     *
 	     *--------------------------------------------------------------------*/
 		directorySort (&fileList);
@@ -473,7 +473,7 @@ int showDir (DIR_ENTRY *file)
 			displayInColumn (1, displayRightsStringACL (file, rightsBuff));
 			displayInColumn (2, displayOwnerString (file -> fileStat.st_uid, ownerString));
 			displayInColumn (3, displayGroupString (file -> fileStat.st_gid, groupString));
-			displayInColumn (5,	displayDateString (file -> fileStat.st_mtime, dateString));
+			displayInColumn (5, displayDateString (file -> fileStat.st_mtime, dateString));
 			displayInColumn (6, fullName);
 			displayInColumn (7, "->");
 			displayInColumn (8, linkBuff);
@@ -490,7 +490,7 @@ int showDir (DIR_ENTRY *file)
 			displayInColumn (1, displayRightsStringACL (file, rightsBuff));
 			displayInColumn (2, displayOwnerString (file -> fileStat.st_uid, ownerString));
 			displayInColumn (3, displayGroupString (file -> fileStat.st_gid, groupString));
-			displayInColumn (5,	displayDateString (file -> fileStat.st_mtime, dateString));
+			displayInColumn (5, displayDateString (file -> fileStat.st_mtime, dateString));
 			displayInColumn (6, fullName);
 			displayNewLine (0);
 			dirsFound ++;
@@ -504,8 +504,8 @@ int showDir (DIR_ENTRY *file)
 			displayInColumn (1, displayRightsStringACL (file, rightsBuff));
 			displayInColumn (2, displayOwnerString (file -> fileStat.st_uid, ownerString));
 			displayInColumn (3, displayGroupString (file -> fileStat.st_gid, groupString));
-			displayInColumn (4,	displayFileSize (file -> fileStat.st_size, numBuff));
-			displayInColumn (5,	displayDateString (file -> fileStat.st_mtime, dateString));
+			displayInColumn (4, displayFileSize (file -> fileStat.st_size, numBuff));
+			displayInColumn (5, displayDateString (file -> fileStat.st_mtime, dateString));
 			displayInColumn (6, fullName);
 			displayNewLine (0);
 			filesFound ++;

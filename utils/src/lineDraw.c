@@ -30,6 +30,8 @@
  **********************************************************************************************************************/
 /**
  *  \brief The program starts here.
+ *  \param argc Argument count.
+ *  \param argv Argument list.
  *  \result 0 (zero) if all processed OK.
  */
 int main (int argc, char *argv[])

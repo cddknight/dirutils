@@ -32,7 +32,7 @@
 #include <libgen.h>
 
 /*----------------------------------------------------------------------------*
- * Prototypes															      *
+ * Prototypes                                                                 *
  *----------------------------------------------------------------------------*/
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo);
 int showDir (DIR_ENTRY *file);
@@ -42,9 +42,9 @@ int showDir (DIR_ENTRY *file);
  *----------------------------------------------------------------------------*/
 COLUMN_DESC colChangeDescs[3] =
 {
-	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Added",	1	},	/* 0 */
-	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Removed",	1	},	/* 1 */
-	{	160,12,	0,	0,	0x07,	0,					"Filename",	0	},	/* 2 */
+	{	10, 10, 0,	3,	0x07,	COL_ALIGN_RIGHT,	"Added",	1	},	/* 0 */
+	{	10, 10, 0,	3,	0x07,	COL_ALIGN_RIGHT,	"Removed",	1	},	/* 1 */
+	{	160,12, 0,	0,	0x07,	0,					"Filename", 0	},	/* 2 */
 };
 
 COLUMN_DESC *ptrChangeColumn[3] =
@@ -141,8 +141,8 @@ int main (int argc, char *argv[])
 			exit (1);
 	}
 
-    for (; optind < argc; ++optind)
-    {
+	for (; optind < argc; ++optind)
+	{
 		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
 	}
 

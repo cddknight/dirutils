@@ -30,11 +30,11 @@
 #include <sys/stat.h>
 #include <dircmd.h>
 #include <libgen.h>
-#ifdef HAVE_VALUES_H                                                                                                    
-#include <values.h>                                                                                                     
-#else                                                                                                                   
-#define MAXINT 2147483647                                                                                               
-#endif                                                                                                                  
+#ifdef HAVE_VALUES_H																									
+#include <values.h>																										
+#else																													
+#define MAXINT 2147483647																								
+#endif																													
 
 /*----------------------------------------------------------------------------*
  * Prototypes                                                                 *
@@ -48,7 +48,7 @@ int showDir (DIR_ENTRY *file);
 COLUMN_DESC colNumberDescs[3] =
 {
 	{ 20,	4,	4,	2,	0x02,	COL_ALIGN_RIGHT,	"Line",			0 },	/* 0 */
-	{ 1024,	12,	8,	0,	0x07,	0,					"Contents",		1 }		/* 1 */
+	{ 1024, 12, 8,	0,	0x07,	0,					"Contents",		1 }		/* 1 */
 };
 
 COLUMN_DESC *ptrNumberColumn[3] =
@@ -59,13 +59,13 @@ COLUMN_DESC *ptrNumberColumn[3] =
 
 COLUMN_DESC fileDescs[] =
 {
-	{	60,	8,	16,	2,	0x07,	0,	"Filename",	1	},	/* 0 */
-	{	20,	4,	4,	0,	0x07,	0,	"Size",		0	},	/* 1 */
+	{	60, 8,	16, 2,	0x07,	0,	"Filename", 1	},	/* 0 */
+	{	20, 4,	4,	0,	0x07,	0,	"Size",		0	},	/* 1 */
 };
 
 COLUMN_DESC *ptrFileColumn[] =
 {
-	&fileDescs[0],  &fileDescs[1]
+	&fileDescs[0],	&fileDescs[1]
 };
 
 int tabSize = 8;
@@ -189,9 +189,9 @@ int main (int argc, char *argv[])
      *------------------------------------------------------------------------*/
 	if (found)
 	{
-	    /*--------------------------------------------------------------------*
-	     * Now we can sort the directory.                                     *
-	     *--------------------------------------------------------------------*/
+		/*--------------------------------------------------------------------*
+         * Now we can sort the directory.                                     *
+         *--------------------------------------------------------------------*/
 		directorySort (&fileList);
 		directoryProcess (showDir, &fileList);
 
@@ -234,7 +234,7 @@ int showDir (DIR_ENTRY *file)
 	int linesFound = 0;
 	FILE *readFile;
 
-    /*------------------------------------------------------------------------*
+	/*------------------------------------------------------------------------*
      * First display a table with the file name and size.                     *
      *------------------------------------------------------------------------*/
 	if (!displayColumnInit (2, ptrFileColumn, displayColour))
@@ -246,7 +246,7 @@ int showDir (DIR_ENTRY *file)
 	displayHeading (0);
 	displayNewLine (0);
 	displayInColumn (0, "%s", file -> fileName);
-	displayInColumn (1,	displayFileSize (file -> fileStat.st_size, (char *)inBuffer));
+	displayInColumn (1, displayFileSize (file -> fileStat.st_size, (char *)inBuffer));
 	displayNewLine (DISPLAY_INFO);
 	displayAllLines ();		
 	displayTidy ();

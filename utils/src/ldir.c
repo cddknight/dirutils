@@ -77,7 +77,7 @@ char *quoteCopy (char *dst, char *src);
 #define SHOW_AGE		(1 << 1)
 #define SHOW_PATH		(1 << 2)
 #define SHOW_MATCH		(1 << 3)
-#define SHOW_RORDER 	(1 << 4)
+#define SHOW_RORDER		(1 << 4)
 #define SHOW_QUIET		(1 << 5)
 #define SHOW_OWNER		(1 << 6)
 #define SHOW_GROUP		(1 << 7)
@@ -108,25 +108,25 @@ char *quoteCopy (char *dst, char *src);
 /*----------------------------------------------------------------------------*
  * Globals                                                                    *
  *----------------------------------------------------------------------------*/
-int			orderType		= 	ORDER_NAME;
-int			showType		= 	SHOW_NORMAL|SHOW_SIZE|SHOW_DATE;
-int			dirType			= 	ALLFILES;
-long		dirsFound		= 	0;
-long		filesFound		= 	0;
-long		linksFound		= 	0;
+int			orderType		=	ORDER_NAME;
+int			showType		=	SHOW_NORMAL|SHOW_SIZE|SHOW_DATE;
+int			dirType			=	ALLFILES;
+long		dirsFound		=	0;
+long		filesFound		=	0;
+long		linksFound		=	0;
 long		devsFound		=	0;
 long		socksFound		=	0;
 long		pipesFound		=	0;
-long long	totalSize		= 	0;
-int			currentCol 		= 	0;
-int 		maxCol 			= 	4;
-int 		showDate		= 	DATE_MOD;
+long long	totalSize		=	0;
+int			currentCol		=	0;
+int			maxCol			=	4;
+int			showDate		=	DATE_MOD;
 int			showFound		=	MAXINT;
 int			sizeFormat		=	1;
 char		dateType[41]	=	"Modified";
 char		md5Type[41]		=	"MD5 Sum (hex)";
 char		shaType[41]		=	"SHA256 Sum (hex)";
-time_t		timeNow			= 	0;
+time_t		timeNow			=	0;
 time_t		maxFileAge		=	-1;
 time_t		minFileAge		=	-1;
 char		*quoteMe		=	" *?|&;()<>#\t\\\"";
@@ -172,46 +172,46 @@ COLUMN_DESC allColumnDescs[MAX_COL_DESC] =
 {
 	{	6,	6,	0,	2,	0x03,	0,					"Type",		11	},	/*  0 */
 #ifdef HAVE_SYS_ACL_H
-	{	11,	11,	0,	2,	0x02,	0,					"Rights",	5	},	/*  1 */
+	{	11, 11, 0,	2,	0x02,	0,					"Rights",	5	},	/*  1 */
 #else
-	{	10,	10,	0,	2,	0x02,	0,					"Rights",	5	},	/*  1 */
+	{	10, 10, 0,	2,	0x02,	0,					"Rights",	5	},	/*  1 */
 #endif
-	{	20,	6,	0,	2,	0x04,	COL_ALIGN_RIGHT,	"Links",	8	},	/*  2 */
-	{	20,	6,	0,	2,	0x05,	0,					"Owner",	6	},	/*  3 */
-	{	20,	6,	0,	2,	0x05,	0,					"Group",	7	},	/*  8 */
-	{	20,	7,	0,	2,	0x06,	COL_ALIGN_RIGHT,	"Size",		2	},	/*  4 */
-	{	255,12,	0,	2,	0x02,	COL_ALIGN_RIGHT,	dateType,	3	},	/*  5 */
+	{	20, 6,	0,	2,	0x04,	COL_ALIGN_RIGHT,	"Links",	8	},	/*  2 */
+	{	20, 6,	0,	2,	0x05,	0,					"Owner",	6	},	/*  3 */
+	{	20, 6,	0,	2,	0x05,	0,					"Group",	7	},	/*  8 */
+	{	20, 7,	0,	2,	0x06,	COL_ALIGN_RIGHT,	"Size",		2	},	/*  4 */
+	{	255,12, 0,	2,	0x02,	COL_ALIGN_RIGHT,	dateType,	3	},	/*  5 */
 	{	7,	4,	0,	1,	0x02,	COL_ALIGN_RIGHT,	"Days",		3	},	/*  6 */
-	{	255,8,	0,	2,	0x02,	0,					"HH:MM:SS",	4	},	/*  7 */
-	{	255,12,	8,	2,	0x07,	0,					"Filename",	0	},	/*  9 */
-	{	20,	3,	0,	2,	0x07,	0,					"Extn",		1	},	/* 10 */
+	{	255,8,	0,	2,	0x02,	0,					"HH:MM:SS", 4	},	/*  7 */
+	{	255,12, 8,	2,	0x07,	0,					"Filename", 0	},	/*  9 */
+	{	20, 3,	0,	2,	0x07,	0,					"Extn",		1	},	/* 10 */
 	{	2,	2,	0,	2,	0x01,	0,					NULL,		10	},	/* 11 */
-	{	255,12,	0,	2,	0x07,	0,					"Target",	9	},	/* 12 */
-	{	80,	8,	0,	2,	0x05,	0,					"Context",	12	},  /* 13 */
-	{	33,	33,	0,	2,	0x05,	0,					md5Type,	13	},  /* 14 */
-	{	65,	65,	0,	2,	0x05,	0,					shaType,	14	},  /* 15 */
-	{	20,	6,	0,	2,	0x04,	COL_ALIGN_RIGHT,	"iNode",	15	},	/* 16 */
+	{	255,12, 0,	2,	0x07,	0,					"Target",	9	},	/* 12 */
+	{	80, 8,	0,	2,	0x05,	0,					"Context",	12	},	/* 13 */
+	{	33, 33, 0,	2,	0x05,	0,					md5Type,	13	},	/* 14 */
+	{	65, 65, 0,	2,	0x05,	0,					shaType,	14	},	/* 15 */
+	{	20, 6,	0,	2,	0x04,	COL_ALIGN_RIGHT,	"iNode",	15	},	/* 16 */
 };
 
 COLUMN_DESC wideColumnDescs[MAX_W_COL_DESC] =
 {
 	{	1,	1,	0,	0,	0x00,	0,					NULL,		1},		/*  0 */
-	{	255,12,	0,	0,	0x00,	0,					"Filename",	0},		/*  1 */
+	{	255,12, 0,	0,	0x00,	0,					"Filename", 0},		/*  1 */
 	{	1,	1,	0,	0,	0x00,	0,					NULL,		2},		/*  2 */
 };
 
 COLUMN_DESC *ptrAllColumns[30] =
 {
-	&wideColumnDescs[COL_W_TYPE_L],	&wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
-	&wideColumnDescs[COL_W_TYPE_L],	&wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
-	&wideColumnDescs[COL_W_TYPE_L],	&wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
-	&wideColumnDescs[COL_W_TYPE_L],	&wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
-	&wideColumnDescs[COL_W_TYPE_L],	&wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
-	&wideColumnDescs[COL_W_TYPE_L],	&wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
-	&wideColumnDescs[COL_W_TYPE_L],	&wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
-	&wideColumnDescs[COL_W_TYPE_L],	&wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
-	&wideColumnDescs[COL_W_TYPE_L],	&wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
-	&wideColumnDescs[COL_W_TYPE_L],	&wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R]
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R]
 };
 
 /*----------------------------------------------------------------------------*
@@ -224,9 +224,9 @@ char *colourNames[] =
 	"colour_extn",		"colour_linkptr",	"colour_target",	"colour_context",	"colour_md5",
 	"colour_sha256",	"colour_inode",
 
-	"colour_wide_col1",	"colour_wide_filename", "colour_wide_col2",
+	"colour_wide_col1", "colour_wide_filename", "colour_wide_col2",
 
-	"colour_directory",	"colour_link",		"colour_base",		"colour_executable",
+	"colour_directory", "colour_link",		"colour_base",		"colour_executable",
 	"colour_read",		"colour_write",		"colour_other",		"colour_block"
 };
 
@@ -392,6 +392,7 @@ int parseTime (char *timeStr, int *len)
 /**
  *  \brief Process a single command line option.
  *  \param option The option to process.
+ *  \param optionVal The value that goes with the option.
  *  \param progName The name of the program being run.
  *  \result None.
  */
@@ -914,14 +915,14 @@ int main (int argc, char *argv[])
 
 	while (1)
 	{
-	    /*--------------------------------------------------------------------*
+		/*--------------------------------------------------------------------*
 		 * getopt_long stores the option index here.                          *
 	     *--------------------------------------------------------------------*/
 		int option_index = 0;
 
 		c = getopt_long (argc, argv, "aAbBcCd:D:mMo:pqQrs:St:T:VwW:", long_options, &option_index);
 
-	    /*--------------------------------------------------------------------*
+		/*--------------------------------------------------------------------*
 		 * Detect the end of the options.                                     *
 	     *--------------------------------------------------------------------*/
 		if (c == -1) break;
@@ -944,7 +945,7 @@ int main (int argc, char *argv[])
 		}
 	}
 
-    /*------------------------------------------------------------------------*
+	/*------------------------------------------------------------------------*
 	 * Print any remaining command line arguments (not options).              *
      *------------------------------------------------------------------------*/
 	while (optind < argc)
@@ -963,7 +964,7 @@ int main (int argc, char *argv[])
 	}
 	directorySort (&fileList);
 	
-    /*------------------------------------------------------------------------*
+	/*------------------------------------------------------------------------*
 	 * We now have the directory loaded into memory.                          *
      *------------------------------------------------------------------------*/
 	if (found)
@@ -1024,7 +1025,7 @@ int main (int argc, char *argv[])
 	}
 	else
 	{
-	    /*--------------------------------------------------------------------*
+		/*--------------------------------------------------------------------*
 		 * Finally we print out the totals                                    *
 	     *--------------------------------------------------------------------*/
 		if (filesFound || linksFound || dirsFound || devsFound || socksFound || pipesFound)
@@ -1258,7 +1259,7 @@ int showDir (DIR_ENTRY *file)
 
 	/*------------------------------------------------------------------------*
 	 * Don't show files ending in ~ as they are backup files.                 *
-	 *------------------------------------------------------------------------*/
+     *------------------------------------------------------------------------*/
 	if (!(showType & SHOW_BACKUP) && !(dirType & SHOWALL))
 	{
 		int n = strlen (file -> fileName);
@@ -1270,7 +1271,7 @@ int showDir (DIR_ENTRY *file)
 	}
 
 	/*------------------------------------------------------------------------*
-	 * Don't show files or directories that are used for version control.     *
+     * Don't show files or directories that are used for version control.     *
 	 *------------------------------------------------------------------------*/
 	if (dirType & HIDEVERCTL)
 	{
@@ -1297,7 +1298,7 @@ int showDir (DIR_ENTRY *file)
 		
 	/*------------------------------------------------------------------------*
 	 * Don't show files or directories that are outside time values.          *
-	 *------------------------------------------------------------------------*/
+     *------------------------------------------------------------------------*/
 	if (showType & SHOW_IN_AGE)
 	{
 		if (maxFileAge != -1 && fileAge < maxFileAge)		/* Too old */
@@ -1307,8 +1308,8 @@ int showDir (DIR_ENTRY *file)
 	}
 
 	/*------------------------------------------------------------------------*
-	 * Show the directory in wide format.                                     *
-	 *------------------------------------------------------------------------*/
+     * Show the directory in wide format.                                     *
+     *------------------------------------------------------------------------*/
 	if (showType & SHOW_WIDE)
 	{
 		char marker1[2], marker2[2], displayName[PATH_SIZE];
@@ -1393,8 +1394,8 @@ int showDir (DIR_ENTRY *file)
 	}
 	
 	/*------------------------------------------------------------------------*
-	 * Show the directory in quiet format.                                    *
-	 *------------------------------------------------------------------------*/
+     * Show the directory in quiet format.                                    *
+     *------------------------------------------------------------------------*/
 	else if (showType & SHOW_QUIET)
 	{
 		char fullName[PATH_SIZE], displayName[PATH_SIZE];
@@ -1435,8 +1436,8 @@ int showDir (DIR_ENTRY *file)
 	}
 	
 	/*------------------------------------------------------------------------*
-	 * Show the directory in normal format.                                   *
-	 *------------------------------------------------------------------------*/	
+     * Show the directory in normal format.                                   *
+     *------------------------------------------------------------------------*/	
 	else
 	{
 		char fullName[PATH_SIZE], displayName[PATH_SIZE];
@@ -1478,8 +1479,8 @@ int showDir (DIR_ENTRY *file)
 		}
 				
 		/*--------------------------------------------------------------------*
-	   	 * If the file is a LINK then just them it is a link.                 *
-		 *--------------------------------------------------------------------*/
+         * If the file is a LINK then just them it is a link.                 *
+         *--------------------------------------------------------------------*/
 		if (S_ISLNK (file -> fileStat.st_mode))
 		{
 			int linkSize;
@@ -1576,8 +1577,8 @@ int showDir (DIR_ENTRY *file)
 		}
 		
 		/*--------------------------------------------------------------------*
-	   	 * If the file is a directory then just show them the name.           *
-		 *--------------------------------------------------------------------*/
+         * If the file is a directory then just show them the name.           *
+         *--------------------------------------------------------------------*/
 		else if (S_ISDIR (file -> fileStat.st_mode))
 		{
 			if (showType & SHOW_TYPE)
@@ -1637,8 +1638,8 @@ int showDir (DIR_ENTRY *file)
 		}
 
 		/*--------------------------------------------------------------------*
-	   	 * If the file is a device then just show them the name.              *
-		 *--------------------------------------------------------------------*/
+         * If the file is a device then just show them the name.              *
+         *--------------------------------------------------------------------*/
 		else if (S_ISBLK(file -> fileStat.st_mode) || S_ISCHR(file -> fileStat.st_mode) ||
 				S_ISSOCK(file -> fileStat.st_mode) || S_ISFIFO(file -> fileStat.st_mode))
 		{
@@ -1726,8 +1727,8 @@ int showDir (DIR_ENTRY *file)
 		}
 		
 		/*--------------------------------------------------------------------*
-   		 * If the file is a normal file then show the size/date/time.         *
-		 *--------------------------------------------------------------------*/
+         * If the file is a normal file then show the size/date/time.         *
+         *--------------------------------------------------------------------*/
 		else if (!file -> fileStat.st_mode || file -> fileStat.st_mode & S_IFREG)
 		{
 			int colour = colourType[2];
@@ -1791,7 +1792,7 @@ int showDir (DIR_ENTRY *file)
 				if (showType & SHOW_SIZE)
 				{
 					long long fileSize = file -> fileStat.st_size;			
-					displayInColumn (columnTranslate[COL_SIZE],	sizeFormat ? displayFileSize (fileSize, numBuff) : 
+					displayInColumn (columnTranslate[COL_SIZE], sizeFormat ? displayFileSize (fileSize, numBuff) : 
 							displayCommaNumber (fileSize, numBuff));
 				}				
 				if (showType & SHOW_DATE)
@@ -1807,7 +1808,7 @@ int showDir (DIR_ENTRY *file)
 								 age % 60);
 					}
 					else
-						displayInColumn (columnTranslate[COL_DATE],	displayDateString (fileAge, dateString));
+						displayInColumn (columnTranslate[COL_DATE], displayDateString (fileAge, dateString));
 				}
 			}
 			displayNewLine (0);
@@ -1842,8 +1843,8 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 		return showType & SHOW_RORDER ? -1 : 1;
 
 	/*------------------------------------------------------------------------*
-	 * Force the directories to the begining of the list                      *
-	 *------------------------------------------------------------------------*/
+     * Force the directories to the begining of the list                      *
+     *------------------------------------------------------------------------*/
 	if (S_ISDIR (fileOne -> fileStat.st_mode))
 	{
 		if (!(S_ISDIR (fileTwo -> fileStat.st_mode)))
@@ -1856,8 +1857,8 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	}
 	
 	/*------------------------------------------------------------------------*
-	 * Force the links to follow the directories                              *
-	 *------------------------------------------------------------------------*/
+     * Force the links to follow the directories                              *
+     *------------------------------------------------------------------------*/
 	if (S_ISLNK (fileOne -> fileStat.st_mode))
 	{
 		if (!(S_ISLNK (fileTwo -> fileStat.st_mode)))
@@ -1870,8 +1871,8 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	}
 	
 	/*------------------------------------------------------------------------*
-	 * Force the block devices to follow the links                            *
-	 *------------------------------------------------------------------------*/
+     * Force the block devices to follow the links                            *
+     *------------------------------------------------------------------------*/
 	if (S_ISBLK(fileOne -> fileStat.st_mode))
 	{
 		if (!(S_ISBLK(fileTwo -> fileStat.st_mode)))
@@ -1884,8 +1885,8 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	}
 
 	/*------------------------------------------------------------------------*
-	 * Force the char devices to follow the block devices                     *
-	 *------------------------------------------------------------------------*/
+     * Force the char devices to follow the block devices                     *
+     *------------------------------------------------------------------------*/
 	if (S_ISCHR(fileOne -> fileStat.st_mode))
 	{
 		if (!(S_ISCHR(fileTwo -> fileStat.st_mode)))
@@ -1898,8 +1899,8 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	}
 
 	/*------------------------------------------------------------------------*
-	 * Force the sockets to follow the char devices                           *
-	 *------------------------------------------------------------------------*/
+     * Force the sockets to follow the char devices                           *
+     *------------------------------------------------------------------------*/
 	if (S_ISSOCK (fileOne -> fileStat.st_mode))
 	{
 		if (!(S_ISSOCK (fileTwo -> fileStat.st_mode)))
@@ -1912,8 +1913,8 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	}
 	
 	/*------------------------------------------------------------------------*
-	 * Force the pipes to follow the sockets                                  *
-	 *------------------------------------------------------------------------*/
+     * Force the pipes to follow the sockets                                  *
+     *------------------------------------------------------------------------*/
 	if (S_ISFIFO (fileOne -> fileStat.st_mode))
 	{
 		if (!(S_ISFIFO (fileTwo -> fileStat.st_mode)))
@@ -1927,9 +1928,9 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 
 	switch (orderType)
 	{
-/*	case ORDER_NONE:
-		retn = 1;
-		break;
+/*  case ORDER_NONE:
+        retn = 1;
+        break;
 */		
 	case ORDER_SIZE:
 		if (showType & SHOW_MATCH)
@@ -2186,7 +2187,7 @@ char *quoteCopy (char *dst, char *src)
 {
 	int i, j;
 
-	dst[i = j = 0] = 0;	
+	dst[i = j = 0] = 0; 
 	while (src[i])
 	{
 		if (strchr (quoteMe, src[i]))

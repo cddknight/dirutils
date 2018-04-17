@@ -42,8 +42,8 @@ int showDir (DIR_ENTRY *file);
  *----------------------------------------------------------------------------*/
 COLUMN_DESC colChangeDescs[3] =
 {
-	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Changed",	1	},	/* 0 */
-	{	160,12,	0,	0,	0x07,	0,					"Filename",	0	},	/* 1 */
+	{	10, 10, 0,	3,	0x07,	COL_ALIGN_RIGHT,	"Changed",	1	},	/* 0 */
+	{	160,12, 0,	0,	0x07,	0,					"Filename", 0	},	/* 1 */
 };
 
 COLUMN_DESC *ptrChangeColumn[3] =

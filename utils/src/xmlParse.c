@@ -37,7 +37,7 @@
 #include <libxml/xmlschemas.h>
 #include <libxml/HTMLparser.h>
 /*----------------------------------------------------------------------------*
- * Prototypes															      *
+ * Prototypes                                                                 *
  *----------------------------------------------------------------------------*/
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo);
 int showDir (DIR_ENTRY *file);
@@ -72,28 +72,28 @@ COLUMN_DESC colParseDescs[6] =
 {
 	{	20,		5,	0,	2,	0x01,	0,	"Depth",		0	},	/* 0 */
 	{	255,	5,	0,	2,	0x02,	0,	"Name",			2	},	/* 1 */
-	{	40, 	5,	0,	2, 	0x04,	0,	"Attribute",	3	},	/* 2 */
-	{	255, 	5,	0,	2, 	0x04,	0,	"Value",		4	},	/* 3 */
+	{	40,		5,	0,	2,	0x04,	0,	"Attribute",	3	},	/* 2 */
+	{	255,	5,	0,	2,	0x04,	0,	"Value",		4	},	/* 3 */
 	{	255,	5,	0,	0,	0x06,	0,	"Key",			2	},	/* 4 */
 	{	255,	5,	0,	0,	0x01,	0,	"Error",		1	},	/* 5 */
 };
 
 COLUMN_DESC *ptrParseColumn[6] =
 {
-	&colParseDescs[0],  &colParseDescs[1],  &colParseDescs[2],  &colParseDescs[3],  &colParseDescs[4],  &colParseDescs[5]
+	&colParseDescs[0],	&colParseDescs[1],	&colParseDescs[2],	&colParseDescs[3],	&colParseDescs[4],	&colParseDescs[5]
 };
 
 COLUMN_DESC fileDescs[4] =
 {
 	{	5,		5,	0,	2,	0x02,	0,	"Type",		1	},	/* 1 */
-	{	255,	8,	0,	2,	0x07,	0,	"Filename",	2	},	/* 2 */
+	{	255,	8,	0,	2,	0x07,	0,	"Filename", 2	},	/* 2 */
 	{	20,		4,	0,	2,	0x07,	0,	"Size",		3	},	/* 3 */
-	{	81,		12,	0,	0,	0x02,	0,	"Modified",	4	},	/* 4 */
+	{	81,		12, 0,	0,	0x02,	0,	"Modified", 4	},	/* 4 */
 };
 
 COLUMN_DESC *ptrFileColumn[4] =
 {
-	&fileDescs[0],  &fileDescs[1],  &fileDescs[2],  &fileDescs[3]
+	&fileDescs[0],	&fileDescs[1],	&fileDescs[2],	&fileDescs[3]
 };
 
 int filesFound = 0;
@@ -331,16 +331,16 @@ int main (int argc, char *argv[])
 		processStdin ();
 		exit (0);			
 	}
-    for (; optind < argc; ++optind)
-    {
+	for (; optind < argc; ++optind)
+	{
 		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
 	}
 
 	if (found)
 	{
-	    /*--------------------------------------------------------------------*
-	     * Now we can sort the directory.                                     *
-	     *--------------------------------------------------------------------*/
+		/*--------------------------------------------------------------------*
+         * Now we can sort the directory.                                     *
+         *--------------------------------------------------------------------*/
 		directorySort (&fileList);
 		directoryProcess (showDir, &fileList);
 
@@ -458,9 +458,9 @@ int xmlChildElementCount (xmlNode *curNode)
 	int count = 0;
 	xmlNode *cNode = curNode -> children;
 
-    for (; cNode; cNode = cNode->next) 
+	for (; cNode; cNode = cNode->next) 
 	{
-        if (cNode->type == XML_ELEMENT_NODE) 
+		if (cNode->type == XML_ELEMENT_NODE) 
 			++count;
 	}
 	return count;
@@ -485,13 +485,13 @@ static void
 processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 {
 	xmlChar *key;
-    xmlNode *curNode = NULL;
-    char tempBuff[1024], fullPath[1024];
+	xmlNode *curNode = NULL;
+	char tempBuff[1024], fullPath[1024];
 	int i;
 
-    for (curNode = aNode; curNode; curNode = curNode->next) 
-    {
-       	int saveLevel = readLevel;
+	for (curNode = aNode; curNode; curNode = curNode->next) 
+	{
+		int saveLevel = readLevel;
 
 		if (displayPaths && curNode -> name != NULL)
 		{
@@ -505,8 +505,8 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 			strcat (fullPath, (char *)curNode -> name);
 		}
 
-        if (curNode->type == XML_ELEMENT_NODE) 
-        {
+		if (curNode->type == XML_ELEMENT_NODE) 
+		{
 			if ((!xmlStrcmp (curNode -> name, (const xmlChar *)levelName[readLevel])) || readLevel >= levels)
 			{
 				++readLevel;
@@ -581,12 +581,12 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 						displayNewLine (0);
 					}
 				}
-		    	xmlFree (key);
-		    }
-        }
-        processElementNames (doc, curNode->children, fullPath, readLevel);
-        readLevel = saveLevel;
-    }
+				xmlFree (key);
+			}
+		}
+		processElementNames (doc, curNode->children, fullPath, readLevel);
+		readLevel = saveLevel;
+	}
 }
 
 /**********************************************************************************************************************
@@ -640,9 +640,9 @@ void myErrorFunc (void *ctx, const char *msg, ...)
  */
 int validateDocument (xmlDocPtr doc)
 {
-    xmlSchemaParserCtxtPtr parserCtxt = NULL;
-    xmlSchemaValidCtxtPtr validCtxt = NULL;
-    xmlSchemaPtr schema = NULL;
+	xmlSchemaParserCtxtPtr parserCtxt = NULL;
+	xmlSchemaValidCtxtPtr validCtxt = NULL;
+	xmlSchemaPtr schema = NULL;
 
 	xmlSetStructuredErrorFunc (NULL, NULL);
 	xmlSetGenericErrorFunc (NULL, myErrorFunc);
@@ -687,7 +687,7 @@ int processFile (char *xmlFile)
 	xmlNodePtr	 rootElement = NULL;
 
 	xmlSetGenericErrorFunc (NULL, myErrorFunc);
-	if ((doc = 	xmlParseFile (xmlFile)) != NULL)
+	if ((doc =	xmlParseFile (xmlFile)) != NULL)
 	{
 		if (xsdPath[0])
 		{
@@ -701,7 +701,7 @@ int processFile (char *xmlFile)
 				retn = 1;
 			}
 		}
-        xmlFreeDoc(doc);
+		xmlFreeDoc(doc);
 	}
 	xmlCleanupParser();
 	return retn;
@@ -725,14 +725,14 @@ int processHTMLFile (char *htmlFile)
 	htmlNodePtr rootElement = NULL;
 
 	xmlSetGenericErrorFunc (NULL, myErrorFunc);
-	if ((doc = 	htmlParseFile (htmlFile, NULL)) != NULL)
+	if ((doc =	htmlParseFile (htmlFile, NULL)) != NULL)
 	{
 		if ((rootElement = xmlDocGetRootElement (doc)) != NULL)
 		{
 			processElementNames (doc, rootElement, "", 0);
 			retn = 1;
 		}
-        xmlFreeDoc(doc);
+		xmlFreeDoc(doc);
 	}
 	xmlCleanupParser();
 	return retn;
@@ -754,7 +754,7 @@ int showDir (DIR_ENTRY *file)
 	int procRetn = 0, useType = fileType;
 	char inFile[PATH_SIZE];
 
-    /*------------------------------------------------------------------------*
+	/*------------------------------------------------------------------------*
      * First display a table with the file name and size.                     *
      *------------------------------------------------------------------------*/
 	if (!displayColumnInit (4, ptrFileColumn, displayOptions))
@@ -763,7 +763,7 @@ int showDir (DIR_ENTRY *file)
 		return 0;
 	}
 
-    /*------------------------------------------------------------------------*
+	/*------------------------------------------------------------------------*
      * Open the file and display a table containing the hex dump.             *
      *------------------------------------------------------------------------*/
 	strcpy (inFile, file -> fullPath);
@@ -778,7 +778,7 @@ int showDir (DIR_ENTRY *file)
 
 		displayInColumn (0, "%s", (useType == FILE_HTML ? "HTML" : "XML"));
 		displayInColumn (1, "%s", file -> fileName);
-		displayInColumn (2,	displayFileSize (file -> fileStat.st_size, tempBuff));
+		displayInColumn (2, displayFileSize (file -> fileStat.st_size, tempBuff));
 		displayInColumn (3, displayDateString (file -> fileStat.st_mtime, tempBuff));
 		displayNewLine (DISPLAY_INFO);
 		displayAllLines ();		
@@ -873,9 +873,9 @@ void processStdin ()
 
 	if (buffer && totalRead)
 	{
-	    /*----------------------------------------------------------------------------*
-	     * Work out the type of input by looking for HTML strings.                    *
-	     *----------------------------------------------------------------------------*/
+		/*----------------------------------------------------------------------------*
+         * Work out the type of input by looking for HTML strings.                    *
+         *----------------------------------------------------------------------------*/
 		if (fileType == FILE_UNKNOWN)
 		{
 			if (searchStr ("<!DOCTYPE html", buffer, totalRead) != NULL)
@@ -894,9 +894,9 @@ void processStdin ()
 
 		if (!displayQuiet) 
 		{
-		    /*------------------------------------------------------------------------*
-		     * Display a table with the type, like this was a normal file.            *
-		     *------------------------------------------------------------------------*/
+			/*------------------------------------------------------------------------*
+             * Display a table with the type, like this was a normal file.            *
+             *------------------------------------------------------------------------*/
 			if (!displayColumnInit (2, ptrFileColumn, displayOptions))
 			{
 				fprintf (stderr, "ERROR in: displayColumnInit\n");
@@ -909,9 +909,9 @@ void processStdin ()
 			displayTidy ();
 		}
 
-	    /*----------------------------------------------------------------------------*
-	     * Display the formatted output.                                              *
-	     *----------------------------------------------------------------------------*/
+		/*----------------------------------------------------------------------------*
+         * Display the formatted output.                                              *
+         *----------------------------------------------------------------------------*/
 		if (displayColumnInit (COL_COUNT, ptrParseColumn, displayOptions))
 		{
 			shownError = false;		

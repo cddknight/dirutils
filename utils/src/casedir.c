@@ -32,16 +32,16 @@
 #include <dircmd.h>
 
 /*----------------------------------------------------------------------*/
-/* Prototypes															*/
+/* Prototypes                                                           */
 /*----------------------------------------------------------------------*/
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo);
 int showDir (DIR_ENTRY *file);
 
 /*----------------------------------------------------------------------*/
-/* Defines   															*/
+/* Defines                                                              */
 /*----------------------------------------------------------------------*/
-#define CASE_LOWER  0
-#define CASE_UPPER  1
+#define CASE_LOWER	0
+#define CASE_UPPER	1
 #define CASE_PROPER 2
 
 /*----------------------------------------------------------------------*/
@@ -49,9 +49,9 @@ int showDir (DIR_ENTRY *file);
 /*----------------------------------------------------------------------*/
 COLUMN_DESC colChangeDescs[3] =
 {
-	{	160,12,	0,	3,	0x07,	0,					"Old Name",	1	},	/* 0 */
-	{	10,	3,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"To",		2	},	/* 1 */
-	{	160,12,	0,	0,	0x07,	0,					"New Name",	0	},	/* 2 */
+	{	160,12, 0,	3,	0x07,	0,					"Old Name", 1	},	/* 0 */
+	{	10, 3,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"To",		2	},	/* 1 */
+	{	160,12, 0,	0,	0x07,	0,					"New Name", 0	},	/* 2 */
 };
 
 COLUMN_DESC *ptrChangeColumn[3] =
@@ -106,7 +106,7 @@ int main (int argc, char *argv[])
 
 	displayInit ();
 
-    /*------------------------------------------------------------------------*
+	/*------------------------------------------------------------------------*
      * If we got a path then split it into a path and a file pattern to match *
      * files with.                                                            *
      *------------------------------------------------------------------------*/
@@ -137,12 +137,12 @@ int main (int argc, char *argv[])
 		}
 	}
 
-    for (; optind < argc; ++optind)
-    {
+	for (; optind < argc; ++optind)
+	{
 		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
 	}
 
-    /*------------------------------------------------------------------------*
+	/*------------------------------------------------------------------------*
      * Now we can sort the directory.                                         *
      *------------------------------------------------------------------------*/
 	directorySort (&fileList);

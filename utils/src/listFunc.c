@@ -40,17 +40,17 @@ int showDir(DIR_ENTRY * file);
 
 #define BUFFER_SIZE 1024
 #define SQ	0x27
-#define	DQ	0x22
+#define DQ	0x22
 
 /*----------------------------------------------------------------------------*
  * Globals                                                                    *
  *----------------------------------------------------------------------------*/
 COLUMN_DESC colFuncDescs[4] =
 {
-	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Count",	3	},	/* 0 */
-	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Line",		2	},	/* 1 */
-	{	160,12,	0,	3,	0x07,	0,					"Filename",	1	},	/* 2 */
-	{	160,12,	0,	0,	0x07,	0,					"Function",	0	},	/* 3 */
+	{	10, 10, 0,	3,	0x07,	COL_ALIGN_RIGHT,	"Count",	3	},	/* 0 */
+	{	10, 10, 0,	3,	0x07,	COL_ALIGN_RIGHT,	"Line",		2	},	/* 1 */
+	{	160,12, 0,	3,	0x07,	0,					"Filename", 1	},	/* 2 */
+	{	160,12, 0,	0,	0x07,	0,					"Function", 0	},	/* 3 */
 };
 
 COLUMN_DESC *ptrFuncColumn[4] =
@@ -148,12 +148,12 @@ int main(int argc, char *argv[])
 		}
 	}
 
-    for (; optind < argc; ++optind)
-    {
+	for (; optind < argc; ++optind)
+	{
 		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
 	}
 
-    /*------------------------------------------------------------------------*
+	/*------------------------------------------------------------------------*
      * Now we can sort the directory.                                         *
      *------------------------------------------------------------------------*/
 	directorySort (&fileList);

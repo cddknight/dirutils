@@ -30,7 +30,7 @@
 #include <dircmd.h>
 
 /*----------------------------------------------------------------------------*
- * Prototypes															      *
+ * Prototypes                                                                 *
  *----------------------------------------------------------------------------*/
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo);
 int showDir (DIR_ENTRY *file);
@@ -40,9 +40,9 @@ int showDir (DIR_ENTRY *file);
  *----------------------------------------------------------------------------*/
 COLUMN_DESC colLinesDescs[4] =
 {
-	{	10,	10,	0,	3,	0x07,	COL_ALIGN_RIGHT,	"Line",	0	},	/* 0 */
-	{	10,	10,	0,	3,	0x07,	0,					"Funny",	1	},	/* 1 */
-	{	160,12,	0,	0,	0x07,	0,					"Filename",	2	},	/* 2 */
+	{	10, 10, 0,	3,	0x07,	COL_ALIGN_RIGHT,	"Line", 0	},	/* 0 */
+	{	10, 10, 0,	3,	0x07,	0,					"Funny",	1	},	/* 1 */
+	{	160,12, 0,	0,	0x07,	0,					"Filename", 2	},	/* 2 */
 };
 
 COLUMN_DESC *ptrLinesColumn[4] =
@@ -102,14 +102,14 @@ int main (int argc, char *argv[])
 		printf ("Enter the command: %s <filename>\n", argv[0]);
 		exit (1);
 	}
-    /*------------------------------------------------------------------------*
+	/*------------------------------------------------------------------------*
      * If we got a path then split it into a path and a file pattern to match *
      * files with.                                                            *
      *------------------------------------------------------------------------*/
 	while (i < argc)
 		found += directoryLoad (argv[i++], ONLYFILES, fileCompare, &fileList);
 
-    /*------------------------------------------------------------------------*
+	/*------------------------------------------------------------------------*
      * Now we can sort the directory.                                         *
      *------------------------------------------------------------------------*/
 	directorySort (&fileList);

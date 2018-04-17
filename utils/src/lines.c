@@ -32,7 +32,7 @@
 #include <unistd.h>
 
 /*----------------------------------------------------------------------------*
- * Prototypes															      *
+ * Prototypes                                                                 *
  *----------------------------------------------------------------------------*/
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo);
 int showDir (DIR_ENTRY *file);
@@ -42,8 +42,8 @@ int showDir (DIR_ENTRY *file);
  *----------------------------------------------------------------------------*/
 COLUMN_DESC colLinesDescs[3] =
 {
-	{	10,	10,	0,	3,	0x0A,	COL_ALIGN_RIGHT,	"Lines",	0	},	/* 0 */
-	{	255,12,	0,	0,	0x0E,	0,					"Filename",	1	},	/* 1 */
+	{	10, 10, 0,	3,	0x0A,	COL_ALIGN_RIGHT,	"Lines",	0	},	/* 0 */
+	{	255,12, 0,	0,	0x0E,	0,					"Filename", 1	},	/* 1 */
 };
 
 COLUMN_DESC *ptrLinesColumn[3] =
@@ -145,12 +145,12 @@ int main (int argc, char *argv[])
 		}
 	}
 
-    for (; optind < argc; ++optind)
-    {
+	for (; optind < argc; ++optind)
+	{
 		found += directoryLoad (argv[optind], dirType, fileCompare, &fileList);
 	}
 
-    /*------------------------------------------------------------------------*
+	/*------------------------------------------------------------------------*
      * Now we can sort the directory.                                         *
      *------------------------------------------------------------------------*/
 	directorySort (&fileList);
