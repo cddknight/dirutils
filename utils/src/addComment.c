@@ -139,86 +139,86 @@ int main(int argc, char *argv[])
 	displayInit();
 	rl_bind_key ('\t',rl_abort);		//disable auto-complete
 
-    while ((i = getopt(argc, argv, "hdipqmvl:w:c:C:?")) != -1)
-    {
-        switch (i) 
-        {
-        case 'l':
-            commentLine = atoi (optarg);
-            break;
+	while ((i = getopt(argc, argv, "hdipqmvl:w:c:C:?")) != -1)
+	{
+		switch (i) 
+		{
+		case 'l':
+			commentLine = atoi (optarg);
+			break;
 
-        case 'h':
-            commentLine = -1;
-            break;
+		case 'h':
+			commentLine = -1;
+			break;
 
-        case 'w':
-            boxWidth = atoi (optarg);
-            if (boxWidth < 40 || boxWidth > MAX_BOXWIDTH)
-            {
-                boxWidth = DEF_BOXWIDTH;
-            }
-            break;
+		case 'w':
+			boxWidth = atoi (optarg);
+			if (boxWidth < 40 || boxWidth > MAX_BOXWIDTH)
+			{
+				boxWidth = DEF_BOXWIDTH;
+			}
+			break;
 
-        case 'c':
-            if (optarg[0] >= ' ' && optarg[0] < 127)
-            {
-                lineChar = optarg[0];
-            }
-            break;
+		case 'c':
+			if (optarg[0] >= ' ' && optarg[0] < 127)
+			{
+				lineChar = optarg[0];
+			}
+			break;
 
-        case 'C':
-            copyrightType = atoi (optarg);
-            if (optarg[1] != 0 && copyrightType == 1)
-            {
-                strncpy (companyName, &optarg[1], 127);
-            }
-            break;
+		case 'C':
+			copyrightType = atoi (optarg);
+			if (optarg[1] != 0 && copyrightType == 1)
+			{
+				strncpy (companyName, &optarg[1], 127);
+			}
+			break;
 
-        case 'd':
-            debug = !debug;
-            break;
+		case 'd':
+			debug = !debug;
+			break;
 
-        case 'i':
-            cvsID = !cvsID;
-            break;
+		case 'i':
+			cvsID = !cvsID;
+			break;
 
-        case 'p':
-            cppStyle = !cppStyle;
-            lineChar = '-';
-            break;
-            
-        case 'q':
-            quietMode = !quietMode;
-            break;
-            
-        case 'm':
-            autoMain = !autoMain;
-            break;
+		case 'p':
+			cppStyle = !cppStyle;
+			lineChar = '-';
+			break;
+			
+		case 'q':
+			quietMode = !quietMode;
+			break;
+			
+		case 'm':
+			autoMain = !autoMain;
+			break;
 
-        case 'v':
-            version (argv[0], 0);
-            return 0;
+		case 'v':
+			version (argv[0], 0);
+			return 0;
 
-        case '?':
-            version (argv[0], 1);
-            return (1);
-        }
-    }
+		case '?':
+			version (argv[0], 1);
+			return (1);
+		}
+	}
 
-    for (; optind < argc; ++optind)
-    {
-        found += directoryLoad(argv[optind], ONLYFILES, addCommentsCmp, &fileList);
-    }
-    directorySort (&fileList);
+	for (; optind < argc; ++optind)
+	{
+		found += directoryLoad(argv[optind], ONLYFILES, addCommentsCmp, &fileList);
+	}
+	directorySort (&fileList);
 
-    if (found)
-        directoryProcess(addComments, &fileList);
+	if (found)
+		directoryProcess(addComments, &fileList);
 
-    if (filesFound)
-        displayLine();
+	if (filesFound)
+		displayLine();
 
-    printf("%5d File%s changed\n", filesFound, filesFound == 1 ? "" : "s");
-    return 0;
+	printf("%5d File%s changed\n", filesFound, filesFound == 1 ? "" : "s");
+	return 0;
 }
 
 /**********************************************************************************************************************
@@ -235,19 +235,19 @@ int main(int argc, char *argv[])
  */
 int bufferRead(char *inChar, FILE * inFile)
 {
-    static int buffPos = 0, buffSize = 0;
+	static int buffPos = 0, buffSize = 0;
 
-    if (buffPos == buffSize)
-    {
-        if ((buffSize = fread(inBuffer, 1, BUFFER_SIZE, inFile)) == 0)
-        {
-            buffPos = 0;
-            return 0;
-        }
-        buffPos = 0;
-    }
-    *inChar = inBuffer[buffPos++];
-    return 1;
+	if (buffPos == buffSize)
+	{
+		if ((buffSize = fread(inBuffer, 1, BUFFER_SIZE, inFile)) == 0)
+		{
+			buffPos = 0;
+			return 0;
+		}
+		buffPos = 0;
+	}
+	*inChar = inBuffer[buffPos++];
+	return 1;
 }
 
 /**********************************************************************************************************************
@@ -264,36 +264,36 @@ int bufferRead(char *inChar, FILE * inFile)
  */
 void bufferFlush(FILE * outFile, int removeSpace)
 {
-    int saveSize = 0;
+	int saveSize = 0;
 
-    if (outBuffPos)
-    {
-        if (firstWrite && commentLine == -1)
-        {
-            displayBox(0, 1, outFile);
-            ++addedComments;
-            comBuffPos = 0;
-            firstWrite = 0;
-        }
-        if (removeSpace)
-        {
-            while (saveSize < outBuffPos && strchr (whiteSpace, outBuffer[saveSize]))
-                ++saveSize;
-            if (saveSize)
-            {
-                if (fwrite(outBuffer, 1, saveSize, outFile) != saveSize)
-                    printf ("Buffer write problem!\n");
-                outBuffPos -= saveSize;
-                memcpy (outBuffer, &outBuffer[saveSize], outBuffPos);
-            }
-        }
-        else
-        {
-            if (fwrite(outBuffer, 1, outBuffPos, outFile) != outBuffPos)
-                printf ("Buffer write problem!\n");
-            outBuffPos = 0;
-        }
-    }
+	if (outBuffPos)
+	{
+		if (firstWrite && commentLine == -1)
+		{
+			displayBox(0, 1, outFile);
+			++addedComments;
+			comBuffPos = 0;
+			firstWrite = 0;
+		}
+		if (removeSpace)
+		{
+			while (saveSize < outBuffPos && strchr (whiteSpace, outBuffer[saveSize]))
+				++saveSize;
+			if (saveSize)
+			{
+				if (fwrite(outBuffer, 1, saveSize, outFile) != saveSize)
+					printf ("Buffer write problem!\n");
+				outBuffPos -= saveSize;
+				memcpy (outBuffer, &outBuffer[saveSize], outBuffPos);
+			}
+		}
+		else
+		{
+			if (fwrite(outBuffer, 1, outBuffPos, outFile) != outBuffPos)
+				printf ("Buffer write problem!\n");
+			outBuffPos = 0;
+		}
+	}
 }
 
 /**********************************************************************************************************************
@@ -309,25 +309,25 @@ void bufferFlush(FILE * outFile, int removeSpace)
  */
 void commentFlush(FILE * outFile)
 {
-    if (comBuffPos)
-    {
-        if (firstWrite && commentLine == -1)
-        {
-            displayBox(0, 1, outFile);
-            ++addedComments;
-            firstWrite = 0;
-        }
-        else if (fwrite(comBuffer, 1, comBuffPos, outFile) != comBuffPos)
-        {
-            printf ("Buffer write problem!\n");
-        }
-        else
-        {
+	if (comBuffPos)
+	{
+		if (firstWrite && commentLine == -1)
+		{
+			displayBox(0, 1, outFile);
+			++addedComments;
+			firstWrite = 0;
+		}
+		else if (fwrite(comBuffer, 1, comBuffPos, outFile) != comBuffPos)
+		{
+			printf ("Buffer write problem!\n");
+		}
+		else
+		{
 /*          comBuffer[comBuffPos] = 0;
             printf (">>>>%s<<<<\n", comBuffer);
-*/      }
-        comBuffPos = 0;
-    }
+*/		}
+		comBuffPos = 0;
+	}
 }
 
 /**********************************************************************************************************************
@@ -344,12 +344,12 @@ void commentFlush(FILE * outFile)
  */
 void bufferWrite(char inChar, FILE * outFile)
 {
-    outBuffer[outBuffPos++] = inChar;
-    if (outBuffPos == BUFFER_SIZE)
-    {
-        commentFlush(outFile);
-        bufferFlush(outFile, 0);
-    }
+	outBuffer[outBuffPos++] = inChar;
+	if (outBuffPos == BUFFER_SIZE)
+	{
+		commentFlush(outFile);
+		bufferFlush(outFile, 0);
+	}
 }
 
 /**********************************************************************************************************************
@@ -366,11 +366,11 @@ void bufferWrite(char inChar, FILE * outFile)
  */
 void commentWrite(char inChar, FILE * outFile)
 {
-    comBuffer[comBuffPos++] = inChar;
-    if (comBuffPos == BUFFER_SIZE)
-    {
-        commentFlush(outFile);
-    }
+	comBuffer[comBuffPos++] = inChar;
+	if (comBuffPos == BUFFER_SIZE)
+	{
+		commentFlush(outFile);
+	}
 }
 
 /**********************************************************************************************************************
@@ -388,29 +388,29 @@ void commentWrite(char inChar, FILE * outFile)
  */
 void doubleName(char *oldName, char *newName, char *underLn)
 {
-    int j = 0, upper;
+	int j = 0, upper;
 
-    while (*oldName)
-    {
-        upper = !(*oldName >= 'a' && *oldName <= 'z');
+	while (*oldName)
+	{
+		upper = !(*oldName >= 'a' && *oldName <= 'z');
 
-        newName[j] = toupper(*oldName);
-        underLn[j++] = '=';
-        oldName++;
+		newName[j] = toupper(*oldName);
+		underLn[j++] = '=';
+		oldName++;
 
-        if (*oldName)
-        {
-            if ((*oldName >= 'A' && *oldName <= 'Z') && upper == 0)
-            {
-                newName[j] = ' ';
-                underLn[j++] = '=';
-            }
-            newName[j] = ' ';
-            underLn[j++] = '=';
-        }
-    }
-    newName[j] = 0;
-    underLn[j] = 0;
+		if (*oldName)
+		{
+			if ((*oldName >= 'A' && *oldName <= 'Z') && upper == 0)
+			{
+				newName[j] = ' ';
+				underLn[j++] = '=';
+			}
+			newName[j] = ' ';
+			underLn[j++] = '=';
+		}
+	}
+	newName[j] = 0;
+	underLn[j] = 0;
 }
 
 /**********************************************************************************************************************
@@ -429,26 +429,26 @@ void doubleName(char *oldName, char *newName, char *underLn)
  */
 void myReadLine (char *retnBuff, int maxSize, char *format, ...)
 {
-    char fullPrompt[256], *readLine;
-    va_list ap;
+	char fullPrompt[256], *readLine;
+	va_list ap;
 
-    if (quietMode)
-    {
-        retnBuff[0] = 0;
-    }
-    else
-    {
-        va_start(ap, format);
-        vsprintf(fullPrompt, format, ap);
-        va_end(ap);
+	if (quietMode)
+	{
+		retnBuff[0] = 0;
+	}
+	else
+	{
+		va_start(ap, format);
+		vsprintf(fullPrompt, format, ap);
+		va_end(ap);
 
-        readLine = readline (fullPrompt);
-        if (strlen (readLine) > maxSize)
-            readLine[maxSize] = 0;
-        add_history (readLine);
-        strcpy (retnBuff, readLine);
-        free (readLine);
-    }
+		readLine = readline (fullPrompt);
+		if (strlen (readLine) > maxSize)
+			readLine[maxSize] = 0;
+		add_history (readLine);
+		strcpy (retnBuff, readLine);
+		free (readLine);
+	}
 }
 
 /**********************************************************************************************************************
@@ -466,29 +466,29 @@ void myReadLine (char *retnBuff, int maxSize, char *format, ...)
  */
 int searchBuff (char *findStr, char *outBuffer, char endChar)
 {
-    int len = strlen (findStr), pos = 0, offset = 0;
-    
-    outBuffer[0] = 0;
-    while (pos < comBuffPos)
-    {
-        while ((offset < len) && (findStr[offset] == comBuffer[pos + offset]) && (pos + offset < comBuffPos))
-            ++offset;
-        if (offset == len)
-            break;
-        offset = 0;
-        ++pos;
-    }           
-    if (offset == len)
-    {
-        pos += offset;
-        offset = 0;
-        while ((comBuffer[pos] != endChar) && (comBuffer[pos] != '\n') && (pos < comBuffPos) && comBuffer[pos])
-        {
-            outBuffer[offset] = comBuffer[pos++];
-            outBuffer[++offset] = 0;
-        }
-    }
-    return strlen(outBuffer);
+	int len = strlen (findStr), pos = 0, offset = 0;
+	
+	outBuffer[0] = 0;
+	while (pos < comBuffPos)
+	{
+		while ((offset < len) && (findStr[offset] == comBuffer[pos + offset]) && (pos + offset < comBuffPos))
+			++offset;
+		if (offset == len)
+			break;
+		offset = 0;
+		++pos;
+	}			
+	if (offset == len)
+	{
+		pos += offset;
+		offset = 0;
+		while ((comBuffer[pos] != endChar) && (comBuffer[pos] != '\n') && (pos < comBuffPos) && comBuffer[pos])
+		{
+			outBuffer[offset] = comBuffer[pos++];
+			outBuffer[++offset] = 0;
+		}
+	}
+	return strlen(outBuffer);
 }
 
 /**********************************************************************************************************************
@@ -506,47 +506,47 @@ int searchBuff (char *findStr, char *outBuffer, char endChar)
  */
 void getComment (char *retnBuff, int type, char *name)
 {
-    *retnBuff = 0;
-    switch (type)
-    {
-    case 0:
-        if (!searchBuff ("\\brief ",  retnBuff, '.'))
-        {
-            if (!searchBuff ("@brief ",  retnBuff, '.'))
-                myReadLine (retnBuff, boxWidth - 9, "Enter (%s) description: ", name);
-        }
-        break;
-    case 1:
-        if (!searchBuff ("\\brief ",  retnBuff, '.'))
-        {
-            if (!searchBuff ("@brief ",  retnBuff, '.'))
-                myReadLine (retnBuff, boxWidth - 9, "Enter (%s) description: ", name);
-        }
-        break;
-    case 2:
-        {
-            char buff[81];
-            sprintf (buff, "\\param %s ", name);
-            if (!searchBuff (buff,  retnBuff, '.'))
-            {
-                sprintf (buff, "@param %s ", name);
-                if (!searchBuff (buff,  retnBuff, '.'))
-                    myReadLine (retnBuff, boxWidth - strlen(name) - 10, "Enter (%s) description: ", name);
-            }
-        }
-        break;
-    case 3:
-        if (!searchBuff ("\\result ", retnBuff, '.'))
-        {
-            if (!searchBuff ("@result ", retnBuff, '.'))
-                myReadLine (retnBuff, boxWidth - 10, "Enter result: ");
-        }
-        break;
-    case 4:
-        if (!searchBuff ("\\version ", retnBuff, '\n'))
-            searchBuff ("@version ", retnBuff, '\n');
-        break;
-    }
+	*retnBuff = 0;
+	switch (type)
+	{
+	case 0:
+		if (!searchBuff ("\\brief ",  retnBuff, '.'))
+		{
+			if (!searchBuff ("@brief ",	 retnBuff, '.'))
+				myReadLine (retnBuff, boxWidth - 9, "Enter (%s) description: ", name);
+		}
+		break;
+	case 1:
+		if (!searchBuff ("\\brief ",  retnBuff, '.'))
+		{
+			if (!searchBuff ("@brief ",	 retnBuff, '.'))
+				myReadLine (retnBuff, boxWidth - 9, "Enter (%s) description: ", name);
+		}
+		break;
+	case 2:
+		{
+			char buff[81];
+			sprintf (buff, "\\param %s ", name);
+			if (!searchBuff (buff,	retnBuff, '.'))
+			{
+				sprintf (buff, "@param %s ", name);
+				if (!searchBuff (buff,	retnBuff, '.'))
+					myReadLine (retnBuff, boxWidth - strlen(name) - 10, "Enter (%s) description: ", name);
+			}
+		}
+		break;
+	case 3:
+		if (!searchBuff ("\\result ", retnBuff, '.'))
+		{
+			if (!searchBuff ("@result ", retnBuff, '.'))
+				myReadLine (retnBuff, boxWidth - 10, "Enter result: ");
+		}
+		break;
+	case 4:
+		if (!searchBuff ("\\version ", retnBuff, '\n'))
+			searchBuff ("@version ", retnBuff, '\n');
+		break;
+	}
 }
 
 /**********************************************************************************************************************
@@ -563,31 +563,31 @@ void getComment (char *retnBuff, int type, char *name)
  */
 int addBoxText (char *outBuff, char *inBuff)
 {
-    int width = boxWidth - 4;
-    int i = 0, s = strlen(inBuff), j = 0;
-    
-    while (i < width && inBuff[i])
-    {
-        outBuff[i] = inBuff[i];
-        if (outBuff[i] == ' ')
-        {
-            s = i;
-            j = 1;
-        }
-        ++i;
-    }
-    if (i < width)
-    {
-        s = strlen(inBuff);
-    }
-    i = s;
-    while (i < width)
-    {
-        outBuff[i] = ' ';
-        ++i;
-    }
-    outBuff[i] = 0;
-    return s + j;
+	int width = boxWidth - 4;
+	int i = 0, s = strlen(inBuff), j = 0;
+	
+	while (i < width && inBuff[i])
+	{
+		outBuff[i] = inBuff[i];
+		if (outBuff[i] == ' ')
+		{
+			s = i;
+			j = 1;
+		}
+		++i;
+	}
+	if (i < width)
+	{
+		s = strlen(inBuff);
+	}
+	i = s;
+	while (i < width)
+	{
+		outBuff[i] = ' ';
+		++i;
+	}
+	outBuff[i] = 0;
+	return s + j;
 }
 
 
@@ -608,64 +608,64 @@ int addBoxText (char *outBuff, char *inBuff)
  */
 void boxLine (char *boxText, int first, int last, int addBlank, FILE *outFile)
 {
-    int pos = 0, len = strlen (boxText);
-    char boxLine [MAX_BOXWIDTH + 1];
-    char boxFill [MAX_BOXWIDTH + 1];
-    char txtBuff [MAX_BOXWIDTH + 1];
-    
-    char firstStart[6],     firstEnd[6];
-    char middleStart[6],    middleEnd[6];
-    char lastStart[6],      lastEnd[6];
-    
-    if (cppStyle)
-    {
-        strcpy (firstStart, "//");
-        strcpy (firstEnd, "");
-        strcpy (middleStart, "//");
-        strcpy (middleEnd, "");
-        strcpy (lastStart, "//");
-        strcpy (lastEnd, "");
-    }
-    else
-    {
-        strcpy (firstStart, "/*");
-        strcpy (firstEnd, "*");
-        strcpy (middleStart, " *");
-        strcpy (middleEnd, "*");
-        strcpy (lastStart, " *");
-        strcpy (lastEnd, "*/");
-    }   
-    if (first || last|| addBlank)
-    {
-        int i;
-        for (i = 0; i < boxWidth; i++)
-        {
-            boxLine[i] = lineChar;
-            boxFill[i] = ' ';
-        }
-        boxLine[i] = 0;
-        boxFill[i] = 0;
-    }
-    if (first)
-    {
-        fprintf(outFile, "%s%s%s\n", firstStart, boxLine, firstEnd);
-        fprintf(outFile, "%s%s%s\n", middleStart, boxFill, middleEnd);
-    }
-    do
-    {
-        pos += addBoxText (txtBuff, &boxText[pos]);
-        fprintf(outFile, "%s  %s  %s\n", middleStart, txtBuff, middleEnd);
-    }
-    while (pos < len);
-    if (addBlank)
-    {
-        fprintf(outFile, "%s%s%s\n", middleStart, boxFill, middleEnd);
-    }
-    if (last)
-    {
-        fprintf(outFile, "%s%s%s\n", middleStart, boxFill, middleEnd);
-        fprintf(outFile, "%s%s%s\n", lastStart, boxLine, lastEnd);
-    }
+	int pos = 0, len = strlen (boxText);
+	char boxLine [MAX_BOXWIDTH + 1];
+	char boxFill [MAX_BOXWIDTH + 1];
+	char txtBuff [MAX_BOXWIDTH + 1];
+	
+	char firstStart[6],		firstEnd[6];
+	char middleStart[6],	middleEnd[6];
+	char lastStart[6],		lastEnd[6];
+	
+	if (cppStyle)
+	{
+		strcpy (firstStart, "//");
+		strcpy (firstEnd, "");
+		strcpy (middleStart, "//");
+		strcpy (middleEnd, "");
+		strcpy (lastStart, "//");
+		strcpy (lastEnd, "");
+	}
+	else
+	{
+		strcpy (firstStart, "/*");
+		strcpy (firstEnd, "*");
+		strcpy (middleStart, " *");
+		strcpy (middleEnd, "*");
+		strcpy (lastStart, " *");
+		strcpy (lastEnd, "*/");
+	}	
+	if (first || last|| addBlank)
+	{
+		int i;
+		for (i = 0; i < boxWidth; i++)
+		{
+			boxLine[i] = lineChar;
+			boxFill[i] = ' ';
+		}
+		boxLine[i] = 0;
+		boxFill[i] = 0;
+	}
+	if (first)
+	{
+		fprintf(outFile, "%s%s%s\n", firstStart, boxLine, firstEnd);
+		fprintf(outFile, "%s%s%s\n", middleStart, boxFill, middleEnd);
+	}
+	do
+	{
+		pos += addBoxText (txtBuff, &boxText[pos]);
+		fprintf(outFile, "%s  %s  %s\n", middleStart, txtBuff, middleEnd);
+	}
+	while (pos < len);
+	if (addBlank)
+	{
+		fprintf(outFile, "%s%s%s\n", middleStart, boxFill, middleEnd);
+	}
+	if (last)
+	{
+		fprintf(outFile, "%s%s%s\n", middleStart, boxFill, middleEnd);
+		fprintf(outFile, "%s%s%s\n", lastStart, boxLine, lastEnd);
+	}
 }
 
 /**********************************************************************************************************************
@@ -683,145 +683,145 @@ void boxLine (char *boxText, int first, int last, int addBlank, FILE *outFile)
  */
 int displayBox(int type, int count, FILE *outFile)
 {
-    struct tm *tm;
-    time_t theTime = time(NULL);
-    int i, functionMain = 0;
-    char doubled [MAX_BOXWIDTH + 1];
-    char underLn [MAX_BOXWIDTH + 1];
-    char readLine[MAX_BOXWIDTH + 1];
-    char firstCom[4], middleCom[4], lastCom[4];
+	struct tm *tm;
+	time_t theTime = time(NULL);
+	int i, functionMain = 0;
+	char doubled [MAX_BOXWIDTH + 1];
+	char underLn [MAX_BOXWIDTH + 1];
+	char readLine[MAX_BOXWIDTH + 1];
+	char firstCom[4], middleCom[4], lastCom[4];
 
-    tm = localtime(&theTime);
-    
-    if (cppStyle)
-    {
-        strcpy (firstCom,   "///");
-        strcpy (middleCom,  "///");
-        strcpy (lastCom,    "///");
-    }
-    else
-    {
-        strcpy (firstCom,   "/**");
-        strcpy (middleCom,  " * ");
-        strcpy (lastCom,    " */");
-    }
-    
-    if (type == 0)
-    {
-        char dateBuff[MAX_BOXWIDTH + 1];
+	tm = localtime(&theTime);
+	
+	if (cppStyle)
+	{
+		strcpy (firstCom,	"///");
+		strcpy (middleCom,	"///");
+		strcpy (lastCom,	"///");
+	}
+	else
+	{
+		strcpy (firstCom,	"/**");
+		strcpy (middleCom,	" * ");
+		strcpy (lastCom,	" */");
+	}
+	
+	if (type == 0)
+	{
+		char dateBuff[MAX_BOXWIDTH + 1];
 
-        doubleName(curFilename, doubled, underLn);
-        
-        boxLine (doubled, 1, 0, 0, outFile);
-        boxLine (underLn, 0, 0, 1, outFile);
-        if (copyrightType == 0)
-        {
-            boxLine ("This is free software; you can redistribute it and/or modify it under "
-                     "the terms of the GNU General Public License version 2 as published by "
-                     "the Free Software Foundation.  Note that I am not granting permission "
-                     "to redistribute or modify this under the terms of any later version "
-                     "of the General Public License.", 0, 0, 0, outFile);
-            boxLine ("", 0, 0, 0, outFile);
-            boxLine ("This is distributed in the hope that it will be useful, but WITHOUT "
-                     "ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
-                     "FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License "
-                     "for more details.", 0, 0, 0, outFile);
-            boxLine ("", 0, 0, 0, outFile);
-            boxLine ("You should have received a copy of the GNU General Public License "
-                     "along with this program (in the file \"COPYING\"); if not, write to "
-                     "the Free Software Foundation, Inc., 59 Temple Place - Suite 330, "
-                     "Boston, MA 02111, USA.", 0, 1, 0, outFile);
-        }
-        else if (copyrightType == 1)
-        {
-            boxLine ("All rights reserved. Reproduction, modification, use or disclosure "
-                     "to third parties without express authority is forbidden.", 0, 0, 0, outFile);
-            boxLine ("", 0, 0, 0, outFile);
-            sprintf (dateBuff, "(c) Copyright %d %s", tm -> tm_year + 1900, companyName);
-            boxLine (dateBuff, 0, 1, 0, outFile);
-        }
-        else
-        {
-            sprintf (dateBuff, "(c) Copyright %d.", tm -> tm_year + 1900);
-            boxLine (dateBuff, 0, 1, 0, outFile);
-        }
-        
-        getComment (readLine, 0, curFilename);
-        fprintf(outFile, "%s\n", firstCom);
-        fprintf(outFile, "%s \\file\n", middleCom);
-        fprintf(outFile, "%s \\brief %s.\n", middleCom, readLine);
-        if (cvsID)
-        {
-            getComment (readLine, 4, curFilename);
-            if (readLine[0])
-                fprintf(outFile, "%s \\version %s\n", middleCom, readLine);
-            else
-                fprintf(outFile, "%s \\version %cId: %s 0 %04d-%02d-%02d 00:00:00Z owner $\n", middleCom,
-                        '$', curFilename, tm -> tm_year + 1900, tm -> tm_mon + 1,  tm -> tm_mday);
-        }
-        fprintf(outFile, "%s\n", lastCom);
-    }
-    else if (type == 1)
-    {
-        doubleName(possibleName[0], doubled, underLn);
-        
-        boxLine (doubled, 1, 0, 0, outFile);
-        boxLine (underLn, 0, 1, 0, outFile);
+		doubleName(curFilename, doubled, underLn);
+		
+		boxLine (doubled, 1, 0, 0, outFile);
+		boxLine (underLn, 0, 0, 1, outFile);
+		if (copyrightType == 0)
+		{
+			boxLine ("This is free software; you can redistribute it and/or modify it under "
+					 "the terms of the GNU General Public License version 2 as published by "
+					 "the Free Software Foundation.  Note that I am not granting permission "
+					 "to redistribute or modify this under the terms of any later version "
+					 "of the General Public License.", 0, 0, 0, outFile);
+			boxLine ("", 0, 0, 0, outFile);
+			boxLine ("This is distributed in the hope that it will be useful, but WITHOUT "
+					 "ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
+					 "FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License "
+					 "for more details.", 0, 0, 0, outFile);
+			boxLine ("", 0, 0, 0, outFile);
+			boxLine ("You should have received a copy of the GNU General Public License "
+					 "along with this program (in the file \"COPYING\"); if not, write to "
+					 "the Free Software Foundation, Inc., 59 Temple Place - Suite 330, "
+					 "Boston, MA 02111, USA.", 0, 1, 0, outFile);
+		}
+		else if (copyrightType == 1)
+		{
+			boxLine ("All rights reserved. Reproduction, modification, use or disclosure "
+					 "to third parties without express authority is forbidden.", 0, 0, 0, outFile);
+			boxLine ("", 0, 0, 0, outFile);
+			sprintf (dateBuff, "(c) Copyright %d %s", tm -> tm_year + 1900, companyName);
+			boxLine (dateBuff, 0, 1, 0, outFile);
+		}
+		else
+		{
+			sprintf (dateBuff, "(c) Copyright %d.", tm -> tm_year + 1900);
+			boxLine (dateBuff, 0, 1, 0, outFile);
+		}
+		
+		getComment (readLine, 0, curFilename);
+		fprintf(outFile, "%s\n", firstCom);
+		fprintf(outFile, "%s \\file\n", middleCom);
+		fprintf(outFile, "%s \\brief %s.\n", middleCom, readLine);
+		if (cvsID)
+		{
+			getComment (readLine, 4, curFilename);
+			if (readLine[0])
+				fprintf(outFile, "%s \\version %s\n", middleCom, readLine);
+			else
+				fprintf(outFile, "%s \\version %cId: %s 0 %04d-%02d-%02d 00:00:00Z owner $\n", middleCom,
+						'$', curFilename, tm -> tm_year + 1900, tm -> tm_mon + 1,  tm -> tm_mday);
+		}
+		fprintf(outFile, "%s\n", lastCom);
+	}
+	else if (type == 1)
+	{
+		doubleName(possibleName[0], doubled, underLn);
+		
+		boxLine (doubled, 1, 0, 0, outFile);
+		boxLine (underLn, 0, 1, 0, outFile);
 
-        for (i = 0; i < count; i++)
-        {
-            if (i == 0)
-                printf ("[%s] Function: %s (", curFilename, possibleName[i]);
-            else if (i == 1)
-                printf ("%s", possibleName[i]);
-            else
-                printf (", %s", possibleName[i]);
-        }
-        printf (");\n");
+		for (i = 0; i < count; i++)
+		{
+			if (i == 0)
+				printf ("[%s] Function: %s (", curFilename, possibleName[i]);
+			else if (i == 1)
+				printf ("%s", possibleName[i]);
+			else
+				printf (", %s", possibleName[i]);
+		}
+		printf (");\n");
 
-        if (autoMain && strcmp (possibleName[0], "main") == 0)
-        {
-            functionMain = 1;
-            fprintf(outFile, "%s\n", firstCom);
-            fprintf(outFile, "%s \\brief %s.\n", middleCom, "The program starts here");         
-        }
-        else
-        {
-            getComment (readLine, 1, possibleName[0]);
-            fprintf(outFile, "%s\n", firstCom);
-            fprintf(outFile, "%s \\brief %s.\n", middleCom, readLine);
-        }   
-        for (i = 1; i < count; i++)
-        {
-            if (functionMain && strcmp (possibleName[i], "argc") == 0)
-            {
-                fprintf(outFile, "%s \\param %s %s.\n", middleCom, possibleName[i], 
-                        "The number of arguments passed to the program");
-                continue;
-            }
-            if (functionMain && strcmp (possibleName[i], "argv") == 0)
-            {
-                fprintf(outFile, "%s \\param %s %s.\n", middleCom, possibleName[i], 
-                        "Pointers to the arguments passed to the program");
-                continue;
-            }
-            getComment (readLine, 2, possibleName[i]);
-            fprintf(outFile, "%s \\param %s %s.\n", middleCom, possibleName[i], readLine);
-        }
-        
-        if (functionMain)
-        {
-            fprintf(outFile, "%s \\result %s.\n", middleCom, "0 (zero) if all processed OK");
-        }
-        else
-        {
-            getComment (readLine, 3, "");
-            fprintf(outFile, "%s \\result %s.\n", middleCom, readLine);
-        }
-        fprintf(outFile, "%s\n", lastCom);
-        displayLine ();
-    }
-    return 1;
+		if (autoMain && strcmp (possibleName[0], "main") == 0)
+		{
+			functionMain = 1;
+			fprintf(outFile, "%s\n", firstCom);
+			fprintf(outFile, "%s \\brief %s.\n", middleCom, "The program starts here");			
+		}
+		else
+		{
+			getComment (readLine, 1, possibleName[0]);
+			fprintf(outFile, "%s\n", firstCom);
+			fprintf(outFile, "%s \\brief %s.\n", middleCom, readLine);
+		}	
+		for (i = 1; i < count; i++)
+		{
+			if (functionMain && strcmp (possibleName[i], "argc") == 0)
+			{
+				fprintf(outFile, "%s \\param %s %s.\n", middleCom, possibleName[i], 
+						"The number of arguments passed to the program");
+				continue;
+			}
+			if (functionMain && strcmp (possibleName[i], "argv") == 0)
+			{
+				fprintf(outFile, "%s \\param %s %s.\n", middleCom, possibleName[i], 
+						"Pointers to the arguments passed to the program");
+				continue;
+			}
+			getComment (readLine, 2, possibleName[i]);
+			fprintf(outFile, "%s \\param %s %s.\n", middleCom, possibleName[i], readLine);
+		}
+		
+		if (functionMain)
+		{
+			fprintf(outFile, "%s \\result %s.\n", middleCom, "0 (zero) if all processed OK");
+		}
+		else
+		{
+			getComment (readLine, 3, "");
+			fprintf(outFile, "%s \\result %s.\n", middleCom, readLine);
+		}
+		fprintf(outFile, "%s\n", lastCom);
+		displayLine ();
+	}
+	return 1;
 }
 
 /**********************************************************************************************************************
@@ -837,10 +837,10 @@ int displayBox(int type, int count, FILE *outFile)
  */
 int isKeyWord (char *currentWord)
 {
-    if (!strcmp (currentWord, "void"))
-        return 1;
+	if (!strcmp (currentWord, "void"))
+		return 1;
 
-    return 0;
+	return 0;
 }
 
 /**********************************************************************************************************************
@@ -857,14 +857,14 @@ int isKeyWord (char *currentWord)
  */
 void debugLine(char *format, ...)
 {
-    va_list ap;
+	va_list ap;
 
-    if (debug)
-    {
-        va_start(ap, format);
-        vfprintf(stderr, format, ap);
-        va_end(ap);
-    }
+	if (debug)
+	{
+		va_start(ap, format);
+		vfprintf(stderr, format, ap);
+		va_end(ap);
+	}
 }
 
 /**********************************************************************************************************************
@@ -880,298 +880,298 @@ void debugLine(char *format, ...)
  */
 int addComments(DIR_ENTRY * file)
 {
-    char inChar, lastChar = 0;
-    char currentWord[80];
-    char inFile[PATH_SIZE], outFile[PATH_SIZE], bkpFile[PATH_SIZE];
-    int braceLevel = 0, bracketLevel = 0, inComment = 0, inQuote = 0, inDefine = 0, colonCount = 0;
-    int addComment = 0, curWordPos = 0, curParam = 0, clear = 0, line = 1, funcLine = 0;
-    FILE *readFile, *writeFile;
+	char inChar, lastChar = 0;
+	char currentWord[80];
+	char inFile[PATH_SIZE], outFile[PATH_SIZE], bkpFile[PATH_SIZE];
+	int braceLevel = 0, bracketLevel = 0, inComment = 0, inQuote = 0, inDefine = 0, colonCount = 0;
+	int addComment = 0, curWordPos = 0, curParam = 0, clear = 0, line = 1, funcLine = 0;
+	FILE *readFile, *writeFile;
 
-    strcpy(inFile, file->fullPath);
-    strcat(inFile, file->fileName);
+	strcpy(inFile, file->fullPath);
+	strcat(inFile, file->fileName);
 
-    strcpy(outFile, file->fullPath);
-    strcat(outFile, file->fileName);
-    strcat(outFile, ".$$$");
-    
-    firstWrite = 1;
-    addedComments = 0;
-    possibleName[0][0] = 0;
-    currentWord[curWordPos = 0] = 0;
+	strcpy(outFile, file->fullPath);
+	strcat(outFile, file->fileName);
+	strcat(outFile, ".$$$");
+	
+	firstWrite = 1;
+	addedComments = 0;
+	possibleName[0][0] = 0;
+	currentWord[curWordPos = 0] = 0;
 
-    if ((readFile = fopen(inFile, "rb")) != NULL)
-    {
-        if ((writeFile = fopen(outFile, "wb")) != NULL)
-        {
-            strcpy(curFilename, file -> fileName);
+	if ((readFile = fopen(inFile, "rb")) != NULL)
+	{
+		if ((writeFile = fopen(outFile, "wb")) != NULL)
+		{
+			strcpy(curFilename, file -> fileName);
 
-            while (bufferRead(&inChar, readFile))
-            {
-                if (inChar == '\n')
-                    line++;
+			while (bufferRead(&inChar, readFile))
+			{
+				if (inChar == '\n')
+					line++;
 
-                if (inComment == 1)
-                {
-                    if (lastChar == '*' && inChar == '/')
-                    {
-                        debugLine("Line %d: Ending C comment\n", line);
-                        if (braceLevel) clear = 1;
-                        inComment = 0;
-                    }
-                }
-                else if (inComment == 2)
-                {
-                    if (inChar == '\n')
-                    {
-                        debugLine("Line %d: Ending C++ comment\n", line);
-                        if (braceLevel) clear = 1;
-                        inComment = 0;
+				if (inComment == 1)
+				{
+					if (lastChar == '*' && inChar == '/')
+					{
+						debugLine("Line %d: Ending C comment\n", line);
+						if (braceLevel) clear = 1;
+						inComment = 0;
+					}
+				}
+				else if (inComment == 2)
+				{
+					if (inChar == '\n')
+					{
+						debugLine("Line %d: Ending C++ comment\n", line);
+						if (braceLevel) clear = 1;
+						inComment = 0;
 
-                        if (inDefine == 1)
-                        {
-                            debugLine("Line %d: Ending define\n", line);
-                            inDefine = 0;
-                        }
-                    }
-                }
-                else if (lastChar == '/' && inChar == '*' && !inQuote)
-                {
-                    debugLine("Line %d: Starting C comment\n", line);
-                    if (outBuffPos)
-                    {
-                        --outBuffPos;
-                        commentFlush(writeFile);
-                        bufferFlush(writeFile, 0);
-                        commentWrite('/', writeFile);
-                    }
-                    inComment = 1;
-                }
-                else if (lastChar == '/' && inChar == '/' && !inQuote)
-                {
-                    debugLine("Line %d: Starting C++ comment\n", line);
-                    if (outBuffPos)
-                    {
-                        --outBuffPos;
-                        commentFlush(writeFile);
-                        bufferFlush(writeFile, 0);
-                        commentWrite('/', writeFile);
-                    }
-                    inComment = 2;
-                }
-                else if (inChar == DQ && lastChar != '\\' && inQuote != 1)
-                {
-                    if (inQuote == 0)
-                    {
-                        debugLine("Line %d: Starting double quote\n", line);
-                        inQuote = 2;
-                    }
-                    else if (inQuote == 2)
-                    {
-                        debugLine("Line %d: Ending double quote\n", line);
-                        inQuote = 0;
-                    }
-                }
-                else if (inChar == SQ && lastChar != '\\' && inQuote != 2)
-                {
-                    if (inQuote == 0)
-                    {
-                        debugLine("Line %d: Starting single quote\n", line);
-                        inQuote = 1;
-                    }
-                    else if (inQuote == 1)
-                    {
-                        debugLine("Line %d: Ending single quote\n", line);
-                        inQuote = 0;
-                    }
-                }
-                else if (inQuote)
-                {
-                    ;
-                }
-                else if (inDefine == 1)
-                {
-                    if (inChar == '\n')
-                    {
-                        debugLine("Line %d: Ending define\n", line);
-                        inDefine = 0;
-                    }
-                }
-                else if (inChar == '#')
-                {
-                    debugLine("Line %d: Starting define\n", line);
-                    commentFlush(writeFile);
-                    bufferFlush(writeFile, 0);
-                    inDefine = 1;
-                }
-                else if (inChar == ':')
-                {
-                    if (bracketLevel == 0 && braceLevel == 0)
-                        ++colonCount;
-                    currentWord[curWordPos++] = inChar;
-                    currentWord[curWordPos] = 0;
-                }
-                else if (inChar == '{')
-                {
-                    debugLine("Line %d: Starting brace level (%d)\n", line, braceLevel + 1);
-                    if (braceLevel == 0)
-                    {
-                        if (curParam)
-                        {
-                            if (commentLine == 0 || commentLine == funcLine)
-                            {
-                                bufferFlush(writeFile, 1);
-                                addedComments += displayBox(1, curParam, writeFile);
-                                comBuffPos = 0;
-                                bufferFlush(writeFile, 0);                              
-                            }
-                            curParam = 0;
-                        }
-                        colonCount = 0;
-                    }
-                    braceLevel++;
-                }
-                else if (inChar == '}' && braceLevel)
-                {
-                    debugLine("Line %d: Ending brace level (%d)\n", line, braceLevel);
-                    if (--braceLevel == 0)
-                    {
-                        commentFlush(writeFile);
-                        colonCount = 0;
-                        clear = 1;
-                    }
-                }
-                else if (inChar == '(')
-                {
-                    debugLine("Line %d: Starting bracket level (%d)\n", line, bracketLevel + 1);
-                    if (bracketLevel == 0)
-                    {
-                        if (currentWord[0] && colonCount < 3)
-                        {
-                            funcLine = line;
-                            strcpy(possibleName[0], currentWord);
-                            currentWord[0] = 0;
-                            curParam = 1;
-                        }
-                    }
-                    bracketLevel++;
-                }
-                else if (inChar == ',' && bracketLevel == 1 && braceLevel == 0)
-                {
-                    if (currentWord[0])
-                    {
-                        debugLine("Line %d: Found possible name (%s)\n", line, currentWord);
-                        strcpy(possibleName[curParam], currentWord);
-                        currentWord[0] = 0;
-                        if (++curParam == 30)
-                            curParam = 29;
-                    }
-                }
-                else if (inChar == ')' && bracketLevel)
-                {
-                    debugLine("Line %d: Ending bracket level (%d)\n", line, bracketLevel);
-                    if (bracketLevel == 1 && braceLevel == 0 && colonCount < 3)
-                    {
-                        if (currentWord[0])
-                        {
-                            debugLine("Line %d: Found possible name (%s)\n", line, currentWord);
-                            if (!isKeyWord (currentWord))
-                            {
-                                strcpy(possibleName[curParam], currentWord);
-                                if (++curParam == 30)
-                                    curParam = 29;
-                            }
-                            currentWord[0] = 0;
-                        }
-                    }
-                    bracketLevel--;
-                }
-                else if (strchr(ignoreChars, inChar) || strchr(whiteSpace, inChar))
-                {
-                    curWordPos = 0;
-                }
-                else if (inChar == ';' && !bracketLevel && !braceLevel)
-                {
-                    commentFlush(writeFile);
-                    colonCount = 0;
-                    curParam = 0;
-                    clear = 1;
-                }
-                else if (strchr(funtionChars, inChar))
-                {
-                    currentWord[curWordPos++] = inChar;
-                    currentWord[curWordPos] = 0;
-                }
-                else
-                {
-                    currentWord[curWordPos = 0] = 0;
-                }
-                if (inComment)
-                {
-                    commentWrite(inChar, writeFile);
-                    addComment = 1;
-                }
-                else
-                {
-                    if (strchr(whiteSpace, inChar) && addComment)
-                        commentWrite(inChar, writeFile);
-                    else
-                    {
-                        addComment = 0;
-                        bufferWrite(inChar, writeFile);
-                        if (clear)
-                        {
-                            commentFlush(writeFile);
-                            bufferFlush(writeFile, 0);
-                            clear = 0;
-                        }
-                    }
-                }
-                if (lastChar == '\\' && inChar == '\\')
-                    lastChar = 0;
-                else
-                    lastChar = inChar;
-            }
-            commentFlush(writeFile);
-            bufferFlush(writeFile, 0);
-            fclose(writeFile);
-        }
-        fclose(readFile);
+						if (inDefine == 1)
+						{
+							debugLine("Line %d: Ending define\n", line);
+							inDefine = 0;
+						}
+					}
+				}
+				else if (lastChar == '/' && inChar == '*' && !inQuote)
+				{
+					debugLine("Line %d: Starting C comment\n", line);
+					if (outBuffPos)
+					{
+						--outBuffPos;
+						commentFlush(writeFile);
+						bufferFlush(writeFile, 0);
+						commentWrite('/', writeFile);
+					}
+					inComment = 1;
+				}
+				else if (lastChar == '/' && inChar == '/' && !inQuote)
+				{
+					debugLine("Line %d: Starting C++ comment\n", line);
+					if (outBuffPos)
+					{
+						--outBuffPos;
+						commentFlush(writeFile);
+						bufferFlush(writeFile, 0);
+						commentWrite('/', writeFile);
+					}
+					inComment = 2;
+				}
+				else if (inChar == DQ && lastChar != '\\' && inQuote != 1)
+				{
+					if (inQuote == 0)
+					{
+						debugLine("Line %d: Starting double quote\n", line);
+						inQuote = 2;
+					}
+					else if (inQuote == 2)
+					{
+						debugLine("Line %d: Ending double quote\n", line);
+						inQuote = 0;
+					}
+				}
+				else if (inChar == SQ && lastChar != '\\' && inQuote != 2)
+				{
+					if (inQuote == 0)
+					{
+						debugLine("Line %d: Starting single quote\n", line);
+						inQuote = 1;
+					}
+					else if (inQuote == 1)
+					{
+						debugLine("Line %d: Ending single quote\n", line);
+						inQuote = 0;
+					}
+				}
+				else if (inQuote)
+				{
+					;
+				}
+				else if (inDefine == 1)
+				{
+					if (inChar == '\n')
+					{
+						debugLine("Line %d: Ending define\n", line);
+						inDefine = 0;
+					}
+				}
+				else if (inChar == '#')
+				{
+					debugLine("Line %d: Starting define\n", line);
+					commentFlush(writeFile);
+					bufferFlush(writeFile, 0);
+					inDefine = 1;
+				}
+				else if (inChar == ':')
+				{
+					if (bracketLevel == 0 && braceLevel == 0)
+						++colonCount;
+					currentWord[curWordPos++] = inChar;
+					currentWord[curWordPos] = 0;
+				}
+				else if (inChar == '{')
+				{
+					debugLine("Line %d: Starting brace level (%d)\n", line, braceLevel + 1);
+					if (braceLevel == 0)
+					{
+						if (curParam)
+						{
+							if (commentLine == 0 || commentLine == funcLine)
+							{
+								bufferFlush(writeFile, 1);
+								addedComments += displayBox(1, curParam, writeFile);
+								comBuffPos = 0;
+								bufferFlush(writeFile, 0);								
+							}
+							curParam = 0;
+						}
+						colonCount = 0;
+					}
+					braceLevel++;
+				}
+				else if (inChar == '}' && braceLevel)
+				{
+					debugLine("Line %d: Ending brace level (%d)\n", line, braceLevel);
+					if (--braceLevel == 0)
+					{
+						commentFlush(writeFile);
+						colonCount = 0;
+						clear = 1;
+					}
+				}
+				else if (inChar == '(')
+				{
+					debugLine("Line %d: Starting bracket level (%d)\n", line, bracketLevel + 1);
+					if (bracketLevel == 0)
+					{
+						if (currentWord[0] && colonCount < 3)
+						{
+							funcLine = line;
+							strcpy(possibleName[0], currentWord);
+							currentWord[0] = 0;
+							curParam = 1;
+						}
+					}
+					bracketLevel++;
+				}
+				else if (inChar == ',' && bracketLevel == 1 && braceLevel == 0)
+				{
+					if (currentWord[0])
+					{
+						debugLine("Line %d: Found possible name (%s)\n", line, currentWord);
+						strcpy(possibleName[curParam], currentWord);
+						currentWord[0] = 0;
+						if (++curParam == 30)
+							curParam = 29;
+					}
+				}
+				else if (inChar == ')' && bracketLevel)
+				{
+					debugLine("Line %d: Ending bracket level (%d)\n", line, bracketLevel);
+					if (bracketLevel == 1 && braceLevel == 0 && colonCount < 3)
+					{
+						if (currentWord[0])
+						{
+							debugLine("Line %d: Found possible name (%s)\n", line, currentWord);
+							if (!isKeyWord (currentWord))
+							{
+								strcpy(possibleName[curParam], currentWord);
+								if (++curParam == 30)
+									curParam = 29;
+							}
+							currentWord[0] = 0;
+						}
+					}
+					bracketLevel--;
+				}
+				else if (strchr(ignoreChars, inChar) || strchr(whiteSpace, inChar))
+				{
+					curWordPos = 0;
+				}
+				else if (inChar == ';' && !bracketLevel && !braceLevel)
+				{
+					commentFlush(writeFile);
+					colonCount = 0;
+					curParam = 0;
+					clear = 1;
+				}
+				else if (strchr(funtionChars, inChar))
+				{
+					currentWord[curWordPos++] = inChar;
+					currentWord[curWordPos] = 0;
+				}
+				else
+				{
+					currentWord[curWordPos = 0] = 0;
+				}
+				if (inComment)
+				{
+					commentWrite(inChar, writeFile);
+					addComment = 1;
+				}
+				else
+				{
+					if (strchr(whiteSpace, inChar) && addComment)
+						commentWrite(inChar, writeFile);
+					else
+					{
+						addComment = 0;
+						bufferWrite(inChar, writeFile);
+						if (clear)
+						{
+							commentFlush(writeFile);
+							bufferFlush(writeFile, 0);
+							clear = 0;
+						}
+					}
+				}
+				if (lastChar == '\\' && inChar == '\\')
+					lastChar = 0;
+				else
+					lastChar = inChar;
+			}
+			commentFlush(writeFile);
+			bufferFlush(writeFile, 0);
+			fclose(writeFile);
+		}
+		fclose(readFile);
 
-        if (addedComments)
-        {
-            strcpy(bkpFile, file->fullPath);
-            strcat(bkpFile, file->fileName);
-            strcat(bkpFile, "~");
-            
-            if (rename (inFile, bkpFile) != 0)
-            {
-                fprintf (stderr, "Rename from %s to %s failed!\n", inFile, bkpFile);
-                return 0;
-            }
-            if (rename (outFile, inFile) != 0)
-            {
-                fprintf (stderr, "Rename from %s to %s failed!\n", inFile, outFile);
-                return 0;
-            }
-        }
-        else
-        {
-            if (unlink (outFile) != 0)
-            {
-                fprintf (stderr, "Delete %s failed!\n", outFile);
-                return 0;
-            }
-        }
-        if (bracketLevel || braceLevel || inComment || inQuote || inDefine)
-        {
-            printf("WARNING unexpected EOF: Bracket: %d, Brace: %d, Comment: %d, "
-                   "Quote: %d, Define: %d\n", bracketLevel, braceLevel, inComment, 
-                   inQuote, inDefine);
-        }
-        printf("      %-16s %d added comment(s)\n", file->fileName, addedComments);
-        filesFound++;
-    }
-    return 1;
+		if (addedComments)
+		{
+			strcpy(bkpFile, file->fullPath);
+			strcat(bkpFile, file->fileName);
+			strcat(bkpFile, "~");
+			
+			if (rename (inFile, bkpFile) != 0)
+			{
+				fprintf (stderr, "Rename from %s to %s failed!\n", inFile, bkpFile);
+				return 0;
+			}
+			if (rename (outFile, inFile) != 0)
+			{
+				fprintf (stderr, "Rename from %s to %s failed!\n", inFile, outFile);
+				return 0;
+			}
+		}
+		else
+		{
+			if (unlink (outFile) != 0)
+			{
+				fprintf (stderr, "Delete %s failed!\n", outFile);
+				return 0;
+			}
+		}
+		if (bracketLevel || braceLevel || inComment || inQuote || inDefine)
+		{
+			printf("WARNING unexpected EOF: Bracket: %d, Brace: %d, Comment: %d, "
+				   "Quote: %d, Define: %d\n", bracketLevel, braceLevel, inComment, 
+				   inQuote, inDefine);
+		}
+		printf("      %-16s %d added comment(s)\n", file->fileName, addedComments);
+		filesFound++;
+	}
+	return 1;
 }
 
 /**********************************************************************************************************************
@@ -1188,16 +1188,16 @@ int addComments(DIR_ENTRY * file)
  */
 int addCommentsCmp (DIR_ENTRY * fileOne, DIR_ENTRY * fileTwo)
 {
-    if (fileOne->fileStat.st_mode & S_IFDIR)
-    {
-        if (!(fileTwo->fileStat.st_mode & S_IFDIR))
-            return -1;
-    }
-    if (fileTwo->fileStat.st_mode & S_IFDIR)
-    {
-        if (!(fileOne->fileStat.st_mode & S_IFDIR))
-            return 1;
-    }
-    return strcasecmp(fileOne->fileName, fileTwo->fileName);
+	if (fileOne->fileStat.st_mode & S_IFDIR)
+	{
+		if (!(fileTwo->fileStat.st_mode & S_IFDIR))
+			return -1;
+	}
+	if (fileTwo->fileStat.st_mode & S_IFDIR)
+	{
+		if (!(fileOne->fileStat.st_mode & S_IFDIR))
+			return 1;
+	}
+	return strcasecmp(fileOne->fileName, fileTwo->fileName);
 }
 

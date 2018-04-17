@@ -226,7 +226,7 @@ int testChar (char thisChar, char lastChar, int current, int line)
 		}
 		if (current == 1 && thisChar == '\'' && lastChar != '\\') retn = 0;
 		else if (current == 2 && thisChar == '"' && lastChar != '\\') retn = 0;
-		else if (current == 3 && thisChar == 13) retn = 0;
+		else if (current == 3 && thisChar == '\n') retn = 0;
 		else if (current == 4 && thisChar == '/' && lastChar == '*') retn = 0;
 		if (retn == 0) isDouble = 0;
 	}
