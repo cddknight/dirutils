@@ -22,7 +22,6 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
@@ -31,6 +30,11 @@
 #include <sys/stat.h>
 #include <dircmd.h>
 #include <libgen.h>
+#ifdef HAVE_VALUES_H                                                                                                    
+#include <values.h>                                                                                                     
+#else                                                                                                                   
+#define MAXINT 2147483647                                                                                               
+#endif                                                                                                                  
 
 /*----------------------------------------------------------------------------*
  * Prototypes                                                                 *
@@ -44,7 +48,7 @@ int showDir (DIR_ENTRY *file);
 COLUMN_DESC colNumberDescs[3] =
 {
 	{ 20,	4,	4,	2,	0x02,	COL_ALIGN_RIGHT,	"Line",			0 },	/* 0 */
-	{ 1024,	12,	8,	0,	0x0E,	0,					"Contents",		1 }		/* 1 */
+	{ 1024,	12,	8,	0,	0x07,	0,					"Contents",		1 }		/* 1 */
 };
 
 COLUMN_DESC *ptrNumberColumn[3] =
@@ -69,7 +73,7 @@ int filesFound = 0;
 int totalLines = 0;
 int displayColour = 0;
 int startLine = 1;
-int endLine = INT32_MAX;
+int endLine = MAXINT;
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -259,8 +263,6 @@ int showDir (DIR_ENTRY *file)
 		}
 
 		displayDrawLine (0);
-		displayHeading (0);
-		
 		while (fgets (inBuffer, 1024, readFile) != NULL)
 		{
 			int inPos = 0, outPos = 0, curPosn = 0, nextPosn = 0;
