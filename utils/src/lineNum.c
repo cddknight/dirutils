@@ -30,25 +30,25 @@
 #include <sys/stat.h>
 #include <dircmd.h>
 #include <libgen.h>
-#ifdef HAVE_VALUES_H																									
-#include <values.h>																										
-#else																													
-#define MAXINT 2147483647																								
-#endif																													
+#ifdef HAVE_VALUES_H
+#include <values.h>
+#else
+#define MAXINT 2147483647
+#endif
 
-/*----------------------------------------------------------------------------*
- * Prototypes                                                                 *
- *----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
+/* Prototypes                                                                 */
+/*----------------------------------------------------------------------------*/
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo);
 int showDir (DIR_ENTRY *file);
 
-/*----------------------------------------------------------------------------*
- * Globals                                                                    *
- *----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
+/* Globals                                                                    */
+/*----------------------------------------------------------------------------*/
 COLUMN_DESC colNumberDescs[3] =
 {
-	{ 20,	4,	4,	2,	0x02,	COL_ALIGN_RIGHT,	"Line",			0 },	/* 0 */
-	{ 1024, 12, 8,	0,	0x07,	0,					"Contents",		1 }		/* 1 */
+	{ 20,	1,	2,	2,	0x02,	COL_ALIGN_RIGHT,	"Line",			0 },	/* 0 */
+	{ 1024, 10, 10, 0,	0x07,	0,					"Contents",		1 }		/* 1 */
 };
 
 COLUMN_DESC *ptrNumberColumn[3] =
@@ -143,7 +143,7 @@ int main (int argc, char *argv[])
 	{
 		int t;
 
-		switch (i) 
+		switch (i)
 		{
 		case 'C':
 			displayColour = DISPLAY_COLOURS;
@@ -184,18 +184,18 @@ int main (int argc, char *argv[])
 		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
 	}
 
-	/*------------------------------------------------------------------------*
-     * Now we can sort the directory.                                         *
-     *------------------------------------------------------------------------*/
+	/*------------------------------------------------------------------------*/
+	/* Now we can sort the directory.                                         */
+	/*------------------------------------------------------------------------*/
 	if (found)
 	{
-		/*--------------------------------------------------------------------*
-         * Now we can sort the directory.                                     *
-         *--------------------------------------------------------------------*/
+		/*--------------------------------------------------------------------*/
+		/* Now we can sort the directory.                                     */
+		/*--------------------------------------------------------------------*/
 		directorySort (&fileList);
 		directoryProcess (showDir, &fileList);
 
-		if (filesFound) 
+		if (filesFound)
 		{
 			if (!displayColumnInit (2, ptrFileColumn, displayColour))
 			{
@@ -205,7 +205,7 @@ int main (int argc, char *argv[])
 			displayDrawLine (0);
 			displayInColumn (0, "%d %s shown\n", filesFound, filesFound == 1 ? "File" : "Files");
 			displayNewLine(DISPLAY_INFO);
-			displayAllLines ();		
+			displayAllLines ();
 		}
 		displayTidy ();
 	}
@@ -234,9 +234,9 @@ int showDir (DIR_ENTRY *file)
 	int linesFound = 0;
 	FILE *readFile;
 
-	/*------------------------------------------------------------------------*
-     * First display a table with the file name and size.                     *
-     *------------------------------------------------------------------------*/
+	/*------------------------------------------------------------------------*/
+	/* First display a table with the file name and size.                     */
+	/*------------------------------------------------------------------------*/
 	if (!displayColumnInit (2, ptrFileColumn, displayColour))
 	{
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
@@ -248,7 +248,7 @@ int showDir (DIR_ENTRY *file)
 	displayInColumn (0, "%s", file -> fileName);
 	displayInColumn (1, displayFileSize (file -> fileStat.st_size, (char *)inBuffer));
 	displayNewLine (DISPLAY_INFO);
-	displayAllLines ();		
+	displayAllLines ();
 	displayTidy ();
 
 	strcpy (inBuffer, file -> fullPath);
@@ -278,7 +278,7 @@ int showDir (DIR_ENTRY *file)
 					}
 					else if (inBuffer[inPos] == '\t')
 					{
-						nextPosn = ((nextPosn + tabSize) / tabSize) * tabSize;						
+						nextPosn = ((nextPosn + tabSize) / tabSize) * tabSize;
 					}
 					else
 					{
@@ -291,14 +291,22 @@ int showDir (DIR_ENTRY *file)
 						{
 							outBuffer[outPos++] = inBuffer[inPos];
 						}
+						else if (inBuffer[inPos] < ' ' && inBuffer[inPos] != '\n')
+						{
+							outBuffer[outPos++] = '^';
+							outBuffer[outPos++] = (inBuffer[inPos] + 'A');
+						}
 						nextPosn = ++curPosn;
 					}
 					++inPos;
 				}
-				outBuffer[outPos] = 0;
-				displayInColumn (0, "%d", linesFound);
-				displayInColumn (1, "%s", outBuffer);
-				displayNewLine (0);
+				if (outPos)
+				{
+					outBuffer[outPos] = 0;
+					displayInColumn (0, "%d", linesFound);
+					displayInColumn (1, "%s", outBuffer);
+					displayNewLine (0);
+				}
 			}
 		}
 		fclose (readFile);

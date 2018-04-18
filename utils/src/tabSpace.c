@@ -300,29 +300,32 @@ int showDir (DIR_ENTRY *file)
 					}
 					else
 					{
-						if (spaceToTab)
+						if (inBuffer[inPos] != '\n')
 						{
-							int one = (curPosn + 1 == nextPosn ? 1 : 0);
-							while (curPosn < nextPosn)
+							if (spaceToTab)
 							{
-								if (((curPosn + tabSize) / tabSize) * tabSize <= nextPosn && !one)
+								int one = (curPosn + 1 == nextPosn ? 1 : 0);
+								while (curPosn < nextPosn)
 								{
-									outBuffer[outPos++] = '\t';
-									curPosn = ((curPosn + tabSize) / tabSize) * tabSize;
+									if (((curPosn + tabSize) / tabSize) * tabSize <= nextPosn && !one)
+									{
+										outBuffer[outPos++] = '\t';
+										curPosn = ((curPosn + tabSize) / tabSize) * tabSize;
+									}
+									else
+									{
+										outBuffer[outPos++] = ' ';
+										++curPosn;
+									}
 								}
-								else
+							}
+							else
+							{
+								while (curPosn < nextPosn)
 								{
 									outBuffer[outPos++] = ' ';
 									++curPosn;
 								}
-							}
-						}
-						else
-						{
-							while (curPosn < nextPosn)
-							{
-								outBuffer[outPos++] = ' ';
-								++curPosn;
 							}
 						}
 						outBuffer[outPos++] = inBuffer[inPos];
