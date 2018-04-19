@@ -69,6 +69,7 @@ COLUMN_DESC *ptrFileColumn[] =
 };
 
 int tabSize = 8;
+int showBlank = 1;
 int filesFound = 0;
 int totalLines = 0;
 int displayColour = 0;
@@ -107,6 +108,7 @@ void helpThem (char *name)
 	version ();
 	printf ("Enter the command: %s [options] <filename>\n", basename(name));
 	printf ("Options: \n");
+	printf ("     -b . . . Do not count blank lines.\n");
 	printf ("     -C . . . Display output in colour.\n");
 	printf ("     -eN  . . Set the ending line number.\n");
 	printf ("     -sN  . . Set the starting line number.\n");
@@ -139,12 +141,16 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "Ce:s:t:?")) != -1)
+	while ((i = getopt(argc, argv, "bCe:s:t:?")) != -1)
 	{
 		int t;
 
 		switch (i)
 		{
+		case 'b':
+			showBlank = 0;
+			break;
+
 		case 'C':
 			displayColour = DISPLAY_COLOURS;
 			break;
@@ -231,7 +237,7 @@ int main (int argc, char *argv[])
 int showDir (DIR_ENTRY *file)
 {
 	char inBuffer[1024 + 1], outBuffer[(8 * 1024) + 1];
-	int linesFound = 0;
+	int linesShown = 0;
 	FILE *readFile;
 
 	/*------------------------------------------------------------------------*/
@@ -256,6 +262,8 @@ int showDir (DIR_ENTRY *file)
 
 	if ((readFile = fopen (inBuffer, "rb")) != NULL)
 	{
+		int linesFound = 0;
+
 		if (!displayColumnInit (2, ptrNumberColumn, displayColour))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
@@ -265,47 +273,52 @@ int showDir (DIR_ENTRY *file)
 		displayDrawLine (0);
 		while (fgets (inBuffer, 1024, readFile) != NULL)
 		{
-			int inPos = 0, outPos = 0, curPosn = 0, nextPosn = 0;
+			int inPos = 0, outPos = 0, curPosn = 0, nextPosn = 0, blankLine = 0;
 
-			++linesFound;
-			if (linesFound >= startLine && linesFound <= endLine)
+			while (inBuffer[inPos])
 			{
-				while (inBuffer[inPos])
+				if (inBuffer[inPos] == ' ')
 				{
-					if (inBuffer[inPos] == ' ')
-					{
-						++nextPosn;
-					}
-					else if (inBuffer[inPos] == '\t')
-					{
-						nextPosn = ((nextPosn + tabSize) / tabSize) * tabSize;
-					}
-					else
-					{
-						while (curPosn < nextPosn)
-						{
-							outBuffer[outPos++] = ' ';
-							++curPosn;
-						}
-						if (inBuffer[inPos] >= ' ' && inBuffer[inPos] < 127)
-						{
-							outBuffer[outPos++] = inBuffer[inPos];
-						}
-						else if (inBuffer[inPos] < ' ' && inBuffer[inPos] != '\n')
-						{
-							outBuffer[outPos++] = '^';
-							outBuffer[outPos++] = (inBuffer[inPos] + 'A');
-						}
-						nextPosn = ++curPosn;
-					}
-					++inPos;
+					++nextPosn;
 				}
-				if (outPos)
+				else if (inBuffer[inPos] == '\t')
+				{
+					nextPosn = ((nextPosn + tabSize) / tabSize) * tabSize;
+				}
+				else
+				{
+					while (curPosn < nextPosn && inBuffer[inPos] != '\n')
+					{
+						outBuffer[outPos++] = ' ';
+						++curPosn;
+					}
+					if (inBuffer[inPos] >= ' ' && inBuffer[inPos] < 127)
+					{
+						outBuffer[outPos++] = inBuffer[inPos];
+					}
+					else if (inBuffer[inPos] < ' ' && inBuffer[inPos] != '\n')
+					{
+						outBuffer[outPos++] = '^';
+						outBuffer[outPos++] = (inBuffer[inPos] + 'A');
+					}
+					else if (inBuffer[inPos] == '\n' && showBlank)
+					{
+						blankLine = 1;
+					}
+					nextPosn = ++curPosn;
+				}
+				++inPos;
+			}
+			if (outPos || blankLine)
+			{
+				++linesFound;
+				if (linesFound >= startLine && linesFound <= endLine)
 				{
 					outBuffer[outPos] = 0;
 					displayInColumn (0, "%d", linesFound);
 					displayInColumn (1, "%s", outBuffer);
 					displayNewLine (0);
+					++linesShown;
 				}
 			}
 		}
@@ -313,7 +326,7 @@ int showDir (DIR_ENTRY *file)
 		displayAllLines ();
 		displayTidy ();
 	}
-	return linesFound ? 1 : 0;
+	return linesShown ? 1 : 0;
 }
 
 /**********************************************************************************************************************
