@@ -74,7 +74,7 @@ char dateFormats[4][41] =
 	"%e/%b %k:%M:%S",			/* dd/Mon hh:mm:ss */
 	"%e/%b/%Y(%P)"				/* dd/Mon/year(pp) */
 };
-	
+
 /*---------------------------------------------------------------------------*
  *                                                                           *
  *---------------------------------------------------------------------------*/
@@ -86,7 +86,7 @@ typedef struct _fullColDesc
 	int priority;
 	int colour;
 	int gap;
-	
+
 	int maxSize;
 	int displaySize;
 	char *heading;
@@ -98,7 +98,7 @@ FULL_COLUMN_DESC;
  *---------------------------------------------------------------------------*/
 typedef struct _rowDesc
 {
-	int	rowType;
+	int rowType;
 	char *colString[MAX_COLUMNS];
 	int colColour[MAX_COLUMNS];
 }
@@ -145,7 +145,7 @@ void displayInit()
 void displayLineChar (char lineChar)
 {
 	int i = 0, cols = displayGetWidth();
-	
+
 	for (; i < cols; i ++)
 	{
 		putchar (lineChar);
@@ -181,10 +181,10 @@ void displayLine ()
 static void getTheTimes ()
 {
 	struct tm *tempTm;
-	
+
 	timeNow = time(NULL);
 	tempTm = localtime (&timeNow);
-	
+
 	if (tempTm != NULL)
 	{
 		tempTm -> tm_hour = 0;
@@ -198,7 +198,7 @@ static void getTheTimes ()
 
 		tempTm -> tm_mday = 1;
 		tempTm -> tm_mon  -= 6;
-		
+
 		timeOld = mktime (tempTm);
 	}
 }
@@ -217,15 +217,15 @@ static void getTheTimes ()
  */
 char *displayCommaNumber (long long number, char *outString)
 {
-	int i, j = 20, x = 0;	
+	int i, j = 20, x = 0;
 	char inBuff[21], outBuff[21], sep[3];
-	
+
 #ifdef THOUSEP
 	strncpy (sep, nl_langinfo(THOUSEP), 2);
 #else
 	strcpy (sep, ",");
 #endif
-	
+
 	sprintf (inBuff, "%lld", number);
 	i = strlen (inBuff);
 	outBuff[j--] = 0;
@@ -261,8 +261,8 @@ char *displayDateString (time_t showDate, char *outString)
 	if (timeDay == 0)
 		getTheTimes ();
 
-	tmShow = localtime(&showDate);	
-	
+	tmShow = localtime(&showDate);
+
 	if (showDate >= timeDay)
 	{
 		strftime(outString, 80, dateFormats[0], tmShow);
@@ -322,12 +322,12 @@ char *displayFileSize (long long size, char *outString)
 		i++;
 		size >>= 10;
 	}
-	
+
 	displayCommaNumber (size, outString);
 	l = strlen (outString);
 	outString[l++] = sizeTypes[i];
 	outString[l] = 0;
-	
+
 	return outString;
 }
 
@@ -346,19 +346,19 @@ char *displayFileSize (long long size, char *outString)
 char *displayRightsString (int userRights, char *outString)
 {
 	int i, j = 9, saveRights = userRights;
-	
+
 	strcpy (outString, "----------");
-	
+
 	if (S_ISSOCK(userRights))
-		outString[0] = 's';	
+		outString[0] = 's';
 	else if (S_ISLNK(userRights))
-		outString[0] = 'l';	
+		outString[0] = 'l';
 	else if (S_ISFIFO(userRights))
-		outString[0] = 'f';	
+		outString[0] = 'f';
 	else if (S_ISBLK(userRights))
-		outString[0] = 'b';	
+		outString[0] = 'b';
 	else if (S_ISCHR(userRights))
-		outString[0] = 'c';	
+		outString[0] = 'c';
 	else if (S_ISDIR(userRights))
 		outString[0] = 'd';
 
@@ -377,7 +377,7 @@ char *displayRightsString (int userRights, char *outString)
 			break;
 		}
 		j--;
-		
+
 		if (userRights & 2)
 			outString[j] = 'w';
 		j--;
@@ -385,10 +385,10 @@ char *displayRightsString (int userRights, char *outString)
 		if (userRights & 4)
 			outString[j] = 'r';
 		j--;
-		
+
 		userRights >>= 3;
 	}
-	
+
 	return outString;
 }
 
@@ -421,19 +421,19 @@ char *displayRightsStringACL (DIR_ENTRY *file, char *outString)
 	strcat (fullName, file -> fileName);
 	if ((acl = acl_get_file (fullName, ACL_TYPE_ACCESS)) != NULL)
 	{
-	    acl_entry_t entry;
-   		acl_tag_t tag;
-	    int entryId = ACL_FIRST_ENTRY;
+		acl_entry_t entry;
+		acl_tag_t tag;
+		int entryId = ACL_FIRST_ENTRY;
 
 		while (acl_get_entry(acl, entryId, &entry) == 1)
 		{
-    	    if (acl_get_tag_type (entry, &tag) != -1)
-    	    {
-    	    	if (tag == ACL_USER || tag == ACL_GROUP)
-    	    	{
-    	    		outString[10] = '+';
-    	    		break;
-    	    	}
+			if (acl_get_tag_type (entry, &tag) != -1)
+			{
+				if (tag == ACL_USER || tag == ACL_GROUP)
+				{
+					outString[10] = '+';
+					break;
+				}
 			}
 			entryId = ACL_NEXT_ENTRY;
 		}
@@ -458,8 +458,8 @@ char *displayRightsStringACL (DIR_ENTRY *file, char *outString)
 char *displayOwnerString (int ownerID, char *outString)
 {
 	struct passwd *pwd;
-	
-    if ((pwd = getpwuid(ownerID)) != NULL)
+
+	if ((pwd = getpwuid(ownerID)) != NULL)
 		sprintf(outString, "%s", pwd -> pw_name);
 	else
 		sprintf(outString, "%d", ownerID);
@@ -482,8 +482,8 @@ char *displayOwnerString (int ownerID, char *outString)
 char *displayGroupString (int groupID, char *outString)
 {
 	struct group *grp;
-	
-    if ((grp = getgrgid(groupID)) != NULL)
+
+	if ((grp = getgrgid(groupID)) != NULL)
 		sprintf(outString, "%s", grp -> gr_name);
 	else
 		sprintf(outString, "%d", groupID);
@@ -579,7 +579,7 @@ char base64CharVals[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012
 int displayEncodeBase64 (unsigned char *inBuff, char *outBuff, int len)
 {
 	int i, j = 0, k = 0;
-	
+
 	while (j < len)
 	{
 		int todo = len - j >= 3 ? 3 : len - j;
@@ -636,7 +636,7 @@ char *displayMD5String (DIR_ENTRY *file, char *outString, int encode)
 		if ((file -> md5Sum = malloc (17)) != NULL)
 		{
 			char fullName[1024];
-			
+
 			strcpy (fullName, file -> fullPath);
 			strcat (fullName, file -> fileName);
 			if (!MD5File (fullName, file -> md5Sum))
@@ -652,7 +652,7 @@ char *displayMD5String (DIR_ENTRY *file, char *outString, int encode)
 		switch (encode)
 		{
 		case DISPLAY_ENCODE_BASE64:
-			displayEncodeBase64	(file -> md5Sum, outString, 16);
+			displayEncodeBase64 (file -> md5Sum, outString, 16);
 			break;
 
 		default:
@@ -660,7 +660,7 @@ char *displayMD5String (DIR_ENTRY *file, char *outString, int encode)
 			break;
 		}
 	}
-	return outString;	
+	return outString;
 }
 
 /**********************************************************************************************************************
@@ -683,7 +683,7 @@ char *displaySHA256String (DIR_ENTRY *file, char *outString, int encode)
 		if ((file -> sha256Sum = malloc (33)) != NULL)
 		{
 			char fullName[1024];
-			
+
 			strcpy (fullName, file -> fullPath);
 			strcat (fullName, file -> fileName);
 			if (!SHA256File (fullName, file -> sha256Sum))
@@ -699,7 +699,7 @@ char *displaySHA256String (DIR_ENTRY *file, char *outString, int encode)
 		switch (encode)
 		{
 		case DISPLAY_ENCODE_BASE64:
-			displayEncodeBase64	(file -> sha256Sum, outString, 32);
+			displayEncodeBase64 (file -> sha256Sum, outString, 32);
 			break;
 
 		default:
@@ -707,7 +707,7 @@ char *displaySHA256String (DIR_ENTRY *file, char *outString, int encode)
 			break;
 		}
 	}
-	return outString;	
+	return outString;
 }
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -723,7 +723,7 @@ int displayGetWidth ()
 {
 	return (ncols == -1 ? 80 : ncols);
 }
-		
+
 /**********************************************************************************************************************
  *                                                                                                                    *
  *  D I S P L A Y  G E T  D E P T H                                                                                   *
@@ -738,7 +738,7 @@ int displayGetDepth ()
 {
 	return (nrows == -1 ? 24 : nrows);
 }
-		
+
 /**********************************************************************************************************************
  *                                                                                                                    *
  *  D I S P L A Y  G E T  W I N D O W  S I Z E                                                                        *
@@ -764,9 +764,9 @@ void displayGetWindowSize ()
 	{
 		foundSize = 1;
 	}
-	
-    if (foundSize &&
-		ws.ws_col > 0   && ws.ws_row > 0 &&
+
+	if (foundSize &&
+		ws.ws_col > 0	&& ws.ws_row > 0 &&
 		ws.ws_col < 512 && ws.ws_row < 512)
 	{
 		nrows = ws.ws_row;
@@ -776,7 +776,7 @@ void displayGetWindowSize ()
 	{
 		foundSize = 0;
 	}
-	
+
 #endif
 
 	if (!foundSize)
@@ -835,16 +835,16 @@ int displayColumnInit (int colCount, COLUMN_DESC *colDesc[], int options)
 {
 	if (colCount > MAX_COLUMNS)
 		return 0;
-		
+
 	if ((rowQueue = queueCreate ()) == NULL)
 		return 0;
-		
+
 	for (columnCount = 0; columnCount < colCount; columnCount++)
 	{
 		fullColDesc[columnCount] = (FULL_COLUMN_DESC *)malloc (sizeof (FULL_COLUMN_DESC));
 		if (fullColDesc[columnCount] == NULL)
 			return 0;
-			
+
 		memset (fullColDesc[columnCount], 0, sizeof (FULL_COLUMN_DESC));
 		fullColDesc[columnCount] -> maxWidth = colDesc[columnCount] -> maxWidth;
 		fullColDesc[columnCount] -> minWidth = colDesc[columnCount] -> minWidth;
@@ -856,9 +856,9 @@ int displayColumnInit (int colCount, COLUMN_DESC *colDesc[], int options)
 		fullColDesc[columnCount] -> maxSize = fullColDesc[columnCount] -> minWidth;
 		fullColDesc[columnCount] -> heading = colDesc[columnCount] -> heading;
 	}
-	
+
 	displayOptions = options;
-	
+
 	return 1;
 }
 
@@ -882,12 +882,12 @@ static int vDisplayInColumn (int column, char *format, va_list arg_ptr)
 
 	if (column >= columnCount)
 		return 0;
-	
+
 	if (currentRow == NULL)
 	{
 		if ((currentRow = (ROW_DESC *)malloc (sizeof (ROW_DESC))) == NULL)
 			return 0;
-			
+
 		memset (currentRow, 0, sizeof (ROW_DESC));
 		currentRow -> rowType = ROW_NORMAL_LINE;
 		for (i = 0; i < columnCount; i++)
@@ -902,13 +902,13 @@ static int vDisplayInColumn (int column, char *format, va_list arg_ptr)
 		free (currentRow -> colString[column]);
 		maxSize -= strlen (tempBuff);
 	}
-		
+
 	vsnprintf (&tempBuff[strlen (tempBuff)], maxSize, format, arg_ptr);
 	strSize = strlen (tempBuff);
-	
+
 	if ((currentRow -> colString[column] = (char *)malloc (strSize + 1)) == NULL)
 		return 0;
-		
+
 	strcpy (currentRow -> colString[column], tempBuff);
 
 	if (strSize > fullColDesc[column] -> maxSize)
@@ -944,7 +944,7 @@ int displayInColour (int column, int colour, char *format, ...)
 {
 	int retn = 1;
 	va_list arg_ptr;
-	
+
 	va_start (arg_ptr, format);
 	if ((retn = vDisplayInColumn (column, format, arg_ptr)) == 1)
 	{
@@ -974,7 +974,7 @@ int displayInColour (int column, int colour, char *format, ...)
 int displayVInColour (int column, int colour, char *format, va_list arg_ptr)
 {
 	int retn = vDisplayInColumn (column, format, arg_ptr);
-	
+
 	if (retn == 1 && currentRow != NULL)
 	{
 		currentRow -> colColour[column] = colour;
@@ -999,7 +999,7 @@ int displayInColumn (int column, char *format, ...)
 {
 	int retn = 1;
 	va_list arg_ptr;
-	
+
 	va_start (arg_ptr, format);
 	retn = vDisplayInColumn (column, format, arg_ptr);
 	va_end (arg_ptr);
@@ -1037,7 +1037,7 @@ int displayVInColumn (int column, char *format, va_list arg_ptr)
 static int calcDisplaySize (void)
 {
 	int retnSize = 0, i;
-	
+
 	for (i = 0; i < columnCount; i++)
 	{
 		if (fullColDesc[i] -> displaySize)
@@ -1062,7 +1062,7 @@ static int calcDisplaySize (void)
 static void addHeadingSizes (void)
 {
 	int i;
-	
+
 	for (i = 0; i < columnCount; i++)
 	{
 		if (fullColDesc[i] -> displaySize > 0 && fullColDesc[i] -> heading != NULL)
@@ -1070,8 +1070,8 @@ static void addHeadingSizes (void)
 			if (strlen (fullColDesc[i] -> heading) > fullColDesc[i] -> displaySize)
 			{
 				/*------------------------------------------------------------*
-				 * Assume the heading size is less than the maxSize           *
-				 *------------------------------------------------------------*/
+                 * Assume the heading size is less than the maxSize           *
+                 *------------------------------------------------------------*/
 				fullColDesc[i] -> displaySize = strlen (fullColDesc[i] -> heading);
 			}
 		}
@@ -1108,7 +1108,7 @@ static int reduceDisplaySize(void)
 		fullColDesc[reduceCol] -> gap --;
 		return 1;
 	}
-	
+
 	for (i = 0; i < columnCount; i++)
 	{
 		if (fullColDesc[i] -> displaySize > fullColDesc[i] -> minWidth)
@@ -1125,7 +1125,7 @@ static int reduceDisplaySize(void)
 		fullColDesc[reduceCol] -> displaySize --;
 		return 1;
 	}
-	
+
 	for (i = 0; i < columnCount; i++)
 	{
 		if (fullColDesc[i] -> priority >  reducePri && fullColDesc[i] -> displaySize)
@@ -1156,29 +1156,29 @@ static int reduceDisplaySize(void)
  */
 static void fixStringSize (char *dispString, int displaySize)
 {
-    int len = strlen (dispString);
+	int len = strlen (dispString);
 
-    if (len > displaySize)
-    {
-        if (displaySize > 4)
-        {
-            int x = (displaySize - 3) / 2;
-            int y = len - (displaySize - 3 - x);
+	if (len > displaySize)
+	{
+		if (displaySize > 4)
+		{
+			int x = (displaySize - 3) / 2;
+			int y = len - (displaySize - 3 - x);
 
-            strcpy (&dispString[x], "...");
-            x += 3;
-            do
-            {
-                dispString[x++] = dispString[y++];
-            }
-            while (dispString[y]);
-            dispString[x] = 0;
-        }
-        else
-        {
-            dispString[displaySize] = 0;
-        }
-    }
+			strcpy (&dispString[x], "...");
+			x += 3;
+			do
+			{
+				dispString[x++] = dispString[y++];
+			}
+			while (dispString[y]);
+			dispString[x] = 0;
+		}
+		else
+		{
+			dispString[displaySize] = 0;
+		}
+	}
 }
 
 /**********************************************************************************************************************
@@ -1237,17 +1237,17 @@ static void displayColumn (int column, char *string, int showColour)
 		char tempString[80];
 		char *dispString;
 		int strSize;
-	
+
 		/*--------------------------------------------------------------------*
-		 * Prepare the string to be displayed.                                *
-		 *--------------------------------------------------------------------*/
+         * Prepare the string to be displayed.                                *
+         *--------------------------------------------------------------------*/
 		if (string == NULL)
 			string = blankString;
-		
+
 		strSize = strlen (string);
 		dispString = (char *)malloc (strSize + 1);
 		strcpy (dispString, string);
-		
+
 		if (strSize > fullColDesc[column] -> displaySize)
 		{
 			fixStringSize (dispString, fullColDesc[column] -> displaySize);
@@ -1255,38 +1255,38 @@ static void displayColumn (int column, char *string, int showColour)
 		strSize = strlen (dispString);
 
 		/*--------------------------------------------------------------------*
-		 * If right aligned add the padding first.                            *
-		 *--------------------------------------------------------------------*/
+         * If right aligned add the padding first.                            *
+         *--------------------------------------------------------------------*/
 		if (fullColDesc[column] -> attrib & COL_ALIGN_RIGHT)
 		{
 			if (strSize < fullColDesc[column] -> displaySize)
 			{
 				sprintf (tempString, "%%%ds", fullColDesc[column] -> displaySize - strSize);
 				printf (tempString, "");
-			
+
 			}
 		}
-	
+
 		/*--------------------------------------------------------------------*
-		 * If displaying colours set them now.                                *
-		 *--------------------------------------------------------------------*/
+         * If displaying colours set them now.                                *
+         *--------------------------------------------------------------------*/
 		if (showColour != -1)
 		{
 			displayColour (showColour, tempString);
 			fputs (tempString, stdout);
 		}
-		
+
 		/*--------------------------------------------------------------------*
-		 * Display the string with a simple puts.                             *
-		 *--------------------------------------------------------------------*/
+         * Display the string with a simple puts.                             *
+         *--------------------------------------------------------------------*/
 		fputs (dispString, stdout);
-	
+
 		if (showColour != -1)
 			fputs ("\033[0m", stdout);
-	
+
 		/*--------------------------------------------------------------------*
-		 * If aligned left add the padding after the string.                  *
-		 *--------------------------------------------------------------------*/
+         * If aligned left add the padding after the string.                  *
+         *--------------------------------------------------------------------*/
 		if (!(fullColDesc[column] -> attrib & COL_ALIGN_RIGHT))
 		{
 			if (strSize < fullColDesc[column] -> displaySize)
@@ -1297,10 +1297,10 @@ static void displayColumn (int column, char *string, int showColour)
 		}
 
 		/*--------------------------------------------------------------------*
-		 * Finally display the gap between columns.                           *
-		 *--------------------------------------------------------------------*/
+         * Finally display the gap between columns.                           *
+         *--------------------------------------------------------------------*/
 		if (fullColDesc[column] -> gap)
-		{		
+		{
 			sprintf (tempString, "%%%ds", fullColDesc[column] -> gap);
 			printf (tempString, "");
 		}
@@ -1335,7 +1335,7 @@ void displayMatchWidth (void)
 				fullColDesc[i] -> displaySize = maxSize;
 		}
 	}
-}	
+}
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -1352,16 +1352,16 @@ void displayNewLine (char flags)
 {
 	if (currentRow != NULL)
 	{
-		if (flags & DISPLAY_INFO)		
+		if (flags & DISPLAY_INFO)
 			currentRow -> rowType = ROW_DISPLAY_INFO;
 		else
 			displayLines ++;
 
-		if (flags & DISPLAY_FIRST)		
+		if (flags & DISPLAY_FIRST)
 			queuePush (rowQueue, currentRow);
 		else
 			queuePut (rowQueue, currentRow);
-			
+
 		currentRow = NULL;
 	}
 }
@@ -1382,15 +1382,15 @@ void displayDrawLine (char flags)
 	if (rowQueue)
 	{
 		ROW_DESC *tempRow;
-	
+
 		if ((tempRow = (ROW_DESC *)malloc (sizeof (ROW_DESC))) == NULL)
 			return;
-			
-		memset (tempRow, 0, sizeof (ROW_DESC));				
+
+		memset (tempRow, 0, sizeof (ROW_DESC));
 		tempRow -> rowType = ROW_DISPLAY_LINE;
 		displayNewLine (flags);
 
-		if (flags & DISPLAY_FIRST)		
+		if (flags & DISPLAY_FIRST)
 			queuePush (rowQueue, tempRow);
 		else
 			queuePut (rowQueue, tempRow);
@@ -1413,15 +1413,15 @@ void displayBlank (char flags)
 	if (rowQueue)
 	{
 		ROW_DESC *tempRow;
-	
+
 		if ((tempRow = (ROW_DESC *)malloc (sizeof (ROW_DESC))) == NULL)
 			return;
-		
-		memset (tempRow, 0, sizeof (ROW_DESC));		
+
+		memset (tempRow, 0, sizeof (ROW_DESC));
 		tempRow -> rowType = ROW_DISPLAY_BLANK;
 		displayNewLine (flags);
-		
-		if (flags & DISPLAY_FIRST)		
+
+		if (flags & DISPLAY_FIRST)
 			queuePush (rowQueue, tempRow);
 		else
 			queuePut (rowQueue, tempRow);
@@ -1444,15 +1444,15 @@ void displayHeading (char flags)
 	if (rowQueue)
 	{
 		ROW_DESC *tempRow;
-	
+
 		if ((tempRow = (ROW_DESC *)malloc (sizeof (ROW_DESC))) == NULL)
 			return;
-		
-		memset (tempRow, 0, sizeof (ROW_DESC));		
+
+		memset (tempRow, 0, sizeof (ROW_DESC));
 		tempRow -> rowType = ROW_DISPLAY_HEADING;
 		displayNewLine (flags);
-		
-		if (flags & DISPLAY_FIRST)		
+
+		if (flags & DISPLAY_FIRST)
 			queuePush (rowQueue, tempRow);
 		else
 			queuePut (rowQueue, tempRow);
@@ -1496,10 +1496,10 @@ void displayAllLines (void)
 {
 	int i, line = 0;
 	ROW_DESC *displayRow;
-	
+
 	if (currentRow != NULL)
 		displayNewLine (0);
-		
+
 	if (displayOptions & DISPLAY_HEADINGS)
 	{
 		if (!(displayOptions & DISPLAY_HEADINGS_NB))
@@ -1513,13 +1513,13 @@ void displayAllLines (void)
 		}
 		addHeadingSizes ();
 	}
-	
+
 	while (calcDisplaySize() > displayGetWidth())
 	{
 		if (!reduceDisplaySize())
 			break;
 	}
-		
+
 	while ((displayRow = (ROW_DESC *)queueGet (rowQueue)) != NULL)
 	{
 		switch (displayRow -> rowType)
@@ -1527,18 +1527,18 @@ void displayAllLines (void)
 		case ROW_DISPLAY_LINE:
 			displayLine();
 			break;
-			
+
 		case ROW_DISPLAY_BLANK:
 			printf ("\n");
 			break;
-			
+
 		case ROW_DISPLAY_HEADING:
 			{
 				char headingBuff[41];
 				for (i = 0; i < columnCount; i++)
 				{
 					headingBuff[0] = 0;
-					
+
 					if (fullColDesc[i] -> heading && fullColDesc[i] -> displaySize)
 					{
 						strncpy (headingBuff, fullColDesc[i] -> heading, 40);
@@ -1549,18 +1549,18 @@ void displayAllLines (void)
 			}
 			printf ("\n");
 			break;
-			
+
 		case ROW_NORMAL_LINE:
 			{
 				int noShow = ((displayStartLine > 0 && line < displayStartLine) ||
 						line >= displayEndLine);
-						
+
 				for (i = 0; i < columnCount; i++)
 				{
 					if (!noShow)
 					{
 						int colour = -1;
-						
+
 						if (displayOptions & DISPLAY_COLOURS)
 						{
 							if (displayRow -> colColour[i] != -1)
@@ -1578,12 +1578,12 @@ void displayAllLines (void)
 			}
 			line ++;
 			break;
-			
+
 		case ROW_DISPLAY_INFO:
 			for (i = 0; i < columnCount; i++)
 			{
 				displayColumn (i, displayRow -> colString[i], -1);
-				
+
 				if (displayRow -> colString[i] != NULL)
 					free (displayRow -> colString[i]);
 			}
@@ -1618,7 +1618,7 @@ void displayTidy (void)
 		}
 	}
 	columnCount = 0;
-	
+
 	if (currentRow)
 	{
 		for (i = 0; i < MAX_COLUMNS; i++)

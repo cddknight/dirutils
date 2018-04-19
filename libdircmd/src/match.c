@@ -21,7 +21,7 @@
  *  \brief Functions to compare strings with wildcards.
  */
 #define _GNU_SOURCE
- 
+
 #include <ctype.h>
 #include <fnmatch.h>
 #include "dircmd.h"
@@ -31,12 +31,12 @@
 #define AND_CMD		2
 #define NOT_CMD		4
 
-#define FALSE_STATE	0
+#define FALSE_STATE 0
 #define TRUE_STATE	1
 #define STOP_STATE	2
 
 /*----------------------------------------------------------------------------*
- * Local Prototypes   													      *
+ * Local Prototypes                                                           *
  *----------------------------------------------------------------------------*/
 static int evalCmd (int newLogic, int oldLogic, int cmd);
 
@@ -145,23 +145,23 @@ static int evalCmd (int newLogic, int oldLogic, int cmd)
 int matchPattern (char *str, char *ptn, int flags)
 {
 	int fnFlags = FNM_PATHNAME;
-	
+
 	if (!(flags & SHOWALL))
 	{
 		fnFlags |= FNM_PERIOD;
-	}	
+	}
 	if (!(flags & USECASE))
 	{
 		char pattern[PATH_SIZE], string[PATH_SIZE];
 		int i = 0;
-		
+
 		while (ptn[i] && i < 255)
 		{
 			pattern[i] = tolower (ptn[i]);
 			i++;
 		}
 		pattern[i] = 0;
-		
+
 		i = 0;
 		while (str[i] && i < 255)
 		{

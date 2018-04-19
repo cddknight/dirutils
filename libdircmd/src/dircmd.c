@@ -33,7 +33,7 @@
 #include "config.h"
 
 /******************************************************************************************************
- * Prototypes															                              *
+ * Prototypes                                                                                         *
  ******************************************************************************************************/
 static int listCompare (const void **item1, const void **item2);
 static int getEntryType (struct stat *fileStat);
@@ -136,7 +136,7 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
 			return 0;
 	}
 
-    /*------------------------------------------------------------------------*
+	/*------------------------------------------------------------------------*
      * Open the directory we plan to view                                     *
      *------------------------------------------------------------------------*/
 	if ((dirPtr = opendir (fullPath)) != NULL)
@@ -145,11 +145,11 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
 
 		while ((dirList = readdir (dirPtr)) != NULL)
 		{
-		    /*----------------------------------------------------------------*
-			 * Recursive directories, avoid '.' and '..'                      *
+			/*----------------------------------------------------------------*
+             * Recursive directories, avoid '.' and '..'                      *
              *----------------------------------------------------------------*/
-			if (findFlags & RECUDIR && 
-					(dirList -> d_name[0] != '.' || findFlags & SHOWALL) && 
+			if (findFlags & RECUDIR &&
+					(dirList -> d_name[0] != '.' || findFlags & SHOWALL) &&
 					strcmp (dirList -> d_name, ".") && strcmp (dirList -> d_name, ".."))
 			{
 				struct stat tempStat;
@@ -165,13 +165,13 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
 				{
 					if (getEntryType (&tempStat) & ONLYDIRS)
 					{
-					    /*----------------------------------------------------*
-						 * Hide any directories linked with version control   *
-			             *----------------------------------------------------*/
+						/*----------------------------------------------------*
+                         * Hide any directories linked with version control   *
+                         *----------------------------------------------------*/
 						if (findFlags & HIDEVERCTL)
 						{
-							if (strcmp (dirList -> d_name, "CVS") == 0 || 
-									strcmp (dirList -> d_name, ".git") == 0 || 
+							if (strcmp (dirList -> d_name, "CVS") == 0 ||
+									strcmp (dirList -> d_name, ".git") == 0 ||
 									strcmp (dirList -> d_name, ".svn") == 0)
 							{
 								continue;
@@ -193,9 +193,9 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
 				}
 			}
 
-            /*----------------------------------------------------------------*
+			/*----------------------------------------------------------------*
              * Does this file match our pattern, if yes then show it to the   *
-			 * user.                                                          *
+             * user.                                                          *
              *----------------------------------------------------------------*/
 			if (matchLogic (dirList -> d_name, filePattern, findFlags))
 			{
@@ -215,9 +215,9 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
 				saveEntry -> doneCRC = saveEntry -> CRC = saveEntry -> match = 0;
 				saveEntry -> Compare = Compare;
 
-                /*------------------------------------------------------------*
-				 * The 'STAT' function we get the full low down on file and   *
-				 * stores it in fileStat                                      *
+				/*------------------------------------------------------------*
+                 * The 'STAT' function we get the full low down on file and   *
+                 * stores it in fileStat                                      *
                  *------------------------------------------------------------*/
 				lstat (fullPath, &saveEntry -> fileStat);
 
@@ -238,9 +238,9 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
 				}
 			}
 		}
-        /*--------------------------------------------------------------------*
+		/*--------------------------------------------------------------------*
          * All done so close the directory and tell them how many files and   *
-		 * directories were found                                             *
+         * directories were found                                             *
          *--------------------------------------------------------------------*/
 		closedir (dirPtr);
 	}
@@ -367,7 +367,7 @@ mode_t directoryTrueLinkType (DIR_ENTRY *dirEntry)
 			err = 1;
 		}
 	}
-	return retn;			
+	return retn;
 }
 
 /**********************************************************************************************************************
@@ -417,11 +417,11 @@ static int getEntryType (struct stat *fileStat)
 	if (S_ISBLK(fileStat -> st_mode) || S_ISCHR(fileStat -> st_mode))
 	{
 		return ONLYDEVS;
- 	}
- 	if (S_ISSOCK(fileStat -> st_mode))
- 		return ONLYSOCKS;
- 	if (S_ISFIFO(fileStat -> st_mode))
- 		return ONLYPIPES;
+	}
+	if (S_ISSOCK(fileStat -> st_mode))
+		return ONLYSOCKS;
+	if (S_ISFIFO(fileStat -> st_mode))
+		return ONLYPIPES;
 
 	printf ("OTHER: %X\n", fileStat -> st_mode);
 	return 0;

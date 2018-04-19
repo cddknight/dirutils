@@ -41,7 +41,7 @@ static unsigned char tempBuff[4096];
 /* the lowest-order bit.  The X^32 term is "implied"; the LSB is the   */
 /* X^31 term, etc.  The X^0 term (usually shown as "+1") results in    */
 /* the MSB being 1.                                                    */
-/*																	   */
+/*                                                                     */
 /* Note that the usual hardware shift register implementation, which   */
 /* is what we're using (we're merely optimizing it by doing eight-bit  */
 /* chunks at a time) shifts bits into the lowest-order term.  In our   */
@@ -53,7 +53,7 @@ static unsigned char tempBuff[4096];
 /* sends each low-bit to hight-bit; and the result is transmission bit */
 /* by bit from highest- to lowest-order term without requiring any bit */
 /* shuffling on our part.  Reception works similarly.                  */
-/*																	   */
+/*                                                                     */
 /* The feedback terms table consists of 256, 32-bit entries.  Notes:   */
 /*                                                                     */
 /*     The table can be generated at runtime if desired; code to do so */
@@ -67,8 +67,8 @@ static unsigned char tempBuff[4096];
 /*     using byte-swap instructions.                                   */
 /*---------------------------------------------------------------------*/
 
-static long CRC32[256] = 
-{ 
+static long CRC32[256] =
+{
 0x00000000L, 0x77073096L, 0xee0e612cL, 0x990951baL, 0x076dc419L, 0x706af48fL, 0xe963a535L, 0x9e6495a3L,
 0x0edb8832L, 0x79dcb8a4L, 0xe0d5e91eL, 0x97d2d988L, 0x09b64c2bL, 0x7eb17cbdL, 0xe7b82d07L, 0x90bf1d91L,
 0x1db71064L, 0x6ab020f2L, 0xf3b97148L, 0x84be41deL, 0x1adad47dL, 0x6ddde4ebL, 0xf4d4b551L, 0x83d385c7L,
@@ -101,9 +101,9 @@ static long CRC32[256] =
 0xaed16a4aL, 0xd9d65adcL, 0x40df0b66L, 0x37d83bf0L, 0xa9bcae53L, 0xdebb9ec5L, 0x47b2cf7fL, 0x30b5ffe9L,
 0xbdbdf21cL, 0xcabac28aL, 0x53b39330L, 0x24b4a3a6L, 0xbad03605L, 0xcdd70693L, 0x54de5729L, 0x23d967bfL,
 0xb3667a2eL, 0xc4614ab8L, 0x5d681b02L, 0x2a6f2b94L, 0xb40bbe37L, 0xc30c8ea1L, 0x5a05df1bL, 0x2d02ef8dL
-};                                                                                                   
+};
 
-#define  UpdC32(b,c) (CRC32[((int)c ^ b) & 0xff] ^ ((c >> 8) & 0x00FFFFFF))
+#define	 UpdC32(b,c) (CRC32[((int)c ^ b) & 0xff] ^ ((c >> 8) & 0x00FFFFFF))
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -159,7 +159,7 @@ int MD5File (char *filename, unsigned char *md5Buffer)
 		if ((inFile = fopen (filename, "rb")) != NULL)
 		{
 			MD5_Init (&md5c);
-		
+
 			retn = 1;
 			while ((read = fread (tempBuff, 1, 4096, inFile)) != 0)
 				MD5_Update (&md5c, tempBuff, read);
@@ -199,7 +199,7 @@ int SHA256File (char *filename, unsigned char *shaBuffer)
 		if ((inFile = fopen (filename, "rb")) != NULL)
 		{
 			SHA256_Init (&sha256c);
-		
+
 			retn = 1;
 			while ((read = fread (tempBuff, 1, 4096, inFile)) != 0)
 				SHA256_Update (&sha256c, tempBuff, read);
@@ -211,5 +211,5 @@ int SHA256File (char *filename, unsigned char *shaBuffer)
 #else
 	*shaBuffer = 0;
 #endif
-    return retn;
+	return retn;
 }
