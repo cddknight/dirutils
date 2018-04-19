@@ -124,7 +124,7 @@ int main (int argc, char *argv[])
 
 	while ((i = getopt(argc, argv, "cdst:?")) != -1)
 	{
-		switch (i) 
+		switch (i)
 		{
 		case 'c':
 			modComment = 1;
@@ -167,14 +167,14 @@ int main (int argc, char *argv[])
 	if (found)
 	{
 		char numBuff[15];
-		
+
 		if (!displayColumnInit (2, ptrChangeColumn, DISPLAY_HEADINGS))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 1;
 		}
 		directoryProcess (showDir, &fileList);
-		
+
 		displayDrawLine (0);
 		displayInColumn (0, displayCommaNumber (totalLines, numBuff));
 		displayInColumn (1, "Lines changed");
@@ -182,7 +182,7 @@ int main (int argc, char *argv[])
 		displayInColumn (0, displayCommaNumber (filesFound, numBuff));
 		displayInColumn (1, "Files changed");
 		displayNewLine(DISPLAY_INFO);
-		displayAllLines ();		
+		displayAllLines ();
 
 		displayTidy ();
 	}
@@ -284,6 +284,7 @@ int showDir (DIR_ENTRY *file)
 	{
 		if ((writeFile = fopen (outFile, "wb")) != NULL)
 		{
+			int blankLineCount = 0;
 			while (fgets (inBuffer, 1024, readFile) != NULL)
 			{
 				int inPos = 0, outPos = 0, curPosn = 0, nextPosn = 0;
@@ -296,10 +297,13 @@ int showDir (DIR_ENTRY *file)
 					}
 					else if (inBuffer[inPos] == '\t' && !inComOrQuo)
 					{
-						nextPosn = ((nextPosn + tabSize) / tabSize) * tabSize;						
+						nextPosn = ((nextPosn + tabSize) / tabSize) * tabSize;
 					}
 					else
 					{
+						/**********************************************************************************************/
+						/* Do not add white space if the next character is \n.                                        */
+						/**********************************************************************************************/
 						if (inBuffer[inPos] != '\n')
 						{
 							if (spaceToTab)
@@ -327,12 +331,19 @@ int showDir (DIR_ENTRY *file)
 									++curPosn;
 								}
 							}
+							blankLineCount = 0;
+							outBuffer[outPos++] = inBuffer[inPos];
+							nextPosn = ++curPosn;
 						}
-						outBuffer[outPos++] = inBuffer[inPos];
-						nextPosn = ++curPosn;
+						else if (outPos == 0)
+						{
+							++blankLineCount;
+						}
 						inComOrQuo = testChar (inBuffer[inPos], lastChar, inComOrQuo, linesRead);
 					}
-					/* If line out is too big, just output the original line */
+					/**************************************************************************************************/
+					/* If line out is too big, just output the original line.                                         */
+					/**************************************************************************************************/
 					if (outPos + nextPosn > 4090)
 					{
 						fwrite (inBuffer, strlen(inBuffer), 1, writeFile);
@@ -342,12 +353,13 @@ int showDir (DIR_ENTRY *file)
 					lastChar = inBuffer[inPos];
 					++inPos;
 				}
-				if (outPos)
+				if (outPos || blankLineCount == 1)
 				{
+					outBuffer[outPos++] = '\n';
 					outBuffer[outPos] = 0;
 					fwrite (outBuffer, outPos, 1, writeFile);
 					if (strncmp (outBuffer, inBuffer, outPos))
-					{ 
+					{
 						++linesFixed;
 					}
 				}

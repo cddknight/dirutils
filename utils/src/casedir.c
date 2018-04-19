@@ -112,7 +112,7 @@ int main (int argc, char *argv[])
      *------------------------------------------------------------------------*/
 	while ((i = getopt(argc, argv, "lup?")) != -1)
 	{
-		switch (i) 
+		switch (i)
 		{
 		case 'l':
 			useCase = CASE_LOWER;
@@ -150,20 +150,20 @@ int main (int argc, char *argv[])
 	if (found)
 	{
 		char numBuff[15];
-		
+
 		if (!displayColumnInit (3, ptrChangeColumn, DISPLAY_HEADINGS))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 1;
 		}
 		directoryProcess (showDir, &fileList);
-		
+
 		displayDrawLine (0);
 		displayInColumn (0, "Changed");
 		displayInColumn (1, displayCommaNumber (totalChanged, numBuff));
 		displayInColumn (2, "file%c", totalChanged == 1 ? ' ' : 's');
 		displayNewLine(DISPLAY_INFO);
-		displayAllLines ();		
+		displayAllLines ();
 
 		displayTidy ();
 	}
@@ -226,9 +226,9 @@ int showDir (DIR_ENTRY *file)
 		displayInColumn (0, "%s", inFile);
 		displayInColumn (1, "-->");
 		displayInColumn (2, "%s", outFile);
-		displayNewLine (0);			
+		displayNewLine (0);
 		totalChanged ++;
-		
+
 		rename (inFile, outFile);
 	}
 	filesFound ++;

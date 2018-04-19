@@ -95,7 +95,7 @@ int testMemory (int mode, int loopCount, unsigned char oldValue, unsigned char n
 				}
 			}
 		}
-	}	
+	}
 	return problems;
 }
 

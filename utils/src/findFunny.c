@@ -117,14 +117,14 @@ int main (int argc, char *argv[])
 	if (found)
 	{
 		char numBuff[15];
-		
+
 		if (!displayColumnInit (3, ptrLinesColumn, DISPLAY_HEADINGS))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 1;
 		}
 		directoryProcess (showDir, &fileList);
-		
+
 		displayDrawLine (0);
 		displayInColumn (1, displayCommaNumber (totalFunny, numBuff));
 		displayInColumn (2, "Funnies");
@@ -132,7 +132,7 @@ int main (int argc, char *argv[])
 		displayInColumn (1, displayCommaNumber (filesFound, numBuff));
 		displayInColumn (2, "Files Found");
 		displayNewLine(DISPLAY_INFO);
-		displayAllLines ();		
+		displayAllLines ();
 
 		displayTidy ();
 	}

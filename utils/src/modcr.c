@@ -119,12 +119,12 @@ int main (int argc, char *argv[])
 
 	while ((i = getopt(argc, argv, "ar?")) != -1)
 	{
-		switch (i) 
+		switch (i)
 		{
 		case 'a':
 			changeMode = 1;
 			break;
-			
+
 		case 'r':
 			changeMode = 2;
 			break;
@@ -155,14 +155,14 @@ int main (int argc, char *argv[])
 	{
 		char numBuff[15];
 		int col = changeMode - 1;
-		
+
 		if (!displayColumnInit (3, ptrChangeColumn, DISPLAY_HEADINGS))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 1;
 		}
 		directoryProcess (showDir, &fileList);
-		
+
 		displayDrawLine (0);
 		displayInColumn (col, displayCommaNumber (totalLines, numBuff));
 		displayInColumn (2, "CR's modified");
@@ -170,7 +170,7 @@ int main (int argc, char *argv[])
 		displayInColumn (col, displayCommaNumber (filesFound, numBuff));
 		displayInColumn (2, "Files changed");
 		displayNewLine(DISPLAY_INFO);
-		displayAllLines ();		
+		displayAllLines ();
 
 		displayTidy ();
 	}

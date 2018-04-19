@@ -121,16 +121,16 @@ int main (int argc, char *argv[])
 
 	while ((i = getopt(argc, argv, "Ccpr?")) != -1)
 	{
-		switch (i) 
+		switch (i)
 		{
 		case 'C':
 			displayColour = DISPLAY_COLOURS;
 			break;
-			
+
 		case 'c':
 			dirType ^= USECASE;
 			break;
-			
+
 		case 'r':
 			dirType ^= RECUDIR;
 			break;
@@ -158,14 +158,14 @@ int main (int argc, char *argv[])
 	if (found)
 	{
 		char numBuff[15];
-		
+
 		if (!displayColumnInit (2, ptrLinesColumn, DISPLAY_HEADINGS | displayColour))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 1;
 		}
 		directoryProcess (showDir, &fileList);
-		
+
 		displayDrawLine (0);
 		displayInColumn (0, displayCommaNumber (totalLines, numBuff));
 		displayInColumn (1, "Lines Found");
@@ -173,7 +173,7 @@ int main (int argc, char *argv[])
 		displayInColumn (0, displayCommaNumber (filesFound, numBuff));
 		displayInColumn (1, "Files Found");
 		displayNewLine(DISPLAY_INFO);
-		displayAllLines ();		
+		displayAllLines ();
 
 		displayTidy ();
 	}
@@ -215,7 +215,7 @@ int showDir (DIR_ENTRY *file)
 		fclose (readFile);
 	}
 	totalLines += linesFound;
-	
+
 	displayInColumn (0, displayCommaNumber (linesFound, inBuffer));
 	if (showFlags & SHOW_PATH)
 	{

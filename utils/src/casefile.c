@@ -106,7 +106,7 @@ int main (int argc, char *argv[])
 
 	while ((i = getopt(argc, argv, "lup?")) != -1)
 	{
-		switch (i) 
+		switch (i)
 		{
 		case 'l':
 			useCase = CASE_LOWER;
@@ -144,24 +144,24 @@ int main (int argc, char *argv[])
 	if (found)
 	{
 		char numBuff[15];
-		
+
 		if (!displayColumnInit (2, ptrChangeColumn, DISPLAY_HEADINGS))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 1;
 		}
 		directoryProcess (showDir, &fileList);
-		
+
 		if (filesFound)
 			displayDrawLine (0);
-			
+
 		displayInColumn (0, displayCommaNumber (totalLines, numBuff));
 		displayInColumn (1, "Lines changed");
 		displayNewLine(DISPLAY_INFO);
 		displayInColumn (0, displayCommaNumber (filesFound, numBuff));
 		displayInColumn (1, "Files changed");
 		displayNewLine(DISPLAY_INFO);
-		displayAllLines ();		
+		displayAllLines ();
 
 		displayTidy ();
 	}
@@ -205,7 +205,7 @@ int showDir (DIR_ENTRY *file)
 				for (i = j = 0; i < bytesIn; i++)
 				{
 					byteIn = inBuffer[i];
-					
+
 					switch (useCase)
 					{
 					case CASE_UPPER:
@@ -223,14 +223,14 @@ int showDir (DIR_ENTRY *file)
 							inBuffer[i] = toupper(byteIn);
 						break;
 					}
-					
+
 					if (byteIn != inBuffer[i])
 						changed = 1;
-						
+
 					if (byteIn == 10 && changed)
 					{
 						linesFixed ++;
-						changed = 0;						
+						changed = 0;
 					}
 					outBuffer[j++] = lastChar = inBuffer[i];
 				}
@@ -246,7 +246,7 @@ int showDir (DIR_ENTRY *file)
 			}
 			if (changed)
 				linesFixed ++;
-			
+
 			fclose (writeFile);
 		}
 		fclose (readFile);
@@ -259,7 +259,7 @@ int showDir (DIR_ENTRY *file)
 			displayInColumn (0, displayCommaNumber (linesFixed, inBuffer));
 			displayInColumn (1, "%s", file -> fileName);
 			displayNewLine (0);
-			
+
 			totalLines += linesFixed;
 			filesFound ++;
 		}

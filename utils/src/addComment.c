@@ -76,8 +76,8 @@ static int firstWrite = 1;
 static char whiteSpace[] = " \t\n\r/";
 static char ignoreChars[] = "[]<>=+-*";
 static char funtionChars[] =
-	"abcdefghijklmnopqrstuvwxyz" 
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZ" 
+	"abcdefghijklmnopqrstuvwxyz"
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	"1234567890-_:~.";
 
 /**********************************************************************************************************************
@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 
 	while ((i = getopt(argc, argv, "hdipqmvl:w:c:C:?")) != -1)
 	{
-		switch (i) 
+		switch (i)
 		{
 		case 'l':
 			commentLine = atoi (optarg);
@@ -186,11 +186,11 @@ int main(int argc, char *argv[])
 			cppStyle = !cppStyle;
 			lineChar = '-';
 			break;
-			
+
 		case 'q':
 			quietMode = !quietMode;
 			break;
-			
+
 		case 'm':
 			autoMain = !autoMain;
 			break;
@@ -467,7 +467,7 @@ void myReadLine (char *retnBuff, int maxSize, char *format, ...)
 int searchBuff (char *findStr, char *outBuffer, char endChar)
 {
 	int len = strlen (findStr), pos = 0, offset = 0;
-	
+
 	outBuffer[0] = 0;
 	while (pos < comBuffPos)
 	{
@@ -477,7 +477,7 @@ int searchBuff (char *findStr, char *outBuffer, char endChar)
 			break;
 		offset = 0;
 		++pos;
-	}			
+	}
 	if (offset == len)
 	{
 		pos += offset;
@@ -565,7 +565,7 @@ int addBoxText (char *outBuff, char *inBuff)
 {
 	int width = boxWidth - 4;
 	int i = 0, s = strlen(inBuff), j = 0;
-	
+
 	while (i < width && inBuff[i])
 	{
 		outBuff[i] = inBuff[i];
@@ -590,7 +590,6 @@ int addBoxText (char *outBuff, char *inBuff)
 	return s + j;
 }
 
-
 /**********************************************************************************************************************
  *                                                                                                                    *
  *  B O X  L I N E                                                                                                    *
@@ -612,11 +611,11 @@ void boxLine (char *boxText, int first, int last, int addBlank, FILE *outFile)
 	char boxLine [MAX_BOXWIDTH + 1];
 	char boxFill [MAX_BOXWIDTH + 1];
 	char txtBuff [MAX_BOXWIDTH + 1];
-	
+
 	char firstStart[6],		firstEnd[6];
 	char middleStart[6],	middleEnd[6];
 	char lastStart[6],		lastEnd[6];
-	
+
 	if (cppStyle)
 	{
 		strcpy (firstStart, "//");
@@ -634,7 +633,7 @@ void boxLine (char *boxText, int first, int last, int addBlank, FILE *outFile)
 		strcpy (middleEnd, "*");
 		strcpy (lastStart, " *");
 		strcpy (lastEnd, "*/");
-	}	
+	}
 	if (first || last|| addBlank)
 	{
 		int i;
@@ -692,7 +691,7 @@ int displayBox(int type, int count, FILE *outFile)
 	char firstCom[4], middleCom[4], lastCom[4];
 
 	tm = localtime(&theTime);
-	
+
 	if (cppStyle)
 	{
 		strcpy (firstCom,	"///");
@@ -705,13 +704,13 @@ int displayBox(int type, int count, FILE *outFile)
 		strcpy (middleCom,	" * ");
 		strcpy (lastCom,	" */");
 	}
-	
+
 	if (type == 0)
 	{
 		char dateBuff[MAX_BOXWIDTH + 1];
 
 		doubleName(curFilename, doubled, underLn);
-		
+
 		boxLine (doubled, 1, 0, 0, outFile);
 		boxLine (underLn, 0, 0, 1, outFile);
 		if (copyrightType == 0)
@@ -745,7 +744,7 @@ int displayBox(int type, int count, FILE *outFile)
 			sprintf (dateBuff, "(c) Copyright %d.", tm -> tm_year + 1900);
 			boxLine (dateBuff, 0, 1, 0, outFile);
 		}
-		
+
 		getComment (readLine, 0, curFilename);
 		fprintf(outFile, "%s\n", firstCom);
 		fprintf(outFile, "%s \\file\n", middleCom);
@@ -764,7 +763,7 @@ int displayBox(int type, int count, FILE *outFile)
 	else if (type == 1)
 	{
 		doubleName(possibleName[0], doubled, underLn);
-		
+
 		boxLine (doubled, 1, 0, 0, outFile);
 		boxLine (underLn, 0, 1, 0, outFile);
 
@@ -783,32 +782,32 @@ int displayBox(int type, int count, FILE *outFile)
 		{
 			functionMain = 1;
 			fprintf(outFile, "%s\n", firstCom);
-			fprintf(outFile, "%s \\brief %s.\n", middleCom, "The program starts here");			
+			fprintf(outFile, "%s \\brief %s.\n", middleCom, "The program starts here");
 		}
 		else
 		{
 			getComment (readLine, 1, possibleName[0]);
 			fprintf(outFile, "%s\n", firstCom);
 			fprintf(outFile, "%s \\brief %s.\n", middleCom, readLine);
-		}	
+		}
 		for (i = 1; i < count; i++)
 		{
 			if (functionMain && strcmp (possibleName[i], "argc") == 0)
 			{
-				fprintf(outFile, "%s \\param %s %s.\n", middleCom, possibleName[i], 
+				fprintf(outFile, "%s \\param %s %s.\n", middleCom, possibleName[i],
 						"The number of arguments passed to the program");
 				continue;
 			}
 			if (functionMain && strcmp (possibleName[i], "argv") == 0)
 			{
-				fprintf(outFile, "%s \\param %s %s.\n", middleCom, possibleName[i], 
+				fprintf(outFile, "%s \\param %s %s.\n", middleCom, possibleName[i],
 						"Pointers to the arguments passed to the program");
 				continue;
 			}
 			getComment (readLine, 2, possibleName[i]);
 			fprintf(outFile, "%s \\param %s %s.\n", middleCom, possibleName[i], readLine);
 		}
-		
+
 		if (functionMain)
 		{
 			fprintf(outFile, "%s \\result %s.\n", middleCom, "0 (zero) if all processed OK");
@@ -893,7 +892,7 @@ int addComments(DIR_ENTRY * file)
 	strcpy(outFile, file->fullPath);
 	strcat(outFile, file->fileName);
 	strcat(outFile, ".$$$");
-	
+
 	firstWrite = 1;
 	addedComments = 0;
 	possibleName[0][0] = 0;
@@ -1022,7 +1021,7 @@ int addComments(DIR_ENTRY * file)
 								bufferFlush(writeFile, 1);
 								addedComments += displayBox(1, curParam, writeFile);
 								comBuffPos = 0;
-								bufferFlush(writeFile, 0);								
+								bufferFlush(writeFile, 0);
 							}
 							curParam = 0;
 						}
@@ -1142,7 +1141,7 @@ int addComments(DIR_ENTRY * file)
 			strcpy(bkpFile, file->fullPath);
 			strcat(bkpFile, file->fileName);
 			strcat(bkpFile, "~");
-			
+
 			if (rename (inFile, bkpFile) != 0)
 			{
 				fprintf (stderr, "Rename from %s to %s failed!\n", inFile, bkpFile);
@@ -1165,7 +1164,7 @@ int addComments(DIR_ENTRY * file)
 		if (bracketLevel || braceLevel || inComment || inQuote || inDefine)
 		{
 			printf("WARNING unexpected EOF: Bracket: %d, Brace: %d, Comment: %d, "
-				   "Quote: %d, Define: %d\n", bracketLevel, braceLevel, inComment, 
+				   "Quote: %d, Define: %d\n", bracketLevel, braceLevel, inComment,
 				   inQuote, inDefine);
 		}
 		printf("      %-16s %d added comment(s)\n", file->fileName, addedComments);

@@ -117,7 +117,7 @@ int main (int argc, char *argv[])
 
 	while ((i = getopt(argc, argv, "c?")) != -1)
 	{
-		switch (i) 
+		switch (i)
 		{
 		case 'c':
 			careful = 1;
@@ -142,14 +142,14 @@ int main (int argc, char *argv[])
 	if (found)
 	{
 		char numBuff[15];
-		
+
 		if (!displayColumnInit (2, ptrChangeColumn, DISPLAY_HEADINGS))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 1;
 		}
 		directoryProcess (showDir, &fileList);
-		
+
 		displayDrawLine (0);
 		displayInColumn (0, displayCommaNumber (totalLines, numBuff));
 		displayInColumn (1, "Comments removed");
@@ -157,7 +157,7 @@ int main (int argc, char *argv[])
 		displayInColumn (0, displayCommaNumber (filesFound, numBuff));
 		displayInColumn (1, "Files changed");
 		displayNewLine(DISPLAY_INFO);
-		displayAllLines ();		
+		displayAllLines ();
 
 		displayTidy ();
 	}
@@ -212,7 +212,7 @@ int showDir (DIR_ENTRY *file)
 							if (careful)
 							{
 								dontChange = 1;
-								break; 
+								break;
 							}
 							inQuote = !inQuote;
 						}

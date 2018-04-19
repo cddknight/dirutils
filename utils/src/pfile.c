@@ -190,13 +190,13 @@ int main (int argc, char *argv[])
 				orderType = ORDER_SIZE;
 				showType |= (optarg[0] == 'S' ? SHOW_RORDER : 0);
 				break;
-				
+
 			case 't':
 			case 'T':
 				orderType = ORDER_DATE;
 				showType |= (optarg[0] == 'T' ? SHOW_RORDER : 0);
 				break;
-				
+
 			case 'n':
 			case 'N':
 				orderType = ORDER_NONE;
@@ -216,10 +216,10 @@ int main (int argc, char *argv[])
 		case 'C':
 			displayColour ^= DISPLAY_COLOURS;
 			break;
-			
+
 		case 'f':
 			showType |= SHOW_FULL;
-			break;					
+			break;
 
 		case 's':
 			switch (optarg[0])
@@ -234,26 +234,26 @@ int main (int argc, char *argv[])
 				dirType |= ONLYFILES;
 				break;
 
-			case 'l':	
+			case 'l':
 				dirType &= ~(ONLYDIRS|ONLYFILES);
 				dirType |= ONLYLINKS;
 				break;
-				
-			case 'x':	
+
+			case 'x':
 				dirType &= ~(ONLYDIRS|ONLYLINKS|ONLYFILES);
 				dirType |= ONLYEXECS;
 				break;
 			}
 			break;
-			
+
 		case 'q':
 			showType |= SHOW_QUIET;
 			break;
-			
+
 		case 'x':
 			showType |= SHOW_EXE;
 			break;
-			
+
 		case '?':
 			version ();
 			printf ("%s -[Options] [FileName] [FileName]...\n\n", basename (argv[0]));
@@ -290,7 +290,7 @@ int main (int argc, char *argv[])
 					findFilePath[k] = 0;
 					strcat (findFilePath, argv[optind]);
 					found += directoryLoad (findFilePath, dirType, fileCompare, &fileList);
-							
+
 					if (showType & SHOW_EXE)
 					{
 						strcat (findFilePath, ".exe");
@@ -334,16 +334,16 @@ int main (int argc, char *argv[])
 		}
 		directoryProcess (showDir, &fileList);
 	}
-	
+
 	if (!(showType & SHOW_QUIET))
 	{
 		if (filesFound || linksFound || dirsFound)
 		{
 			char foundBuff[11], sizeBuff[11];
-		
+
 			displayNewLine (0);
 			displayDrawLine (0);
-			
+
 			if (showType & SHOW_FULL)
 			{
 				if (filesFound)
@@ -416,7 +416,7 @@ int showDir (DIR_ENTRY *file)
 {
 	int showFile = 0;
 	char fullName[1025];
-	
+
 	if (file -> fileName[0] == '.' && !(showType & SHOW_DOT))
 		return 0;
 
@@ -463,7 +463,7 @@ int showDir (DIR_ENTRY *file)
 		{
 			int linkSize;
 			char linkBuff[1025];
-						
+
 			if ((linkSize = readlink(fullName, linkBuff, 1024)) >= 0)
 				linkBuff[linkSize] = 0;
 			else
@@ -480,7 +480,7 @@ int showDir (DIR_ENTRY *file)
 			displayNewLine (0);
 			linksFound ++;
 		}
-		
+
 		/*--------------------------------------------------------------------*
 	   	 * If the file is a directory then just show them the name.           *
 		 *--------------------------------------------------------------------*/
@@ -495,7 +495,7 @@ int showDir (DIR_ENTRY *file)
 			displayNewLine (0);
 			dirsFound ++;
 		}
-		
+
 		/*--------------------------------------------------------------------*
    		 * If the file is a normal file then show the size/date/time.         *
 		 *--------------------------------------------------------------------*/
@@ -567,7 +567,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	case ORDER_NONE:
 		retn = 1;
 		break;
-		
+
 	case ORDER_SIZE:
 		if (showType & SHOW_MATCH)
 		{

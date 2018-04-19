@@ -131,7 +131,7 @@ time_t		maxFileAge		=	-1;
 time_t		minFileAge		=	-1;
 char		*quoteMe		=	" *?|&;()<>#\t\\\"";
 
-int			coloursAlt[MAX_COL_DESC + MAX_W_COL_DESC];	
+int			coloursAlt[MAX_COL_DESC + MAX_W_COL_DESC];
 int			colourType[EXTRA_COLOURS];
 int			dirColour = 0;
 int			encode = DISPLAY_ENCODE_HEX;
@@ -161,10 +161,10 @@ int			encode = DISPLAY_ENCODE_HEX;
 #define		COL_W_FILENAME	1
 #define		COL_W_TYPW_R	2
 
-int columnTranslate[MAX_COL_DESC] = 
+int columnTranslate[MAX_COL_DESC] =
 {
-	COL_TYPE, COL_RIGHTS, COL_N_LINKS, COL_OWNER, COL_GROUP, COL_SIZE, 
-	COL_DATE, COL_DAYS, COL_TIME, COL_FILENAME, COL_EXTN, COL_ARROW, 
+	COL_TYPE, COL_RIGHTS, COL_N_LINKS, COL_OWNER, COL_GROUP, COL_SIZE,
+	COL_DATE, COL_DAYS, COL_TIME, COL_FILENAME, COL_EXTN, COL_ARROW,
 	COL_TARGET, COL_CONTEXT, COL_MD5, COL_SHA256, COL_INODE
 };
 
@@ -202,25 +202,25 @@ COLUMN_DESC wideColumnDescs[MAX_W_COL_DESC] =
 
 COLUMN_DESC *ptrAllColumns[30] =
 {
-	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
-	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
-	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
-	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
-	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
-	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
-	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
-	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
-	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],	
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],
+	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R],
 	&wideColumnDescs[COL_W_TYPE_L], &wideColumnDescs[COL_W_FILENAME], &wideColumnDescs[COL_W_TYPW_R]
 };
 
 /*----------------------------------------------------------------------------*
  * The name of the colours in the cfg file                                    *
  *----------------------------------------------------------------------------*/
-char *colourNames[] = 
+char *colourNames[] =
 {
-	"colour_type",		"colour_rights",	"colour_numlinks",	"colour_owner",		"colour_group",		
-	"colour_size",		"colour_date",		"colour_day",		"colour_time",		"colour_filename",	
+	"colour_type",		"colour_rights",	"colour_numlinks",	"colour_owner",		"colour_group",
+	"colour_size",		"colour_date",		"colour_day",		"colour_time",		"colour_filename",
 	"colour_extn",		"colour_linkptr",	"colour_target",	"colour_context",	"colour_md5",
 	"colour_sha256",	"colour_inode",
 
@@ -257,7 +257,7 @@ void version ()
  *  \param progName The name of the program being run.
  *  \result None.
  */
-void helpThem (char *progName)	
+void helpThem (char *progName)
 {
 	version ();
 	printf ("%s -[Options] [FileNames] [FileNames]...\n", progName);
@@ -299,7 +299,7 @@ void helpThem (char *progName)
 	printf ("     --path  . . . . . . -p  . . . . . Show the full path to the file\n");
 	printf ("     --quiet . . . . . . -q  . . . . . Quiet mode, only paths and file names\n");
 	printf ("     --quote . . . . . . -Q  . . . . . Quote special chars\n");
-	printf ("     --recursive . . . . -r  . . . . . Recursive directory listing\n"); 
+	printf ("     --recursive . . . . -r  . . . . . Recursive directory listing\n");
 	printf ("     --show d  . . . . . -sd . . . . . Show only directories\n");
 	printf ("     --show f  . . . . . -sf . . . . . Show only files\n");
 	printf ("     --show l  . . . . . -sl . . . . . Show only links\n");
@@ -418,7 +418,7 @@ void commandOption (char option, char *optionVal, char *progName)
 			dirColour = DISPLAY_COLOURS;
 		}
 		break;
-		
+
 	case 'o':
 		if (optionVal != NULL)
 		{
@@ -437,21 +437,21 @@ void commandOption (char option, char *optionVal, char *progName)
 				showType |= (optionVal[j] == 'E' ? SHOW_RORDER : 0);
 				j++;
 				break;
-				
+
 			case 's':
 			case 'S':
 				orderType = ORDER_SIZE;
 				showType |= (optionVal[j] == 'S' ? SHOW_RORDER : 0);
 				j++;
 				break;
-				
+
 			case 't':
 			case 'T':
 				orderType = ORDER_DATE;
 				showType |= (optionVal[j] == 'T' ? SHOW_RORDER : 0);
 				j++;
 				break;
-				
+
 			case 'n':
 			case 'N':
 				orderType = ORDER_NONE;
@@ -520,7 +520,7 @@ void commandOption (char option, char *optionVal, char *progName)
 		if (optionVal != NULL)
 		{
 			int width = 0;
-		
+
 			k = 0;
 			while (optionVal[j + k])
 			{
@@ -559,15 +559,15 @@ void commandOption (char option, char *optionVal, char *progName)
 			{
 			case 'l':
 				maxFileAge = timeNow - parseTime(&optionVal[j], &len);
-				break;			
-			case 'g':	
+				break;
+			case 'g':
 				minFileAge = timeNow - parseTime(&optionVal[j], &len);
-				break;			
+				break;
 			}
 			j += len;
 		}
-		break;		
-		
+		break;
+
 	case 'a':
 		dirType ^= SHOWALL;
 		break;
@@ -594,7 +594,7 @@ void commandOption (char option, char *optionVal, char *progName)
 	case 'c':
 		dirType ^= USECASE;
 		break;
-		
+
 	case 'r':
 		dirType ^= RECUDIR;
 		break;
@@ -616,31 +616,31 @@ void commandOption (char option, char *optionVal, char *progName)
 				j++;
 				break;
 
-			case 'l':	
+			case 'l':
 				dirType &= ~(ONLYDIRS|ONLYFILES|ONLYDEVS|ONLYSOCKS|ONLYPIPES);
 				dirType |= ONLYLINKS;
 				j++;
 				break;
-				
-			case 'p':	
+
+			case 'p':
 				dirType &= ~(ONLYDIRS|ONLYLINKS|ONLYFILES|ONLYDEVS|ONLYSOCKS);
 				dirType |= ONLYPIPES;
 				j++;
 				break;
 
-			case 's':	
+			case 's':
 				dirType &= ~(ONLYDIRS|ONLYLINKS|ONLYFILES|ONLYDEVS|ONLYPIPES);
 				dirType |= ONLYSOCKS;
 				j++;
 				break;
-				
-			case 'x':	
+
+			case 'x':
 				dirType &= ~(ONLYDIRS|ONLYLINKS|ONLYFILES|ONLYDEVS|ONLYSOCKS|ONLYPIPES);
 				dirType |= ONLYEXECS;
 				j++;
 				break;
 
-			case 'v':	
+			case 'v':
 				dirType &= ~(ONLYDIRS|ONLYFILES|ONLYLINKS|ONLYSOCKS|ONLYPIPES);
 				dirType |= ONLYDEVS;
 				j++;
@@ -648,7 +648,7 @@ void commandOption (char option, char *optionVal, char *progName)
 			}
 		}
 		break;
-		
+
 	case 'q':
 		showType ^= SHOW_QUIET;
 		break;
@@ -662,7 +662,7 @@ void commandOption (char option, char *optionVal, char *progName)
 		{
 			int done = 0;
 			while (!done)
-			{					
+			{
 				switch (optionVal[j])
 				{
 				case 'd':
@@ -733,7 +733,7 @@ void commandOption (char option, char *optionVal, char *progName)
 		if (optionVal != NULL)
 		{
 			int m = 1;
-			
+
 			k = 0;
 			showFound = 0;
 			while (optionVal[j + k])
@@ -750,7 +750,7 @@ void commandOption (char option, char *optionVal, char *progName)
 			j += k;
 		}
 		break;
-	
+
 	case 't':
 		if (optionVal != NULL)
 		{
@@ -761,13 +761,13 @@ void commandOption (char option, char *optionVal, char *progName)
 				showDate = DATE_MOD;
 				j++;
 				break;
-				
+
 			case 'a':
 				strcpy (dateType, "Accessed");
 				showDate = DATE_ACC;
 				j++;
 				break;
-				
+
 			case 'c':
 				strcpy (dateType, "Changed");
 				showDate = DATE_CHG;
@@ -807,7 +807,7 @@ void loadSettings (char *progName)
 	int i, j;
 	char *home = getenv ("HOME");
 	char configPath[PATH_SIZE], value[81];
-	
+
 	configLoad ("/etc/ldirrc");
 	strcpy (configPath, home);
 	strcat (configPath, "/.ldirrc");
@@ -816,11 +816,11 @@ void loadSettings (char *progName)
 	for (i = 0; i < MAX_COL_DESC; i++)
 	{
 		configGetIntValue (colourNames[i], &coloursAlt[i]);
-	}	
+	}
 	for (i = 0; i < MAX_W_COL_DESC; i++)
 	{
 		configGetIntValue (colourNames[i + MAX_COL_DESC], &coloursAlt[i + MAX_COL_DESC]);
-	}	
+	}
 	for (i = 0; i < EXTRA_COLOURS; i++)
 	{
 		configGetIntValue (colourNames[i + MAX_COL_DESC + MAX_W_COL_DESC], &colourType[i]);
@@ -963,7 +963,7 @@ int main (int argc, char *argv[])
 		found = directoryLoad (defaultDir, dirType, fileCompare, &fileList);
 	}
 	directorySort (&fileList);
-	
+
 	/*------------------------------------------------------------------------*
 	 * We now have the directory loaded into memory.                          *
      *------------------------------------------------------------------------*/
@@ -975,7 +975,7 @@ int main (int argc, char *argv[])
 
 			if (longestName > 160)
 				longestName = 160;
-				
+
 			if ((maxCol = (displayGetWidth () - 1) / (longestName + 2)) < 4)
 				maxCol = 4;
 			if (maxCol > 10)
@@ -1000,12 +1000,12 @@ int main (int argc, char *argv[])
 		else
 		{
 			int colNum;
-			
+
 			for (colNum = 0; colNum < MAX_COL_DESC; colNum++)
 			{
 				ptrAllColumns[colNum] = &allColumnDescs [columnTranslate[colNum]];
 			}
-			
+
 			if (!displayColumnInit (colNum, ptrAllColumns, DISPLAY_HEADINGS | dirColour))
 			{
 				fprintf (stderr, "ERROR in: displayColumnInit\n");
@@ -1031,11 +1031,11 @@ int main (int argc, char *argv[])
 		if (filesFound || linksFound || dirsFound || devsFound || socksFound || pipesFound)
 		{
 			char foundBuff[11], sizeBuff[21];
-		
+
 			displayNewLine (0);
 			if (showFound != 0)
 				displayDrawLine (0);
-			
+
 			if (showType & SHOW_WIDE)
 			{
 				displayMatchWidth ();
@@ -1044,7 +1044,7 @@ int main (int argc, char *argv[])
 				{
 					displayInColumn (1, "Files: %s", displayCommaNumber (filesFound, foundBuff));
 					displayNewLine(DISPLAY_INFO);
-					displayInColumn (1, "Size:  %s", sizeFormat ? displayFileSize (totalSize, sizeBuff) : 
+					displayInColumn (1, "Size:  %s", sizeFormat ? displayFileSize (totalSize, sizeBuff) :
 							displayCommaNumber (totalSize, sizeBuff));
 					displayNewLine(DISPLAY_INFO);
 				}
@@ -1080,7 +1080,7 @@ int main (int argc, char *argv[])
 				{
 					displayInColumn (columnTranslate[COL_FILENAME], "Files: %s", displayCommaNumber (filesFound, foundBuff));
 					displayNewLine(DISPLAY_INFO);
-					displayInColumn (columnTranslate[COL_FILENAME], "Size:  %s", sizeFormat ? displayFileSize (totalSize, sizeBuff) : 
+					displayInColumn (columnTranslate[COL_FILENAME], "Size:  %s", sizeFormat ? displayFileSize (totalSize, sizeBuff) :
 							displayCommaNumber (totalSize, sizeBuff));
 					displayNewLine(DISPLAY_INFO);
 				}
@@ -1115,8 +1115,8 @@ int main (int argc, char *argv[])
 				if (filesFound)
 				{
 					if (showType & SHOW_SIZE)
-					{				
-						displayInColumn (columnTranslate[COL_SIZE], sizeFormat ? displayFileSize (totalSize, sizeBuff) : 
+					{
+						displayInColumn (columnTranslate[COL_SIZE], sizeFormat ? displayFileSize (totalSize, sizeBuff) :
 								displayCommaNumber (totalSize, sizeBuff));
 					}
 					displayInColumn (columnTranslate[COL_FILENAME], "Files: %s", displayCommaNumber (filesFound, foundBuff));
@@ -1177,7 +1177,7 @@ int fileExists (char *fileName, char *extraPath)
 	FILE *temp;
 	int fileExists = 1;
 	char tempBuff[1025];
-	
+
 	if (fileName[0] == DIRCHAR)
 	{
 		strcpy (tempBuff, fileName);
@@ -1224,7 +1224,7 @@ char *findExtn (char *fileName)
 			extn = &fileName[i];
 			break;
 		}
-	}	
+	}
 	return extn;
 }
 
@@ -1295,7 +1295,7 @@ int showDir (DIR_ENTRY *file)
 		fileAge = file -> fileStat.st_ctime;
 		break;
 	}
-		
+
 	/*------------------------------------------------------------------------*
 	 * Don't show files or directories that are outside time values.          *
      *------------------------------------------------------------------------*/
@@ -1314,7 +1314,7 @@ int showDir (DIR_ENTRY *file)
 	{
 		char marker1[2], marker2[2], displayName[PATH_SIZE];
 		int colour = -1;
-		
+
 		if (S_ISLNK (file -> fileStat.st_mode))
 		{
 			marker1[0] = '<';
@@ -1352,7 +1352,7 @@ int showDir (DIR_ENTRY *file)
 			marker2[0] = '}';
 			marker1[1] = marker2[1] = 0;
 			colour = colourType[6];
-			devsFound ++;			
+			devsFound ++;
 		}
 		else if (S_ISSOCK(file -> fileStat.st_mode))
 		{
@@ -1360,7 +1360,7 @@ int showDir (DIR_ENTRY *file)
 			marker2[0] = '}';
 			marker1[1] = marker2[1] = 0;
 			colour = colourType[6];
-			socksFound ++;			
+			socksFound ++;
 		}
 		else if (S_ISFIFO(file -> fileStat.st_mode))
 		{
@@ -1368,7 +1368,7 @@ int showDir (DIR_ENTRY *file)
 			marker2[0] = '}';
 			marker1[1] = marker2[1] = 0;
 			colour = colourType[6];
-			pipesFound ++;			
+			pipesFound ++;
 		}
 		else
 			return 0;
@@ -1385,14 +1385,14 @@ int showDir (DIR_ENTRY *file)
 		displayInColumn (currentCol++, marker1);
 		displayInColour (currentCol++, colour, "%s", displayName);
 		displayInColumn (currentCol++, marker2);
-		
+
 		if (currentCol == maxCol)
 		{
 			displayNewLine (0);
 			currentCol = 0;
 		}
 	}
-	
+
 	/*------------------------------------------------------------------------*
      * Show the directory in quiet format.                                    *
      *------------------------------------------------------------------------*/
@@ -1434,10 +1434,10 @@ int showDir (DIR_ENTRY *file)
 		displayNewLine (0);
 		filesFound ++;
 	}
-	
+
 	/*------------------------------------------------------------------------*
      * Show the directory in normal format.                                   *
-     *------------------------------------------------------------------------*/	
+     *------------------------------------------------------------------------*/
 	else
 	{
 		char fullName[PATH_SIZE], displayName[PATH_SIZE];
@@ -1449,7 +1449,7 @@ int showDir (DIR_ENTRY *file)
 		char shaString[65];
 		char rightsBuff[14];
 		char numBuff[21];
-		
+
 		if (showType & SHOW_QUOTE)
 		{
 			quoteCopy (fullName, file -> fullPath);
@@ -1464,7 +1464,7 @@ int showDir (DIR_ENTRY *file)
 			strcpy (displayName, file -> partPath);
 			strcat (displayName, file -> fileName);
 		}
-		
+
 		switch (showDate)
 		{
 		case DATE_MOD:
@@ -1477,7 +1477,7 @@ int showDir (DIR_ENTRY *file)
 			fileAge = file -> fileStat.st_ctime;
 			break;
 		}
-				
+
 		/*--------------------------------------------------------------------*
          * If the file is a LINK then just them it is a link.                 *
          *--------------------------------------------------------------------*/
@@ -1485,7 +1485,7 @@ int showDir (DIR_ENTRY *file)
 		{
 			int linkSize;
 			char linkBuff[1025];
-			
+
 			if (showType & SHOW_TYPE)
 			{
 				displayInColumn (COL_TYPE, "<Link>");
@@ -1557,13 +1557,13 @@ int showDir (DIR_ENTRY *file)
 					}
 				}
 				if (showType & SHOW_DATE)
-				{				
+				{
 					if (showType & SHOW_AGE)
 					{
 						int age = timeNow - fileAge;
-						
+
 						displayInColumn (columnTranslate[COL_DAYS], "%d", age / 86400);
-						displayInColumn (columnTranslate[COL_TIME], "%2d:%02d:%02d", 
+						displayInColumn (columnTranslate[COL_TIME], "%2d:%02d:%02d",
 								(age / 3600) % 24,
 								(age / 60) % 60,
 								 age % 60);
@@ -1575,7 +1575,7 @@ int showDir (DIR_ENTRY *file)
 			displayNewLine (0);
 			linksFound ++;
 		}
-		
+
 		/*--------------------------------------------------------------------*
          * If the file is a directory then just show them the name.           *
          *--------------------------------------------------------------------*/
@@ -1602,7 +1602,7 @@ int showDir (DIR_ENTRY *file)
 				if (showType & SHOW_OWNER)
 				{
 					displayInColumn (columnTranslate[COL_OWNER], "%s", displayOwnerString (file -> fileStat.st_uid, ownerString));
-				}		
+				}
 				if (showType & SHOW_GROUP)
 				{
 					displayInColumn (columnTranslate[COL_GROUP], "%s", displayGroupString (file -> fileStat.st_gid, groupString));
@@ -1618,13 +1618,13 @@ int showDir (DIR_ENTRY *file)
 				displayInColour (columnTranslate[COL_FILENAME], colourType[0], "%s/", displayName);
 
 				if (showType & SHOW_DATE)
-				{				
+				{
 					if (showType & SHOW_AGE)
 					{
 						int age = timeNow - fileAge;
-					
+
 						displayInColumn (columnTranslate[COL_DAYS], "%d", age / 86400);
-						displayInColumn (columnTranslate[COL_TIME], "%2d:%02d:%02d", 
+						displayInColumn (columnTranslate[COL_TIME], "%2d:%02d:%02d",
 								(age / 3600) % 24,
 								(age / 60) % 60,
 								 age % 60);
@@ -1648,7 +1648,7 @@ int showDir (DIR_ENTRY *file)
 				if (S_ISBLK(file -> fileStat.st_mode))
 				{
 					displayInColumn (columnTranslate[COL_TYPE], "<BlkD>");
-					devsFound ++;			
+					devsFound ++;
 				}
 				else if (S_ISCHR(file -> fileStat.st_mode))
 				{
@@ -1658,11 +1658,11 @@ int showDir (DIR_ENTRY *file)
 				else if (S_ISSOCK(file -> fileStat.st_mode))
 				{
 					displayInColumn (columnTranslate[COL_TYPE], "<Sckt>");
-					socksFound ++;			
+					socksFound ++;
 				}
 				else if (S_ISFIFO(file -> fileStat.st_mode))
 				{
-					displayInColumn (columnTranslate[COL_TYPE], "<Pipe>");					
+					displayInColumn (columnTranslate[COL_TYPE], "<Pipe>");
 					socksFound ++;
 				}
 			}
@@ -1683,7 +1683,7 @@ int showDir (DIR_ENTRY *file)
 				if (showType & SHOW_OWNER)
 				{
 					displayInColumn (columnTranslate[COL_OWNER], "%s", displayOwnerString (file -> fileStat.st_uid, ownerString));
-				}		
+				}
 				if (showType & SHOW_GROUP)
 				{
 					displayInColumn (columnTranslate[COL_GROUP], "%s", displayGroupString (file -> fileStat.st_gid, groupString));
@@ -1708,13 +1708,13 @@ int showDir (DIR_ENTRY *file)
 				displayInColour (columnTranslate[COL_FILENAME], colourType[6], "%s", displayName);
 
 				if (showType & SHOW_DATE)
-				{				
+				{
 					if (showType & SHOW_AGE)
 					{
 						int age = timeNow - fileAge;
-						
+
 						displayInColumn (columnTranslate[COL_DAYS], "%d", age / 86400);
-						displayInColumn (columnTranslate[COL_TIME], "%2d:%02d:%02d", 
+						displayInColumn (columnTranslate[COL_TIME], "%2d:%02d:%02d",
 								(age / 3600) % 24,
 								(age / 60) % 60,
 								 age % 60);
@@ -1725,21 +1725,21 @@ int showDir (DIR_ENTRY *file)
 			}
 			displayNewLine (0);
 		}
-		
+
 		/*--------------------------------------------------------------------*
          * If the file is a normal file then show the size/date/time.         *
          *--------------------------------------------------------------------*/
 		else if (!file -> fileStat.st_mode || file -> fileStat.st_mode & S_IFREG)
 		{
 			int colour = colourType[2];
-			
+
 			if (file -> fileStat.st_mode & 0100)
 				colour |= colourType[3];
 			if (file -> fileStat.st_mode & 0200)
 				colour |= colourType[4];
 			if (file -> fileStat.st_mode & 0400)
 				colour |= colourType[5];
-				
+
 			if (showType & SHOW_PATH)
 			{
 				displayInColour (columnTranslate[COL_FILENAME], colour, "%s", fullName);
@@ -1791,18 +1791,18 @@ int showDir (DIR_ENTRY *file)
 
 				if (showType & SHOW_SIZE)
 				{
-					long long fileSize = file -> fileStat.st_size;			
-					displayInColumn (columnTranslate[COL_SIZE], sizeFormat ? displayFileSize (fileSize, numBuff) : 
+					long long fileSize = file -> fileStat.st_size;
+					displayInColumn (columnTranslate[COL_SIZE], sizeFormat ? displayFileSize (fileSize, numBuff) :
 							displayCommaNumber (fileSize, numBuff));
-				}				
+				}
 				if (showType & SHOW_DATE)
-				{				
+				{
 					if (showType & SHOW_AGE)
 					{
 						int age = timeNow - fileAge;
-						
+
 						displayInColumn (columnTranslate[COL_DAYS], "%d", age / 86400);
-						displayInColumn (columnTranslate[COL_TIME], "%2d:%02d:%02d", 
+						displayInColumn (columnTranslate[COL_TIME], "%2d:%02d:%02d",
 								(age / 3600) % 24,
 								(age / 60) % 60,
 								 age % 60);
@@ -1855,7 +1855,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 		if (!(S_ISDIR (fileOne -> fileStat.st_mode)))
 			return 1;
 	}
-	
+
 	/*------------------------------------------------------------------------*
      * Force the links to follow the directories                              *
      *------------------------------------------------------------------------*/
@@ -1869,7 +1869,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 		if (!(S_ISLNK (fileOne -> fileStat.st_mode)))
 			return 1;
 	}
-	
+
 	/*------------------------------------------------------------------------*
      * Force the block devices to follow the links                            *
      *------------------------------------------------------------------------*/
@@ -1881,7 +1881,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	if (S_ISBLK(fileTwo -> fileStat.st_mode))
 	{
 		if (!(S_ISBLK(fileOne -> fileStat.st_mode)))
-			return 1;	
+			return 1;
 	}
 
 	/*------------------------------------------------------------------------*
@@ -1895,7 +1895,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	if (S_ISCHR(fileTwo -> fileStat.st_mode))
 	{
 		if (!(S_ISCHR(fileOne -> fileStat.st_mode)))
-			return 1;	
+			return 1;
 	}
 
 	/*------------------------------------------------------------------------*
@@ -1911,7 +1911,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 		if (!(S_ISSOCK (fileOne -> fileStat.st_mode)))
 			return 1;
 	}
-	
+
 	/*------------------------------------------------------------------------*
      * Force the pipes to follow the sockets                                  *
      *------------------------------------------------------------------------*/
@@ -1931,14 +1931,14 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 /*  case ORDER_NONE:
         retn = 1;
         break;
-*/		
+*/
 	case ORDER_SIZE:
 		if (showType & SHOW_MATCH)
 		{
 			if (fileOne -> fileStat.st_size == fileTwo -> fileStat.st_size)
 			{
 				int i;
-				
+
 				if (fileOne -> sha256Sum == NULL)
 				{
 					if ((fileOne -> sha256Sum = malloc (33)) != NULL)
@@ -1991,14 +1991,14 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 			retn = (fileOne -> fileStat.st_ctime > fileTwo -> fileStat.st_ctime ? -1 :
 					fileOne -> fileStat.st_ctime < fileTwo -> fileStat.st_ctime ? 1 : 0);
 			break;
-		}		
+		}
 		break;
 
 	case ORDER_EXTN:
 		{
 			char *extnOne = findExtn (fileOne -> fileName);
 			char *extnTwo = findExtn (fileTwo -> fileName);
-		
+
 			if (extnOne != NULL && extnTwo != NULL)
 			{
 				if (dirType & USECASE)
@@ -2049,7 +2049,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 		{
 			char contextOne[81], contextTwo[81];
 			char fileNameOne[PATH_SIZE], fileNameTwo[PATH_SIZE];
-		
+
 			strcpy (fileNameOne, fileOne -> fullPath);
 			strcat (fileNameOne, fileOne -> fileName);
 			strcpy (fileNameTwo, fileTwo -> fullPath);
@@ -2059,7 +2059,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 			retn = strcasecmp (contextOne, contextTwo);
 		}
 		break;
-		
+
 	case ORDER_MD5S:
 		if (fileOne -> md5Sum == NULL)
 		{
@@ -2089,7 +2089,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 			}
 		}
 		break;
-		
+
 	case ORDER_SHAS:
 		if (fileOne -> sha256Sum == NULL)
 		{
@@ -2126,7 +2126,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	if (retn == 0)
 	{
 		char fileNameOne[PATH_SIZE], fileNameTwo[PATH_SIZE];
-		
+
 		/*--------------------------------------------------------------------*/
 		if (showType & SHOW_PATH)
 		{
@@ -2187,7 +2187,7 @@ char *quoteCopy (char *dst, char *src)
 {
 	int i, j;
 
-	dst[i = j = 0] = 0; 
+	dst[i = j = 0] = 0;
 	while (src[i])
 	{
 		if (strchr (quoteMe, src[i]))

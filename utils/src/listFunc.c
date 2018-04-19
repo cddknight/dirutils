@@ -77,8 +77,8 @@ int debug = 0;
 static char whiteSpace[] = " \t\n\r[]<>=+-*/";
 static char ignoreChars[] = "[]<>=+-*";
 static char funtionChars[] =
-	"abcdefghijklmnopqrstuvwxyz" 
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZ" 
+	"abcdefghijklmnopqrstuvwxyz"
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	"1234567890-_:~.";
 
 /**********************************************************************************************************************
@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
      *------------------------------------------------------------------------*/
 	while ((i = getopt(argc, argv, "dj?")) != -1)
 	{
-		switch (i) 
+		switch (i)
 		{
 		case 'd':
 			debug = 1;
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 		case 'j':
 			javaMode = 1;
 			break;
-			
+
 		case '?':
 			version ();
 			printf ("%s -[options] <file names>\n", basename (argv[0]));
@@ -161,22 +161,22 @@ int main(int argc, char *argv[])
 	if (found)
 	{
 		char numBuff[15];
-		
+
 		if (!displayColumnInit (4, ptrFuncColumn, DISPLAY_HEADINGS))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 1;
 		}
 		directoryProcess (showDir, &fileList);
-		
+
 		displayInColumn (1, displayCommaNumber (totalFuncs, numBuff));
 		displayInColumn (2, "Functions");
 		displayNewLine(DISPLAY_INFO);
 		displayInColumn (1, displayCommaNumber (filesFound, numBuff));
 		displayInColumn (2, "Files");
 		displayNewLine(DISPLAY_INFO);
-		displayAllLines ();		
-		
+		displayAllLines ();
+
 		displayTidy ();
 	}
 	else
@@ -281,7 +281,7 @@ void displayFunc(char *fileName, int line, int func, int count)
 	displayInColumn (0, displayCommaNumber (func, numBuffer));
 	displayInColumn (1, displayCommaNumber (line, numBuffer));
 	displayInColumn (2, "%s", fileName);
-	
+
 	for (i = 0; i < count; i++)
 	{
 		if (i == 0)
@@ -328,7 +328,7 @@ int showDir(DIR_ENTRY * file)
 	strcpy(outFile, file->fullPath);
 	strcat(outFile, file->fileName);
 	strcat(outFile, ".$$$");
-	
+
 	firstWrite = 1;
 	possibleName[0][0] = 0;
 	currentWord[curWordPos = 0] = 0;
@@ -548,7 +548,7 @@ int showDir(DIR_ENTRY * file)
 		if (bracketLevel || braceLevel || inComment || inQuote || inDefine)
 		{
 			printf("WARNING unexpected EOF: Bracket: %d, Brace: %d, Comment: %d, "
-				   "Quote: %d, Define: %d\n", bracketLevel, braceLevel, inComment, 
+				   "Quote: %d, Define: %d\n", bracketLevel, braceLevel, inComment,
 				   inQuote, inDefine);
 		}
 		if (func)

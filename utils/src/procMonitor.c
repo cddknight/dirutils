@@ -119,7 +119,7 @@ int main (int argc, char *argv[])
      *------------------------------------------------------------------------*/
 	while ((i = getopt(argc, argv, "apwtT?")) != -1)
 	{
-		switch (i) 
+		switch (i)
 		{
 		case 'a':
 			outputAll = 1;
@@ -166,14 +166,14 @@ int main (int argc, char *argv[])
 	if (found)
 	{
 		char numBuff[15];
-		
+
 		if (!displayColumnInit (4, ptrChangeColumn, DISPLAY_HEADINGS))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 1;
 		}
 		directoryProcess (showDir, &fileList);
-		
+
 		displayDrawLine (0);
 		displayInColumn (2, displayCommaNumber (totalProcessed, numBuff));
 		displayInColumn (3, "Lines processed");
@@ -182,7 +182,7 @@ int main (int argc, char *argv[])
 		displayInColumn (3, "Files read");
 		displayNewLine(DISPLAY_INFO);
 		displayAllLines ();
-		
+
 		displayTidy ();
 	}
 	else
@@ -357,8 +357,8 @@ int flushBuffer (char *outBuffer)
 	{
 		if (savedRead[i])
 		{
-			sprintf (&outBuffer[strlen (outBuffer)], 
-					(outputMode == 0 ? "%0.2f," : "%0.2f\t"), 
+			sprintf (&outBuffer[strlen (outBuffer)],
+					(outputMode == 0 ? "%0.2f," : "%0.2f\t"),
 					savedValues[i] / savedRead[i]);
 			savedRead[i] = 0;
 			++count;
@@ -431,7 +431,7 @@ int showDir (DIR_ENTRY *file)
 			}
 		}
 
-		sprintf (&outFile[strlen (outFile)], "%s-%d.%s", 
+		sprintf (&outFile[strlen (outFile)], "%s-%d.%s",
 				(inputMode == 0 ? "monitor" : "power"),
 				getNumber (file -> fileName) / 100,
 				(outputMode == 0 ? "csv" : "tsv"));

@@ -256,7 +256,7 @@ int main (int argc, char *argv[])
 
 	while ((i = getopt(argc, argv, "hxCdqPp:s:D:?")) != -1)
 	{
-		switch (i) 
+		switch (i)
 		{
 		case 'x':
 			fileType = FILE_XML;
@@ -269,7 +269,7 @@ int main (int argc, char *argv[])
 		case 'C':
 			displayOptions ^= DISPLAY_COLOURS;
 			break;
-			
+
 		case 'D':
 			j = 0;
 			while (optarg[j])
@@ -302,16 +302,16 @@ int main (int argc, char *argv[])
 		case 'd':
 			displayDebug = !displayDebug;
 			break;
-			
+
 		case 'q':
 			displayOptions ^= DISPLAY_HEADINGS;
 			displayQuiet = !displayQuiet;
 			break;
-			
+
 		case 'P':
 			displayPaths = !displayPaths;
 			break;
-			
+
 		case 'p':
 			parsePath (optarg);
 			break;
@@ -319,7 +319,7 @@ int main (int argc, char *argv[])
 		case 's':
 			strncpy (xsdPath, optarg, PATH_SIZE);
 			break;
-			
+
 		case '?':
 			helpThem (argv[0]);
 			exit (1);
@@ -329,7 +329,7 @@ int main (int argc, char *argv[])
 	if (optind == argc)
 	{
 		processStdin ();
-		exit (0);			
+		exit (0);
 	}
 	for (; optind < argc; ++optind)
 	{
@@ -344,7 +344,7 @@ int main (int argc, char *argv[])
 		directorySort (&fileList);
 		directoryProcess (showDir, &fileList);
 
-		if (!displayQuiet) 
+		if (!displayQuiet)
 		{
 			if (!displayColumnInit (3, ptrFileColumn, displayOptions & ~DISPLAY_HEADINGS))
 			{
@@ -354,7 +354,7 @@ int main (int argc, char *argv[])
 			displayDrawLine (0);
 			displayInColumn (1, "%d %s shown\n", filesFound, filesFound == 1 ? "File" : "Files");
 			displayNewLine(DISPLAY_INFO);
-			displayAllLines ();		
+			displayAllLines ();
 		}
 		displayTidy ();
 	}
@@ -382,7 +382,7 @@ void parsePath (char *path)
 	char tempBuffer[81];
 	int i = 0, j = 0;
 
-	do	
+	do
 	{
 		if (path[i] == '/' || path[i] == 0)
 		{
@@ -458,9 +458,9 @@ int xmlChildElementCount (xmlNode *curNode)
 	int count = 0;
 	xmlNode *cNode = curNode -> children;
 
-	for (; cNode; cNode = cNode->next) 
+	for (; cNode; cNode = cNode->next)
 	{
-		if (cNode->type == XML_ELEMENT_NODE) 
+		if (cNode->type == XML_ELEMENT_NODE)
 			++count;
 	}
 	return count;
@@ -489,7 +489,7 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 	char tempBuff[1024], fullPath[1024];
 	int i;
 
-	for (curNode = aNode; curNode; curNode = curNode->next) 
+	for (curNode = aNode; curNode; curNode = curNode->next)
 	{
 		int saveLevel = readLevel;
 
@@ -505,7 +505,7 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 			strcat (fullPath, (char *)curNode -> name);
 		}
 
-		if (curNode->type == XML_ELEMENT_NODE) 
+		if (curNode->type == XML_ELEMENT_NODE)
 		{
 			if ((!xmlStrcmp (curNode -> name, (const xmlChar *)levelName[readLevel])) || readLevel >= levels)
 			{
@@ -514,25 +514,25 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 			if (readLevel >= levels)
 			{
 				xmlAttrPtr attr;
-				
+
 				key = xmlNodeListGetString (doc, curNode -> xmlChildrenNode, 1);
-				if (displayQuiet) 
+				if (displayQuiet)
 				{
 					rmWhiteSpace ((char *)key, tempBuff, 1020);
 					if (tempBuff[0])
 					{
-						printf ("%s=\"%s\"\n", 
-								(displayPaths ? fullPath : (char *)curNode -> name), 
+						printf ("%s=\"%s\"\n",
+								(displayPaths ? fullPath : (char *)curNode -> name),
 								key == NULL ? "(null)" : tempBuff);
 					}
 				}
 				else
 				{
 					bool shown = false;
-					if (displayCols & DISP_DEPTH) 
+					if (displayCols & DISP_DEPTH)
 					{
 						int count = xmlChildElementCount (curNode);
-						for (i = 0; i < readLevel - 1 && i < 1020; ++i) 
+						for (i = 0; i < readLevel - 1 && i < 1020; ++i)
 						{
 							tempBuff[i] = ' ';
 						}
@@ -554,16 +554,16 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 							displayInColumn (COL_KEY, "%s", key == NULL ? "(null)" : tempBuff);
 							shown = true;
 						}
-					}											
+					}
 					for (attr = curNode -> properties; attr != NULL; attr = attr -> next)
 					{
 						bool shownP = false;
-						if (displayCols & DISP_ATTR) 
+						if (displayCols & DISP_ATTR)
 						{
 							displayInColumn (COL_ATTR, "%s", (char *)attr -> name);
 							shownP = true;
 						}
-						if (displayCols & DISP_VALUE) 
+						if (displayCols & DISP_VALUE)
 						{
 							if (attr -> children)
 							{
@@ -606,19 +606,19 @@ void myErrorFunc (void *ctx, const char *msg, ...)
 {
 	if (displayDebug)
 	{
-		if (displayCols & DISP_ERROR) 
+		if (displayCols & DISP_ERROR)
 		{
 			va_list arg_ptr;
 
 			va_start (arg_ptr, msg);
 			displayVInColumn (COL_ERROR, (char *)msg, arg_ptr);
 			va_end (arg_ptr);
-		}		
+		}
 	}
 	else if (!shownError)
 	{
 		shownError = true;
-		if (displayCols & DISP_ERROR) 
+		if (displayCols & DISP_ERROR)
 		{
 			displayInColumn (COL_ERROR, "Parsing file failed");
 			displayNewLine(0);
@@ -651,15 +651,15 @@ int validateDocument (xmlDocPtr doc)
 
 	parserCtxt = xmlSchemaNewParserCtxt (xsdPath);
 
-	if (parserCtxt != NULL) 
+	if (parserCtxt != NULL)
 	{
 		schema = xmlSchemaParse (parserCtxt);
 
-		if (schema != NULL) 
+		if (schema != NULL)
 		{
 			validCtxt = xmlSchemaNewValidCtxt (schema);
 
-			if (validCtxt) 
+			if (validCtxt)
 			{
 
 				return xmlSchemaValidateDoc (validCtxt, doc);
@@ -772,7 +772,7 @@ int showDir (DIR_ENTRY *file)
 	{
 		useType = testFile (inFile) ? FILE_HTML : FILE_XML;
 	}
-	if (!displayQuiet) 
+	if (!displayQuiet)
 	{
 		char tempBuff[121];
 
@@ -781,7 +781,7 @@ int showDir (DIR_ENTRY *file)
 		displayInColumn (2, displayFileSize (file -> fileStat.st_size, tempBuff));
 		displayInColumn (3, displayDateString (file -> fileStat.st_mtime, tempBuff));
 		displayNewLine (DISPLAY_INFO);
-		displayAllLines ();		
+		displayAllLines ();
 	}
 	displayTidy ();
 
@@ -855,7 +855,7 @@ void processStdin ()
 	xmlNodePtr rootElement = NULL;
 	htmlDocPtr hDoc = NULL;
 	xmlChar *xmlBuffer = NULL;
-	
+
 	buffer = (char *)malloc(buffSize = READSIZE);
 	do
 	{
@@ -892,7 +892,7 @@ void processStdin ()
 			}
 		}
 
-		if (!displayQuiet) 
+		if (!displayQuiet)
 		{
 			/*------------------------------------------------------------------------*
              * Display a table with the type, like this was a normal file.            *
@@ -905,7 +905,7 @@ void processStdin ()
 			displayInColumn (0, "%s", (fileType == FILE_HTML ? "HTML" : "XML"));
 			displayInColumn (1, "stdin");
 			displayNewLine (DISPLAY_INFO);
-			displayAllLines ();		
+			displayAllLines ();
 			displayTidy ();
 		}
 
@@ -914,7 +914,7 @@ void processStdin ()
          *----------------------------------------------------------------------------*/
 		if (displayColumnInit (COL_COUNT, ptrParseColumn, displayOptions))
 		{
-			shownError = false;		
+			shownError = false;
 			xmlSetGenericErrorFunc (NULL, myErrorFunc);
 			if ((xmlBuffer = xmlCharStrndup(buffer, totalRead)) != NULL)
 			{

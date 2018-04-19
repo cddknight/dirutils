@@ -195,12 +195,12 @@ int main (int argc, char *argv[])
 
 	while ((i = getopt(argc, argv, "Cqw:?")) != -1)
 	{
-		switch (i) 
+		switch (i)
 		{
 		case 'C':
 			displayColour = DISPLAY_COLOURS;
 			break;
-			
+
 		case 'q':
 			displayQuiet ^= 1;
 			break;
@@ -227,7 +227,7 @@ int main (int argc, char *argv[])
 	{
 		if (displayWidth == -1)
 		{
-			displayWidth = displayQuiet ? 
+			displayWidth = displayQuiet ?
 					(width < 48 ? 8 : width <  72 ? 16 : width < 96	 ? 24 : width < 120 ? 32 : width < 144 ? 40 : 48):
 					(width < 77 ? 8 : width < 110 ? 16 : width < 143 ? 24 : width < 176 ? 32 : width < 209 ? 40 : 48);
 		}
@@ -238,7 +238,7 @@ int main (int argc, char *argv[])
 		directorySort (&fileList);
 		directoryProcess (showDir, &fileList);
 
-		if (!displayQuiet && filesFound) 
+		if (!displayQuiet && filesFound)
 		{
 			if (!displayColumnInit (2, ptrFileColumn, displayColour))
 			{
@@ -248,7 +248,7 @@ int main (int argc, char *argv[])
 			displayDrawLine (0);
 			displayInColumn (0, "%d %s shown\n", filesFound, filesFound == 1 ? "File" : "Files");
 			displayNewLine(DISPLAY_INFO);
-			displayAllLines ();		
+			displayAllLines ();
 		}
 		displayTidy ();
 	}
@@ -281,7 +281,7 @@ int showDir (DIR_ENTRY *file)
 	/*------------------------------------------------------------------------*
      * If the file is a link check it points to a regular file.               *
      *------------------------------------------------------------------------*/
-	if (S_ISLNK (file -> fileStat.st_mode)) 
+	if (S_ISLNK (file -> fileStat.st_mode))
 	{
 		mode_t type = directoryTrueLinkType (file);
 		if (!S_ISREG (type))
@@ -299,7 +299,7 @@ int showDir (DIR_ENTRY *file)
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
 		return 0;
 	}
-	if (!displayQuiet) 
+	if (!displayQuiet)
 	{
 		displayDrawLine (0);
 		displayHeading (0);
@@ -307,7 +307,7 @@ int showDir (DIR_ENTRY *file)
 		displayInColumn (0, "%s", file -> fileName);
 		displayInColumn (1, displayFileSize (file -> fileStat.st_size, (char *)inBuffer));
 		displayNewLine (DISPLAY_INFO);
-		displayAllLines ();		
+		displayAllLines ();
 	}
 	displayTidy ();
 
@@ -327,7 +327,7 @@ int showDir (DIR_ENTRY *file)
 
 		if (!displayQuiet) displayDrawLine (0);
 		if (!displayQuiet) displayHeading (0);
-		
+
 		while ((read = fread (inBuffer, 1, 2048, readFile)) != 0)
 		{
 			int i = 0;
@@ -336,10 +336,10 @@ int showDir (DIR_ENTRY *file)
 				sprintf ((char *)saveHex, "%02X", ((int)inBuffer[i]) & 0xFF);
 				saveChar[j++] = (inBuffer[i] < 127 && inBuffer[i] > ' ') ? inBuffer[i] : '.';
 				saveChar[j] = 0;
-				
+
 				if (j > 1 && (j - 1) % 8 == 0)
 				{
-					if (!displayQuiet) 
+					if (!displayQuiet)
 					{
 						displayInColumn (c, " ");
 					}
@@ -349,7 +349,7 @@ int showDir (DIR_ENTRY *file)
 
 				if (j == displayWidth)
 				{
-					if (!displayQuiet) 
+					if (!displayQuiet)
 					{
 						displayInColumn (0, "%08X", filePosn);
 						displayInColumn (54, " ", saveChar);
@@ -361,7 +361,7 @@ int showDir (DIR_ENTRY *file)
 
 					if (++l == displayWidth)
 					{
-						if (!displayQuiet) 
+						if (!displayQuiet)
 						{
 							displayBlank (0);
 						}
@@ -374,7 +374,7 @@ int showDir (DIR_ENTRY *file)
 		}
 		if (j)
 		{
-			if (!displayQuiet) 
+			if (!displayQuiet)
 			{
 				displayInColumn (0, "%08X", filePosn);
 				displayInColumn (54, " ", saveChar);
@@ -384,7 +384,7 @@ int showDir (DIR_ENTRY *file)
 		}
 		displayAllLines ();
 		displayTidy ();
-		
+
 		fclose (readFile);
 		++filesFound;
 	}

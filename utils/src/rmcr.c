@@ -116,14 +116,14 @@ int main (int argc, char *argv[])
 	if (found)
 	{
 		char numBuff[15];
-		
+
 		if (!displayColumnInit (2, ptrChangeColumn, DISPLAY_HEADINGS))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 1;
 		}
 		directoryProcess (showDir, &fileList);
-		
+
 		displayDrawLine (0);
 		displayInColumn (0, displayCommaNumber (totalLines, numBuff));
 		displayInColumn (1, "CR's removed");
@@ -132,7 +132,7 @@ int main (int argc, char *argv[])
 		displayInColumn (1, "Files changed");
 		displayNewLine(DISPLAY_INFO);
 		displayAllLines ();
-		
+
 		displayTidy ();
 	}
 	else
