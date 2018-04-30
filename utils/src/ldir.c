@@ -316,7 +316,7 @@ CONFIG_WORD *findWord (int flag, char *word)
 	{
 		if (flag & configWords[i].flag)
 		{
-			if (strncmp (configWords[i].word, word, strlen (configWords[i].word)) == 0)
+			if (strncmp (configWords[i].word, word, strlen (configWords[i].word) + 1) == 0)
 			{
 				break;
 			}
@@ -324,6 +324,45 @@ CONFIG_WORD *findWord (int flag, char *word)
 		++i;
 	}
 	return &configWords[i];
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  A L L  V A L I D                                                                                                  *
+ *  ================                                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Check to see if word contains only valid options.
+ *  \param flag Which options to check.
+ *  \param word Word containing options.
+ *  \result 1 if they are all valid.
+ */
+int allValid (int flag, char *word)
+{
+	int i = 0, j = 0, retn = 1;
+	while (word[j] && retn == 1)
+	{
+		i = 0;
+		while (configWords[i].flag)
+		{
+			if (flag & configWords[i].flag)
+			{
+				if (configWords[i].letter == word[j])
+					break;
+			}
+			++i;
+		}
+		if (configWords[i].letter != word[j])
+		{
+			retn = 0;
+		}
+		else
+		{
+			++j;
+		}
+	}
+	return retn;
 }
 
 /**********************************************************************************************************************
@@ -518,55 +557,69 @@ void commandOption (char option, char *optionVal, char *progName)
 	case 'o':
 		if (optionVal != NULL)
 		{
-			char letter = optionVal[0];
+			char letter;
+			int all = 0, j = 0;
 			CONFIG_WORD *found = findWord (1, optionVal);
 
 			if (found -> letter)
 			{
 				letter = found -> letter;
 			}
-			switch (letter)
+			else if ((all = allValid (1, optionVal)) == 0)
 			{
-			case 'f':
-				orderType = ORDER_NAME;
-				break;
-			case 'e':
-				orderType = ORDER_EXTN;
-				break;
-			case 's':
-				orderType = ORDER_SIZE;
-				break;
-			case 'd':
-				orderType = ORDER_DATE;
-				break;
-			case 'n':
-				orderType = ORDER_NONE;
-				break;
-			case 'o':
-				orderType = ORDER_OWNR;
-				break;
-			case 'g':
-				orderType = ORDER_GRUP;
-				break;
-			case 'l':
-				orderType = ORDER_LINK;
-				break;
-			case 'c':
-				orderType = ORDER_CNXT;
-				break;
-			case 'm':
-				orderType = ORDER_MD5S;
-				break;
-			case 'h':
-				orderType = ORDER_SHAS;
-				break;
-			case 'i':
-				orderType = ORDER_INOD;
-				break;
-			case 'r':
-				showType |= SHOW_RORDER;
-				break;
+				helpThem (progName);
+				exit(1);
 			}
+			do
+			{
+				if (all)
+				{
+					letter = optionVal[j];
+				}
+				switch (letter)
+				{
+				case 'f':
+					orderType = ORDER_NAME;
+					break;
+				case 'e':
+					orderType = ORDER_EXTN;
+					break;
+				case 's':
+					orderType = ORDER_SIZE;
+					break;
+				case 'd':
+					orderType = ORDER_DATE;
+					break;
+				case 'n':
+					orderType = ORDER_NONE;
+					break;
+				case 'o':
+					orderType = ORDER_OWNR;
+					break;
+				case 'g':
+					orderType = ORDER_GRUP;
+					break;
+				case 'l':
+					orderType = ORDER_LINK;
+					break;
+				case 'c':
+					orderType = ORDER_CNXT;
+					break;
+				case 'm':
+					orderType = ORDER_MD5S;
+					break;
+				case 'h':
+					orderType = ORDER_SHAS;
+					break;
+				case 'i':
+					orderType = ORDER_INOD;
+					break;
+				case 'r':
+					showType |= SHOW_RORDER;
+					break;
+				}
+			}
+			while (optionVal[++j] != 0 && all);
 		}
 		break;
 
@@ -620,6 +673,9 @@ void commandOption (char option, char *optionVal, char *progName)
 			case 'g':
 				minFileAge = timeNow - parseTime(&optionVal[j], &len);
 				break;
+			default:
+				helpThem (progName);
+				exit (1);
 			}
 			j += len;
 		}
@@ -659,44 +715,52 @@ void commandOption (char option, char *optionVal, char *progName)
 	case 's':
 		if (optionVal != NULL)
 		{
-			char letter = optionVal[0];
+			char letter;
+			int all = 0, j = 0;
 			CONFIG_WORD *found = findWord (4, optionVal);
 
 			if (found -> letter)
 			{
 				letter = found -> letter;
 			}
-			switch (letter)
+			else if ((all = allValid (4, optionVal)) == 0)
 			{
-			case 'd':
-				dirType &= ~(ONLYFILES|ONLYLINKS|ONLYDEVS|ONLYSOCKS|ONLYPIPES);
-				dirType |= ONLYDIRS;
-				break;
-			case 'f':
-				dirType &= ~(ONLYDIRS|ONLYLINKS|ONLYDEVS|ONLYSOCKS|ONLYPIPES);
-				dirType |= ONLYFILES;
-				break;
-			case 'l':
-				dirType &= ~(ONLYDIRS|ONLYFILES|ONLYDEVS|ONLYSOCKS|ONLYPIPES);
-				dirType |= ONLYLINKS;
-				break;
-			case 'p':
-				dirType &= ~(ONLYDIRS|ONLYLINKS|ONLYFILES|ONLYDEVS|ONLYSOCKS);
-				dirType |= ONLYPIPES;
-				break;
-			case 's':
-				dirType &= ~(ONLYDIRS|ONLYLINKS|ONLYFILES|ONLYDEVS|ONLYPIPES);
-				dirType |= ONLYSOCKS;
-				break;
-			case 'x':
-				dirType &= ~(ONLYDIRS|ONLYLINKS|ONLYFILES|ONLYDEVS|ONLYSOCKS|ONLYPIPES);
-				dirType |= ONLYEXECS;
-				break;
-			case 'v':
-				dirType &= ~(ONLYDIRS|ONLYFILES|ONLYLINKS|ONLYSOCKS|ONLYPIPES);
-				dirType |= ONLYDEVS;
-				break;
+				helpThem (progName);
+				exit(1);
 			}
+			dirType &= ~(ONLYDIRS|ONLYFILES|ONLYLINKS|ONLYDEVS|ONLYSOCKS|ONLYPIPES|ONLYEXECS);
+			do
+			{
+				if (all)
+				{
+					letter = optionVal[j];
+				}
+				switch (letter)
+				{
+				case 'd':
+					dirType |= ONLYDIRS;
+					break;
+				case 'f':
+					dirType |= ONLYFILES;
+					break;
+				case 'l':
+					dirType |= ONLYLINKS;
+					break;
+				case 'p':
+					dirType |= ONLYPIPES;
+					break;
+				case 's':
+					dirType |= ONLYSOCKS;
+					break;
+				case 'x':
+					dirType |= ONLYEXECS;
+					break;
+				case 'v':
+					dirType |= ONLYDEVS;
+					break;
+				}
+			}
+			while (optionVal[++j] != 0 && all);
 		}
 		break;
 
@@ -711,76 +775,69 @@ void commandOption (char option, char *optionVal, char *progName)
 	case 'D':
 		if (optionVal != NULL)
 		{
-			int done = 0, j = 0;
-			while (!done)
-			{
-				char letter = optionVal[j];
-				CONFIG_WORD *found = findWord (2, &optionVal[j]);
+			char letter;
+			int all = 0, j = 0;
+			CONFIG_WORD *found = findWord (2, optionVal);
 
-				if (found -> letter)
+			if (found -> letter)
+			{
+				letter = found -> letter;
+			}
+			else if ((all = allValid (2, optionVal)) == 0)
+			{
+				helpThem (progName);
+				exit(1);
+			}
+			do
+			{
+				if (all)
 				{
-					letter = found -> letter;
-					j += (strlen (found -> word) - 1);
+					letter = optionVal[j];
 				}
 				switch (letter)
 				{
 				case 'd':
 					showType ^= SHOW_DATE;
-					j++;
 					break;
 				case 'e':
 					showType ^= SHOW_EXTN;
-					j++;
 					break;
 				case 'o':
 					showType ^= SHOW_OWNER;
-					j++;
 					break;
 				case 'g':
 					showType ^= SHOW_GROUP;
-					j++;
 					break;
 				case 'r':
 					showType ^= SHOW_RIGHTS;
-					j++;
 					break;
 				case 's':
 					showType ^= SHOW_SIZE;
-					j++;
 					break;
 				case 't':
 					showType ^= SHOW_TYPE;
-					j++;
 					break;
 				case 'l':
 					showType ^= SHOW_LINK;
-					j++;
 					break;
 				case 'n':
 					showType ^= SHOW_NUM_LINKS;
-					j++;
 					break;
 				case 'c':
 					showType ^= SHOW_SELINUX;
-					j++;
 					break;
 				case 'm':
 					showType ^= SHOW_MD5;
-					j++;
 					break;
 				case 'h':
 					showType ^= SHOW_SHA256;
-					j++;
 					break;
 				case 'i':
 					showType ^= SHOW_INODE;
-					j++;
-					break;
-				default:
-					done = 1;
 					break;
 				}
 			}
+			while (optionVal[++j] != 0 && all);
 		}
 		break;
 
@@ -810,28 +867,42 @@ void commandOption (char option, char *optionVal, char *progName)
 	case 'd':
 		if (optionVal != NULL)
 		{
-			char letter = optionVal[0];
+			char letter;
+			int all = 0, j = 0;
 			CONFIG_WORD *found = findWord (8, optionVal);
 
 			if (found -> letter)
 			{
 				letter = found -> letter;
 			}
-			switch (letter)
+			else if ((all = allValid (8, optionVal)) == 0)
 			{
-			case 'm':
-				strcpy (dateType, "Mofified");
-				showDate = DATE_MOD;
-				break;
-			case 'a':
-				strcpy (dateType, "Accessed");
-				showDate = DATE_ACC;
-				break;
-			case 'c':
-				strcpy (dateType, "Changed");
-				showDate = DATE_CHG;
-				break;
+				helpThem (progName);
+				exit(1);
 			}
+			do
+			{
+				if (all)
+				{
+					letter = optionVal[j];
+				}
+				switch (letter)
+				{
+				case 'm':
+					strcpy (dateType, "Mofified");
+					showDate = DATE_MOD;
+					break;
+				case 'a':
+					strcpy (dateType, "Accessed");
+					showDate = DATE_ACC;
+					break;
+				case 'c':
+					strcpy (dateType, "Changed");
+					showDate = DATE_CHG;
+					break;
+				}
+			}
+			while (optionVal[++j] != 0 && all);
 		}
 		break;
 
