@@ -557,7 +557,7 @@ void commandOption (char option, char *optionVal, char *progName)
 	case 'o':
 		if (optionVal != NULL)
 		{
-			char letter;
+			char letter = 0;
 			int all = 0, j = 0;
 			CONFIG_WORD *found = findWord (1, optionVal);
 
@@ -715,7 +715,7 @@ void commandOption (char option, char *optionVal, char *progName)
 	case 's':
 		if (optionVal != NULL)
 		{
-			char letter;
+			char letter = 0;
 			int all = 0, j = 0;
 			CONFIG_WORD *found = findWord (4, optionVal);
 
@@ -775,7 +775,7 @@ void commandOption (char option, char *optionVal, char *progName)
 	case 'D':
 		if (optionVal != NULL)
 		{
-			char letter;
+			char letter = 0;
 			int all = 0, j = 0;
 			CONFIG_WORD *found = findWord (2, optionVal);
 
@@ -867,7 +867,7 @@ void commandOption (char option, char *optionVal, char *progName)
 	case 'd':
 		if (optionVal != NULL)
 		{
-			char letter;
+			char letter = 0;
 			int all = 0, j = 0;
 			CONFIG_WORD *found = findWord (8, optionVal);
 
