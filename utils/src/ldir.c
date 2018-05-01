@@ -401,7 +401,7 @@ void helpThem (char *progName)
 	printf ("     --age . . . . . . . . . -A  . . . . . Show the age of the file\n");
 	printf ("     --backup  . . . . . . . -b  . . . . . Show backup files ending with ~\n");
 	printf ("     --base64  . . . . . . . -B  . . . . . Encode checksums in base64\n");
-	printf ("     --case4 . . . . . . . . -c  . . . . . Makes the directory case sensitive\n");
+	printf ("     --case  . . . . . . . . -c  . . . . . Should the sort be case sensitive\n");
 	printf ("     --colour  . . . . . . . -C  . . . . . Toggle colour display, defined in dirrc\n");
 	printf ("     --date accessed . . . . -da . . . . . Show time of last access\n");
 	printf ("     --date changed  . . . . -dc . . . . . Show time of last status change\n");
