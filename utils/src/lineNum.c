@@ -36,6 +36,8 @@
 #define MAXINT 2147483647
 #endif
 
+#define INBUFF_SIZE		2048
+
 /*----------------------------------------------------------------------------*/
 /* Prototypes                                                                 */
 /*----------------------------------------------------------------------------*/
@@ -72,6 +74,7 @@ int tabSize = 8;
 int showBlank = 1;
 int filesFound = 0;
 int totalLines = 0;
+int displayQuiet = 0;
 int displayColour = 0;
 int startLine = 1;
 int endLine = MAXINT;
@@ -110,6 +113,7 @@ void helpThem (char *name)
 	printf ("Options: \n");
 	printf ("     -b . . . Do not count blank lines.\n");
 	printf ("     -C . . . Display output in colour.\n");
+	printf ("     -q . . . Quiet mode, only show file contents.\n");
 	printf ("     -eN  . . Set the ending line number.\n");
 	printf ("     -sN  . . Set the starting line number.\n");
 	printf ("     -tN  . . Set the desired tab size, defaults to 8.\n");
@@ -141,7 +145,7 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "bCe:s:t:?")) != -1)
+	while ((i = getopt(argc, argv, "bCqe:s:t:?")) != -1)
 	{
 		int t;
 
@@ -150,11 +154,12 @@ int main (int argc, char *argv[])
 		case 'b':
 			showBlank = 0;
 			break;
-
 		case 'C':
 			displayColour = DISPLAY_COLOURS;
 			break;
-
+		case 'q':
+			displayQuiet ^= 1;
+			break;
 		case 'e':
 			t = atoi (optarg);
 			if (t >= startLine)
@@ -162,7 +167,6 @@ int main (int argc, char *argv[])
 				endLine = t;
 			}
 			break;
-
 		case 's':
 			t = atoi (optarg);
 			if (t > 0 && t <= endLine)
@@ -170,7 +174,6 @@ int main (int argc, char *argv[])
 				startLine = t;
 			}
 			break;
-
 		case 't':
 			t = atoi (optarg);
 			if (t > 0 && t <= 32)
@@ -178,7 +181,6 @@ int main (int argc, char *argv[])
 				tabSize = t;
 			}
 			break;
-
 		case '?':
 			helpThem (argv[0]);
 			exit (1);
@@ -236,7 +238,7 @@ int main (int argc, char *argv[])
  */
 int showDir (DIR_ENTRY *file)
 {
-	char inBuffer[1024 + 1], outBuffer[(8 * 1024) + 1];
+	char inBuffer[INBUFF_SIZE + 1], outBuffer[(8 * INBUFF_SIZE) + 1];
 	int linesShown = 0;
 	FILE *readFile;
 
@@ -248,13 +250,16 @@ int showDir (DIR_ENTRY *file)
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
 		return 0;
 	}
-	displayDrawLine (0);
-	displayHeading (0);
-	displayNewLine (0);
-	displayInColumn (0, "%s", file -> fileName);
-	displayInColumn (1, displayFileSize (file -> fileStat.st_size, (char *)inBuffer));
-	displayNewLine (DISPLAY_INFO);
-	displayAllLines ();
+	if (!displayQuiet)
+	{
+		displayDrawLine (0);
+		displayHeading (0);
+		displayNewLine (0);
+		displayInColumn (0, "%s", file -> fileName);
+		displayInColumn (1, displayFileSize (file -> fileStat.st_size, (char *)inBuffer));
+		displayNewLine (DISPLAY_INFO);
+		displayAllLines ();
+	}
 	displayTidy ();
 
 	strcpy (inBuffer, file -> fullPath);
@@ -262,7 +267,7 @@ int showDir (DIR_ENTRY *file)
 
 	if ((readFile = fopen (inBuffer, "rb")) != NULL)
 	{
-		int linesFound = 0;
+		int linesFound = 0, terminated = 1;
 
 		if (!displayColumnInit (2, ptrNumberColumn, displayColour))
 		{
@@ -270,12 +275,20 @@ int showDir (DIR_ENTRY *file)
 			return 0;
 		}
 
-		displayDrawLine (0);
-		while (fgets (inBuffer, 1024, readFile) != NULL)
+		if (!displayQuiet)
+		{
+			displayDrawLine (0);
+		}
+		while (fgets (inBuffer, INBUFF_SIZE, readFile) != NULL)
 		{
 			int inPos = 0, outPos = 0, curPosn = 0, nextPosn = 0, blankLine = 0;
 
-			while (inBuffer[inPos])
+			if (terminated)
+			{
+				++linesFound;
+				terminated = 0;
+			}
+			while (inBuffer[inPos] && outPos < (8 * INBUFF_SIZE))
 			{
 				if (inBuffer[inPos] == ' ')
 				{
@@ -301,9 +314,11 @@ int showDir (DIR_ENTRY *file)
 						outBuffer[outPos++] = '^';
 						outBuffer[outPos++] = (inBuffer[inPos] + 'A');
 					}
-					else if (inBuffer[inPos] == '\n' && showBlank)
+					else if (inBuffer[inPos] == '\n')
 					{
-						blankLine = 1;
+						terminated = 1;
+						if (showBlank)
+							blankLine = 1;
 					}
 					nextPosn = ++curPosn;
 				}
@@ -311,7 +326,6 @@ int showDir (DIR_ENTRY *file)
 			}
 			if (outPos || blankLine)
 			{
-				++linesFound;
 				if (linesFound >= startLine && linesFound <= endLine)
 				{
 					outBuffer[outPos] = 0;
