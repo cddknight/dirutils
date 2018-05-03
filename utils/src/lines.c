@@ -109,7 +109,7 @@ void helpThem(char *progName)
 int main (int argc, char *argv[])
 {
 	void *fileList = NULL;
-	int i = 1, found = 0, dirType = ONLYFILES, displayColour = 0;;
+	int i = 1, found = 0, dirType = ONLYFILES|ONLYLINKS, displayColour = 0;;
 
 	if (strcmp (directoryVersion(), VERSION) != 0)
 	{

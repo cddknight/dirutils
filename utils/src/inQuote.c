@@ -109,7 +109,7 @@ int main (int argc, char *argv[])
      * files with.                                                            *
      *------------------------------------------------------------------------*/
 	while (i < argc)
-		found += directoryLoad (argv[i++], ONLYFILES, fileCompare, &fileList);
+		found += directoryLoad (argv[i++], ONLYFILES|ONLYLINKS, fileCompare, &fileList);
 
 	/*------------------------------------------------------------------------*
      * Now we can sort the directory.                                         *

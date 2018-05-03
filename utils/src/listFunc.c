@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 
 	for (; optind < argc; ++optind)
 	{
-		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
+		found += directoryLoad (argv[optind], ONLYFILES|ONLYLINKS, fileCompare, &fileList);
 	}
 
 	/*------------------------------------------------------------------------*
