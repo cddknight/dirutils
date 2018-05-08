@@ -20,6 +20,7 @@
  *  \file
  *  \brief Add CR's to LF's to make a file DOS compatable.
  */
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

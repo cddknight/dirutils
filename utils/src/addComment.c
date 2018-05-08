@@ -20,6 +20,7 @@
  *  \file
  *  \brief Automatically add comments to C source file.
  */
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>

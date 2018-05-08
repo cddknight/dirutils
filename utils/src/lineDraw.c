@@ -20,6 +20,7 @@
  *  \file
  *  \brief Simple function to draw a line across the width of the screen.
  */
+#include <config.h>
 #include <dircmd.h>
 
 /**********************************************************************************************************************

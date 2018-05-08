@@ -20,6 +20,7 @@
  *  \file
  *  \brief Program to remove CR from a file to make it Linux compatable.
  */
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

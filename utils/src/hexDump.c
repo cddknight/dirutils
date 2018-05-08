@@ -20,6 +20,7 @@
  *  \file
  *  \brief Program to dump the contence of a file in Hex.
  */
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -20,6 +20,7 @@
  *  \file
  *  \brief Program to test the memory for problems.
  */
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <dircmd.h>

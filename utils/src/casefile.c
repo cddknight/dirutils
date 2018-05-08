@@ -20,6 +20,7 @@
  *  \file
  *  \brief Convert the case in a file.
  */
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

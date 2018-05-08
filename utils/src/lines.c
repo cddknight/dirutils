@@ -20,6 +20,7 @@
  *  \file
  *  \brief Program to count the number of lines in a file.
  */
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

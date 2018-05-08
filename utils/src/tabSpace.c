@@ -20,6 +20,7 @@
  *  \file
  *  \brief Convert between tabs and spaces.
  */
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

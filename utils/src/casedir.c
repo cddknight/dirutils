@@ -20,6 +20,7 @@
  *  \file
  *  \brief Change the case of the files in a directory.
  */
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -20,6 +20,7 @@
  *  \file
  *  \brief Program to parse an XML file.
  */
+#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
