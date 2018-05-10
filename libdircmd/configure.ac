@@ -1,4 +1,4 @@
-AC_INIT([libdircmd], [4.0.17])
+AC_INIT([libdircmd], [4.0.18])
 AC_CONFIG_SRCDIR([src/dircmd.c])
 AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE([subdir-objects])
