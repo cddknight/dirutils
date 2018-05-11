@@ -10,8 +10,6 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildRequires: libselinux-devel
 %define debug_package %{nil}
 
-%define debug_package %{nil}
-
 %description
 dircmd consists of a general purpose directory library.
  
