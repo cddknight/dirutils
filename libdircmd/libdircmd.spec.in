@@ -7,7 +7,7 @@ URL: http://www.tzclock.org
 Group: Applications/Productivity
 Source: http://www.tzclock.org/releases/%{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-BuildRequires: libselinux-devel
+BuildRequires: libselinux-devel libacl-devel openssl-devel
 %define debug_package %{nil}
 
 %description
