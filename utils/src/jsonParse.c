@@ -40,7 +40,6 @@
  *----------------------------------------------------------------------------*/
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo);
 int showDir (DIR_ENTRY *file);
-void parsePath (char *path);
 void processStdin (void);
 
 struct levelInfo
@@ -69,9 +68,9 @@ struct levelInfo
  *----------------------------------------------------------------------------*/
 COLUMN_DESC colParseDescs[6] =
 {
-	{	20,		5,	0,	2,	0x01,	0,	"Depth",		0	},	/* 0 */
-	{	255,	5,	0,	2,	0x02,	0,	"Name",			1	},	/* 1 */
-	{	255,	5,	0,	2,	0x04,	0,	"Value",		2	},	/* 3 */
+	{	20,		5,	0,	2,	0x01,	0,	"Depth",	0	},	/* 0 */
+	{	255,	5,	0,	2,	0x02,	0,	"Name",		1	},	/* 1 */
+	{	255,	5,	0,	2,	0x04,	0,	"Value",	2	},	/* 3 */
 };
 
 COLUMN_DESC *ptrParseColumn[6] =
@@ -100,7 +99,7 @@ bool displayPaths = false;
 int displayCols = DISP_ALL;
 int levels = 0;
 char *levelName[20];
-char jsonPath[PATH_SIZE];
+char jsonMatchPath[PATH_SIZE];
 
 void jsonObjectForeachFunc(JsonObject *object, const gchar *member_name, JsonNode *member_node, gpointer user_data);
 
@@ -209,7 +208,7 @@ int main (int argc, char *argv[])
 			break;
 
 		case 'p':
-			parsePath (optarg);
+			strncpy (jsonMatchPath, optarg, 1020);
 			break;
 
 		case '?':
@@ -333,6 +332,18 @@ char *rmWhiteSpace (char *inBuff, char *outBuff, int maxLen)
 	return outBuff;
 }
 
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I S P L A Y  D E P T H                                                                                          *
+ *  ========================                                                                                          *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Display the depth marker.
+ *  \param depth Current depth.
+ *  \param code Marker to show.
+ *  \result None.
+ */
 void displayDepth (int depth, char code)
 {
 	if (!displayQuiet && displayCols & DISP_DEPTH)
@@ -358,7 +369,7 @@ void displayDepth (int depth, char code)
  **********************************************************************************************************************/
 /**
  *  \brief Display the contents of a value.
- *  \param level Current iteration level.
+ *  \param levelInfo Information about the current level.
  *  \param value Value to display.
  *  \result None.
  */
@@ -373,7 +384,8 @@ void displayValue (struct levelInfo *levelInfo, GValue *value)
 	{
 		if (displayQuiet)
 		{
-			g_print ("%s=\"%s\"\n", levelInfo -> pathName, g_value_get_string (value));
+			g_print ("%s=\"%s\"\n", (displayPaths ? levelInfo -> pathName : levelInfo -> objName),
+					g_value_get_string (value));
 		}
 		else
 		{
@@ -405,7 +417,7 @@ void displayValue (struct levelInfo *levelInfo, GValue *value)
 		{
 			if (displayQuiet)
 			{
-				g_print ("%s=%f\n", levelInfo -> pathName, g_value_get_double (&number));
+				g_print ("%s=%0.2f\n", levelInfo -> pathName, g_value_get_double (&number));
 			}
 			else
 			{
@@ -445,6 +457,7 @@ void displayValue (struct levelInfo *levelInfo, GValue *value)
  */
 void jsonArrayForeachFunc (JsonArray *array, guint index_, JsonNode *element_node, gpointer user_data)
 {
+	int match = 0;
 	char tempBuff[81];
 	struct levelInfo *inLevelInfo = (struct levelInfo *)user_data;
 	struct levelInfo outLevelInfo;
@@ -456,6 +469,12 @@ void jsonArrayForeachFunc (JsonArray *array, guint index_, JsonNode *element_nod
 	strcpy (outLevelInfo.objName, inLevelInfo -> objName);
 	strcat (outLevelInfo.objName, tempBuff);
 
+	if (jsonMatchPath[0])
+	{
+		match = strncmp (outLevelInfo.pathName, jsonMatchPath, strlen (jsonMatchPath));
+/*		printf ("array %d:[%s][%s]\n", match, outLevelInfo.pathName, jsonMatchPath); */
+	}
+
 	if (element_node)
 	{
 		if (json_node_get_node_type (element_node) == JSON_NODE_OBJECT)
@@ -463,7 +482,7 @@ void jsonArrayForeachFunc (JsonArray *array, guint index_, JsonNode *element_nod
 			JsonObject *objectInner = json_node_get_object(element_node);
 			if (objectInner != NULL)
 			{
-				if (!displayQuiet && displayCols & DISP_NAME)
+				if (match == 0 && !displayQuiet && displayCols & DISP_NAME)
 				{
 					displayDepth (outLevelInfo.level, '+');
 					displayInColumn (COL_NAME, "%s", (displayPaths ? outLevelInfo.pathName : outLevelInfo.objName));
@@ -476,7 +495,10 @@ void jsonArrayForeachFunc (JsonArray *array, guint index_, JsonNode *element_nod
 		{
 			GValue value = G_VALUE_INIT;
 			json_node_get_value (element_node, &value);
-			displayValue (&outLevelInfo, &value);
+			if (match == 0)
+			{
+				displayValue (&outLevelInfo, &value);
+			}
 		}
 		else if (json_node_get_node_type (element_node) == JSON_NODE_ARRAY)
 		{
@@ -486,7 +508,7 @@ void jsonArrayForeachFunc (JsonArray *array, guint index_, JsonNode *element_nod
 				json_array_foreach_element (array, jsonArrayForeachFunc, (gpointer)&outLevelInfo);
 			}
 		}
-	}	
+	}
 }
 
 /**********************************************************************************************************************
@@ -505,6 +527,7 @@ void jsonArrayForeachFunc (JsonArray *array, guint index_, JsonNode *element_nod
  */
 void jsonObjectForeachFunc(JsonObject *object, const gchar *member_name, JsonNode *member_node, gpointer user_data)
 {
+	int match = 0;
 	struct levelInfo *inLevelInfo = (struct levelInfo *)user_data;
 	struct levelInfo outLevelInfo;
 
@@ -514,7 +537,11 @@ void jsonObjectForeachFunc(JsonObject *object, const gchar *member_name, JsonNod
 	strcat (outLevelInfo.pathName, member_name);
 	strcpy (outLevelInfo.objName, member_name);
 
-//	g_print ("[Oject(obj):%d] %s\n", outLevelInfo.level, outLevelInfo.objName);
+	if (jsonMatchPath[0])
+	{
+		match = strncmp (outLevelInfo.pathName, jsonMatchPath, strlen (jsonMatchPath));
+/*		printf ("object %d:[%s][%s]\n", match, outLevelInfo.pathName, jsonMatchPath); */
+	}
 
 	if (member_node)
 	{
@@ -523,7 +550,7 @@ void jsonObjectForeachFunc(JsonObject *object, const gchar *member_name, JsonNod
 			JsonObject *objectInner = json_node_get_object(member_node);
 			if (objectInner != NULL)
 			{
-				if (!displayQuiet && displayCols & DISP_NAME)
+				if (match == 0 && !displayQuiet && displayCols & DISP_NAME)
 				{
 					displayDepth (outLevelInfo.level, '+');
 					displayInColumn (COL_NAME, "%s", (displayPaths ? outLevelInfo.pathName : outLevelInfo.objName));
@@ -536,7 +563,10 @@ void jsonObjectForeachFunc(JsonObject *object, const gchar *member_name, JsonNod
 		{
 			GValue value = G_VALUE_INIT;
 			json_node_get_value (member_node, &value);
-			displayValue (&outLevelInfo, &value);
+			if (match == 0)
+			{
+				displayValue (&outLevelInfo, &value);
+			}
 		}
 		else if (json_node_get_node_type (member_node) == JSON_NODE_ARRAY)
 		{
@@ -571,8 +601,8 @@ int processFile (char *xmlFile)
 	struct levelInfo outLevelInfo;
 
 	outLevelInfo.level = 0;
-	outLevelInfo.pathName[0] = 0;
 	outLevelInfo.objName[0] = 0;
+	strcpy (outLevelInfo.pathName, "/");
 
 	parser = json_parser_new ();
 
@@ -581,7 +611,7 @@ int processFile (char *xmlFile)
 	if (error)
 	{
 /*		g_print ("Unable to parse `%s': %s\n", xmlFile, error->message); */
-		g_error_free (error);	
+		g_error_free (error);
 		g_object_unref (parser);
 /*		return EXIT_FAILURE; */
 		return retn;
