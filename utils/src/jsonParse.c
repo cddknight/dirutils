@@ -55,12 +55,14 @@ struct levelInfo
 #define COL_DEPTH		0
 #define COL_NAME		1
 #define COL_VALUE		2
-#define COL_COUNT		3
+#define COL_ERROR		3
+#define COL_COUNT		4
 
 #define DISP_DEPTH		0x0001
 #define DISP_NAME		0x0002
 #define DISP_VALUE		0x0004
-#define DISP_ALL		0x0007
+#define DISP_ERROR		0x0008
+#define DISP_ALL		0x000F
 
 /*----------------------------------------------------------------------------*
  * Globals                                                                    *
@@ -70,12 +72,13 @@ COLUMN_DESC colParseDescs[6] =
 {
 	{	20,		5,	0,	2,	0x01,	0,	"Depth",	0	},	/* 0 */
 	{	255,	5,	0,	2,	0x02,	0,	"Name",		1	},	/* 1 */
-	{	255,	5,	0,	2,	0x04,	0,	"Value",	2	},	/* 3 */
+	{	255,	5,	0,	2,	0x04,	0,	"Value",	2	},	/* 2 */
+	{	255,	5,	0,	2,	0x04,	0,	"Error",	3	},	/* 2 */
 };
 
 COLUMN_DESC *ptrParseColumn[6] =
 {
-	&colParseDescs[0],	&colParseDescs[1],	&colParseDescs[2]
+	&colParseDescs[0],	&colParseDescs[1],	&colParseDescs[2],	&colParseDescs[3]
 };
 
 COLUMN_DESC fileDescs[4] =
@@ -219,7 +222,7 @@ int main (int argc, char *argv[])
 
 	if (optind == argc)
 	{
-//		processStdin ();
+		processStdin ();
 		exit (0);
 	}
 	for (; optind < argc; ++optind)
@@ -595,8 +598,6 @@ int processFile (char *xmlFile)
 	int retn = 0;
 	JsonParser *parser;
 	JsonNode *root;
-	JsonObject *object;
-	JsonObject *object_member;
 	GError *error;
 	struct levelInfo outLevelInfo;
 
@@ -610,21 +611,33 @@ int processFile (char *xmlFile)
 	json_parser_load_from_file (parser, xmlFile, &error);
 	if (error)
 	{
-/*		g_print ("Unable to parse `%s': %s\n", xmlFile, error->message); */
+		displayInColumn (COL_ERROR, "%s", error -> message);
+		displayNewLine(0);
 		g_error_free (error);
 		g_object_unref (parser);
-/*		return EXIT_FAILURE; */
 		return retn;
 	}
 
 	root = json_parser_get_root (parser);
 	if (root != NULL)
 	{
-		object = json_node_get_object(root);
-		if (object != NULL)
+		if (json_node_get_node_type (root) == JSON_NODE_OBJECT)
 		{
-			json_object_foreach_member (object, jsonObjectForeachFunc, (gpointer)&outLevelInfo);
-			retn = 1;
+			JsonObject *object = json_node_get_object(root);
+			if (object != NULL)
+			{
+				json_object_foreach_member (object, jsonObjectForeachFunc, (gpointer)&outLevelInfo);
+				retn = 1;
+			}
+		}
+		else if (json_node_get_node_type (root) == JSON_NODE_ARRAY)
+		{
+			JsonArray *array = json_node_get_array(root);
+			if (array != NULL)
+			{
+				json_array_foreach_element (array, jsonArrayForeachFunc, (gpointer)&outLevelInfo);
+				retn = 1;
+			}
 		}
 	}
 
@@ -719,7 +732,6 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	return strcasecmp (fileOne -> fileName, fileTwo -> fileName);
 }
 
-#ifdef NOTDEF
 #define READSIZE 4096
 
 /**********************************************************************************************************************
@@ -734,12 +746,12 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
  */
 void processStdin ()
 {
+	JsonParser *parser;
+	JsonNode *root;
+	GError *error;
+	struct levelInfo outLevelInfo;
 	int readSize, buffSize = 0, totalRead = 0, notValid = 0;
 	char *buffer;
-	xmlDocPtr xDoc = NULL;
-	xmlNodePtr rootElement = NULL;
-	htmlDocPtr hDoc = NULL;
-	xmlChar *xmlBuffer = NULL;
 
 	buffer = (char *)malloc(buffSize = READSIZE);
 	do
@@ -768,7 +780,7 @@ void processStdin ()
 				fprintf (stderr, "ERROR in: displayColumnInit\n");
 				return;
 			}
-			displayInColumn (0, "%s", (fileType == FILE_HTML ? "HTML" : "XML"));
+			displayInColumn (0, "JSON");
 			displayInColumn (1, "stdin");
 			displayNewLine (DISPLAY_INFO);
 			displayAllLines ();
@@ -780,49 +792,53 @@ void processStdin ()
          *----------------------------------------------------------------------------*/
 		if (displayColumnInit (COL_COUNT, ptrParseColumn, displayOptions))
 		{
-			shownError = false;
-			xmlSetGenericErrorFunc (NULL, myErrorFunc);
-			if ((xmlBuffer = xmlCharStrndup(buffer, totalRead)) != NULL)
+			outLevelInfo.level = 0;
+			outLevelInfo.objName[0] = 0;
+			strcpy (outLevelInfo.pathName, "/");
+
+			parser = json_parser_new ();
+
+			error = NULL;
+			json_parser_load_from_data (parser, buffer, totalRead, &error);
+			if (error)
 			{
-				if (fileType == FILE_HTML)
+				displayInColumn (COL_ERROR, "%s", error -> message);
+				displayNewLine(0);
+				g_error_free (error);
+				g_object_unref (parser);
+			}
+			else
+			{
+				root = json_parser_get_root (parser);
+				if (root != NULL)
 				{
-					if ((hDoc = htmlParseDoc(xmlBuffer, NULL)) != NULL)
+					if (json_node_get_node_type (root) == JSON_NODE_OBJECT)
 					{
-						if ((rootElement = xmlDocGetRootElement (hDoc)) != NULL)
+						JsonObject *object = json_node_get_object(root);
+						if (object != NULL)
 						{
-							processElementNames (hDoc, rootElement, "", 0);
+							json_object_foreach_member (object, jsonObjectForeachFunc, (gpointer)&outLevelInfo);
 						}
-						xmlFreeDoc(hDoc);
+					}
+					else if (json_node_get_node_type (root) == JSON_NODE_ARRAY)
+					{
+						JsonArray *array = json_node_get_array(root);
+						if (array != NULL)
+						{
+							json_array_foreach_element (array, jsonArrayForeachFunc, (gpointer)&outLevelInfo);
+						}
 					}
 				}
-				else
+				g_object_unref (parser);
+
+				if (!displayQuiet)
 				{
-					if ((xDoc = xmlParseDoc(xmlBuffer)) != NULL)
-					{
-						if (xsdPath[0])
-						{
-							notValid = validateDocument (xDoc);
-						}
-						if (!notValid)
-						{
-							if ((rootElement = xmlDocGetRootElement (xDoc)) != NULL)
-							{
-								processElementNames (xDoc, rootElement, "", 0);
-							}
-						}
-						xmlFreeDoc(xDoc);
-					}
+					displayDrawLine (0);
 				}
-				xmlFree (xmlBuffer);
 			}
-			if (!displayQuiet)
-			{
-				displayDrawLine (0);
-			}
-			xmlCleanupParser();
 			displayAllLines ();
 			displayTidy ();
 		}
 	}
 }
-#endif
+
