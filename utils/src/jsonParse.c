@@ -427,7 +427,7 @@ void jsonArrayForeachFunc (JsonArray *array, guint index_, JsonNode *element_nod
 	struct levelInfo outLevelInfo;
 
 	sprintf (tempBuff, "[%d]", index_);
-	outLevelInfo.level = inLevelInfo -> level + 1;
+	outLevelInfo.level = inLevelInfo -> level;
 	strcpy (outLevelInfo.pathName, inLevelInfo -> pathName);
 	strcat (outLevelInfo.pathName, tempBuff);
 	strcpy (outLevelInfo.objName, inLevelInfo -> objName);
