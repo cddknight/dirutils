@@ -7,7 +7,7 @@ URL: http://www.tzclock.org
 Group: Applications/Productivity
 Source: http://www.tzclock.org/releases/%{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-BuildRequires: ncurses-devel readline-devel libselinux-devel libxml2-devel libacl-devel
+BuildRequires: ncurses-devel readline-devel libselinux-devel json-glib-devel libxml2-devel libacl-devel
 BuildRequires: libdircmd libdircmd-devel
 
 %define debug_package %{nil}
@@ -32,6 +32,7 @@ install -s -m 755 addComment $RPM_BUILD_ROOT%{_bindir}/addComment
 install -s -m 755 casedir $RPM_BUILD_ROOT%{_bindir}/casedir
 install -s -m 755 casefile $RPM_BUILD_ROOT%{_bindir}/casefile
 install -s -m 755 hexDump $RPM_BUILD_ROOT%{_bindir}/hexDump
+install -s -m 755 jsonParse $RPM_BUILD_ROOT%{_bindir}/jsonParse
 install -s -m 755 ldir $RPM_BUILD_ROOT%{_bindir}/ldir
 install -s -m 755 lineDraw $RPM_BUILD_ROOT%{_bindir}/lineDraw
 install -s -m 755 lineNum $RPM_BUILD_ROOT%{_bindir}/lineNum
@@ -57,6 +58,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/casedir
 %{_bindir}/casefile
 %{_bindir}/hexDump
+%{_bindir}/jsonParse
 %{_bindir}/ldir
 %{_bindir}/lineDraw
 %{_bindir}/lineNum

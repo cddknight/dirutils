@@ -659,7 +659,7 @@ int processFile (char *xmlFile)
  */
 int showDir (DIR_ENTRY *file)
 {
-	int procRetn = 0, useType = fileType;
+	int procRetn = 0;
 	char inFile[PATH_SIZE];
 
 	/*------------------------------------------------------------------------*
@@ -750,7 +750,7 @@ void processStdin ()
 	JsonNode *root;
 	GError *error;
 	struct levelInfo outLevelInfo;
-	int readSize, buffSize = 0, totalRead = 0, notValid = 0;
+	int readSize, buffSize = 0, totalRead = 0;
 	char *buffer;
 
 	buffer = (char *)malloc(buffSize = READSIZE);
