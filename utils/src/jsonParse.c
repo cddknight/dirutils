@@ -262,46 +262,6 @@ int main (int argc, char *argv[])
 
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  P A R S E  P A T H                                                                                                *
- *  ==================                                                                                                *
- *                                                                                                                    *
- **********************************************************************************************************************/
-/**
- *  \brief Split the passed in path so we know what to look for.
- *  \param path Path from the command line.
- *  \result None.
- */
-void parsePath (char *path)
-{
-	char tempBuffer[81];
-	int i = 0, j = 0;
-
-	do
-	{
-		if (path[i] == '/' || path[i] == 0)
-		{
-			if (j && levels < 20)
-			{
-				levelName[levels] = (char *)malloc (j + 1);
-				if (levelName[levels])
-				{
-					strcpy (levelName[levels], tempBuffer);
-					tempBuffer[j = 0] = 0;
-					++levels;
-				}
-			}
-		}
-		else if (j < 80)
-		{
-			tempBuffer[j] = path[i];
-			tempBuffer[++j] = 0;
-		}
-	}
-	while (path[i++]);
-}
-
-/**********************************************************************************************************************
- *                                                                                                                    *
  *  R M  W H I T E  S P A C E                                                                                         *
  *  =========================                                                                                         *
  *                                                                                                                    *
@@ -313,7 +273,7 @@ void parsePath (char *path)
  *  \param maxLen Size of the output buffer.
  *  \result Pointer to the output buffer.
  */
-char *rmWhiteSpace (char *inBuff, char *outBuff, int maxLen)
+char *rmWhiteSpace (const char *inBuff, char *outBuff, int maxLen)
 {
 	int lastCharWS = 1, lastSave = 0, i = 0, j = 0;
 
@@ -385,16 +345,17 @@ void displayValue (struct levelInfo *levelInfo, GValue *value)
 	}
 	if (G_VALUE_HOLDS (value, G_TYPE_STRING))
 	{
+		char tempBuff[1025];
+		rmWhiteSpace (g_value_get_string (value), tempBuff, 1024);
 		if (displayQuiet)
 		{
-			g_print ("%s=\"%s\"\n", (displayPaths ? levelInfo -> pathName : levelInfo -> objName),
-					g_value_get_string (value));
+			g_print ("%s=\"%s\"\n", (displayPaths ? levelInfo -> pathName : levelInfo -> objName), tempBuff);
 		}
 		else
 		{
 			if (displayCols & DISP_VALUE)
 			{
-				displayInColumn (COL_VALUE, "%s", g_value_get_string (value));
+				displayInColumn (COL_VALUE, "%s", tempBuff);
 			}
 		}
 	}
