@@ -18,7 +18,7 @@
  **********************************************************************************************************************/
 /**
  *  \file
- *  \brief Program to parse an XML file.
+ *  \brief Program to parse an JSON files.
  */
 #include <config.h>
 #include <stdio.h>
@@ -551,10 +551,10 @@ void jsonObjectForeachFunc(JsonObject *object, const gchar *member_name, JsonNod
  **********************************************************************************************************************/
 /**
  *  \brief Process the down loaded buffer.
- *  \param xmlFile File to parse.
+ *  \param jsonFile File to parse.
  *  \result 1 if the file was processed.
  */
-int processFile (char *xmlFile)
+int processFile (char *jsonFile)
 {
 	int retn = 0;
 	JsonParser *parser;
@@ -569,7 +569,7 @@ int processFile (char *xmlFile)
 	parser = json_parser_new ();
 
 	error = NULL;
-	json_parser_load_from_file (parser, xmlFile, &error);
+	json_parser_load_from_file (parser, jsonFile, &error);
 	if (error)
 	{
 		displayInColumn (COL_ERROR, "%s", error -> message);
