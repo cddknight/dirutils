@@ -30,6 +30,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <math.h>
 #include <dircmd.h>
 
 #include <glib-object.h>
@@ -338,10 +339,12 @@ void displayDepth (int depth, char code)
  */
 void displayValue (struct levelInfo *levelInfo, GValue *value)
 {
+	char *pathPtr = displayPaths ? levelInfo -> pathName : levelInfo -> objName;
+
 	displayDepth (levelInfo -> level, '-');
 	if (!displayQuiet && displayCols & DISP_NAME)
 	{
-		displayInColumn (COL_NAME, "%s", (displayPaths ? levelInfo -> pathName : levelInfo -> objName));
+		displayInColumn (COL_NAME, "%s", pathPtr);
 	}
 	if (G_VALUE_HOLDS (value, G_TYPE_STRING))
 	{
@@ -349,7 +352,7 @@ void displayValue (struct levelInfo *levelInfo, GValue *value)
 		rmWhiteSpace (g_value_get_string (value), tempBuff, 1024);
 		if (displayQuiet)
 		{
-			g_print ("%s=\"%s\"\n", (displayPaths ? levelInfo -> pathName : levelInfo -> objName), tempBuff);
+			g_print ("%s=\"%s\"\n", pathPtr, tempBuff);
 		}
 		else
 		{
@@ -363,7 +366,7 @@ void displayValue (struct levelInfo *levelInfo, GValue *value)
 	{
 		if (displayQuiet)
 		{
-			g_print ("%s=%s\n", levelInfo -> pathName, g_value_get_boolean (value) ? "true" : "false");
+			g_print ("%s=%s\n", pathPtr, g_value_get_boolean (value) ? "true" : "false");
 		}
 		else
 		{
@@ -379,15 +382,16 @@ void displayValue (struct levelInfo *levelInfo, GValue *value)
 		g_value_init (&number, G_TYPE_DOUBLE);
 		if (g_value_transform (value, &number))
 		{
+			double num = g_value_get_double (&number);
 			if (displayQuiet)
 			{
-				g_print ("%s=%0.2f\n", levelInfo -> pathName, g_value_get_double (&number));
+				g_print ((ceilf (num) == num ? "%s=%0.0f\n" : "%s=%0.2f\n"), pathPtr, num);
 			}
 			else
 			{
 				if (displayCols & DISP_VALUE)
 				{
-					displayInColumn (COL_VALUE, "%0.2f", g_value_get_double (&number));
+					displayInColumn (COL_VALUE, (ceilf (num) == num ? "%0.0f" : "%0.2f"), num);
 				}
 			}
 		}
