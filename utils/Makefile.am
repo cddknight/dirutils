@@ -2,7 +2,7 @@ AUTOMAKE_OPTIONS = dist-bzip2
 bin_PROGRAMS = ldir addComment casedir casefile findFunny hexDump inQuote jsonParse lineDraw lineNum lines listFunc \
 		memTest modcr pfile procMonitor rmCppCmt tabSpace xmlParse
 AM_CPPFLAGS = -D_FILE_OFFSET_BITS=64 $(DEPS_CFLAGS)
-LIBS = $(DEPS_LIBS)
+LIBS = $(DEPS_LIBS) -lm
 ldir_SOURCES = src/ldir.c
 addComment_SOURCES = src/addComment.c
 addComment_LDADD = -lreadline
