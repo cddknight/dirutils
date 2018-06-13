@@ -398,6 +398,7 @@ void displayValue (struct levelInfo *levelInfo, GValue *value)
 				displayInColumn (COL_VALUE, "Unknown type");
 			}
 		}
+		g_value_unset (&number);
 	}
 	if (!displayQuiet)
 	{
@@ -436,7 +437,6 @@ void jsonArrayForeachFunc (JsonArray *array, guint index_, JsonNode *element_nod
 	if (jsonMatchPath[0])
 	{
 		match = strncmp (outLevelInfo.pathName, jsonMatchPath, strlen (jsonMatchPath));
-/*		printf ("array %d:[%s][%s]\n", match, outLevelInfo.pathName, jsonMatchPath); */
 	}
 
 	if (element_node)
@@ -463,6 +463,7 @@ void jsonArrayForeachFunc (JsonArray *array, guint index_, JsonNode *element_nod
 			{
 				displayValue (&outLevelInfo, &value);
 			}
+			g_value_unset (&value);
 		}
 		else if (json_node_get_node_type (element_node) == JSON_NODE_ARRAY)
 		{
@@ -504,7 +505,6 @@ void jsonObjectForeachFunc(JsonObject *object, const gchar *member_name, JsonNod
 	if (jsonMatchPath[0])
 	{
 		match = strncmp (outLevelInfo.pathName, jsonMatchPath, strlen (jsonMatchPath));
-/*		printf ("object %d:[%s][%s]\n", match, outLevelInfo.pathName, jsonMatchPath); */
 	}
 
 	if (member_node)
@@ -531,6 +531,7 @@ void jsonObjectForeachFunc(JsonObject *object, const gchar *member_name, JsonNod
 			{
 				displayValue (&outLevelInfo, &value);
 			}
+			g_value_unset (&value);
 		}
 		else if (json_node_get_node_type (member_node) == JSON_NODE_ARRAY)
 		{
@@ -557,9 +558,9 @@ void jsonObjectForeachFunc(JsonObject *object, const gchar *member_name, JsonNod
 int processFile (char *jsonFile)
 {
 	int retn = 0;
-	JsonParser *parser;
-	JsonNode *root;
-	GError *error;
+	JsonParser *parser = NULL;
+	JsonNode *root = NULL;
+	GError *error = NULL;
 	struct levelInfo outLevelInfo;
 
 	outLevelInfo.level = 0;
@@ -567,43 +568,42 @@ int processFile (char *jsonFile)
 	strcpy (outLevelInfo.pathName, "/");
 
 	parser = json_parser_new ();
-
-	error = NULL;
-	json_parser_load_from_file (parser, jsonFile, &error);
-	if (error)
+	if (parser != NULL)
 	{
-		displayInColumn (COL_ERROR, "%s", error -> message);
-		displayNewLine(0);
-		g_error_free (error);
+		json_parser_load_from_file (parser, jsonFile, &error);
+		if (error)
+		{
+			displayInColumn (COL_ERROR, "%s", error -> message);
+			displayNewLine(0);
+			g_error_free (error);
+			g_object_unref (parser);
+			return retn;
+		}
+
+		root = json_parser_get_root (parser);
+		if (root != NULL)
+		{
+			if (json_node_get_node_type (root) == JSON_NODE_OBJECT)
+			{
+				JsonObject *object = json_node_get_object(root);
+				if (object != NULL)
+				{
+					json_object_foreach_member (object, jsonObjectForeachFunc, (gpointer)&outLevelInfo);
+					retn = 1;
+				}
+			}
+			else if (json_node_get_node_type (root) == JSON_NODE_ARRAY)
+			{
+				JsonArray *array = json_node_get_array(root);
+				if (array != NULL)
+				{
+					json_array_foreach_element (array, jsonArrayForeachFunc, (gpointer)&outLevelInfo);
+					retn = 1;
+				}
+			}
+		}	
 		g_object_unref (parser);
-		return retn;
 	}
-
-	root = json_parser_get_root (parser);
-	if (root != NULL)
-	{
-		if (json_node_get_node_type (root) == JSON_NODE_OBJECT)
-		{
-			JsonObject *object = json_node_get_object(root);
-			if (object != NULL)
-			{
-				json_object_foreach_member (object, jsonObjectForeachFunc, (gpointer)&outLevelInfo);
-				retn = 1;
-			}
-		}
-		else if (json_node_get_node_type (root) == JSON_NODE_ARRAY)
-		{
-			JsonArray *array = json_node_get_array(root);
-			if (array != NULL)
-			{
-				json_array_foreach_element (array, jsonArrayForeachFunc, (gpointer)&outLevelInfo);
-				retn = 1;
-			}
-		}
-	}
-
-	g_object_unref (parser);
-
 	return retn;
 }
 
