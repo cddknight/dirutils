@@ -1949,6 +1949,7 @@ int orderFilenameVer (char *fileOne, char *fileTwo, int useCase)
 	int retn = 0, i = 0, nums[2][21];
 	char fileStart[2][PATH_SIZE];
 
+	fileStart[0][0] = fileStart[1][0] = 0;
 	for (i = 0; i < 2; ++i)
 	{
 		char lastChar = 0, *filePtr = (i == 0 ? fileOne : fileTwo);
