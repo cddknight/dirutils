@@ -72,6 +72,7 @@ char *quoteCopy (char *dst, char *src);
 #define ORDER_MD5S		9
 #define ORDER_SHAS		10
 #define ORDER_INOD		11
+#define ORDER_VERS		12
 
 #define SHOW_NORMAL		0
 #define SHOW_WIDE		1
@@ -276,6 +277,7 @@ CONFIG_WORD configWords[] =
 	{	3,	'g',	"group"		},
 	{	3,	'h',	"SHA"		},
 	{	3,	'i',	"inode"		},
+	{	1,	'v',	"version"	},
 	{	3,	'l',	"links"		},
 	{	3,	'm',	"MD5"		},
 	{	1,	'n',	"none"		},
@@ -436,6 +438,7 @@ void helpThem (char *progName)
 	printf ("     --order owner . . . . . -oo . . . . . Order the files by owners name\n");
 	printf ("     --order size  . . . . . -os . . . . . Order the files by size\n");
 	printf ("     --order rev . . . . . . -or . . . . . Reverse the current sort order\n");
+	printf ("     --order ver . . . . . . -ov . . . . . Order by numbers in the file name\n");
 	printf ("     --path  . . . . . . . . -p  . . . . . Show the full path to the file\n");
 	printf ("     --quiet . . . . . . . . -q  . . . . . Quiet mode, only paths and file names\n");
 	printf ("     --quote . . . . . . . . -Q  . . . . . Quote special chars\n");
@@ -617,6 +620,9 @@ void commandOption (char option, char *optionVal, char *progName)
 					break;
 				case 'r':
 					showType |= SHOW_RORDER;
+					break;
+				case 'v':
+					orderType = ORDER_VERS;
 					break;
 				}
 			}
@@ -1927,6 +1933,78 @@ int showDir (DIR_ENTRY *file)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  O R D E R  F I L E N A M E  V E R                                                                                 *
+ *  =================================                                                                                 *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Extract the numbers in a files name and sort by those.
+ *  \param fileOne First file name.
+ *  \param fileTwo Second file name.
+ *  \param useCase Sort case sensitive.
+ *  \result -1 less, 0 equal, 1 greater.
+ */
+int orderFilenameVer (char *fileOne, char *fileTwo, int useCase)
+{
+	int retn = 0, i = 0, nums[2][21];
+	char fileStart[2][PATH_SIZE];
+
+	for (i = 0; i < 2; ++i)
+	{
+		char lastChar = 0, *filePtr = (i == 0 ? fileOne : fileTwo);
+		int j, l = 0;
+
+		for (j = 0; j < 21; ++j) nums[i][j] = 0;
+		j = 0;
+		while (filePtr[j])
+		{
+			if (l == 0)
+			{
+				if (filePtr[j] < '0' || filePtr[j] > '9')
+				{
+					fileStart[i][j] = filePtr[j];
+					fileStart[i][j + 1] = 0;
+				}
+				else
+				{
+					nums[i][0] = nums[i][1] = 0;
+					++l;
+				}
+			}
+			if (l > 0 && l < 20)
+			{
+				if (filePtr[j] < '0' || filePtr[j] > '9')
+				{
+					if (lastChar >= '0' && lastChar <= '9')
+					{
+						nums[i][0] = ++l;
+						nums[i][l] = 0;
+					}
+				}
+				else
+				{
+					nums[i][l] = (nums[i][l] * 10) + (filePtr[j] - '0');
+				}
+			}
+			lastChar = filePtr[j++];
+		}
+	}
+	retn = (useCase ? strcmp (&fileStart[0][0], &fileStart[1][0]) : 
+			strcasecmp (&fileStart[0][0], &fileStart[1][0]));
+	if (retn == 0)
+	{
+		for (i = 1; i < 21 && retn == 0; ++i) 
+			retn = (nums[0][i] == nums[1][i] ? 0 : nums[0][i] < nums[1][i] ? -1 : 1);
+	}
+	if (retn == 0)
+	{
+		retn = (useCase ? strcmp (fileOne, fileTwo) : strcasecmp (fileOne, fileTwo));
+	}
+	return retn;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  F I L E  C O M P A R E                                                                                            *
  *  ======================                                                                                            *
  *                                                                                                                    *
@@ -2031,10 +2109,6 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 
 	switch (orderType)
 	{
-/*  case ORDER_NONE:
-        retn = 1;
-        break;
-*/
 	case ORDER_SIZE:
 		if (showType & SHOW_MATCH)
 		{
@@ -2222,9 +2296,23 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 			}
 		}
 		break;
-	}
-	if (retn == 0)
-	{
+
+	case  ORDER_VERS:
+		if (showType & SHOW_PATH)
+		{
+			retn = (dirType & USECASE ? strcmp (fileOne -> fullPath, fileTwo -> fullPath) :
+					strcasecmp (fileOne -> fullPath, fileTwo -> fullPath));
+		}
+		else
+		{
+			retn = (dirType & USECASE ? strcmp (fileOne -> partPath, fileTwo -> partPath) :
+					strcasecmp (fileOne -> partPath, fileTwo -> partPath));
+		}
+		if (retn == 0)
+		{
+			retn = orderFilenameVer (fileOne -> fileName, fileTwo -> fileName, dirType & USECASE);
+		}
+		break;
 	}
 	if (retn == 0)
 	{
@@ -2259,10 +2347,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 			strcpy (fileNameTwo, fileTwo -> fileName);
 
 		/*--------------------------------------------------------------------*/
-		if (dirType & USECASE)
-			retn = strcmp (fileNameOne, fileNameTwo);
-		else
-			retn = strcasecmp (fileNameOne, fileNameTwo);
+		retn = (dirType & USECASE ? strcmp (fileNameOne, fileNameTwo) : strcasecmp (fileNameOne, fileNameTwo));
 	}
 	if (showType & SHOW_RORDER)
 	{
