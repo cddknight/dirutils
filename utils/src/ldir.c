@@ -277,7 +277,7 @@ CONFIG_WORD configWords[] =
 	{	3,	'g',	"group"		},
 	{	3,	'h',	"SHA"		},
 	{	3,	'i',	"inode"		},
-	{	1,	'v',	"version"	},
+	{	1,	'v',	"ver"		},
 	{	3,	'l',	"links"		},
 	{	3,	'm',	"MD5"		},
 	{	1,	'n',	"none"		},
