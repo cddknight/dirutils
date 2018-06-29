@@ -105,7 +105,7 @@ int levels = 0;
 char *levelName[20];
 char jsonMatchPath[PATH_SIZE];
 
-void jsonObjectForeachFunc(JsonObject *object, const gchar *member_name, JsonNode *member_node, gpointer user_data);
+void jsonObjectForEachFunc(JsonObject *object, const gchar *member_name, JsonNode *member_node, gpointer user_data);
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -424,7 +424,7 @@ void displayValue (struct levelInfo *levelInfo, GValue *value)
  *  \param user_data User data (at the moment this is level).
  *  \result None.
  */
-void jsonArrayForeachFunc (JsonArray *array, guint index_, JsonNode *element_node, gpointer user_data)
+void jsonArrayForEachFunc (JsonArray *array, guint index_, JsonNode *element_node, gpointer user_data)
 {
 	int match = 0;
 	char tempBuff[81];
@@ -456,7 +456,7 @@ void jsonArrayForeachFunc (JsonArray *array, guint index_, JsonNode *element_nod
 					displayInColumn (COL_NAME, "%s", (displayPaths ? outLevelInfo.pathName : outLevelInfo.objName));
 					displayNewLine(0);
 				}
-				json_object_foreach_member (objectInner, jsonObjectForeachFunc, (gpointer)&outLevelInfo);
+				json_object_foreach_member (objectInner, jsonObjectForEachFunc, (gpointer)&outLevelInfo);
 			}
 		}
 		else if (json_node_get_node_type (element_node) == JSON_NODE_VALUE)
@@ -474,7 +474,7 @@ void jsonArrayForeachFunc (JsonArray *array, guint index_, JsonNode *element_nod
 			JsonArray *array = json_node_get_array(element_node);
 			if (array != NULL)
 			{
-				json_array_foreach_element (array, jsonArrayForeachFunc, (gpointer)&outLevelInfo);
+				json_array_foreach_element (array, jsonArrayForEachFunc, (gpointer)&outLevelInfo);
 			}
 		}
 	}
@@ -494,7 +494,7 @@ void jsonArrayForeachFunc (JsonArray *array, guint index_, JsonNode *element_nod
  *  \param user_data User data (at the moment this is level).
  *  \result None.
  */
-void jsonObjectForeachFunc(JsonObject *object, const gchar *member_name, JsonNode *member_node, gpointer user_data)
+void jsonObjectForEachFunc(JsonObject *object, const gchar *member_name, JsonNode *member_node, gpointer user_data)
 {
 	int match = 0;
 	struct levelInfo *inLevelInfo = (struct levelInfo *)user_data;
@@ -524,7 +524,7 @@ void jsonObjectForeachFunc(JsonObject *object, const gchar *member_name, JsonNod
 					displayInColumn (COL_NAME, "%s", (displayPaths ? outLevelInfo.pathName : outLevelInfo.objName));
 					displayNewLine(0);
 				}
-				json_object_foreach_member (objectInner, jsonObjectForeachFunc, (gpointer)&outLevelInfo);
+				json_object_foreach_member (objectInner, jsonObjectForEachFunc, (gpointer)&outLevelInfo);
 			}
 		}
 		else if (json_node_get_node_type (member_node) == JSON_NODE_VALUE)
@@ -542,7 +542,7 @@ void jsonObjectForeachFunc(JsonObject *object, const gchar *member_name, JsonNod
 			JsonArray *array = json_node_get_array(member_node);
 			if (array != NULL)
 			{
-				json_array_foreach_element (array, jsonArrayForeachFunc, (gpointer)&outLevelInfo);
+				json_array_foreach_element (array, jsonArrayForEachFunc, (gpointer)&outLevelInfo);
 			}
 		}
 	}
@@ -592,7 +592,7 @@ int processFile (char *jsonFile)
 				JsonObject *object = json_node_get_object(root);
 				if (object != NULL)
 				{
-					json_object_foreach_member (object, jsonObjectForeachFunc, (gpointer)&outLevelInfo);
+					json_object_foreach_member (object, jsonObjectForEachFunc, (gpointer)&outLevelInfo);
 					retn = 1;
 				}
 			}
@@ -601,7 +601,7 @@ int processFile (char *jsonFile)
 				JsonArray *array = json_node_get_array(root);
 				if (array != NULL)
 				{
-					json_array_foreach_element (array, jsonArrayForeachFunc, (gpointer)&outLevelInfo);
+					json_array_foreach_element (array, jsonArrayForEachFunc, (gpointer)&outLevelInfo);
 					retn = 1;
 				}
 			}
@@ -782,7 +782,7 @@ void processStdin ()
 						JsonObject *object = json_node_get_object(root);
 						if (object != NULL)
 						{
-							json_object_foreach_member (object, jsonObjectForeachFunc, (gpointer)&outLevelInfo);
+							json_object_foreach_member (object, jsonObjectForEachFunc, (gpointer)&outLevelInfo);
 						}
 					}
 					else if (json_node_get_node_type (root) == JSON_NODE_ARRAY)
@@ -790,7 +790,7 @@ void processStdin ()
 						JsonArray *array = json_node_get_array(root);
 						if (array != NULL)
 						{
-							json_array_foreach_element (array, jsonArrayForeachFunc, (gpointer)&outLevelInfo);
+							json_array_foreach_element (array, jsonArrayForEachFunc, (gpointer)&outLevelInfo);
 						}
 					}
 				}
