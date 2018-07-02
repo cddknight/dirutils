@@ -201,40 +201,42 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
 			{
 				DIR_ENTRY *saveEntry = malloc (sizeof (DIR_ENTRY));
 
-				saveEntry -> fileName = malloc (strlen (dirList -> d_name) + 1);
-				saveEntry -> fullPath = malloc (strlen (fullPath) + 1);
-				saveEntry -> partPath = malloc (strlen (partPath) + 1);
-				saveEntry -> sha256Sum = NULL;
-				saveEntry -> md5Sum = NULL;
-
-				*endPath = 0;
-				strcpy (saveEntry -> fileName, dirList -> d_name);
-				strcpy (saveEntry -> fullPath, fullPath);
-				strcpy (saveEntry -> partPath, partPath);
-				strcpy (endPath, dirList -> d_name);
-				saveEntry -> doneCRC = saveEntry -> CRC = saveEntry -> match = 0;
-				saveEntry -> Compare = Compare;
-
-				/*------------------------------------------------------------*
-                 * The 'STAT' function we get the full low down on file and   *
-                 * stores it in fileStat                                      *
-                 *------------------------------------------------------------*/
-				lstat (fullPath, &saveEntry -> fileStat);
-
-				if (getEntryType (&saveEntry -> fileStat) & findFlags)
+				if (saveEntry != NULL)
 				{
-					if (strlen (saveEntry -> fileName) > queueGetFreeData (*fileList))
-						queueSetFreeData (*fileList, strlen (saveEntry -> fileName));
+					memset (saveEntry, 0, sizeof (DIR_ENTRY));
+					saveEntry -> fileName = malloc (strlen (dirList -> d_name) + 1);
+					saveEntry -> fullPath = malloc (strlen (fullPath) + 1);
+					saveEntry -> partPath = malloc (strlen (partPath) + 1);
 
-					queuePut (*fileList, saveEntry);
-					filesFound ++;
-				}
-				else
-				{
-					free (saveEntry -> partPath);
-					free (saveEntry -> fullPath);
-					free (saveEntry -> fileName);
-					free (saveEntry);
+					*endPath = 0;
+					strcpy (saveEntry -> fileName, dirList -> d_name);
+					strcpy (saveEntry -> fullPath, fullPath);
+					strcpy (saveEntry -> partPath, partPath);
+					strcpy (endPath, dirList -> d_name);
+					saveEntry -> doneCRC = saveEntry -> CRC = saveEntry -> match = 0;
+					saveEntry -> Compare = Compare;
+
+					/*------------------------------------------------------------*
+		             * The 'STAT' function we get the full low down on file and   *
+		             * stores it in fileStat                                      *
+		             *------------------------------------------------------------*/
+					lstat (fullPath, &saveEntry -> fileStat);
+
+					if (getEntryType (&saveEntry -> fileStat) & findFlags)
+					{
+						if (strlen (saveEntry -> fileName) > queueGetFreeData (*fileList))
+							queueSetFreeData (*fileList, strlen (saveEntry -> fileName));
+
+						queuePut (*fileList, saveEntry);
+						filesFound ++;
+					}
+					else
+					{
+						free (saveEntry -> partPath);
+						free (saveEntry -> fullPath);
+						free (saveEntry -> fileName);
+						free (saveEntry);
+					}
 				}
 			}
 		}
@@ -305,8 +307,25 @@ int directoryProcess (int(*ProcFile)(DIR_ENTRY *dirEntry),	void **fileList)
 	while ((readEntry = (DIR_ENTRY *)queueGet (*fileList)) != NULL)
 	{
 		if (ProcFile (readEntry))
+		{
 			filesProcessed ++;
-
+		}			
+		if (readEntry -> md5Sum != NULL)
+		{
+			free (readEntry -> md5Sum);
+		}			
+		if (readEntry -> sha256Sum != NULL)
+		{
+			free (readEntry -> sha256Sum);
+		}			
+		if (readEntry -> fileVer != NULL)
+		{
+			if (readEntry -> fileVer -> fileStart != NULL)
+			{
+				free (readEntry -> fileVer -> fileStart);
+			}			
+			free (readEntry -> fileVer);
+		}
 		free (readEntry -> fileName);
 		free (readEntry -> fullPath);
 		free (readEntry -> partPath);

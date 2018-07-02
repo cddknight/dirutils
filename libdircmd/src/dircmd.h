@@ -198,6 +198,12 @@ struct columnDesc
  */
 typedef struct columnDesc COLUMN_DESC;
 
+struct dirFileVerInfo
+{
+	char *fileStart;
+	int verVals[21];
+};
+
 /**
  *  @struct dirEntry dircmd.h
  *  @brief Used to pass directory information to call back functions.
@@ -214,6 +220,8 @@ struct dirEntry
 	unsigned char *md5Sum;
 	/** SHA256 checksum if needed */
 	unsigned char *sha256Sum;
+	/** Version extracted from the name */
+	struct dirFileVerInfo *fileVer;
 	/** Directory information */
 	struct stat fileStat;
 	/** Has the CRC been calculated for this file */
@@ -273,6 +281,7 @@ EXTERNC char *displayGroupString (int groupID, char *outString);
 EXTERNC char *displayContextString (char *fullpath, char *outString);
 EXTERNC char *displayMD5String (DIR_ENTRY *file, char *outString, int encode);
 EXTERNC char *displaySHA256String (DIR_ENTRY *file, char *outString, int encode);
+EXTERNC char *displayVerString (DIR_ENTRY *file, char *outString);
 EXTERNC void displayGetWindowSize (void);
 EXTERNC void displayForceSize (int cols, int rows);
 EXTERNC int displayGetWidth (void);

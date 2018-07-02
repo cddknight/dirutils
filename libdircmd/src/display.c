@@ -709,6 +709,39 @@ char *displaySHA256String (DIR_ENTRY *file, char *outString, int encode)
 	}
 	return outString;
 }
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I S P L A Y  V E R  S T R I N G                                                                                 *
+ *  =================================                                                                                 *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Display any version information about this file.
+ *  \param file File being displayed.
+ *  \param outString Output to this file.
+ *  \result Pointer to version text.
+ */
+char *displayVerString (DIR_ENTRY *file, char *outString)
+{
+	int i;
+	char tempStr[21];
+
+	outString[0] = 0;
+	if (file -> fileVer != NULL)
+	{
+		for (i = 1; i < file -> fileVer -> verVals[0]; ++i)
+		{
+			sprintf (tempStr, (i > 1 ? ".%d" : "%d"),  file -> fileVer -> verVals[i]);
+			if (strlen (outString) + strlen (tempStr) < 200)
+			{
+				strcat (outString, tempStr);
+			}
+		}
+	}
+	return outString;
+}
+
 /**********************************************************************************************************************
  *                                                                                                                    *
  *  D I S P L A Y  G E T  W I D T H                                                                                   *

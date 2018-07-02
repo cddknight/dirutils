@@ -56,6 +56,7 @@ extern int errno;
 int showDir (DIR_ENTRY *file);
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo);
 char *quoteCopy (char *dst, char *src);
+void getFileVersion (DIR_ENTRY *fileOne);
 
 /*----------------------------------------------------------------------------*
  * Defines   															      *
@@ -98,12 +99,13 @@ char *quoteCopy (char *dst, char *src);
 #define SHOW_SHA256		(1 << 20)
 #define SHOW_INODE		(1 << 21)
 #define SHOW_IN_AGE		(1 << 22)
+#define SHOW_VERSION	(1 << 23)
 
 #define DATE_MOD		0
 #define DATE_ACC		1
 #define DATE_CHG		2
 
-#define MAX_COL_DESC	17
+#define MAX_COL_DESC	18
 #define MAX_W_COL_DESC	3
 #define EXTRA_COLOURS	8
 
@@ -157,7 +159,8 @@ int			encode = DISPLAY_ENCODE_HEX;
 #define		COL_CONTEXT		13
 #define		COL_MD5			14
 #define		COL_SHA256		15
-#define		COL_INODE		16
+#define		COL_VERSION		16
+#define		COL_INODE		17
 
 #define		COL_W_TYPE_L	0
 #define		COL_W_FILENAME	1
@@ -167,7 +170,7 @@ int columnTranslate[MAX_COL_DESC] =
 {
 	COL_TYPE, COL_RIGHTS, COL_N_LINKS, COL_OWNER, COL_GROUP, COL_SIZE,
 	COL_DATE, COL_DAYS, COL_TIME, COL_FILENAME, COL_EXTN, COL_ARROW,
-	COL_TARGET, COL_CONTEXT, COL_MD5, COL_SHA256, COL_INODE
+	COL_TARGET, COL_CONTEXT, COL_MD5, COL_SHA256, COL_VERSION, COL_INODE
 };
 
 COLUMN_DESC allColumnDescs[MAX_COL_DESC] =
@@ -192,7 +195,8 @@ COLUMN_DESC allColumnDescs[MAX_COL_DESC] =
 	{	80, 8,	0,	2,	0x05,	0,					"Context",	12	},	/* 13 */
 	{	33, 33, 0,	2,	0x05,	0,					md5Type,	13	},	/* 14 */
 	{	65, 65, 0,	2,	0x05,	0,					shaType,	14	},	/* 15 */
-	{	20, 6,	0,	2,	0x04,	COL_ALIGN_RIGHT,	"iNode",	15	},	/* 16 */
+	{	200,7,  0,  2,  0x05,	0,					"Version",	15	},	/* 16 */
+	{	20, 6,	0,	2,	0x04,	COL_ALIGN_RIGHT,	"iNode",	16	},	/* 17 */
 };
 
 COLUMN_DESC wideColumnDescs[MAX_W_COL_DESC] =
@@ -224,7 +228,7 @@ char *colourNames[] =
 	"colour_type",		"colour_rights",	"colour_numlinks",	"colour_owner",		"colour_group",
 	"colour_size",		"colour_date",		"colour_day",		"colour_time",		"colour_filename",
 	"colour_extn",		"colour_linkptr",	"colour_target",	"colour_context",	"colour_md5",
-	"colour_sha256",	"colour_inode",
+	"colour_sha256",	"colour_version",	"colour_inode",
 
 	"colour_wide_col1", "colour_wide_filename", "colour_wide_col2",
 
@@ -277,7 +281,7 @@ CONFIG_WORD configWords[] =
 	{	3,	'g',	"group"		},
 	{	3,	'h',	"SHA"		},
 	{	3,	'i',	"inode"		},
-	{	1,	'v',	"ver"		},
+	{	3,	'v',	"ver"		},
 	{	3,	'l',	"links"		},
 	{	3,	'm',	"MD5"		},
 	{	1,	'n',	"none"		},
@@ -422,6 +426,7 @@ void helpThem (char *progName)
 	printf ("     --display rights  . . . -Dr . . . . . Show the user rights of the file\n");
 	printf ("     --display size  . . . . -Ds . . . . . Show the size of the file\n");
 	printf ("     --display type  . . . . -Dt . . . . . Show the type of the file\n");
+	printf ("     --display ver . . . . . -Dv . . . . . Show the version from file name\n");
 	printf ("     --matching  . . . . . . -m  . . . . . Show only duplicated files\n");
 	printf ("     --unique  . . . . . . . -M  . . . . . Show only files with no duplicate\n");
 	printf ("     --number #  . . . . . . -n# . . . . . Display some, # > 0 first #, # < 0 last n\n");
@@ -841,6 +846,9 @@ void commandOption (char option, char *optionVal, char *progName)
 					break;
 				case 'i':
 					showType ^= SHOW_INODE;
+					break;
+				case 'v':
+					showType ^= SHOW_VERSION;
 					break;
 				}
 			}
@@ -1556,6 +1564,7 @@ int showDir (DIR_ENTRY *file)
 		char contextString[81];
 		char md5String[65];
 		char shaString[65];
+		char verString[201];
 		char rightsBuff[14];
 		char numBuff[21];
 
@@ -1883,6 +1892,14 @@ int showDir (DIR_ENTRY *file)
 				{
 					displayInColumn (columnTranslate[COL_SHA256], "%s", displaySHA256String (file, shaString, encode));
 				}
+				if (showType & SHOW_VERSION)
+				{
+					if (file -> fileVer == NULL)
+					{
+						getFileVersion (file);
+					}
+					displayInColumn (columnTranslate[COL_VERSION], "%s", displayVerString (file, verString));
+				}
 				if (showType & SHOW_INODE)
 				{
 					displayInColumn (columnTranslate[COL_INODE], "%s", displayCommaNumber (file -> fileStat.st_ino, numBuff));
@@ -1933,73 +1950,116 @@ int showDir (DIR_ENTRY *file)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  O R D E R  F I L E N A M E  V E R                                                                                 *
- *  =================================                                                                                 *
+ *  G E T  F I L E  V E R S I O N                                                                                     *
+ *  =============================                                                                                     *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  \brief Extract the numbers in a files name and sort by those.
- *  \param fileOne First file name.
- *  \param fileTwo Second file name.
- *  \param useCase Sort case sensitive.
- *  \result -1 less, 0 equal, 1 greater.
+ *  \brief Get the file version from the file name.
+ *  \param fileOne File to get the version for.
+ *  \result None.
  */
-int orderFilenameVer (char *fileOne, char *fileTwo, int useCase)
+void getFileVersion (DIR_ENTRY *fileOne)
 {
-	int retn = 0, i = 0, nums[2][21];
-	char fileStart[2][PATH_SIZE];
-
-	fileStart[0][0] = fileStart[1][0] = 0;
-	for (i = 0; i < 2; ++i)
+	if (fileOne -> fileVer == NULL)
 	{
-		char lastChar = 0, *filePtr = (i == 0 ? fileOne : fileTwo);
-		int j, l = 0;
+		fileOne -> fileVer = (struct dirFileVerInfo *)malloc (sizeof (struct dirFileVerInfo));
 
-		for (j = 0; j < 21; ++j) nums[i][j] = 0;
-		j = 0;
-		while (filePtr[j])
+		if (fileOne -> fileVer != NULL)
 		{
-			if (l == 0)
+			int j = 0, l = 0;
+			char fileStart[PATH_SIZE], lastChar = 0, *filePtr = fileOne -> fileName;
+
+			memset (fileOne -> fileVer, 0, sizeof (struct dirFileVerInfo));
+			fileStart[0] = 0;
+
+			while (filePtr[j])
 			{
-				if (filePtr[j] < '0' || filePtr[j] > '9')
+				if (l == 0)
 				{
-					fileStart[i][j] = filePtr[j];
-					fileStart[i][j + 1] = 0;
-				}
-				else
-				{
-					nums[i][0] = nums[i][1] = 0;
-					++l;
-				}
-			}
-			if (l > 0 && l < 20)
-			{
-				if (filePtr[j] < '0' || filePtr[j] > '9')
-				{
-					if (lastChar >= '0' && lastChar <= '9')
+					if (filePtr[j] < '0' || filePtr[j] > '9')
 					{
-						nums[i][0] = ++l;
-						nums[i][l] = 0;
+						fileStart[j] = filePtr[j];
+						fileStart[j + 1] = 0;
+					}
+					else
+					{
+						fileOne -> fileVer -> verVals[0] = 0;
+						++l;
 					}
 				}
-				else
+				if (l > 0 && l < 20)
 				{
-					nums[i][l] = (nums[i][l] * 10) + (filePtr[j] - '0');
+					if (filePtr[j] < '0' || filePtr[j] > '9')
+					{
+						if (lastChar >= '0' && lastChar <= '9')
+						{
+							fileOne -> fileVer -> verVals[0] = ++l;
+							fileOne -> fileVer -> verVals[l] = 0;
+						}
+					}
+					else
+					{
+						fileOne -> fileVer -> verVals[l] = 
+								(fileOne -> fileVer -> verVals[l] * 10) + (filePtr[j] - '0');
+					}
 				}
+				lastChar = filePtr[j++];
 			}
-			lastChar = filePtr[j++];
+			fileOne -> fileVer -> fileStart = (char *)malloc (strlen (fileStart) + 1);
+			if (fileOne -> fileVer -> fileStart != NULL)
+			{
+				strcpy (fileOne -> fileVer -> fileStart, fileStart);
+			}
 		}
 	}
-	retn = (useCase ? strcmp (&fileStart[0][0], &fileStart[1][0]) : 
-			strcasecmp (&fileStart[0][0], &fileStart[1][0]));
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  C O M P A R E  F I L E  V E R S I O N                                                                             *
+ *  =====================================                                                                             *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Compare two file versions.
+ *  \param fileOne First file to compare.
+ *  \param fileTwo Second file to compare.
+ *  \param useCase Use case when comparing names.
+ *  \result 0 match, -1 less, 1 greater.
+ */
+int compareFileVersion (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo, int useCase)
+{
+	int retn = 0;
+
+	if (fileOne -> fileVer == NULL)
+	{
+		getFileVersion (fileOne);
+	}
+	if (fileTwo -> fileVer == NULL)
+	{
+		getFileVersion (fileTwo);
+	}
+	if (fileOne -> fileVer == NULL || fileTwo -> fileVer == NULL)
+	{
+		return retn;
+	}
+	retn = (useCase ? 
+			strcmp (fileOne -> fileVer -> fileStart, fileTwo -> fileVer -> fileStart) : 
+			strcasecmp (fileOne -> fileVer -> fileStart, fileTwo -> fileVer -> fileStart));
 	if (retn == 0)
 	{
+		int i;
 		for (i = 1; i < 21 && retn == 0; ++i) 
-			retn = (nums[0][i] == nums[1][i] ? 0 : nums[0][i] < nums[1][i] ? -1 : 1);
+		{
+			retn = (fileOne -> fileVer -> verVals[i] == fileTwo -> fileVer -> verVals[i] ? 0 : 
+					fileOne -> fileVer -> verVals[i] < fileTwo -> fileVer -> verVals[i] ? -1 : 1);
+		}
 	}
 	if (retn == 0)
 	{
-		retn = (useCase ? strcmp (fileOne, fileTwo) : strcasecmp (fileOne, fileTwo));
+		retn = (useCase ? strcmp (fileOne -> fileName, fileTwo -> fileName) : 
+				strcasecmp (fileOne -> fileName, fileTwo -> fileName));
 	}
 	return retn;
 }
@@ -2311,7 +2371,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 		}
 		if (retn == 0)
 		{
-			retn = orderFilenameVer (fileOne -> fileName, fileTwo -> fileName, dirType & USECASE);
+			retn = compareFileVersion (fileOne, fileTwo, dirType & USECASE);
 		}
 		break;
 	}
