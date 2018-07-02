@@ -32,9 +32,11 @@
 #include "dircmd.h"
 #include "config.h"
 
-/******************************************************************************************************
- * Prototypes                                                                                         *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ * Prototypes                                                                                                         *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 static int listCompare (const void **item1, const void **item2);
 static int getEntryType (struct stat *fileStat);
 static char directoryVersionText[] = VERSION;
@@ -98,7 +100,7 @@ static char *strcat_ch (char *buff, char ch)
  *  \param inPath The path to the directory to be process.
  *  \param partPath If it is recursive keep the subdirs to be added to t.
  *  \param findFlags Various options to select what files to read.
- *  \param compare Function to compare two files.
+ *  \param Compare Function to compare two files.
  *  \param fileList Where to save the directory.
  *  \result The number of files found.
  */
@@ -259,7 +261,7 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
  *  \brief Read the contents of a directory into memory.
  *  \param inPath The path to the directory to be process.
  *  \param findFlags Various options to select what files to read.
- *  \param compare Function to compare two files.
+ *  \param f2 .
  *  \param fileList Where to save the directory.
  *  \result The number of files found.
  */

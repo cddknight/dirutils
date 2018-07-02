@@ -198,6 +198,10 @@ struct columnDesc
  */
 typedef struct columnDesc COLUMN_DESC;
 
+/**
+ *  @struct dirFileVerInfo dircmd
+ *  @brief Structure to store file version information.
+ */
 struct dirFileVerInfo
 {
 	char *fileStart;

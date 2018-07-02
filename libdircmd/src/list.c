@@ -28,11 +28,11 @@
 	#endif
 #endif
 
-/******************************************************************************************************
- *                                                                                                    *
- * Structure to hold an item on the queue                                                             *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ * Structure to hold an item on the queue                                                                             *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 typedef struct _queueItem
 {
 	void *myNextPtr;
@@ -41,11 +41,11 @@ typedef struct _queueItem
 }
 QUEUE_ITEM;
 
-/******************************************************************************************************
- *                                                                                                    *
- * Structure to hold the queue header                                                                 *
- *                                                                                                    *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ * Structure to hold the queue header                                                                                 *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
 typedef struct _queueHeader
 {
 	QUEUE_ITEM *firstInQueue;
@@ -321,7 +321,7 @@ void queuePush (void *queueHandle, void *putData)
  *  \brief Put an item on the queue in a sorted order.
  *  \param queueHandle Handle of the queue, returned from create.
  *  \param putData Data to put on the queue, normally a pointer.
- *  \param item2 .
+ *  \param Compare Function to compare two items.
  *  \result None.
  */
 void queuePutSort (void *queueHandle, void *putData,
