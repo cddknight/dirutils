@@ -1994,12 +1994,12 @@ void getFileVersion (DIR_ENTRY *fileOne)
 					{
 						if (lastChar >= '0' && lastChar <= '9')
 						{
-							fileOne -> fileVer -> verVals[0] = ++l;
-							fileOne -> fileVer -> verVals[l] = 0;
+							fileOne -> fileVer -> verVals[++l] = 0;
 						}
 					}
 					else
 					{
+						fileOne -> fileVer -> verVals[0] = l + 1;
 						fileOne -> fileVer -> verVals[l] = 
 								(fileOne -> fileVer -> verVals[l] * 10) + (filePtr[j] - '0');
 					}
