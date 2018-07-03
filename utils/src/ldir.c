@@ -195,7 +195,7 @@ COLUMN_DESC allColumnDescs[MAX_COL_DESC] =
 	{	80, 8,	0,	2,	0x05,	0,					"Context",	12	},	/* 13 */
 	{	33, 33, 0,	2,	0x05,	0,					md5Type,	13	},	/* 14 */
 	{	65, 65, 0,	2,	0x05,	0,					shaType,	14	},	/* 15 */
-	{	200,7,  0,  2,  0x05,	0,					"Version",	15	},	/* 16 */
+	{	200,7,	0,	2,	0x05,	0,					"Version",	15	},	/* 16 */
 	{	20, 6,	0,	2,	0x04,	COL_ALIGN_RIGHT,	"iNode",	16	},	/* 17 */
 };
 
@@ -2000,7 +2000,7 @@ void getFileVersion (DIR_ENTRY *fileOne)
 					else
 					{
 						fileOne -> fileVer -> verVals[0] = l + 1;
-						fileOne -> fileVer -> verVals[l] = 
+						fileOne -> fileVer -> verVals[l] =
 								(fileOne -> fileVer -> verVals[l] * 10) + (filePtr[j] - '0');
 					}
 				}
@@ -2044,21 +2044,21 @@ int compareFileVersion (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo, int useCase)
 	{
 		return retn;
 	}
-	retn = (useCase ? 
-			strcmp (fileOne -> fileVer -> fileStart, fileTwo -> fileVer -> fileStart) : 
+	retn = (useCase ?
+			strcmp (fileOne -> fileVer -> fileStart, fileTwo -> fileVer -> fileStart) :
 			strcasecmp (fileOne -> fileVer -> fileStart, fileTwo -> fileVer -> fileStart));
 	if (retn == 0)
 	{
 		int i;
-		for (i = 1; i < 21 && retn == 0; ++i) 
+		for (i = 1; i < 21 && retn == 0; ++i)
 		{
-			retn = (fileOne -> fileVer -> verVals[i] == fileTwo -> fileVer -> verVals[i] ? 0 : 
+			retn = (fileOne -> fileVer -> verVals[i] == fileTwo -> fileVer -> verVals[i] ? 0 :
 					fileOne -> fileVer -> verVals[i] < fileTwo -> fileVer -> verVals[i] ? -1 : 1);
 		}
 	}
 	if (retn == 0)
 	{
-		retn = (useCase ? strcmp (fileOne -> fileName, fileTwo -> fileName) : 
+		retn = (useCase ? strcmp (fileOne -> fileName, fileTwo -> fileName) :
 				strcasecmp (fileOne -> fileName, fileTwo -> fileName));
 	}
 	return retn;

@@ -605,7 +605,7 @@ int processFile (char *jsonFile)
 					retn = 1;
 				}
 			}
-		}	
+		}
 		g_object_unref (parser);
 	}
 	return retn;
