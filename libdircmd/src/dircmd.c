@@ -311,21 +311,21 @@ int directoryProcess (int(*ProcFile)(DIR_ENTRY *dirEntry),	void **fileList)
 		if (ProcFile (readEntry))
 		{
 			filesProcessed ++;
-		}			
+		}
 		if (readEntry -> md5Sum != NULL)
 		{
 			free (readEntry -> md5Sum);
-		}			
+		}
 		if (readEntry -> sha256Sum != NULL)
 		{
 			free (readEntry -> sha256Sum);
-		}			
+		}
 		if (readEntry -> fileVer != NULL)
 		{
 			if (readEntry -> fileVer -> fileStart != NULL)
 			{
 				free (readEntry -> fileVer -> fileStart);
-			}			
+			}
 			free (readEntry -> fileVer);
 		}
 		free (readEntry -> fileName);

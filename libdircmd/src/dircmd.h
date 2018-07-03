@@ -167,7 +167,6 @@
 #define DISPLAY_ENCODE_HEX		0	// Default
 #define DISPLAY_ENCODE_BASE64	1
 
-
 /**
  *  @struct columnDesc dircmd.h
  *  @brief Used when calling displayColumnInit.
@@ -311,16 +310,15 @@ EXTERNC void *queueCreate (void);
 EXTERNC void  queueDelete (void *queueHandle);
 EXTERNC void *queueGet (void *queueHandle);
 EXTERNC void  queuePut (void *queueHandle, void *putData);
-EXTERNC void  queuePutSort (void *queueHandle, void *putData, 
-	  		int(*Compare)(const void *item1, const void *item2));
+EXTERNC void  queuePutSort (void *queueHandle, void *putData,
+			int(*Compare)(const void *item1, const void *item2));
 EXTERNC void  queuePush (void *queueHandle, void *putData);
 EXTERNC void *queueRead (void *queueHandle, int item);
 EXTERNC void queueSetFreeData (void *queueHandle, unsigned long setData);
 EXTERNC unsigned long queueGetFreeData (void *queueHandle);
 EXTERNC unsigned long queueGetItemCount (void *queueHandle);
-EXTERNC void queueSort (void *queueHandle, 
+EXTERNC void queueSort (void *queueHandle,
 			int(*Compare)(const void *item1, const void *item2));
-
 
 /*
  *  match.c
