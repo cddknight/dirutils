@@ -39,7 +39,6 @@
 /******************************************************************************************************
  * Prototypes                                                                                         *
  ******************************************************************************************************/
-int addCommentsCmp (DIR_ENTRY * fileOne, DIR_ENTRY * fileTwo);
 int addComments (DIR_ENTRY * file);
 int displayBox(int type, int count, FILE *outFile);
 
@@ -138,7 +137,7 @@ int main(int argc, char *argv[])
 	}
 
 	displayInit();
-	rl_bind_key ('\t',rl_abort);		//disable auto-complete
+	rl_bind_key ('\t',rl_abort);		/* disable auto-complete */
 
 	while ((i = getopt(argc, argv, "hdipqmvl:w:c:C:?")) != -1)
 	{
@@ -208,7 +207,7 @@ int main(int argc, char *argv[])
 
 	for (; optind < argc; ++optind)
 	{
-		found += directoryLoad(argv[optind], ONLYFILES, addCommentsCmp, &fileList);
+		found += directoryLoad(argv[optind], ONLYFILES, NULL, &fileList);
 	}
 	directorySort (&fileList);
 
@@ -1172,32 +1171,5 @@ int addComments(DIR_ENTRY * file)
 		filesFound++;
 	}
 	return 1;
-}
-
-/**********************************************************************************************************************
- *                                                                                                                    *
- *  A D D  C O M M E N T S  C M P                                                                                     *
- *  =============================                                                                                     *
- *                                                                                                                    *
- **********************************************************************************************************************/
-/**
- *  \brief Call back from directoryProcess to order the files.
- *  \param fileOne First file to compare.
- *  \param fileTwo Second file to compare with.
- *  \result 1, 0 and -1 depending on the match.
- */
-int addCommentsCmp (DIR_ENTRY * fileOne, DIR_ENTRY * fileTwo)
-{
-	if (fileOne->fileStat.st_mode & S_IFDIR)
-	{
-		if (!(fileTwo->fileStat.st_mode & S_IFDIR))
-			return -1;
-	}
-	if (fileTwo->fileStat.st_mode & S_IFDIR)
-	{
-		if (!(fileOne->fileStat.st_mode & S_IFDIR))
-			return 1;
-	}
-	return strcasecmp(fileOne->fileName, fileTwo->fileName);
 }
 

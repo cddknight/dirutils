@@ -36,7 +36,6 @@
 /*----------------------------------------------------------------------------*
  * Prototypes															      *
  *----------------------------------------------------------------------------*/
-int fileCompare(DIR_ENTRY * fileOne, DIR_ENTRY * fileTwo);
 int showDir(DIR_ENTRY * file);
 
 #define BUFFER_SIZE 1024
@@ -151,7 +150,7 @@ int main(int argc, char *argv[])
 
 	for (; optind < argc; ++optind)
 	{
-		found += directoryLoad (argv[optind], ONLYFILES|ONLYLINKS, fileCompare, &fileList);
+		found += directoryLoad (argv[optind], ONLYFILES|ONLYLINKS, NULL, &fileList);
 	}
 
 	/*------------------------------------------------------------------------*
@@ -561,29 +560,3 @@ int showDir(DIR_ENTRY * file)
 	return 1;
 }
 
-/**********************************************************************************************************************
- *                                                                                                                    *
- *  F I L E  C O M P A R E                                                                                            *
- *  ======================                                                                                            *
- *                                                                                                                    *
- **********************************************************************************************************************/
-/**
- *  \brief Called back by load dir to sort the files.
- *  \param fileOne First file.
- *  \param fileTwo Second file to compare first with.
- *  \result 1, 0 or -1 depending on order.
- */
-int fileCompare(DIR_ENTRY * fileOne, DIR_ENTRY * fileTwo)
-{
-	if (fileOne->fileStat.st_mode & S_IFDIR)
-	{
-		if (!(fileTwo->fileStat.st_mode & S_IFDIR))
-			return -1;
-	}
-	if (fileTwo->fileStat.st_mode & S_IFDIR)
-	{
-		if (!(fileOne->fileStat.st_mode & S_IFDIR))
-			return 1;
-	}
-	return strcasecmp(fileOne->fileName, fileTwo->fileName);
-}

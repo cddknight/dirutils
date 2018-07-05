@@ -37,7 +37,6 @@
 /*----------------------------------------------------------------------------*
  * Prototypes                                                                 *
  *----------------------------------------------------------------------------*/
-int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo);
 int showDir (DIR_ENTRY *file);
 
 /*----------------------------------------------------------------------------*
@@ -110,7 +109,7 @@ int main (int argc, char *argv[])
      * files with.                                                            *
      *------------------------------------------------------------------------*/
 	while (i < argc)
-		found += directoryLoad (argv[i++], ONLYFILES|ONLYLINKS, fileCompare, &fileList);
+		found += directoryLoad (argv[i++], ONLYFILES|ONLYLINKS, NULL, &fileList);
 
 	/*------------------------------------------------------------------------*
      * Now we can sort the directory.                                         *
@@ -210,32 +209,5 @@ int showDir (DIR_ENTRY *file)
 		filesFound ++;
 	}
 	return quoteFound ? 1 : 0;
-}
-
-/**********************************************************************************************************************
- *                                                                                                                    *
- *  F I L E  C O M P A R E                                                                                            *
- *  ======================                                                                                            *
- *                                                                                                                    *
- **********************************************************************************************************************/
-/**
- *  \brief Compare two directory names for sorting.
- *  \param fileOne First file.
- *  \param fileTwo Second file.
- *  \result The same as the result of strcmp.
- */
-int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
-{
-	if (fileOne -> fileStat.st_mode & S_IFDIR)
-	{
-		if (!(fileTwo -> fileStat.st_mode & S_IFDIR))
-			return -1;
-	}
-	if (fileTwo -> fileStat.st_mode & S_IFDIR)
-	{
-		if (!(fileOne -> fileStat.st_mode & S_IFDIR))
-			return 1;
-	}
-	return strcasecmp (fileOne -> fileName, fileTwo -> fileName);
 }
 

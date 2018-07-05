@@ -35,7 +35,6 @@
 /*----------------------------------------------------------------------------*
  * Prototypes                                                                 *
  *----------------------------------------------------------------------------*/
-int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo);
 int showDir (DIR_ENTRY *file);
 
 /*----------------------------------------------------------------------------*
@@ -157,7 +156,7 @@ int main (int argc, char *argv[])
 
 	for (; optind < argc; ++optind)
 	{
-		found += directoryLoad (argv[optind], ONLYFILES, fileCompare, &fileList);
+		found += directoryLoad (argv[optind], ONLYFILES, NULL, &fileList);
 	}
 
 	/*------------------------------------------------------------------------*
@@ -392,29 +391,3 @@ int showDir (DIR_ENTRY *file)
 	return linesFixed ? 1 : 0;
 }
 
-/**********************************************************************************************************************
- *                                                                                                                    *
- *  F I L E  C O M P A R E                                                                                            *
- *  ======================                                                                                            *
- *                                                                                                                    *
- **********************************************************************************************************************/
-/**
- *  \brief Compare two files for sorting.
- *  \param fileOne First file.
- *  \param fileTwo Second file.
- *  \result 0, 1 or -1 depending on compare.
- */
-int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
-{
-	if (fileOne -> fileStat.st_mode & S_IFDIR)
-	{
-		if (!(fileTwo -> fileStat.st_mode & S_IFDIR))
-			return -1;
-	}
-	if (fileTwo -> fileStat.st_mode & S_IFDIR)
-	{
-		if (!(fileOne -> fileStat.st_mode & S_IFDIR))
-			return 1;
-	}
-	return strcasecmp (fileOne -> fileName, fileTwo -> fileName);
-}

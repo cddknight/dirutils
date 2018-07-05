@@ -39,7 +39,6 @@
 /*----------------------------------------------------------------------------*
  * Prototypes                                                                 *
  *----------------------------------------------------------------------------*/
-int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo);
 int showDir (DIR_ENTRY *file);
 void processStdin (void);
 
@@ -228,7 +227,7 @@ int main (int argc, char *argv[])
 	}
 	for (; optind < argc; ++optind)
 	{
-		found += directoryLoad (argv[optind], ONLYFILES|ONLYLINKS, fileCompare, &fileList);
+		found += directoryLoad (argv[optind], ONLYFILES|ONLYLINKS, NULL, &fileList);
 	}
 
 	if (found)
@@ -412,8 +411,8 @@ void displayValue (struct levelInfo *levelInfo, GValue *value)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  J S O N  A R R A Y  F O R E A C H  F U N C                                                                        *
- *  ==========================================                                                                        *
+ *  J S O N  A R R A Y  F O R  E A C H  F U N C                                                                       *
+ *  ===========================================                                                                       *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
@@ -482,8 +481,8 @@ void jsonArrayForEachFunc (JsonArray *array, guint index_, JsonNode *element_nod
 
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  J S O N  O B J E C T  F O R E A C H  F U N C                                                                      *
- *  ============================================                                                                      *
+ *  J S O N  O B J E C T  F O R  E A C H  F U N C                                                                     *
+ *  =============================================                                                                     *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
@@ -668,33 +667,6 @@ int showDir (DIR_ENTRY *file)
 	displayAllLines ();
 	displayTidy ();
 	return 1;
-}
-
-/**********************************************************************************************************************
- *                                                                                                                    *
- *  F I L E  C O M P A R E                                                                                            *
- *  ======================                                                                                            *
- *                                                                                                                    *
- **********************************************************************************************************************/
-/**
- *  \brief Compare two files for sorting.
- *  \param fileOne First file.
- *  \param fileTwo Second file.
- *  \result 0, 1 or -1 depending on order.
- */
-int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
-{
-	if (fileOne -> fileStat.st_mode & S_IFDIR)
-	{
-		if (!(fileTwo -> fileStat.st_mode & S_IFDIR))
-			return -1;
-	}
-	if (fileTwo -> fileStat.st_mode & S_IFDIR)
-	{
-		if (!(fileOne -> fileStat.st_mode & S_IFDIR))
-			return 1;
-	}
-	return strcasecmp (fileOne -> fileName, fileTwo -> fileName);
 }
 
 #define READSIZE 4096
