@@ -321,11 +321,10 @@ void queuePush (void *queueHandle, void *putData)
  *  \brief Put an item on the queue in a sorted order.
  *  \param queueHandle Handle of the queue, returned from create.
  *  \param putData Data to put on the queue, normally a pointer.
- *  \param Compare Function to compare two items.
+ *  \param Compare Function to cpmpare two list items.
  *  \result None.
  */
-void queuePutSort (void *queueHandle, void *putData,
-		int(*Compare)(const void *item1, const void *item2))
+void queuePutSort (void *queueHandle, void *putData, comparePtr *Compare)
 {
 	if (queueHandle)
 	{
@@ -499,10 +498,10 @@ unsigned long queueGetItemCount (void *queueHandle)
 /**
  *  \brief Sort the list.
  *  \param queueHandle Handle of the queue, returned from create.
- *  \param item2 .
+ *  \param Compare Function to cpmpare two list items.
  *  \result None.
  */
-void queueSort (void *queueHandle, int(*Compare)(const void *item1, const void *item2))
+void queueSort (void *queueHandle, comparePtr *Compare)
 {
 	if (queueHandle)
 	{

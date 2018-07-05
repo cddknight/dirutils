@@ -91,6 +91,33 @@ static char *strcat_ch (char *buff, char ch)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  D I R E C T O R Y  D E F  C O M P A R E                                                                           *
+ *  =======================================                                                                           *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Default compare function if one is not supplied.
+ *  \param fileOne First file to compare.
+ *  \param fileTwo Second file to compare with.
+ *  \result 0 same, 1 greater, -1 less.
+ */
+int directoryDefCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
+{
+	if (fileOne -> fileStat.st_mode & S_IFDIR)
+	{
+		if (!(fileTwo -> fileStat.st_mode & S_IFDIR))
+			return -1;
+	}
+	if (fileTwo -> fileStat.st_mode & S_IFDIR)
+	{
+		if (!(fileOne -> fileStat.st_mode & S_IFDIR))
+			return 1;
+	}
+	return strcasecmp (fileOne -> fileName, fileTwo -> fileName);
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  D I R E C T O R Y  L O A D  I N T                                                                                 *
  *  =================================                                                                                 *
  *                                                                                                                    *
@@ -104,13 +131,12 @@ static char *strcat_ch (char *buff, char ch)
  *  \param fileList Where to save the directory.
  *  \result The number of files found.
  */
-static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
-		int(*Compare)(DIR_ENTRY *f1, DIR_ENTRY *f2),
-		void **fileList)
+static int directoryLoadInt (char *inPath, char *partPath, int findFlags, compareFile *Compare, void **fileList)
 {
 	DIR *dirPtr;
 	int filesFound = 0;
 	struct dirent *dirList;
+	compareFile *compareFunc = Compare;
 	char fullPath[PATH_SIZE], filePattern[PATH_SIZE], *endPath;
 
 	strcpy (fullPath, inPath);
@@ -131,11 +157,14 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
 			strcpy (fullPath, ".");
 		strcat_ch (fullPath, DIRSEP);
 	}
-
 	if (!(*fileList))
 	{
 		if ((*fileList = queueCreate ()) == NULL)
 			return 0;
+	}
+	if (compareFunc == NULL)
+	{
+		compareFunc = directoryDefCompare;
 	}
 
 	/*------------------------------------------------------------------------*
@@ -189,8 +218,7 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
 						strcat (subPath, dirList -> d_name);
 						strcat_ch (subPath, DIRSEP);
 
-						filesFound += directoryLoadInt (tempPath, subPath, findFlags,
-								Compare, fileList);
+						filesFound += directoryLoadInt (tempPath, subPath, findFlags, compareFunc, fileList);
 					}
 				}
 			}
@@ -216,7 +244,7 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
 					strcpy (saveEntry -> partPath, partPath);
 					strcpy (endPath, dirList -> d_name);
 					saveEntry -> doneCRC = saveEntry -> CRC = saveEntry -> match = 0;
-					saveEntry -> Compare = Compare;
+					saveEntry -> Compare = (comparePtr *)compareFunc;
 
 					/*------------------------------------------------------------*
 		             * The 'STAT' function we get the full low down on file and   *
@@ -261,13 +289,11 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags,
  *  \brief Read the contents of a directory into memory.
  *  \param inPath The path to the directory to be process.
  *  \param findFlags Various options to select what files to read.
- *  \param f2 .
+ *  \param Compare Function to compare two directory entries.
  *  \param fileList Where to save the directory.
  *  \result The number of files found.
  */
-int directoryLoad (char *inPath, int findFlags,
-		int(*Compare)(DIR_ENTRY *f1, DIR_ENTRY *f2),
-		void **fileList)
+int directoryLoad (char *inPath, int findFlags, compareFile *Compare, void **fileList)
 {
 	return directoryLoadInt (inPath, "", findFlags, Compare, fileList);
 }

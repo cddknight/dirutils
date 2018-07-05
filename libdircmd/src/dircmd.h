@@ -168,6 +168,12 @@
 #define DISPLAY_ENCODE_BASE64	1
 
 /**
+ *  @typedef comparePtr
+ *  @brief Function pointer for comparing objects of unknown type.
+ */
+typedef int (comparePtr)(const void *first, const void *second);
+
+/**
  *  @struct columnDesc dircmd.h
  *  @brief Used when calling displayColumnInit.
  */
@@ -234,7 +240,7 @@ struct dirEntry
 	/** Was a match found for this file */
 	unsigned int match;
 	/** Pointer to function used to compare the files */
-	int(*Compare)(struct dirEntry *f1, struct dirEntry *f2);
+	comparePtr *Compare;
 };
 
 /**
@@ -242,6 +248,12 @@ struct dirEntry
  *  @brief Type definition of the directory entry.
  */
 typedef struct dirEntry DIR_ENTRY;
+
+/**
+ *  @typedef compareFile
+ *  @brief Function pointer for comparing two files.
+ */
+typedef int (compareFile)(DIR_ENTRY *first, DIR_ENTRY *second);
 
 #ifdef __cplusplus
 #define EXTERNC extern "C"
@@ -253,9 +265,7 @@ typedef struct dirEntry DIR_ENTRY;
  *  dircmd.c
  */
 EXTERNC char *directoryVersion(void);
-EXTERNC int directoryLoad (char *inPath, int findFlags,
-		int(*Compare)(DIR_ENTRY *f1, DIR_ENTRY *f2),
-		void **fileList);
+EXTERNC int directoryLoad (char *inPath, int findFlags, compareFile Compare, void **fileList);
 EXTERNC int directorySort (void **fileList);
 EXTERNC int directoryProcess (int(*ProcFile)(DIR_ENTRY *f1), void **fileList);
 EXTERNC mode_t directoryTrueLinkType (DIR_ENTRY *f1);
@@ -310,15 +320,13 @@ EXTERNC void *queueCreate (void);
 EXTERNC void  queueDelete (void *queueHandle);
 EXTERNC void *queueGet (void *queueHandle);
 EXTERNC void  queuePut (void *queueHandle, void *putData);
-EXTERNC void  queuePutSort (void *queueHandle, void *putData,
-			int(*Compare)(const void *item1, const void *item2));
+EXTERNC void  queuePutSort (void *queueHandle, void *putData, comparePtr Compare);
 EXTERNC void  queuePush (void *queueHandle, void *putData);
 EXTERNC void *queueRead (void *queueHandle, int item);
 EXTERNC void queueSetFreeData (void *queueHandle, unsigned long setData);
 EXTERNC unsigned long queueGetFreeData (void *queueHandle);
 EXTERNC unsigned long queueGetItemCount (void *queueHandle);
-EXTERNC void queueSort (void *queueHandle,
-			int(*Compare)(const void *item1, const void *item2));
+EXTERNC void queueSort (void *queueHandle, comparePtr Compare);
 
 /*
  *  match.c
