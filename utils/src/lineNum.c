@@ -49,14 +49,16 @@ int showDir (DIR_ENTRY *file);
 /*----------------------------------------------------------------------------*/
 COLUMN_DESC colNumberDescs[3] =
 {
-	{ 20,	1,	2,	2,	0x02,	COL_ALIGN_RIGHT,	"Line",			0 },	/* 0 */
-	{ 1024, 10, 10, 0,	0x07,	0,					"Contents",		1 }		/* 1 */
+	{ 20,	1,	2,	2,	0x02,	COL_ALIGN_RIGHT,	"Total",		0 },	/* 0 */
+	{ 20,	1,	2,	2,	0x02,	COL_ALIGN_RIGHT,	"Line",			1 },	/* 1 */
+	{ 1024, 10, 10, 0,	0x07,	0,					"Contents",		2 }		/* 2 */
 };
 
 COLUMN_DESC *ptrNumberColumn[3] =
 {
 	&colNumberDescs[0],
-	&colNumberDescs[1]
+	&colNumberDescs[1],
+	&colNumberDescs[2]
 };
 
 COLUMN_DESC fileDescs[] =
@@ -73,7 +75,7 @@ COLUMN_DESC *ptrFileColumn[] =
 int tabSize = 8;
 int showBlank = 1;
 int filesFound = 0;
-int totalLines = 0;
+int totalLines = -1;
 int displayQuiet = 0;
 int displayColour = 0;
 int startLine = 1;
@@ -117,6 +119,7 @@ void helpThem (char *name)
 	printf ("     -eN  . . Set the ending line number.\n");
 	printf ("     -sN  . . Set the starting line number.\n");
 	printf ("     -tN  . . Set the desired tab size, defaults to 8.\n");
+	printf ("     -T . . . Show total lines in all files.\n");
 }
 
 /**********************************************************************************************************************
@@ -145,7 +148,7 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "bCqe:s:t:?")) != -1)
+	while ((i = getopt(argc, argv, "bCqe:s:t:T?")) != -1)
 	{
 		int t;
 
@@ -181,6 +184,9 @@ int main (int argc, char *argv[])
 				tabSize = t;
 			}
 			break;
+		case 'T':
+			totalLines = 0;
+			break;
 		case '?':
 			helpThem (argv[0]);
 			exit (1);
@@ -192,9 +198,6 @@ int main (int argc, char *argv[])
 		found += directoryLoad (argv[optind], ONLYFILES|ONLYLINKS, NULL, &fileList);
 	}
 
-	/*------------------------------------------------------------------------*/
-	/* Now we can sort the directory.                                         */
-	/*------------------------------------------------------------------------*/
 	if (found)
 	{
 		/*--------------------------------------------------------------------*/
@@ -269,7 +272,7 @@ int showDir (DIR_ENTRY *file)
 	{
 		int linesFound = 0, terminated = 1;
 
-		if (!displayColumnInit (2, ptrNumberColumn, displayColour))
+		if (!displayColumnInit (3, ptrNumberColumn, displayColour))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 0;
@@ -285,6 +288,10 @@ int showDir (DIR_ENTRY *file)
 
 			if (terminated)
 			{
+				if (totalLines >= 0)
+				{
+					++totalLines;
+				}
 				++linesFound;
 				terminated = 0;
 			}
@@ -329,8 +336,12 @@ int showDir (DIR_ENTRY *file)
 				if (linesFound >= startLine && linesFound <= endLine)
 				{
 					outBuffer[outPos] = 0;
-					displayInColumn (0, "%d", linesFound);
-					displayInColumn (1, "%s", outBuffer);
+					if (totalLines >= 0)
+					{
+						displayInColumn (0, "%d", totalLines);
+					}
+					displayInColumn (1, "%d", linesFound);
+					displayInColumn (2, "%s", outBuffer);
 					displayNewLine (0);
 					++linesShown;
 				}
