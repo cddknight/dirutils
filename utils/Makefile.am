@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = dist-bzip2
 bin_PROGRAMS = ldir addComment casedir casefile findFunny hexDump inQuote jsonParse lineDraw lineNum lines listFunc \
-		memTest modcr pfile procMonitor rmCppCmt tabSpace xmlParse
+		memTest mkTable modcr pfile procMonitor rmCppCmt tabSpace xmlParse
 AM_CPPFLAGS = -D_FILE_OFFSET_BITS=64 $(DEPS_CFLAGS)
 LIBS = $(DEPS_LIBS) -lm
 ldir_SOURCES = src/ldir.c
@@ -17,6 +17,7 @@ lines_SOURCES = src/lines.c
 inQuote_SOURCES = src/inQuote.c
 listFunc_SOURCES = src/listFunc.c
 memTest_SOURCES = src/memTest.c
+mkTable_SOURCES = src/mkTable.c
 modcr_SOURCES = src/modcr.c
 pfile_SOURCES = src/pfile.c
 procMonitor_SOURCES = src/procMonitor.c
