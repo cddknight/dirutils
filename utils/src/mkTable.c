@@ -1,6 +1,6 @@
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  L I N E  N U M . C                                                                                                *
+ *  M K  T A B L E . C                                                                                                *
  *  ==================                                                                                                *
  *                                                                                                                    *
  *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
@@ -18,7 +18,7 @@
  **********************************************************************************************************************/
 /**
  *  \file
- *  \brief Display a text file with line numbers.
+ *  \brief Display a separated file in columns.
  */
 #include <config.h>
 #include <stdio.h>
@@ -46,30 +46,30 @@
 int showDir (DIR_ENTRY *file);
 
 /*----------------------------------------------------------------------------*/
-/* Globals                                                                    */
+/* Global                                                                    */
 /*----------------------------------------------------------------------------*/
 COLUMN_DESC colNumberDescs[MAX_COL + 1] =
 {
-	{ 81,	5,	2,	2,	0x02,	0,	"Col1",		1 },	/* 0 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col2",		2 },	/* 1 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col3",		3 },	/* 0 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col4",		4 },	/* 1 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col5",		5 },	/* 0 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col6",		6 },	/* 1 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col7",		7 },	/* 0 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col8",		8 },	/* 1 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col9",		9 },	/* 0 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col10",	10 },	/* 1 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col11",	11 },	/* 0 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col12",	12 },	/* 1 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col13",	13 },	/* 0 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col14",	14 },	/* 1 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col15",	15 },	/* 0 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col16",	16 },	/* 1 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col17",	17 },	/* 0 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col18",	18 },	/* 1 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col19",	19 },	/* 0 */
-	{ 81,	5,	2,	2,	0x02,	0,	"Col20",	20 },	/* 1 */
+	{ 81,	2,	2,	2,	0x0A,	0,	"Col1",		1 },	/* 0 */
+	{ 81,	2,	2,	2,	0x0E,	0,	"Col2",		2 },	/* 1 */
+	{ 81,	2,	2,	2,	0x0A,	0,	"Col3",		3 },	/* 0 */
+	{ 81,	2,	2,	2,	0x0E,	0,	"Col4",		4 },	/* 1 */
+	{ 81,	2,	2,	2,	0x0A,	0,	"Col5",		5 },	/* 0 */
+	{ 81,	2,	2,	2,	0x0E,	0,	"Col6",		6 },	/* 1 */
+	{ 81,	2,	2,	2,	0x0A,	0,	"Col7",		7 },	/* 0 */
+	{ 81,	2,	2,	2,	0x0E,	0,	"Col8",		8 },	/* 1 */
+	{ 81,	2,	2,	2,	0x0A,	0,	"Col9",		9 },	/* 0 */
+	{ 81,	2,	2,	2,	0x0E,	0,	"Col10",	10 },	/* 1 */
+	{ 81,	2,	2,	2,	0x0A,	0,	"Col11",	11 },	/* 0 */
+	{ 81,	2,	2,	2,	0x0E,	0,	"Col12",	12 },	/* 1 */
+	{ 81,	2,	2,	2,	0x0A,	0,	"Col13",	13 },	/* 0 */
+	{ 81,	2,	2,	2,	0x0E,	0,	"Col14",	14 },	/* 1 */
+	{ 81,	2,	2,	2,	0x0A,	0,	"Col15",	15 },	/* 0 */
+	{ 81,	2,	2,	2,	0x0E,	0,	"Col16",	16 },	/* 1 */
+	{ 81,	2,	2,	2,	0x0A,	0,	"Col17",	17 },	/* 0 */
+	{ 81,	2,	2,	2,	0x0E,	0,	"Col18",	18 },	/* 1 */
+	{ 81,	2,	2,	2,	0x0A,	0,	"Col19",	19 },	/* 0 */
+	{ 81,	2,	2,	2,	0x0E,	0,	"Col20",	20 },	/* 1 */
 };
 
 COLUMN_DESC *ptrNumberColumn[MAX_COL + 1] =
@@ -82,7 +82,7 @@ COLUMN_DESC *ptrNumberColumn[MAX_COL + 1] =
 
 COLUMN_DESC fileDescs[] =
 {
-	{	60, 8,	16, 2,	0x07,	0,	"Filename", 1	},	/* 0 */
+	{	60, 8,	16, 2,	0x07,	0,	"File name", 1	},	/* 0 */
 	{	20, 4,	4,	0,	0x07,	0,	"Size",		0	},	/* 1 */
 };
 
@@ -100,6 +100,7 @@ int displayColour = 0;
 int startLine = 1;
 int endLine = MAXINT;
 char separator = ',';
+unsigned long displayCol = -1;
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -113,7 +114,7 @@ char separator = ',';
  */
 void version (void)
 {
-	printf ("TheKnight: , Version %s\n", directoryVersion());
+	printf ("TheKnight: Display separated file, Version %s\n", directoryVersion());
 	displayLine ();
 }
 
@@ -131,12 +132,13 @@ void version (void)
 void helpThem (char *name)
 {
 	version ();
-	printf ("Enter the command: %s [options] <filename>\n", basename(name));
+	printf ("Enter the command: %s [options] <file name>\n", basename(name));
 	printf ("Options: \n");
 	printf ("     -C . . . Display output in colour.\n");
 	printf ("     -q . . . Quiet mode, only show file contents.\n");
+	printf ("     -sC  . . Set separator character [,].\n");
+	printf ("     -bN  . . Set the beginning line number.\n");
 	printf ("     -eN  . . Set the ending line number.\n");
-	printf ("     -sN  . . Set the starting line number.\n");
 }
 
 /**********************************************************************************************************************
@@ -165,7 +167,7 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "Cqe:s:?")) != -1)
+	while ((i = getopt(argc, argv, "Cqe:b:s:d:?")) != -1)
 	{
 		int t;
 
@@ -184,11 +186,78 @@ int main (int argc, char *argv[])
 				endLine = t;
 			}
 			break;
-		case 's':
+		case 'b':
 			t = atoi (optarg);
 			if (t > 0 && t <= endLine)
 			{
 				startLine = t;
+			}
+			break;
+		case 'd':
+			t = atoi (optarg);
+			if (displayCol == -1)
+			{
+				displayCol = 0;
+			}
+			if (t > 0)
+			{
+				displayCol |= (1 << (t - 1));
+			}
+			break;
+		case 's':
+			{
+				int i = 0;
+				char lastChar = 0;
+				while (optarg[i])
+				{
+					if (lastChar == '\\')
+					{
+						switch (optarg[i])
+						{
+						case '\\':
+							separator = '\\';
+							break;
+						case 'b':
+							separator = '\b';
+							break;
+						case 'f':
+							separator = '\f';
+							break;
+						case 'a':
+							separator = '\a';
+							break;
+						case 't':
+							separator = '\t';
+							break;
+						case 'r':
+							separator = '\r';
+							break;
+						case 'n':
+							separator = '\n';
+							break;
+						case '\'':
+							separator = '\'';
+							break;
+						case '\"':
+							separator = '\"';
+							break;
+						case ' ':
+							separator = ' ';
+							break;
+						}
+						lastChar = 0;
+					}
+					else if (optarg[i] >= ' ')
+					{
+						separator = optarg[i];
+						lastChar = optarg[i];
+					}
+					else
+					{
+						lastChar = 0;
+					}
+					++i;
+				}
 			}
 			break;
 		case '?':
@@ -245,12 +314,11 @@ int main (int argc, char *argv[])
  */
 int showDir (DIR_ENTRY *file)
 {
-	char inBuffer[INBUFF_SIZE + 1], outBuffer[(8 * INBUFF_SIZE) + 1];
+	char inBuffer[INBUFF_SIZE + 1], outBuffer[INBUFF_SIZE + 1];
 	int linesShown = 0;
 	FILE *readFile;
 
-	/*------------------------------------------------------------------------*/
-	/* First display a table with the file name and size.                     */
+	/*------------------------------------------------------------------------*/	/* First display a table with the file name and size.                     */
 	/*------------------------------------------------------------------------*/
 	if (!displayColumnInit (2, ptrFileColumn, displayColour))
 	{
@@ -274,7 +342,7 @@ int showDir (DIR_ENTRY *file)
 
 	if ((readFile = fopen (inBuffer, "rb")) != NULL)
 	{
-		if (!displayColumnInit (10, ptrNumberColumn, displayColour))
+		if (!displayColumnInit (MAX_COL, ptrNumberColumn, displayColour))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 0;
@@ -285,35 +353,45 @@ int showDir (DIR_ENTRY *file)
 		}
 		while (fgets (inBuffer, INBUFF_SIZE, readFile) != NULL)
 		{
-			int i = 0, j = 0, c = 0;
+			int ipos = 0, opos = 0, icol = 0, ocol = 0;
 
 			outBuffer[0] = 0;
-			while (inBuffer[i] != 0 && c < 20)
+			while (inBuffer[ipos] != 0 && ocol < MAX_COL)
 			{
-				if (inBuffer[i] >= ' ')
+				if (inBuffer[ipos] >= ' ')
 				{
-					if (inBuffer[i] == separator)
+					if (inBuffer[ipos] == separator)
 					{
-						if (j)
+						if (opos)
 						{
-							displayInColumn (c++, "%s", outBuffer);
-							outBuffer[j = 0] = 0;
+							if (displayCol & (1 << icol))
+							{
+								displayInColumn (ocol++, "%s", outBuffer);
+							}
+							outBuffer[opos = 0] = 0;
+							++linesShown;
+							++icol;
 						}
 					}
 					else
 					{
-						outBuffer[j++] = inBuffer[i];
-						outBuffer[j] = 0;
+						outBuffer[opos++] = inBuffer[ipos];
+						outBuffer[opos] = 0;
 					}
 				}
-				++i;
+				++ipos;
 			}
-			if (j)
+			if (opos)
 			{
-				displayInColumn (c++, "%s", outBuffer);
-				outBuffer[j = 0] = 0;
+				if (displayCol & (1 << icol))
+				{
+					displayInColumn (ocol++, "%s", outBuffer);
+				}
+				outBuffer[opos = 0] = 0;
+				++linesShown;
+				++icol;
 			}
-			if (c)
+			if (ocol)
 			{
 				displayNewLine (0);
 			}
