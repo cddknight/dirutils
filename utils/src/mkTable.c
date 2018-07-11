@@ -143,8 +143,8 @@ int getBitMask (int bit)
 {
 	if (bitMaskSet)
 	{
-	    unsigned long mask = 1;
-   		unsigned int maskNum = bit >> 6, bitNum = bit & 0x3F;
+		unsigned long mask = 1;
+		unsigned int maskNum = bit >> 6, bitNum = bit & 0x3F;
 
 		if (maskNum < 8)
 		{
@@ -218,7 +218,7 @@ void procNumberRange (char *value)
 				for (l = start; l <= end; ++l)
 				{
 					setBitMask (l - 1);
-				} 
+				}
 			}
 			else if (start)
 			{
@@ -535,7 +535,6 @@ void processStdin (void)
 {
 	char inBuffer[INBUFF_SIZE + 1], outBuffer[INBUFF_SIZE + 1];
 	int linesShown = 0;
-	FILE *readFile;
 
 	/*------------------------------------------------------------------------*/
 	/* First display a table with the file name and size.                     */
