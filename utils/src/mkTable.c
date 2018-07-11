@@ -119,11 +119,13 @@ void processStdin (void);
 void setBitMask (int bit)
 {
 	unsigned long mask = 1;
-	int maskNum = bit >> 6;
-	int bitNum = bit & 0x3F;
+	unsigned int maskNum = bit >> 6, bitNum = bit & 0x3F;
 
-	bitMask[maskNum] |= (mask << bitNum);
-	bitMaskSet = 1;
+	if (maskNum < 8)
+	{
+		bitMask[maskNum] |= (mask << bitNum);
+		bitMaskSet = 1;
+	}
 }
 
 /**********************************************************************************************************************
@@ -142,10 +144,13 @@ int getBitMask (int bit)
 	if (bitMaskSet)
 	{
 	    unsigned long mask = 1;
-   		int maskNum = bit >> 6;
-		int bitNum = bit & 0x3F;
+   		unsigned int maskNum = bit >> 6, bitNum = bit & 0x3F;
 
-		return (bitMask[maskNum] & (mask << bitNum) ? 1 : 0);
+		if (maskNum < 8)
+		{
+			return (bitMask[maskNum] & (mask << bitNum) ? 1 : 0);
+		}
+		return 0;
 	}
 	return 1;
 }
@@ -164,6 +169,73 @@ void version (void)
 {
 	printf ("TheKnight: Display separated file, Version %s\n", directoryVersion());
 	displayLine ();
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  P R O C  N U M B E R  R A N G E                                                                                   *
+ *  ===============================                                                                                   *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Allow you to input column number ranges and comma separated lists.
+ *  \param value A number string that could be (1) (1-3) (1,2,3).
+ *  \result None.
+ */
+void procNumberRange (char *value)
+{
+	int start = 0, end = 0, range = 0, ipos = 0, done = 0;
+
+	while (!done)
+	{
+		if (value[ipos] >= '0' && value[ipos] <= '9')
+		{
+			if (range)
+			{
+				end = (end * 10) + (value[ipos] - '0');
+			}
+			else
+			{
+				start = (start * 10) + (value[ipos] - '0');
+			}
+		}
+		else if (value[ipos] == '-')
+		{
+			if (range == 0)
+			{
+				range = 1;
+			}
+			else
+			{
+				start = end = range = 0;
+			}
+		}
+		else if (value[ipos] == ',' || value[ipos] == 0)
+		{
+			if (start && end && range)
+			{
+				int l;
+				for (l = start; l <= end; ++l)
+				{
+					setBitMask (l - 1);
+				} 
+			}
+			else if (start)
+			{
+				setBitMask (start - 1);
+			}
+			start = end = range = 0;
+			if (value[ipos] == 0)
+			{
+				done = 1;
+			}
+		}
+		else
+		{
+			start = end = range = 0;
+		}
+		++ipos;
+	}
 }
 
 /**********************************************************************************************************************
@@ -242,11 +314,7 @@ int main (int argc, char *argv[])
 			}
 			break;
 		case 'd':
-			t = atoi (optarg);
-			if (t > 0)
-			{
-				setBitMask (t - 1);
-			}
+			procNumberRange (optarg);
 			break;
 		case 's':
 			{
