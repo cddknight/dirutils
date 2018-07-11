@@ -100,7 +100,53 @@ int displayColour = 0;
 int startLine = 1;
 int endLine = MAXINT;
 char separator = ',';
-unsigned long displayCol = -1;
+int bitMaskSet;
+unsigned long bitMask[8];
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  S E T  B I T  M A S K                                                                                             *
+ *  =====================                                                                                             *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Set a bit can be in the range 0 to 511.
+ *  \param bit Bit to be set.
+ *  \result None.
+ */
+void setBitMask (int bit)
+{
+	unsigned long mask = 1;
+	int maskNum = bit >> 6;
+	int bitNum = bit & 0x3F;
+
+	bitMask[maskNum] |= (mask << bitNum);
+	bitMaskSet = 1;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  G E T  B I T  M A S K                                                                                             *
+ *  =====================                                                                                             *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Get whether a bit is set.
+ *  \param bit Bit to check.
+ *  \result 1 if it is set, 0 if not.
+ */
+int getBitMask (int bit)
+{
+	if (bitMaskSet)
+	{
+	    unsigned long mask = 1;
+   		int maskNum = bit >> 6;
+		int bitNum = bit & 0x3F;
+
+		return (bitMask[maskNum] & (mask << bitNum) ? 1 : 0);
+	}
+	return 1;
+}
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -195,24 +241,20 @@ int main (int argc, char *argv[])
 			break;
 		case 'd':
 			t = atoi (optarg);
-			if (displayCol == -1)
-			{
-				displayCol = 0;
-			}
 			if (t > 0)
 			{
-				displayCol |= (1 << (t - 1));
+				setBitMask (t - 1);
 			}
 			break;
 		case 's':
 			{
-				int i = 0;
+				int chr = 0;
 				char lastChar = 0;
-				while (optarg[i])
+				while (optarg[chr])
 				{
 					if (lastChar == '\\')
 					{
-						switch (optarg[i])
+						switch (optarg[chr])
 						{
 						case '\\':
 							separator = '\\';
@@ -247,16 +289,16 @@ int main (int argc, char *argv[])
 						}
 						lastChar = 0;
 					}
-					else if (optarg[i] >= ' ')
+					else if (optarg[chr] >= ' ')
 					{
-						separator = optarg[i];
-						lastChar = optarg[i];
+						separator = optarg[chr];
+						lastChar = optarg[chr];
 					}
 					else
 					{
 						lastChar = 0;
 					}
-					++i;
+					++chr;
 				}
 			}
 			break;
@@ -318,7 +360,8 @@ int showDir (DIR_ENTRY *file)
 	int linesShown = 0;
 	FILE *readFile;
 
-	/*------------------------------------------------------------------------*/	/* First display a table with the file name and size.                     */
+	/*------------------------------------------------------------------------*/
+	/* First display a table with the file name and size.                     */
 	/*------------------------------------------------------------------------*/
 	if (!displayColumnInit (2, ptrFileColumn, displayColour))
 	{
@@ -356,22 +399,23 @@ int showDir (DIR_ENTRY *file)
 			int ipos = 0, opos = 0, icol = 0, ocol = 0;
 
 			outBuffer[0] = 0;
-			while (inBuffer[ipos] != 0 && ocol < MAX_COL)
+			while (inBuffer[ipos] != 0 && ocol < MAX_COL && icol < 512)
 			{
-				if (inBuffer[ipos] >= ' ')
+				if (inBuffer[ipos] >= ' ' || inBuffer[ipos] == separator)
 				{
 					if (inBuffer[ipos] == separator)
 					{
-						if (opos)
+						if (getBitMask (icol))
 						{
-							if (displayCol & (1 << icol))
+							if (opos)
 							{
-								displayInColumn (ocol++, "%s", outBuffer);
+/*								printf ("icol = %d, mask = %s [%s]\n", icol, getBitMask(icol) ? "yes" : "no", outBuffer);
+*/								displayInColumn (ocol, "%s", outBuffer);
 							}
-							outBuffer[opos = 0] = 0;
-							++linesShown;
-							++icol;
+							++ocol;
 						}
+						outBuffer[opos = 0] = 0;
+						++icol;
 					}
 					else
 					{
@@ -383,17 +427,16 @@ int showDir (DIR_ENTRY *file)
 			}
 			if (opos)
 			{
-				if (displayCol & (1 << icol))
+				if (getBitMask (icol))
 				{
 					displayInColumn (ocol++, "%s", outBuffer);
 				}
 				outBuffer[opos = 0] = 0;
-				++linesShown;
-				++icol;
 			}
 			if (ocol)
 			{
 				displayNewLine (0);
+				++linesShown;
 			}
 		}
 		fclose (readFile);
