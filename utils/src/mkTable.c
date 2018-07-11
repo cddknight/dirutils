@@ -37,7 +37,7 @@
 #define MAXINT 2147483647
 #endif
 
-#define INBUFF_SIZE		2048
+#define INBUFF_SIZE		4096
 #define MAX_COL			20
 
 /*----------------------------------------------------------------------------*/
@@ -102,6 +102,8 @@ int endLine = MAXINT;
 char separator = ',';
 int bitMaskSet;
 unsigned long bitMask[8];
+
+void processStdin (void);
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -308,6 +310,11 @@ int main (int argc, char *argv[])
 		}
 	}
 
+	if (optind == argc)
+	{
+		processStdin ();
+		exit (0);
+	}
 	for (; optind < argc; ++optind)
 	{
 		found += directoryLoad (argv[optind], ONLYFILES|ONLYLINKS, NULL, &fileList);
@@ -446,3 +453,95 @@ int showDir (DIR_ENTRY *file)
 	return linesShown ? 1 : 0;
 }
 
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  P R O C E S S  S T D I N                                                                                          *
+ *  ========================                                                                                          *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Read the input from stdin.
+ *  \result None.
+ */
+void processStdin (void)
+{
+	char inBuffer[INBUFF_SIZE + 1], outBuffer[INBUFF_SIZE + 1];
+	int linesShown = 0;
+	FILE *readFile;
+
+	/*------------------------------------------------------------------------*/
+	/* First display a table with the file name and size.                     */
+	/*------------------------------------------------------------------------*/
+	if (!displayColumnInit (1, ptrFileColumn, displayColour))
+	{
+		fprintf (stderr, "ERROR in: displayColumnInit\n");
+		return;
+	}
+	if (!displayQuiet)
+	{
+		displayDrawLine (0);
+		displayHeading (0);
+		displayNewLine (0);
+		displayInColumn (0, "stdin");
+		displayNewLine (DISPLAY_INFO);
+		displayAllLines ();
+	}
+	displayTidy ();
+
+	if (!displayColumnInit (MAX_COL, ptrNumberColumn, displayColour))
+	{
+		fprintf (stderr, "ERROR in: displayColumnInit\n");
+		return;
+	}
+	if (!displayQuiet)
+	{
+		displayDrawLine (0);
+	}
+	while (fgets (inBuffer, INBUFF_SIZE, stdin) != NULL)
+	{
+		int ipos = 0, opos = 0, icol = 0, ocol = 0;
+
+		outBuffer[0] = 0;
+		while (inBuffer[ipos] != 0 && ocol < MAX_COL && icol < 512)
+		{
+			if (inBuffer[ipos] >= ' ' || inBuffer[ipos] == separator)
+			{
+				if (inBuffer[ipos] == separator)
+				{
+					if (getBitMask (icol))
+					{
+						if (opos)
+						{
+/*								printf ("icol = %d, mask = %s [%s]\n", icol, getBitMask(icol) ? "yes" : "no", outBuffer);
+*/								displayInColumn (ocol, "%s", outBuffer);
+						}
+						++ocol;
+					}
+					outBuffer[opos = 0] = 0;
+					++icol;
+				}
+				else
+				{
+					outBuffer[opos++] = inBuffer[ipos];
+					outBuffer[opos] = 0;
+				}
+			}
+			++ipos;
+		}
+		if (opos)
+		{
+			if (getBitMask (icol))
+			{
+				displayInColumn (ocol++, "%s", outBuffer);
+			}
+			outBuffer[opos = 0] = 0;
+		}
+		if (ocol)
+		{
+			displayNewLine (0);
+			++linesShown;
+		}
+	}
+	displayAllLines ();
+	displayTidy ();
+}
