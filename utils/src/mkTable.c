@@ -201,6 +201,10 @@ void procNumberRange (char *value)
 		{
 			if (range == 0)
 			{
+				if (start == 0)
+				{
+					start = 1;
+				}
 				range = 1;
 			}
 			else
@@ -252,11 +256,12 @@ void helpThem (char *name)
 	version ();
 	printf ("Enter the command: %s [options] <file name>\n", basename(name));
 	printf ("Options: \n");
-	printf ("     -C . . . Display output in colour.\n");
-	printf ("     -q . . . Quiet mode, only show file contents.\n");
-	printf ("     -sC  . . Set separator character [,].\n");
-	printf ("     -bN  . . Set the beginning line number.\n");
-	printf ("     -eN  . . Set the ending line number.\n");
+	printf ("     -C . . . . . Display output in colour.\n");
+	printf ("     -q . . . . . Quiet mode, only show file contents.\n");
+	printf ("     -dN  . . . . Columns to display, [example 1,3-5,7].\n");
+	printf ("     -sC  . . . . Set separator character [default ,].\n");
+	printf ("     -bN  . . . . Set the beginning line number.\n");
+	printf ("     -eN  . . . . Set the ending line number.\n");
 }
 
 /**********************************************************************************************************************
