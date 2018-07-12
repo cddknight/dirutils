@@ -435,7 +435,7 @@ int main (int argc, char *argv[])
 int showDir (DIR_ENTRY *file)
 {
 	char inBuffer[INBUFF_SIZE + 1], outBuffer[INBUFF_SIZE + 1];
-	int linesShown = 0;
+	int linesShown = 0, linesRead = 0;
 	FILE *readFile;
 
 	/*------------------------------------------------------------------------*/
@@ -476,6 +476,108 @@ int showDir (DIR_ENTRY *file)
 		{
 			int ipos = 0, opos = 0, icol = 0, ocol = 0;
 
+			++linesRead;
+			if (linesRead >= startLine && linesRead <= endLine)
+			{
+				outBuffer[0] = 0;
+				while (inBuffer[ipos] != 0 && ocol < MAX_COL && icol < 512)
+				{
+					if (inBuffer[ipos] >= ' ' || inBuffer[ipos] == separator)
+					{
+						if (inBuffer[ipos] == separator)
+						{
+							if (getBitMask (icol))
+							{
+								if (opos)
+								{
+	/*								printf ("icol = %d, mask = %s [%s]\n", icol, getBitMask(icol) ? "yes" : "no", outBuffer);
+	*/								displayInColumn (ocol, "%s", outBuffer);
+								}
+								++ocol;
+							}
+							outBuffer[opos = 0] = 0;
+							++icol;
+						}
+						else
+						{
+							outBuffer[opos++] = inBuffer[ipos];
+							outBuffer[opos] = 0;
+						}
+					}
+					++ipos;
+				}
+				if (opos)
+				{
+					if (getBitMask (icol))
+					{
+						displayInColumn (ocol++, "%s", outBuffer);
+					}
+					outBuffer[opos = 0] = 0;
+				}
+				if (ocol)
+				{
+					displayNewLine (0);
+					++linesShown;
+				}
+			}
+		}
+		fclose (readFile);
+		displayAllLines ();
+		displayTidy ();
+	}
+	return linesShown ? 1 : 0;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  P R O C E S S  S T D I N                                                                                          *
+ *  ========================                                                                                          *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Read the input from stdin.
+ *  \result None.
+ */
+void processStdin (void)
+{
+	char inBuffer[INBUFF_SIZE + 1], outBuffer[INBUFF_SIZE + 1];
+	int linesShown = 0, linesRead = 0;
+
+	/*------------------------------------------------------------------------*/
+	/* First display a table with the file name and size.                     */
+	/*------------------------------------------------------------------------*/
+	if (!displayColumnInit (1, ptrFileColumn, displayColour))
+	{
+		fprintf (stderr, "ERROR in: displayColumnInit\n");
+		return;
+	}
+	if (!displayQuiet)
+	{
+		displayDrawLine (0);
+		displayHeading (0);
+		displayNewLine (0);
+		displayInColumn (0, "stdin");
+		displayNewLine (DISPLAY_INFO);
+		displayAllLines ();
+	}
+	displayTidy ();
+
+	if (!displayColumnInit (MAX_COL, ptrNumberColumn, displayColour))
+	{
+		fprintf (stderr, "ERROR in: displayColumnInit\n");
+		return;
+	}
+	if (!displayQuiet)
+	{
+		displayDrawLine (0);
+	}
+	while (fgets (inBuffer, INBUFF_SIZE, stdin) != NULL)
+	{
+		int ipos = 0, opos = 0, icol = 0, ocol = 0;
+
+		++linesRead;
+		if (linesRead >= startLine && linesRead <= endLine)
+		{
 			outBuffer[0] = 0;
 			while (inBuffer[ipos] != 0 && ocol < MAX_COL && icol < 512)
 			{
@@ -516,100 +618,6 @@ int showDir (DIR_ENTRY *file)
 				displayNewLine (0);
 				++linesShown;
 			}
-		}
-		fclose (readFile);
-		displayAllLines ();
-		displayTidy ();
-	}
-	return linesShown ? 1 : 0;
-}
-
-/**********************************************************************************************************************
- *                                                                                                                    *
- *  P R O C E S S  S T D I N                                                                                          *
- *  ========================                                                                                          *
- *                                                                                                                    *
- **********************************************************************************************************************/
-/**
- *  \brief Read the input from stdin.
- *  \result None.
- */
-void processStdin (void)
-{
-	char inBuffer[INBUFF_SIZE + 1], outBuffer[INBUFF_SIZE + 1];
-	int linesShown = 0;
-
-	/*------------------------------------------------------------------------*/
-	/* First display a table with the file name and size.                     */
-	/*------------------------------------------------------------------------*/
-	if (!displayColumnInit (1, ptrFileColumn, displayColour))
-	{
-		fprintf (stderr, "ERROR in: displayColumnInit\n");
-		return;
-	}
-	if (!displayQuiet)
-	{
-		displayDrawLine (0);
-		displayHeading (0);
-		displayNewLine (0);
-		displayInColumn (0, "stdin");
-		displayNewLine (DISPLAY_INFO);
-		displayAllLines ();
-	}
-	displayTidy ();
-
-	if (!displayColumnInit (MAX_COL, ptrNumberColumn, displayColour))
-	{
-		fprintf (stderr, "ERROR in: displayColumnInit\n");
-		return;
-	}
-	if (!displayQuiet)
-	{
-		displayDrawLine (0);
-	}
-	while (fgets (inBuffer, INBUFF_SIZE, stdin) != NULL)
-	{
-		int ipos = 0, opos = 0, icol = 0, ocol = 0;
-
-		outBuffer[0] = 0;
-		while (inBuffer[ipos] != 0 && ocol < MAX_COL && icol < 512)
-		{
-			if (inBuffer[ipos] >= ' ' || inBuffer[ipos] == separator)
-			{
-				if (inBuffer[ipos] == separator)
-				{
-					if (getBitMask (icol))
-					{
-						if (opos)
-						{
-/*								printf ("icol = %d, mask = %s [%s]\n", icol, getBitMask(icol) ? "yes" : "no", outBuffer);
-*/								displayInColumn (ocol, "%s", outBuffer);
-						}
-						++ocol;
-					}
-					outBuffer[opos = 0] = 0;
-					++icol;
-				}
-				else
-				{
-					outBuffer[opos++] = inBuffer[ipos];
-					outBuffer[opos] = 0;
-				}
-			}
-			++ipos;
-		}
-		if (opos)
-		{
-			if (getBitMask (icol))
-			{
-				displayInColumn (ocol++, "%s", outBuffer);
-			}
-			outBuffer[opos = 0] = 0;
-		}
-		if (ocol)
-		{
-			displayNewLine (0);
-			++linesShown;
 		}
 	}
 	displayAllLines ();
