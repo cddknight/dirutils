@@ -101,7 +101,7 @@ int startLine = 1;
 int endLine = MAXINT;
 char separator = ',';
 int bitMaskSet;
-unsigned long bitMask[8];
+unsigned int bitMask[16];
 
 void processStdin (void);
 
@@ -118,10 +118,9 @@ void processStdin (void);
  */
 void setBitMask (int bit)
 {
-	unsigned long mask = 1;
-	unsigned int maskNum = bit >> 6, bitNum = bit & 0x3F;
+	unsigned int mask = 1, maskNum = bit >> 5, bitNum = bit & 0x1F;
 
-	if (maskNum < 8)
+	if (maskNum < 16)
 	{
 		bitMask[maskNum] |= (mask << bitNum);
 		bitMaskSet = 1;
@@ -143,10 +142,9 @@ int getBitMask (int bit)
 {
 	if (bitMaskSet)
 	{
-		unsigned long mask = 1;
-		unsigned int maskNum = bit >> 6, bitNum = bit & 0x3F;
+		unsigned int mask = 1, maskNum = bit >> 5, bitNum = bit & 0x1F;
 
-		if (maskNum < 8)
+		if (maskNum < 16)
 		{
 			return (bitMask[maskNum] & (mask << bitNum) ? 1 : 0);
 		}
