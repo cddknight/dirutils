@@ -99,6 +99,7 @@ int displayQuiet = 0;
 int displayFlags = 0;
 int startLine = 1;
 int endLine = MAXINT;
+int removeSpace = 0;
 char separator = ',';
 int bitMaskSet;
 unsigned int bitMask[16];
@@ -151,6 +152,42 @@ int getBitMask (int bit)
 		return 0;
 	}
 	return 1;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  R M  W H I T E  S P A C E                                                                                         *
+ *  =========================                                                                                         *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Remove whitespace from the beginning and end of the field.
+ *  \param str String to process.
+ *  \result Pointer to the new string.
+ */
+char *rmWhiteSpace (char *str)
+{
+	int start = 0, end = 0, loop = 0, out = 0;
+
+	while (str[loop] <= ' ' && str[loop] != 0)
+	{
+		++loop;
+	}
+	start = loop;
+	while (str[loop] != 0)
+	{
+		if (str[loop] > ' ')
+		{
+			end = loop;
+		}
+		++loop;
+	}
+	for (loop = start; loop <= end; ++loop)
+	{
+		str[out++] = str[loop];
+	}
+	str[out] = 0;
+	return str;
 }
 
 /**********************************************************************************************************************
@@ -258,6 +295,7 @@ void helpThem (char *name)
 	printf ("Options: \n");
 	printf ("     -C . . . . . Display output in colour.\n");
 	printf ("     -q . . . . . Quiet mode, only show file contents.\n");
+	printf ("     -w . . . . . Remove whitespace from the fields.\n");
 	printf ("     -dN  . . . . Columns to display, [example 1,3-5,7].\n");
 	printf ("     -sC  . . . . Set separator character [default ,].\n");
 	printf ("     -bN  . . . . Set the beginning line number.\n");
@@ -290,7 +328,7 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "CHqe:b:s:d:?")) != -1)
+	while ((i = getopt(argc, argv, "CHqwe:b:s:d:?")) != -1)
 	{
 		int t;
 
@@ -299,12 +337,15 @@ int main (int argc, char *argv[])
 		case 'C':
 			displayFlags |= DISPLAY_COLOURS;
 			break;
+
 		case 'H':
 			displayFlags |= DISPLAY_HEADINGS;
 			break;
+
 		case 'q':
 			displayQuiet ^= 1;
 			break;
+
 		case 'e':
 			t = atoi (optarg);
 			if (t >= startLine)
@@ -312,6 +353,7 @@ int main (int argc, char *argv[])
 				endLine = t;
 			}
 			break;
+
 		case 'b':
 			t = atoi (optarg);
 			if (t > 0 && t <= endLine)
@@ -319,9 +361,11 @@ int main (int argc, char *argv[])
 				startLine = t;
 			}
 			break;
+
 		case 'd':
 			procNumberRange (optarg);
 			break;
+
 		case 's':
 			{
 				int chr = 0;
@@ -378,6 +422,11 @@ int main (int argc, char *argv[])
 				}
 			}
 			break;
+
+		case 'w':
+			removeSpace = 1;
+			break;
+
 		case '?':
 			helpThem (argv[0]);
 			exit (1);
@@ -422,6 +471,83 @@ int main (int argc, char *argv[])
 		printf ("No files found\n");
 	}
 	return 0;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  S H O W  L I N E                                                                                                  *
+ *  ================                                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Show a line read from a file or from stdin.
+ *  \param inBuffer String read.
+ *  \param linesRead Number of lines read so far.
+ *  \result 1 if any output shown.
+ */
+int showLine (char *inBuffer, int linesRead)
+{
+	char outBuffer[INBUFF_SIZE + 1];
+	int ipos = 0, opos = 0, icol = 0, ocol = 0, shown = 0;
+
+	if (linesRead >= startLine && linesRead <= endLine)
+	{
+		outBuffer[0] = 0;
+		while (inBuffer[ipos] != 0 && ocol < MAX_COL && icol < 512)
+		{
+			if (inBuffer[ipos] >= ' ' || inBuffer[ipos] == separator)
+			{
+				if (inBuffer[ipos] == separator)
+				{
+					if (getBitMask (icol))
+					{
+						if (opos)
+						{
+							if (removeSpace)
+							{
+								rmWhiteSpace (outBuffer);
+							}
+							if (outBuffer[0])
+							{
+								displayInColumn (ocol, "%s", outBuffer);
+							}
+						}
+						++ocol;
+					}
+					outBuffer[opos = 0] = 0;
+					++icol;
+				}
+				else
+				{
+					outBuffer[opos++] = inBuffer[ipos];
+					outBuffer[opos] = 0;
+				}
+			}
+			++ipos;
+		}
+		if (opos)
+		{
+			if (getBitMask (icol))
+			{
+				if (removeSpace)
+				{
+					rmWhiteSpace (outBuffer);
+				}
+				if (outBuffer[0])
+				{
+					displayInColumn (ocol, "%s", outBuffer);
+				}
+				++ocol;
+			}
+			outBuffer[opos = 0] = 0;
+		}
+		if (ocol)
+		{
+			displayNewLine (0);
+			shown = 1;
+		}
+	}
+	return shown;
 }
 
 /**********************************************************************************************************************
@@ -477,51 +603,10 @@ int showDir (DIR_ENTRY *file)
 		}
 		while (fgets (inBuffer, INBUFF_SIZE, readFile) != NULL)
 		{
-			int ipos = 0, opos = 0, icol = 0, ocol = 0;
-
 			++linesRead;
-			if (linesRead >= startLine && linesRead <= endLine)
+			if (showLine (inBuffer, ++linesRead))
 			{
-				outBuffer[0] = 0;
-				while (inBuffer[ipos] != 0 && ocol < MAX_COL && icol < 512)
-				{
-					if (inBuffer[ipos] >= ' ' || inBuffer[ipos] == separator)
-					{
-						if (inBuffer[ipos] == separator)
-						{
-							if (getBitMask (icol))
-							{
-								if (opos)
-								{
-	/*								printf ("icol = %d, mask = %s [%s]\n", icol, getBitMask(icol) ? "yes" : "no", outBuffer);
-	*/								displayInColumn (ocol, "%s", outBuffer);
-								}
-								++ocol;
-							}
-							outBuffer[opos = 0] = 0;
-							++icol;
-						}
-						else
-						{
-							outBuffer[opos++] = inBuffer[ipos];
-							outBuffer[opos] = 0;
-						}
-					}
-					++ipos;
-				}
-				if (opos)
-				{
-					if (getBitMask (icol))
-					{
-						displayInColumn (ocol++, "%s", outBuffer);
-					}
-					outBuffer[opos = 0] = 0;
-				}
-				if (ocol)
-				{
-					displayNewLine (0);
-					++linesShown;
-				}
+				++linesShown;
 			}
 		}
 		fclose (readFile);
@@ -581,51 +666,10 @@ void processStdin (void)
 	}
 	while (fgets (inBuffer, INBUFF_SIZE, stdin) != NULL)
 	{
-		int ipos = 0, opos = 0, icol = 0, ocol = 0;
-
 		++linesRead;
-		if (linesRead >= startLine && linesRead <= endLine)
+		if (showLine (inBuffer, ++linesRead))
 		{
-			outBuffer[0] = 0;
-			while (inBuffer[ipos] != 0 && ocol < MAX_COL && icol < 512)
-			{
-				if (inBuffer[ipos] >= ' ' || inBuffer[ipos] == separator)
-				{
-					if (inBuffer[ipos] == separator)
-					{
-						if (getBitMask (icol))
-						{
-							if (opos)
-							{
-/*								printf ("icol = %d, mask = %s [%s]\n", icol, getBitMask(icol) ? "yes" : "no", outBuffer);
-*/								displayInColumn (ocol, "%s", outBuffer);
-							}
-							++ocol;
-						}
-						outBuffer[opos = 0] = 0;
-						++icol;
-					}
-					else
-					{
-						outBuffer[opos++] = inBuffer[ipos];
-						outBuffer[opos] = 0;
-					}
-				}
-				++ipos;
-			}
-			if (opos)
-			{
-				if (getBitMask (icol))
-				{
-					displayInColumn (ocol++, "%s", outBuffer);
-				}
-				outBuffer[opos = 0] = 0;
-			}
-			if (ocol)
-			{
-				displayNewLine (0);
-				++linesShown;
-			}
+			++linesShown;
 		}
 	}
 	if (linesShown)
