@@ -39,6 +39,7 @@ install -s -m 755 lineNum $RPM_BUILD_ROOT%{_bindir}/lineNum
 install -s -m 755 lines $RPM_BUILD_ROOT%{_bindir}/lines
 install -s -m 755 listFunc $RPM_BUILD_ROOT%{_bindir}/listFunc
 install -s -m 755 pfile $RPM_BUILD_ROOT%{_bindir}/pfile
+install -s -m 755 mkTable $RPM_BUILD_ROOT%{_bindir}/mkTable
 install -s -m 755 modcr $RPM_BUILD_ROOT%{_bindir}/modcr
 install -s -m 755 rmCppCmt $RPM_BUILD_ROOT%{_bindir}/rmCppCmt
 install -s -m 755 tabSpace $RPM_BUILD_ROOT%{_bindir}/tabSpace
@@ -65,6 +66,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/lines
 %{_bindir}/listFunc
 %{_bindir}/pfile
+%{_bindir}/mkTable
 %{_bindir}/modcr
 %{_bindir}/rmCppCmt
 %{_bindir}/tabSpace
