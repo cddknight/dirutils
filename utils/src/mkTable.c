@@ -50,26 +50,26 @@ int showDir (DIR_ENTRY *file);
 /*----------------------------------------------------------------------------*/
 COLUMN_DESC colNumberDescs[MAX_COL + 1] =
 {
-	{ 81,	2,	2,	2,	0x0A,	0,	"Col1",		1 },	/* 0 */
-	{ 81,	2,	2,	2,	0x0E,	0,	"Col2",		2 },	/* 1 */
-	{ 81,	2,	2,	2,	0x0A,	0,	"Col3",		3 },	/* 0 */
-	{ 81,	2,	2,	2,	0x0E,	0,	"Col4",		4 },	/* 1 */
-	{ 81,	2,	2,	2,	0x0A,	0,	"Col5",		5 },	/* 0 */
-	{ 81,	2,	2,	2,	0x0E,	0,	"Col6",		6 },	/* 1 */
-	{ 81,	2,	2,	2,	0x0A,	0,	"Col7",		7 },	/* 0 */
-	{ 81,	2,	2,	2,	0x0E,	0,	"Col8",		8 },	/* 1 */
-	{ 81,	2,	2,	2,	0x0A,	0,	"Col9",		9 },	/* 0 */
-	{ 81,	2,	2,	2,	0x0E,	0,	"Col10",	10 },	/* 1 */
-	{ 81,	2,	2,	2,	0x0A,	0,	"Col11",	11 },	/* 0 */
-	{ 81,	2,	2,	2,	0x0E,	0,	"Col12",	12 },	/* 1 */
-	{ 81,	2,	2,	2,	0x0A,	0,	"Col13",	13 },	/* 0 */
-	{ 81,	2,	2,	2,	0x0E,	0,	"Col14",	14 },	/* 1 */
-	{ 81,	2,	2,	2,	0x0A,	0,	"Col15",	15 },	/* 0 */
-	{ 81,	2,	2,	2,	0x0E,	0,	"Col16",	16 },	/* 1 */
-	{ 81,	2,	2,	2,	0x0A,	0,	"Col17",	17 },	/* 0 */
-	{ 81,	2,	2,	2,	0x0E,	0,	"Col18",	18 },	/* 1 */
-	{ 81,	2,	2,	2,	0x0A,	0,	"Col19",	19 },	/* 0 */
-	{ 81,	2,	2,	2,	0x0E,	0,	"Col20",	20 },	/* 1 */
+	{ 81,	2,	0,	2,	0x02,	0,	"1",		1 },	/* 0 */
+	{ 81,	2,	0,	2,	0x06,	0,	"2",		2 },	/* 1 */
+	{ 81,	2,	0,	2,	0x02,	0,	"3",		3 },	/* 0 */
+	{ 81,	2,	0,	2,	0x06,	0,	"4",		4 },	/* 1 */
+	{ 81,	2,	0,	2,	0x02,	0,	"5",		5 },	/* 0 */
+	{ 81,	2,	0,	2,	0x06,	0,	"6",		6 },	/* 1 */
+	{ 81,	2,	0,	2,	0x02,	0,	"7",		7 },	/* 0 */
+	{ 81,	2,	0,	2,	0x06,	0,	"8",		8 },	/* 1 */
+	{ 81,	2,	0,	2,	0x02,	0,	"9",		9 },	/* 0 */
+	{ 81,	2,	0,	2,	0x06,	0,	"10",		10 },	/* 1 */
+	{ 81,	2,	0,	2,	0x02,	0,	"11",		11 },	/* 0 */
+	{ 81,	2,	0,	2,	0x06,	0,	"12",		12 },	/* 1 */
+	{ 81,	2,	0,	2,	0x02,	0,	"13",		13 },	/* 0 */
+	{ 81,	2,	0,	2,	0x06,	0,	"14",		14 },	/* 1 */
+	{ 81,	2,	0,	2,	0x02,	0,	"15",		15 },	/* 0 */
+	{ 81,	2,	0,	2,	0x06,	0,	"16",		16 },	/* 1 */
+	{ 81,	2,	0,	2,	0x02,	0,	"17",		17 },	/* 0 */
+	{ 81,	2,	0,	2,	0x06,	0,	"18",		18 },	/* 1 */
+	{ 81,	2,	0,	2,	0x02,	0,	"19",		19 },	/* 0 */
+	{ 81,	2,	0,	2,	0x06,	0,	"20",		20 },	/* 1 */
 };
 
 COLUMN_DESC *ptrNumberColumn[MAX_COL + 1] =
@@ -96,7 +96,7 @@ int showBlank = 1;
 int filesFound = 0;
 int totalLines = 0;
 int displayQuiet = 0;
-int displayColour = 0;
+int displayFlags = 0;
 int startLine = 1;
 int endLine = MAXINT;
 char separator = ',';
@@ -290,14 +290,17 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "Cqe:b:s:d:?")) != -1)
+	while ((i = getopt(argc, argv, "CHqe:b:s:d:?")) != -1)
 	{
 		int t;
 
 		switch (i)
 		{
 		case 'C':
-			displayColour = DISPLAY_COLOURS;
+			displayFlags |= DISPLAY_COLOURS;
+			break;
+		case 'H':
+			displayFlags |= DISPLAY_HEADINGS;
 			break;
 		case 'q':
 			displayQuiet ^= 1;
@@ -401,7 +404,7 @@ int main (int argc, char *argv[])
 
 		if (filesFound)
 		{
-			if (!displayColumnInit (2, ptrFileColumn, displayColour))
+			if (!displayColumnInit (2, ptrFileColumn, displayFlags & DISPLAY_COLOURS))
 			{
 				fprintf (stderr, "ERROR in: displayColumnInit\n");
 				return 0;
@@ -441,7 +444,7 @@ int showDir (DIR_ENTRY *file)
 	/*------------------------------------------------------------------------*/
 	/* First display a table with the file name and size.                     */
 	/*------------------------------------------------------------------------*/
-	if (!displayColumnInit (2, ptrFileColumn, displayColour))
+	if (!displayColumnInit (2, ptrFileColumn, displayFlags & DISPLAY_COLOURS))
 	{
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
 		return 0;
@@ -463,12 +466,12 @@ int showDir (DIR_ENTRY *file)
 
 	if ((readFile = fopen (inBuffer, "rb")) != NULL)
 	{
-		if (!displayColumnInit (MAX_COL, ptrNumberColumn, displayColour))
+		if (!displayColumnInit (MAX_COL, ptrNumberColumn, displayFlags))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 0;
 		}
-		if (!displayQuiet)
+		if (!displayQuiet && !(displayFlags & DISPLAY_HEADINGS))
 		{
 			displayDrawLine (0);
 		}
@@ -525,7 +528,12 @@ int showDir (DIR_ENTRY *file)
 		displayAllLines ();
 		displayTidy ();
 	}
-	return linesShown ? 1 : 0;
+	if (linesShown)
+	{
+		++filesFound;
+		return 1;
+	}
+	return 0;
 }
 
 /**********************************************************************************************************************
@@ -546,7 +554,7 @@ void processStdin (void)
 	/*------------------------------------------------------------------------*/
 	/* First display a table with the file name and size.                     */
 	/*------------------------------------------------------------------------*/
-	if (!displayColumnInit (1, ptrFileColumn, displayColour))
+	if (!displayColumnInit (1, ptrFileColumn, displayFlags & DISPLAY_COLOURS))
 	{
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
 		return;
@@ -562,12 +570,12 @@ void processStdin (void)
 	}
 	displayTidy ();
 
-	if (!displayColumnInit (MAX_COL, ptrNumberColumn, displayColour))
+	if (!displayColumnInit (MAX_COL, ptrNumberColumn, displayFlags))
 	{
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
 		return;
 	}
-	if (!displayQuiet)
+	if (!displayQuiet && !(displayFlags & DISPLAY_HEADINGS))
 	{
 		displayDrawLine (0);
 	}
@@ -619,6 +627,10 @@ void processStdin (void)
 				++linesShown;
 			}
 		}
+	}
+	if (linesShown)
+	{
+		displayDrawLine (0);
 	}
 	displayAllLines ();
 	displayTidy ();
