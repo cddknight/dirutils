@@ -563,7 +563,7 @@ int showLine (char *inBuffer, int linesRead)
  */
 int showDir (DIR_ENTRY *file)
 {
-	char inBuffer[INBUFF_SIZE + 1], outBuffer[INBUFF_SIZE + 1];
+	char inBuffer[INBUFF_SIZE + 1];
 	int linesShown = 0, linesRead = 0;
 	FILE *readFile;
 
@@ -633,7 +633,7 @@ int showDir (DIR_ENTRY *file)
  */
 void processStdin (void)
 {
-	char inBuffer[INBUFF_SIZE + 1], outBuffer[INBUFF_SIZE + 1];
+	char inBuffer[INBUFF_SIZE + 1];
 	int linesShown = 0, linesRead = 0;
 
 	/*------------------------------------------------------------------------*/
