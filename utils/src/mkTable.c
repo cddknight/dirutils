@@ -99,7 +99,7 @@ int displayQuiet = 0;
 int displayFlags = 0;
 int startLine = 1;
 int endLine = MAXINT;
-int removeSpace = 0;
+int removeSpace = 1;
 char separator = ',';
 int bitMaskSet;
 unsigned int bitMask[16];
@@ -295,7 +295,7 @@ void helpThem (char *name)
 	printf ("Options: \n");
 	printf ("     -C . . . . . Display output in colour.\n");
 	printf ("     -q . . . . . Quiet mode, only show file contents.\n");
-	printf ("     -w . . . . . Remove whitespace from the fields.\n");
+	printf ("     -w . . . . . Do not remove whitespace from fields.\n");
 	printf ("     -dN  . . . . Columns to display, [example 1,3-5,7].\n");
 	printf ("     -sC  . . . . Set separator character [default ,].\n");
 	printf ("     -bN  . . . . Set the beginning line number.\n");
@@ -424,7 +424,7 @@ int main (int argc, char *argv[])
 			break;
 
 		case 'w':
-			removeSpace = 1;
+			removeSpace = 0;
 			break;
 
 		case '?':
