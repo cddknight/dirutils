@@ -603,7 +603,6 @@ int showDir (DIR_ENTRY *file)
 		}
 		while (fgets (inBuffer, INBUFF_SIZE, readFile) != NULL)
 		{
-			++linesRead;
 			if (showLine (inBuffer, ++linesRead))
 			{
 				++linesShown;
@@ -666,7 +665,6 @@ void processStdin (void)
 	}
 	while (fgets (inBuffer, INBUFF_SIZE, stdin) != NULL)
 	{
-		++linesRead;
 		if (showLine (inBuffer, ++linesRead))
 		{
 			++linesShown;
