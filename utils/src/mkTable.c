@@ -475,6 +475,30 @@ int main (int argc, char *argv[])
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  S H O W  D A T A                                                                                                  *
+ *  ================                                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Function to display in a column.
+ *  \param col Which column to display in.
+ *  \param outBuffer The buffer to display.
+ *  \result None.
+ */
+void showData (int col, char *outBuffer)
+{
+	if (removeSpace)
+	{
+		rmWhiteSpace (outBuffer);
+	}
+	if (outBuffer[0])
+	{
+		displayInColumn (col, "%s", outBuffer);
+	}
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  S H O W  L I N E                                                                                                  *
  *  ================                                                                                                  *
  *                                                                                                                    *
@@ -503,14 +527,7 @@ int showLine (char *inBuffer, int linesRead)
 					{
 						if (opos)
 						{
-							if (removeSpace)
-							{
-								rmWhiteSpace (outBuffer);
-							}
-							if (outBuffer[0])
-							{
-								displayInColumn (ocol, "%s", outBuffer);
-							}
+							showData (ocol, outBuffer);
 						}
 						++ocol;
 					}
@@ -525,21 +542,13 @@ int showLine (char *inBuffer, int linesRead)
 			}
 			++ipos;
 		}
-		if (opos)
+		if (getBitMask (icol))
 		{
-			if (getBitMask (icol))
+			if (opos)
 			{
-				if (removeSpace)
-				{
-					rmWhiteSpace (outBuffer);
-				}
-				if (outBuffer[0])
-				{
-					displayInColumn (ocol, "%s", outBuffer);
-				}
+				showData (ocol, outBuffer);
 				++ocol;
 			}
-			outBuffer[opos = 0] = 0;
 		}
 		if (ocol)
 		{
@@ -587,8 +596,8 @@ int showDir (DIR_ENTRY *file)
 	}
 	displayTidy ();
 
-	strcpy (inBuffer, file -> fullPath);
-	strcat (inBuffer, file -> fileName);
+	strncpy (inBuffer, file -> fullPath, INBUFF_SIZE);
+	strncat (inBuffer, file -> fileName, INBUFF_SIZE - strlen (inBuffer));
 
 	if ((readFile = fopen (inBuffer, "rb")) != NULL)
 	{
