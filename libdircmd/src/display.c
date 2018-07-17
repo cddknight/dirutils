@@ -911,9 +911,9 @@ void displayUpdHeading (int column, char *heading)
 {
 	if (column >= 0 && column < columnCount)
 	{
-		if (fullColDesc[columnCount] != NULL)
+		if (fullColDesc[column] != NULL)
 		{
-			fullColDesc[columnCount] -> heading = heading;
+			fullColDesc[column] -> heading = heading;
 		}
 	}
 }
