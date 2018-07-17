@@ -146,7 +146,7 @@ void displayLineChar (char lineChar)
 {
 	int i = 0, cols = displayGetWidth();
 
-	for (; i < cols; i ++)
+	for (; i < cols; ++i)
 	{
 		putchar (lineChar);
 	}
@@ -319,7 +319,7 @@ char *displayFileSize (long long size, char *outString)
 
 	while (size >= (long long)10240 && i < 9)
 	{
-		i++;
+		++i;
 		size >>= 10;
 	}
 
@@ -362,7 +362,7 @@ char *displayRightsString (int userRights, char *outString)
 	else if (S_ISDIR(userRights))
 		outString[0] = 'd';
 
-	for (i = 0; i < 3; i++)
+	for (i = 0; i < 3; ++i)
 	{
 		switch (i)
 		{
@@ -872,7 +872,7 @@ int displayColumnInit (int colCount, COLUMN_DESC *colDesc[], int options)
 	if ((rowQueue = queueCreate ()) == NULL)
 		return 0;
 
-	for (columnCount = 0; columnCount < colCount; columnCount++)
+	for (columnCount = 0; columnCount < colCount; ++columnCount)
 	{
 		fullColDesc[columnCount] = (FULL_COLUMN_DESC *)malloc (sizeof (FULL_COLUMN_DESC));
 		if (fullColDesc[columnCount] == NULL)
@@ -897,6 +897,29 @@ int displayColumnInit (int colCount, COLUMN_DESC *colDesc[], int options)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  D I S P L A Y  U P D  H E A D I N G                                                                               *
+ *  ===================================                                                                               *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Allow updating the heading after the init but before display.
+ *  \param column Column to update.
+ *  \param heading Pointer to the new heading.
+ *  \result None.
+ */
+void displayUpdHeading (int column, char *heading)
+{
+	if (column >= 0 && column < columnCount)
+	{
+		if (fullColDesc[columnCount] != NULL)
+		{
+			fullColDesc[columnCount] -> heading = heading;
+		}
+	}
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  V  D I S P L A Y  I N  C O L U M N                                                                                *
  *  ==================================                                                                                *
  *                                                                                                                    *
@@ -913,7 +936,7 @@ static int vDisplayInColumn (int column, char *format, va_list arg_ptr)
 	char tempBuff[TEMP_BUFF_SIZE];
 	int strSize, i, maxSize = TEMP_BUFF_SIZE - 1;
 
-	if (column >= columnCount)
+	if (column < 0 && column >= columnCount)
 		return 0;
 
 	if (currentRow == NULL)
@@ -923,7 +946,7 @@ static int vDisplayInColumn (int column, char *format, va_list arg_ptr)
 
 		memset (currentRow, 0, sizeof (ROW_DESC));
 		currentRow -> rowType = ROW_NORMAL_LINE;
-		for (i = 0; i < columnCount; i++)
+		for (i = 0; i < columnCount; ++i)
 			currentRow -> colColour[i] = -1;
 	}
 
@@ -1071,7 +1094,7 @@ static int calcDisplaySize (void)
 {
 	int retnSize = 0, i;
 
-	for (i = 0; i < columnCount; i++)
+	for (i = 0; i < columnCount; ++i)
 	{
 		if (fullColDesc[i] -> displaySize)
 		{
@@ -1096,7 +1119,7 @@ static void addHeadingSizes (void)
 {
 	int i;
 
-	for (i = 0; i < columnCount; i++)
+	for (i = 0; i < columnCount; ++i)
 	{
 		if (fullColDesc[i] -> displaySize > 0 && fullColDesc[i] -> heading != NULL)
 		{
@@ -1125,7 +1148,7 @@ static int reduceDisplaySize(void)
 {
 	int reduceCol = -1, reducePri = 0, sizeDiff = 0, gapSize = 0, i;
 
-	for (i = 0; i < columnCount; i++)
+	for (i = 0; i < columnCount; ++i)
 	{
 		if (fullColDesc[i] -> gap > 1)
 		{
@@ -1142,7 +1165,7 @@ static int reduceDisplaySize(void)
 		return 1;
 	}
 
-	for (i = 0; i < columnCount; i++)
+	for (i = 0; i < columnCount; ++i)
 	{
 		if (fullColDesc[i] -> displaySize > fullColDesc[i] -> minWidth)
 		{
@@ -1159,7 +1182,7 @@ static int reduceDisplaySize(void)
 		return 1;
 	}
 
-	for (i = 0; i < columnCount; i++)
+	for (i = 0; i < columnCount; ++i)
 	{
 		if (fullColDesc[i] -> priority >  reducePri && fullColDesc[i] -> displaySize)
 		{
@@ -1355,14 +1378,14 @@ void displayMatchWidth (void)
 {
 	int i, maxSize = 0;
 
-	for (i = 0; i < columnCount; i++)
+	for (i = 0; i < columnCount; ++i)
 	{
 		if (fullColDesc[i] -> displaySize > maxSize)
 			maxSize = fullColDesc[i] -> displaySize;
 	}
 	if (maxSize)
 	{
-		for (i = 0; i < columnCount; i++)
+		for (i = 0; i < columnCount; ++i)
 		{
 			if (maxSize <= fullColDesc[i] -> maxWidth)
 				fullColDesc[i] -> displaySize = maxSize;
@@ -1568,7 +1591,7 @@ void displayAllLines (void)
 		case ROW_DISPLAY_HEADING:
 			{
 				char headingBuff[41];
-				for (i = 0; i < columnCount; i++)
+				for (i = 0; i < columnCount; ++i)
 				{
 					headingBuff[0] = 0;
 
@@ -1588,7 +1611,7 @@ void displayAllLines (void)
 				int noShow = ((displayStartLine > 0 && line < displayStartLine) ||
 						line >= displayEndLine);
 
-				for (i = 0; i < columnCount; i++)
+				for (i = 0; i < columnCount; ++i)
 				{
 					if (!noShow)
 					{
@@ -1613,7 +1636,7 @@ void displayAllLines (void)
 			break;
 
 		case ROW_DISPLAY_INFO:
-			for (i = 0; i < columnCount; i++)
+			for (i = 0; i < columnCount; ++i)
 			{
 				displayColumn (i, displayRow -> colString[i], -1);
 
@@ -1642,7 +1665,7 @@ void displayTidy (void)
 {
 	int i;
 
-	for (i = 0; i < MAX_COLUMNS; i++)
+	for (i = 0; i < MAX_COLUMNS; ++i)
 	{
 		if (fullColDesc[i])
 		{
@@ -1654,7 +1677,7 @@ void displayTidy (void)
 
 	if (currentRow)
 	{
-		for (i = 0; i < MAX_COLUMNS; i++)
+		for (i = 0; i < MAX_COLUMNS; ++i)
 		{
 			if (currentRow -> colString[i])
 				free (currentRow -> colString[i]);
@@ -1663,5 +1686,4 @@ void displayTidy (void)
 	}
 	queueDelete (rowQueue);
 	rowQueue = NULL;
-
 }
