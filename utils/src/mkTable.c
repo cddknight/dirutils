@@ -38,7 +38,7 @@
 #endif
 
 #define INBUFF_SIZE		4096
-#define MAX_COL			20
+#define MAX_COL			40
 
 /*----------------------------------------------------------------------------*/
 /* Prototypes                                                                 */
@@ -48,37 +48,7 @@ int showDir (DIR_ENTRY *file);
 /*----------------------------------------------------------------------------*/
 /* Global                                                                    */
 /*----------------------------------------------------------------------------*/
-COLUMN_DESC colNumberDescs[MAX_COL + 1] =
-{
-	{ 81,	2,	0,	2,	0x02,	0,	"1",		1 },	/* 0 */
-	{ 81,	2,	0,	2,	0x06,	0,	"2",		2 },	/* 1 */
-	{ 81,	2,	0,	2,	0x02,	0,	"3",		3 },	/* 0 */
-	{ 81,	2,	0,	2,	0x06,	0,	"4",		4 },	/* 1 */
-	{ 81,	2,	0,	2,	0x02,	0,	"5",		5 },	/* 0 */
-	{ 81,	2,	0,	2,	0x06,	0,	"6",		6 },	/* 1 */
-	{ 81,	2,	0,	2,	0x02,	0,	"7",		7 },	/* 0 */
-	{ 81,	2,	0,	2,	0x06,	0,	"8",		8 },	/* 1 */
-	{ 81,	2,	0,	2,	0x02,	0,	"9",		9 },	/* 0 */
-	{ 81,	2,	0,	2,	0x06,	0,	"10",		10 },	/* 1 */
-	{ 81,	2,	0,	2,	0x02,	0,	"11",		11 },	/* 0 */
-	{ 81,	2,	0,	2,	0x06,	0,	"12",		12 },	/* 1 */
-	{ 81,	2,	0,	2,	0x02,	0,	"13",		13 },	/* 0 */
-	{ 81,	2,	0,	2,	0x06,	0,	"14",		14 },	/* 1 */
-	{ 81,	2,	0,	2,	0x02,	0,	"15",		15 },	/* 0 */
-	{ 81,	2,	0,	2,	0x06,	0,	"16",		16 },	/* 1 */
-	{ 81,	2,	0,	2,	0x02,	0,	"17",		17 },	/* 0 */
-	{ 81,	2,	0,	2,	0x06,	0,	"18",		18 },	/* 1 */
-	{ 81,	2,	0,	2,	0x02,	0,	"19",		19 },	/* 0 */
-	{ 81,	2,	0,	2,	0x06,	0,	"20",		20 },	/* 1 */
-};
-
-COLUMN_DESC *ptrNumberColumn[MAX_COL + 1] =
-{
-	&colNumberDescs[0], &colNumberDescs[1], &colNumberDescs[2], &colNumberDescs[3], &colNumberDescs[4],
-	&colNumberDescs[5], &colNumberDescs[6], &colNumberDescs[7], &colNumberDescs[8], &colNumberDescs[9],
-	&colNumberDescs[10], &colNumberDescs[11], &colNumberDescs[12], &colNumberDescs[13], &colNumberDescs[14],
-	&colNumberDescs[15], &colNumberDescs[16], &colNumberDescs[17], &colNumberDescs[18], &colNumberDescs[19]
-};
+COLUMN_DESC **ptrNumberColumn;
 
 COLUMN_DESC fileDescs[] =
 {
@@ -100,11 +70,54 @@ int displayFlags = 0;
 int startLine = 1;
 int endLine = MAXINT;
 int removeSpace = 1;
+int lineHeading = 0;
 char separator = ',';
 int bitMaskSet;
 unsigned int bitMask[16];
 
 void processStdin (void);
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  A L L O C  T A B L E                                                                                              *
+ *  ====================                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Allocate the table column descripters.
+ *  \result Number of columns.
+ */
+int allocTable ()
+{
+	ptrNumberColumn = (COLUMN_DESC **) malloc ((MAX_COL + 1) * sizeof (COLUMN_DESC *));
+
+	if (ptrNumberColumn != NULL)
+	{
+		int i, c = 0;
+
+		memset (ptrNumberColumn, 0, (MAX_COL + 1) * sizeof (COLUMN_DESC *));
+		for (i = 0; i < MAX_COL; ++i)
+		{
+			ptrNumberColumn[i] = (COLUMN_DESC *)malloc (sizeof (COLUMN_DESC));
+			if (ptrNumberColumn[i] != NULL)
+			{
+				ptrNumberColumn[i] -> maxWidth = 81;
+				ptrNumberColumn[i] -> minWidth = 2;
+				ptrNumberColumn[i] -> startWidth = 0 ;
+				ptrNumberColumn[i] -> gap = 2;
+				ptrNumberColumn[i] -> colour = (i & 1 ? 0x06 : 0x02);
+				ptrNumberColumn[i] -> attrib = 0;
+				ptrNumberColumn[i] -> priority = i;
+				ptrNumberColumn[i] -> heading = (char *)malloc (21);
+				sprintf (ptrNumberColumn[i] -> heading, "%d", i);
+				++c;
+			}
+		}
+		ptrNumberColumn[c] = NULL;
+		return c;
+	}
+	return 0;
+}
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -325,10 +338,11 @@ int main (int argc, char *argv[])
 		exit (1);
 	}
 
+	allocTable ();
 	displayInit ();
-	displayGetWidth();
+	displayGetWidth ();
 
-	while ((i = getopt(argc, argv, "CHqwe:b:s:d:?")) != -1)
+	while ((i = getopt(argc, argv, "CHhqwe:b:s:d:?")) != -1)
 	{
 		int t;
 
@@ -338,6 +352,8 @@ int main (int argc, char *argv[])
 			displayFlags |= DISPLAY_COLOURS;
 			break;
 
+		case 'h':
+			lineHeading = 1;
 		case 'H':
 			displayFlags |= DISPLAY_HEADINGS;
 			break;
@@ -481,11 +497,12 @@ int main (int argc, char *argv[])
  **********************************************************************************************************************/
 /**
  *  \brief Function to display in a column.
+ *  \param row Which line are we showing (it coulb be line 1 for the headings).
  *  \param col Which column to display in.
  *  \param outBuffer The buffer to display.
  *  \result None.
  */
-void showData (int col, char *outBuffer)
+void showData (int row, int col, char *outBuffer)
 {
 	if (removeSpace)
 	{
@@ -493,7 +510,22 @@ void showData (int col, char *outBuffer)
 	}
 	if (outBuffer[0])
 	{
-		displayInColumn (col, "%s", outBuffer);
+		if (row == 1 && lineHeading)
+		{
+			if (ptrNumberColumn[col] -> heading != NULL)
+			{
+				free (ptrNumberColumn[col] -> heading);
+			}
+			ptrNumberColumn[col] -> heading = (char *)malloc (strlen (outBuffer) + 1);
+			if (ptrNumberColumn[col] -> heading != NULL)
+			{
+				strcpy (ptrNumberColumn[col] -> heading, outBuffer);
+			}
+		}
+		else
+		{
+			displayInColumn (col, "%s", outBuffer);
+		}
 	}
 }
 
@@ -514,7 +546,7 @@ int showLine (char *inBuffer, int linesRead)
 	char outBuffer[INBUFF_SIZE + 1];
 	int ipos = 0, opos = 0, icol = 0, ocol = 0, shown = 0;
 
-	if (linesRead >= startLine && linesRead <= endLine)
+	if ((linesRead >= startLine && linesRead <= endLine) || (linesRead == 1 && lineHeading))
 	{
 		outBuffer[0] = 0;
 		while (inBuffer[ipos] != 0 && ocol < MAX_COL && icol < 512)
@@ -527,7 +559,7 @@ int showLine (char *inBuffer, int linesRead)
 					{
 						if (opos)
 						{
-							showData (ocol, outBuffer);
+							showData (linesRead, ocol, outBuffer);
 						}
 						++ocol;
 					}
@@ -546,7 +578,7 @@ int showLine (char *inBuffer, int linesRead)
 		{
 			if (opos)
 			{
-				showData (ocol, outBuffer);
+				showData (linesRead, ocol, outBuffer);
 				++ocol;
 			}
 		}
