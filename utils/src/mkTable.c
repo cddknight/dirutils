@@ -307,6 +307,8 @@ void helpThem (char *name)
 	printf ("Enter the command: %s [options] <file name>\n", basename(name));
 	printf ("Options: \n");
 	printf ("     -C . . . . . Display output in colour.\n");
+	printf ("     -H . . . . . Show column numbers as headers.\n");
+	printf ("     -h . . . . . Use first line to generate headers.\n");
 	printf ("     -q . . . . . Quiet mode, only show file contents.\n");
 	printf ("     -w . . . . . Do not remove whitespace from fields.\n");
 	printf ("     -dN  . . . . Columns to display, [example 1,3-5,7].\n");
