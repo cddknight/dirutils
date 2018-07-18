@@ -77,7 +77,7 @@ int showBlank = 1;
 int filesFound = 0;
 int totalLines = -1;
 int displayQuiet = 0;
-int displayColour = 0;
+int displayFlags = 0;
 int startLine = 1;
 int endLine = MAXINT;
 
@@ -115,6 +115,7 @@ void helpThem (char *name)
 	printf ("Options: \n");
 	printf ("     -b . . . Do not count blank lines.\n");
 	printf ("     -C . . . Display output in colour.\n");
+	printf ("     -P . . . Display output in pages.\n");
 	printf ("     -q . . . Quiet mode, only show file contents.\n");
 	printf ("     -eN  . . Set the ending line number.\n");
 	printf ("     -sN  . . Set the starting line number.\n");
@@ -148,7 +149,7 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "bCqe:s:t:T?")) != -1)
+	while ((i = getopt(argc, argv, "bCPqe:s:t:T?")) != -1)
 	{
 		int t;
 
@@ -158,7 +159,10 @@ int main (int argc, char *argv[])
 			showBlank = 0;
 			break;
 		case 'C':
-			displayColour = DISPLAY_COLOURS;
+			displayFlags |= DISPLAY_COLOURS;
+			break;
+		case 'P':
+			displayFlags |= DISPLAY_IN_PAGES;
 			break;
 		case 'q':
 			displayQuiet ^= 1;
@@ -208,7 +212,7 @@ int main (int argc, char *argv[])
 
 		if (filesFound)
 		{
-			if (!displayColumnInit (2, ptrFileColumn, displayColour))
+			if (!displayColumnInit (2, ptrFileColumn, 0))
 			{
 				fprintf (stderr, "ERROR in: displayColumnInit\n");
 				return 0;
@@ -248,7 +252,7 @@ int showDir (DIR_ENTRY *file)
 	/*------------------------------------------------------------------------*/
 	/* First display a table with the file name and size.                     */
 	/*------------------------------------------------------------------------*/
-	if (!displayColumnInit (2, ptrFileColumn, displayColour))
+	if (!displayColumnInit (2, ptrFileColumn, 0))
 	{
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
 		return 0;
@@ -272,7 +276,7 @@ int showDir (DIR_ENTRY *file)
 	{
 		int linesFound = 0, terminated = 1;
 
-		if (!displayColumnInit (3, ptrNumberColumn, displayColour))
+		if (!displayColumnInit (3, ptrNumberColumn, displayFlags))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 0;

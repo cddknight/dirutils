@@ -127,7 +127,7 @@ COLUMN_DESC *ptrFileColumn[] =
 };
 
 int filesFound = 0;
-int displayColour = 0;
+int displayFlags = 0;
 int displayQuiet = 0;
 int displayWidth = -1;
 
@@ -162,6 +162,7 @@ void helpThem(char *progName)
 {
 	printf ("Enter the command: %s [-Cqw <size>] <filename>\n", basename (progName));
 	printf ("    -C . . . . . Display output in colour.\n");
+	printf ("    -P . . . . . Display output in pages.\n");
 	printf ("    -q . . . . . Quite mode, only dump the hex codes.\n");
 	printf ("    -w <size>  . Set the display size (8, 16, 24, 32, 40 or 48).\n");
 }
@@ -193,12 +194,16 @@ int main (int argc, char *argv[])
 
 	width = displayGetWidth();
 
-	while ((i = getopt(argc, argv, "Cqw:?")) != -1)
+	while ((i = getopt(argc, argv, "CPqw:?")) != -1)
 	{
 		switch (i)
 		{
 		case 'C':
-			displayColour = DISPLAY_COLOURS;
+			displayFlags |= DISPLAY_COLOURS;
+			break;
+
+		case 'P':
+			displayFlags |= DISPLAY_IN_PAGES;
 			break;
 
 		case 'q':
@@ -240,7 +245,7 @@ int main (int argc, char *argv[])
 
 		if (!displayQuiet && filesFound)
 		{
-			if (!displayColumnInit (2, ptrFileColumn, displayColour))
+			if (!displayColumnInit (2, ptrFileColumn, 0))
 			{
 				fprintf (stderr, "ERROR in: displayColumnInit\n");
 				return 0;
@@ -294,7 +299,7 @@ int showDir (DIR_ENTRY *file)
 	/*------------------------------------------------------------------------*
      * First display a table with the file name and size.                     *
      *------------------------------------------------------------------------*/
-	if (!displayColumnInit (2, ptrFileColumn, displayColour))
+	if (!displayColumnInit (2, ptrFileColumn, 0))
 	{
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
 		return 0;
@@ -319,7 +324,7 @@ int showDir (DIR_ENTRY *file)
 
 	if ((readFile = fopen ((char *)inFile, "rb")) != NULL)
 	{
-		if (!displayColumnInit (56, ptrDumpColumn, displayColour))
+		if (!displayColumnInit (56, ptrDumpColumn, displayFlags))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 0;
