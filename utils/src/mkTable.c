@@ -308,6 +308,7 @@ void helpThem (char *name)
 	printf ("Options: \n");
 	printf ("     -C . . . . . Display output in colour.\n");
 	printf ("     -H . . . . . Show column numbers as headers.\n");
+	printf ("     -P . . . . . Stop the the end of each page.\n");
 	printf ("     -h . . . . . Use first line to generate headers.\n");
 	printf ("     -q . . . . . Quiet mode, only show file contents.\n");
 	printf ("     -w . . . . . Do not remove whitespace from fields.\n");
@@ -344,7 +345,7 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth ();
 
-	while ((i = getopt(argc, argv, "CHhqwe:b:s:d:?")) != -1)
+	while ((i = getopt(argc, argv, "CHPhqwe:b:s:d:?")) != -1)
 	{
 		int t;
 
@@ -358,6 +359,10 @@ int main (int argc, char *argv[])
 			lineHeading = 1;
 		case 'H':
 			displayFlags |= DISPLAY_HEADINGS;
+			break;
+
+		case 'P':
+			displayFlags |= DISPLAY_IN_PAGES;
 			break;
 
 		case 'q':

@@ -160,6 +160,7 @@
 #define DISPLAY_HEADINGS_NT		0x0004
 #define DISPLAY_HEADINGS_NB		0x0008
 #define DISPLAY_IN_COLUMNS		0x0010
+#define DISPLAY_IN_PAGES		0x0020
 
 #define DISPLAY_FIRST			1
 #define DISPLAY_INFO			2
@@ -312,6 +313,7 @@ EXTERNC void displayDrawLine (char flags);
 EXTERNC void displayHeading (char flags);
 EXTERNC void displayBlank (char flags);
 EXTERNC void displayTidy (void);
+EXTERNC int displayKeyPress (void);
 EXTERNC void displayUpdateHeading (int column, char *heading);
 
 /*

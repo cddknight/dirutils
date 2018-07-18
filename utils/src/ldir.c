@@ -137,7 +137,7 @@ char		*quoteMe		=	" *?|&;()<>#\t\\\"";
 
 int			coloursAlt[MAX_COL_DESC + MAX_W_COL_DESC];
 int			colourType[EXTRA_COLOURS];
-int			dirColour = 0;
+int			dirDisplayFlags = 0;
 int			encode = DISPLAY_ENCODE_HEX;
 
 /*----------------------------------------------------------------------------*
@@ -251,6 +251,7 @@ static struct option long_options[] =
 	{	"unique",		no_argument,		0,	'M' },
 	{	"order",		required_argument,	0,	'o' },
 	{	"path",			no_argument,		0,	'p' },
+	{	"pages",		no_argument,		0,	'P' },
 	{	"quiet",		no_argument,		0,	'q' },
 	{	"quote",		no_argument,		0,	'Q' },
 	{	"recursive",	no_argument,		0,	'r' },
@@ -445,6 +446,7 @@ void helpThem (char *progName)
 	printf ("     --order rev . . . . . . -or . . . . . Reverse the current sort order\n");
 	printf ("     --order ver . . . . . . -ov . . . . . Order by numbers in the file name\n");
 	printf ("     --path  . . . . . . . . -p  . . . . . Show the full path to the file\n");
+	printf ("     --pages . . . . . . . . -P  . . . . . Stop the the end of each page\n");
 	printf ("     --quiet . . . . . . . . -q  . . . . . Quiet mode, only paths and file names\n");
 	printf ("     --quote . . . . . . . . -Q  . . . . . Quote special chars\n");
 	printf ("     --recursive . . . . . . -r  . . . . . Recursive directory listing\n");
@@ -546,8 +548,10 @@ void commandOption (char option, char *optionVal, char *progName)
 	switch (option)
 	{
 	case 'C':
-		if (dirColour == DISPLAY_COLOURS)
-			dirColour = 0;
+		if (dirDisplayFlags & DISPLAY_COLOURS)
+		{
+			dirDisplayFlags &= ~DISPLAY_COLOURS;
+		}
 		else
 		{
 			int k;
@@ -559,7 +563,7 @@ void commandOption (char option, char *optionVal, char *progName)
 			{
 				wideColumnDescs[k].colour = coloursAlt[k + MAX_COL_DESC];
 			}
-			dirColour = DISPLAY_COLOURS;
+			dirDisplayFlags |= DISPLAY_COLOURS;
 		}
 		break;
 
@@ -660,6 +664,10 @@ void commandOption (char option, char *optionVal, char *progName)
 	case 'p':
 		showType &= ~SHOW_WIDE;
 		showType |= SHOW_PATH;
+		break;
+
+	case 'P':
+		dirDisplayFlags ^= DISPLAY_IN_PAGES;
 		break;
 
 	case 'm':
@@ -1036,7 +1044,7 @@ int main (int argc, char *argv[])
 	     *--------------------------------------------------------------------*/
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "aAbBcCd:D:mMn:o:pqQrs:ST:VwW:", long_options, &option_index);
+		c = getopt_long (argc, argv, "aAbBcCd:D:mMn:o:pPqQrs:ST:VwW:", long_options, &option_index);
 
 		/*--------------------------------------------------------------------*
 		 * Detect the end of the options.                                     *
@@ -1099,7 +1107,7 @@ int main (int argc, char *argv[])
 				maxCol = 10;
 			maxCol *= 3;
 
-			if (!displayColumnInit (maxCol, ptrAllColumns, dirColour))
+			if (!displayColumnInit (maxCol, ptrAllColumns, dirDisplayFlags))
 			{
 				fprintf (stderr, "ERROR in: displayColumnInit\n");
 				return 1;
@@ -1123,7 +1131,7 @@ int main (int argc, char *argv[])
 				ptrAllColumns[colNum] = &allColumnDescs [columnTranslate[colNum]];
 			}
 
-			if (!displayColumnInit (colNum, ptrAllColumns, DISPLAY_HEADINGS | dirColour))
+			if (!displayColumnInit (colNum, ptrAllColumns, DISPLAY_HEADINGS | dirDisplayFlags))
 			{
 				fprintf (stderr, "ERROR in: displayColumnInit\n");
 				return 1;

@@ -1579,7 +1579,7 @@ void displaySomeLines (int lines)
  */
 void displayAllLines (void)
 {
-	int i, line = 0;
+	int i, line = 0, pageLine = 0;
 	ROW_DESC *displayRow;
 
 	if (currentRow != NULL)
@@ -1606,14 +1606,33 @@ void displayAllLines (void)
 	}
 	while ((displayRow = (ROW_DESC *)queueGet (rowQueue)) != NULL)
 	{
+		if (pageLine + 1 >= displayGetDepth() && (displayOptions & DISPLAY_IN_PAGES))
+		{
+			int key = 0;
+			printf ("Press any key to continue ...");
+			key = displayKeyPress ();
+			printf ("\r                             \r");
+			if (key == 'q')
+			{
+				while ((displayRow = (ROW_DESC *)queueGet (rowQueue)) != NULL)
+				{
+					free (displayRow);
+				}
+				break;
+			}
+			pageLine = 0;
+		}
+
 		switch (displayRow -> rowType)
 		{
 		case ROW_DISPLAY_LINE:
 			displayLine();
+			++pageLine;
 			break;
 
 		case ROW_DISPLAY_BLANK:
 			printf ("\n");
+			++pageLine;
 			break;
 
 		case ROW_DISPLAY_HEADING:
@@ -1632,6 +1651,7 @@ void displayAllLines (void)
 				}
 			}
 			printf ("\n");
+			++pageLine;
 			break;
 
 		case ROW_NORMAL_LINE:
@@ -1664,10 +1684,11 @@ void displayAllLines (void)
 				}
 				if (!noShow)
 				{
+					++pageLine;
 					printf ("\n");
 				}
 			}
-			line ++;
+			++line;
 			break;
 
 		case ROW_DISPLAY_INFO:
@@ -1680,11 +1701,49 @@ void displayAllLines (void)
 				}
 			}
 			printf ("\n");
-			line ++;
+			++pageLine;
+			++line;
 			break;
 		}
 		free (displayRow);
 	}
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I S P L A Y  K E Y  P R E S S                                                                                   *
+ *  ===============================                                                                                   *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Stop and wait for a key press.
+ *  \result The ID of the key pressed.
+ */
+int displayKeyPress (void)
+{
+	int c;
+	struct termios savedState, newState;
+
+	if (tcgetattr(STDIN_FILENO, &savedState) == -1)
+	{
+		return EOF;
+	}
+
+	newState = savedState;
+	newState.c_lflag &= ~(ECHO | ICANON);
+	newState.c_cc[VMIN] = 1;
+
+	if (tcsetattr(STDIN_FILENO, TCSANOW, &newState) == -1)
+	{
+		return EOF;
+	}
+	c = getchar();
+
+	if (tcsetattr(STDIN_FILENO, TCSANOW, &savedState) == -1)
+	{
+		return EOF;
+	}
+	return c;
 }
 
 /**********************************************************************************************************************
