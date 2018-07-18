@@ -867,17 +867,20 @@ void displayForceSize (int cols, int rows)
 int displayColumnInit (int colCount, COLUMN_DESC *colDesc[], int options)
 {
 	if (colCount > MAX_COLUMNS)
+	{
 		return 0;
-
+	}
 	if ((rowQueue = queueCreate ()) == NULL)
+	{
 		return 0;
-
+	}
 	for (columnCount = 0; columnCount < colCount; ++columnCount)
 	{
 		fullColDesc[columnCount] = (FULL_COLUMN_DESC *)malloc (sizeof (FULL_COLUMN_DESC));
 		if (fullColDesc[columnCount] == NULL)
+		{
 			return 0;
-
+		}
 		memset (fullColDesc[columnCount], 0, sizeof (FULL_COLUMN_DESC));
 		fullColDesc[columnCount] -> maxWidth = colDesc[columnCount] -> maxWidth;
 		fullColDesc[columnCount] -> minWidth = colDesc[columnCount] -> minWidth;
@@ -887,18 +890,23 @@ int displayColumnInit (int colCount, COLUMN_DESC *colDesc[], int options)
 		fullColDesc[columnCount] -> colour = colDesc[columnCount] -> colour;
 		fullColDesc[columnCount] -> gap = colDesc[columnCount] -> gap;
 		fullColDesc[columnCount] -> maxSize = fullColDesc[columnCount] -> minWidth;
-		fullColDesc[columnCount] -> heading = colDesc[columnCount] -> heading;
+		if (colDesc[columnCount] -> heading != NULL)
+		{
+			fullColDesc[columnCount] -> heading = (char *)malloc (strlen (colDesc[columnCount] -> heading) + 1);
+			if (fullColDesc[columnCount] -> heading != NULL)
+			{
+				strcpy (fullColDesc[columnCount] -> heading, colDesc[columnCount] -> heading);
+			}
+		}
 	}
-
 	displayOptions = options;
-
 	return 1;
 }
 
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  D I S P L A Y  U P D  H E A D I N G                                                                               *
- *  ===================================                                                                               *
+ *  D I S P L A Y  U P D A T E  H E A D I N G                                                                         *
+ *  =========================================                                                                         *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
@@ -907,13 +915,22 @@ int displayColumnInit (int colCount, COLUMN_DESC *colDesc[], int options)
  *  \param heading Pointer to the new heading.
  *  \result None.
  */
-void displayUpdHeading (int column, char *heading)
+void displayUpdateHeading (int column, char *heading)
 {
 	if (column >= 0 && column < columnCount)
 	{
-		if (fullColDesc[column] != NULL)
+		if (fullColDesc[column] -> heading != NULL)
 		{
-			fullColDesc[column] -> heading = heading;
+			free (fullColDesc[column] -> heading);
+			fullColDesc[column] -> heading = NULL;
+		}
+		if (heading != NULL)
+		{
+			fullColDesc[column] -> heading	= (char *)malloc (strlen (heading) + 1);
+			if (fullColDesc[column] -> heading != NULL)
+			{
+				strcpy (fullColDesc[column] -> heading = heading, heading);
+			}
 		}
 	}
 }
@@ -1471,16 +1488,21 @@ void displayBlank (char flags)
 		ROW_DESC *tempRow;
 
 		if ((tempRow = (ROW_DESC *)malloc (sizeof (ROW_DESC))) == NULL)
+		{
 			return;
-
+		}
 		memset (tempRow, 0, sizeof (ROW_DESC));
 		tempRow -> rowType = ROW_DISPLAY_BLANK;
 		displayNewLine (flags);
 
 		if (flags & DISPLAY_FIRST)
+		{
 			queuePush (rowQueue, tempRow);
+		}
 		else
+		{
 			queuePut (rowQueue, tempRow);
+		}
 	}
 }
 
@@ -1502,16 +1524,21 @@ void displayHeading (char flags)
 		ROW_DESC *tempRow;
 
 		if ((tempRow = (ROW_DESC *)malloc (sizeof (ROW_DESC))) == NULL)
+		{
 			return;
-
+		}
 		memset (tempRow, 0, sizeof (ROW_DESC));
 		tempRow -> rowType = ROW_DISPLAY_HEADING;
 		displayNewLine (flags);
 
 		if (flags & DISPLAY_FIRST)
+		{
 			queuePush (rowQueue, tempRow);
+		}
 		else
+		{
 			queuePut (rowQueue, tempRow);
+		}
 	}
 }
 
@@ -1529,7 +1556,9 @@ void displayHeading (char flags)
 void displaySomeLines (int lines)
 {
 	if (lines >= 0)
+	{
 		displayEndLine = lines;
+	}
 	else if (lines < 0)
 	{
 		displayStartLine = displayLines + lines;
@@ -1554,8 +1583,9 @@ void displayAllLines (void)
 	ROW_DESC *displayRow;
 
 	if (currentRow != NULL)
+	{
 		displayNewLine (0);
-
+	}
 	if (displayOptions & DISPLAY_HEADINGS)
 	{
 		if (!(displayOptions & DISPLAY_HEADINGS_NB))
@@ -1569,13 +1599,11 @@ void displayAllLines (void)
 		}
 		addHeadingSizes ();
 	}
-
 	while (calcDisplaySize() > displayGetWidth())
 	{
 		if (!reduceDisplaySize())
 			break;
 	}
-
 	while ((displayRow = (ROW_DESC *)queueGet (rowQueue)) != NULL)
 	{
 		switch (displayRow -> rowType)
@@ -1608,8 +1636,7 @@ void displayAllLines (void)
 
 		case ROW_NORMAL_LINE:
 			{
-				int noShow = ((displayStartLine > 0 && line < displayStartLine) ||
-						line >= displayEndLine);
+				int noShow = ((displayStartLine > 0 && line < displayStartLine) || line >= displayEndLine);
 
 				for (i = 0; i < columnCount; ++i)
 				{
@@ -1620,17 +1647,25 @@ void displayAllLines (void)
 						if (displayOptions & DISPLAY_COLOURS)
 						{
 							if (displayRow -> colColour[i] != -1)
+							{
 								colour = displayRow -> colColour[i];
+							}
 							else if (fullColDesc[i] -> colour != -1)
+							{
 								colour = fullColDesc[i] -> colour;
+							}
 						}
 						displayColumn (i, displayRow -> colString[i], colour);
 					}
 					if (displayRow -> colString[i] != NULL)
+					{
 						free (displayRow -> colString[i]);
+					}
 				}
 				if (!noShow)
+				{
 					printf ("\n");
+				}
 			}
 			line ++;
 			break;
@@ -1639,9 +1674,10 @@ void displayAllLines (void)
 			for (i = 0; i < columnCount; ++i)
 			{
 				displayColumn (i, displayRow -> colString[i], -1);
-
 				if (displayRow -> colString[i] != NULL)
+				{
 					free (displayRow -> colString[i]);
+				}
 			}
 			printf ("\n");
 			line ++;
@@ -1667,8 +1703,13 @@ void displayTidy (void)
 
 	for (i = 0; i < MAX_COLUMNS; ++i)
 	{
-		if (fullColDesc[i])
+		if (fullColDesc[i] != NULL)
 		{
+			if (fullColDesc[i] -> heading != NULL)
+			{
+				free (fullColDesc[i] -> heading);
+				fullColDesc[i] -> heading = NULL;
+			}
 			free (fullColDesc[i]);
 			fullColDesc[i] = NULL;
 		}

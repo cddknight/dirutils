@@ -520,7 +520,7 @@ void showData (int row, int col, char *outBuffer)
 			if (ptrNumberColumn[col] -> heading != NULL)
 			{
 				strcpy (ptrNumberColumn[col] -> heading, outBuffer);
-				displayUpdHeading (col, ptrNumberColumn[col] -> heading);
+				displayUpdateHeading (col, ptrNumberColumn[col] -> heading);
 			}
 		}
 		else

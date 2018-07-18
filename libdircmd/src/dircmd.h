@@ -312,7 +312,7 @@ EXTERNC void displayDrawLine (char flags);
 EXTERNC void displayHeading (char flags);
 EXTERNC void displayBlank (char flags);
 EXTERNC void displayTidy (void);
-EXTERNC void displayUpdHeading (int column, char *heading);
+EXTERNC void displayUpdateHeading (int column, char *heading);
 
 /*
  *  list.c
