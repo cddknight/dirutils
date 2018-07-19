@@ -7,7 +7,7 @@ URL: http://www.tzclock.org
 Group: Applications/Productivity
 Source: http://www.tzclock.org/releases/%{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
-BuildRequires: ncurses-devel readline-devel libselinux-devel json-glib-devel libxml2-devel libacl-devel
+BuildRequires: ncurses-devel readline-devel libselinux-devel json-glib-devel libxml2-devel libacl-devel gcc
 BuildRequires: libdircmd libdircmd-devel
 
 %define debug_package %{nil}
