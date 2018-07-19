@@ -31,6 +31,8 @@
 #include <sys/stat.h>
 #include <dircmd.h>
 #include <libgen.h>
+#include <getopt.h>
+
 #ifdef HAVE_VALUES_H
 #include <values.h>
 #else
@@ -39,6 +41,10 @@
 
 #define INBUFF_SIZE		4096
 #define MAX_COL			40
+#define MASK_COLS		0
+#define MASK_ROWS		1
+#define MASK_COUNT		2
+#define MASK_SIZE		1024
 
 /*----------------------------------------------------------------------------*/
 /* Prototypes                                                                 */
@@ -67,13 +73,25 @@ int filesFound = 0;
 int totalLines = 0;
 int displayQuiet = 0;
 int displayFlags = 0;
-int startLine = 1;
-int endLine = MAXINT;
 int removeSpace = 1;
 int lineHeading = 0;
 char separator = ',';
-int bitMaskSet;
-unsigned int bitMask[16];
+int bitMaskSet[2];
+unsigned int bitMask[MASK_COUNT][MASK_SIZE];
+
+static struct option long_options[] =
+{
+	{	"colour",		no_argument,		0,	'C' },
+	{	"numbers",		no_argument,		0,	'N' },
+	{	"pages",		no_argument,		0,	'P' },
+	{	"headers",		no_argument,		0,	'h' },
+	{	"quiet",		no_argument,		0,	'q' },
+	{	"white",		no_argument,		0,	'w' },
+	{	"columns",		required_argument,	0,	'c' },
+	{	"rows",			required_argument,	0,	'r' },
+	{	"separator",	required_argument,	0,	's' },
+	{	0,				0,					0,	0	}
+};
 
 void processStdin (void);
 
@@ -127,17 +145,18 @@ int allocTable ()
  **********************************************************************************************************************/
 /**
  *  \brief Set a bit can be in the range 0 to 511.
+ *  \param bitSet Which bit set to use, rows or columns.
  *  \param bit Bit to be set.
  *  \result None.
  */
-void setBitMask (int bit)
+void setBitMask (int bitSet, int bit)
 {
 	unsigned int mask = 1, maskNum = bit >> 5, bitNum = bit & 0x1F;
 
-	if (maskNum < 16)
+	if (maskNum < MASK_SIZE && bitSet < MASK_SIZE)
 	{
-		bitMask[maskNum] |= (mask << bitNum);
-		bitMaskSet = 1;
+		bitMask[bitSet][maskNum] |= (mask << bitNum);
+		bitMaskSet[bitSet] = 1;
 	}
 }
 
@@ -149,18 +168,19 @@ void setBitMask (int bit)
  **********************************************************************************************************************/
 /**
  *  \brief Get whether a bit is set.
+ *  \param bitSet Which bit set to use, rows or columns.
  *  \param bit Bit to check.
  *  \result 1 if it is set, 0 if not.
  */
-int getBitMask (int bit)
+int getBitMask (int bitSet, int bit)
 {
-	if (bitMaskSet)
+	if (bitMaskSet[bitSet])
 	{
 		unsigned int mask = 1, maskNum = bit >> 5, bitNum = bit & 0x1F;
 
-		if (maskNum < 16)
+		if (maskNum < MASK_SIZE && bitSet < MASK_SIZE)
 		{
-			return (bitMask[maskNum] & (mask << bitNum) ? 1 : 0);
+			return (bitMask[bitSet][maskNum] & (mask << bitNum) ? 1 : 0);
 		}
 		return 0;
 	}
@@ -227,10 +247,11 @@ void version (void)
  **********************************************************************************************************************/
 /**
  *  \brief Allow you to input column number ranges and comma separated lists.
+ *  \param bitSet Which bit set to use, rows or columns.
  *  \param value A number string that could be (1) (1-3) (1,2,3).
  *  \result None.
  */
-void procNumberRange (char *value)
+void procNumberRange (int bitSet, char *value)
 {
 	int start = 0, end = 0, range = 0, ipos = 0, done = 0;
 
@@ -269,12 +290,12 @@ void procNumberRange (char *value)
 				int l;
 				for (l = start; l <= end; ++l)
 				{
-					setBitMask (l - 1);
+					setBitMask (bitSet, l - 1);
 				}
 			}
 			else if (start)
 			{
-				setBitMask (start - 1);
+				setBitMask (bitSet, start - 1);
 			}
 			start = end = range = 0;
 			if (value[ipos] == 0)
@@ -306,17 +327,17 @@ void helpThem (char *name)
 	version ();
 	printf ("Enter the command: %s [options] <file name>\n", basename(name));
 	printf ("Options: \n");
-	printf ("      -C . . . . . Display output in colour.\n");
-	printf ("      -H . . . . . Show column numbers as headers.\n");
-	printf ("      -P . . . . . Stop the the end of each page.\n");
-	printf ("                   Not available when processing stdin.\n");
-	printf ("      -h . . . . . Use first line to generate headers.\n");
-	printf ("      -q . . . . . Quiet mode, only show file contents.\n");
-	printf ("      -w . . . . . Do not remove whitespace from fields.\n");
-	printf ("      -dN  . . . . Columns to display, [example 1,3-5,7].\n");
-	printf ("      -sC  . . . . Set separator character [default ,].\n");
-	printf ("      -bN  . . . . Set the beginning line number.\n");
-	printf ("      -eN  . . . . Set the ending line number.\n");
+	printf ("     --colour  . . . . . . -C . . . . Display output in colour.\n");
+	printf ("     --numbers . . . . . . -N . . . . Show column numbers as headers.\n");
+	printf ("     --pages . . . . . . . -P . . . . Stop the the end of each page.\n");
+	printf ("                                      (Not available when processing stdin)\n");
+	printf ("     --headers . . . . . . -h . . . . Use first line to generate headers.\n");
+	printf ("     --quiet . . . . . . . -q . . . . Quiet mode, only show file contents.\n");
+	printf ("     --white . . . . . . . -w . . . . Do not remove whitespace from fields.\n");
+	printf ("     --columns # . . . . . -c#  . . . Columns to display, [example 1,3-5,7].\n");
+	printf ("     --rows #  . . . . . . -r#  . . . Rows to display, [example 1,3-5,7].\n");
+	printf ("     --separator \"c\" . . . -sc  . . . Set separator character [default ,].\n");
+	printf ("     --help  . . . . . . . -? . . . . Display this help message.\n");
 }
 
 /**********************************************************************************************************************
@@ -346,19 +367,29 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth ();
 
-	while ((i = getopt(argc, argv, "CHPhqwe:b:s:d:?")) != -1)
+	while (1)
 	{
-		int t;
+		/*--------------------------------------------------------------------*
+		 * getopt_long stores the option index here.                          *
+	     *--------------------------------------------------------------------*/
+		int option_index = 0, c;
 
-		switch (i)
+		c = getopt_long (argc, argv, "CNPhqwc:r:s:?", long_options, &option_index);
+
+		/*--------------------------------------------------------------------*
+		 * Detect the end of the options.                                     *
+	     *--------------------------------------------------------------------*/
+		if (c == -1) break;
+
+		switch (c)
 		{
 		case 'C':
 			displayFlags |= DISPLAY_COLOURS;
 			break;
 
 		case 'h':
-			lineHeading = 1;
-		case 'H':
+			lineHeading ^= 1;
+		case 'N':
 			displayFlags |= DISPLAY_HEADINGS;
 			break;
 
@@ -370,24 +401,12 @@ int main (int argc, char *argv[])
 			displayQuiet ^= 1;
 			break;
 
-		case 'e':
-			t = atoi (optarg);
-			if (t >= startLine)
-			{
-				endLine = t;
-			}
+		case 'c':
+			procNumberRange (MASK_COLS, optarg);
 			break;
 
-		case 'b':
-			t = atoi (optarg);
-			if (t > 0 && t <= endLine)
-			{
-				startLine = t;
-			}
-			break;
-
-		case 'd':
-			procNumberRange (optarg);
+		case 'r':
+			procNumberRange (MASK_ROWS, optarg);
 			break;
 
 		case 's':
@@ -475,7 +494,7 @@ int main (int argc, char *argv[])
 		directorySort (&fileList);
 		directoryProcess (showDir, &fileList);
 
-		if (filesFound)
+		if (filesFound && !displayQuiet)
 		{
 			if (!displayColumnInit (2, ptrFileColumn, displayFlags & DISPLAY_COLOURS))
 			{
@@ -555,7 +574,7 @@ int showLine (char *inBuffer, int linesRead)
 	char outBuffer[INBUFF_SIZE + 1];
 	int ipos = 0, opos = 0, icol = 0, ocol = 0, shown = 0;
 
-	if ((linesRead >= startLine && linesRead <= endLine) || (linesRead == 1 && lineHeading))
+	if (getBitMask (MASK_ROWS, linesRead - 1) || (linesRead == 1 && lineHeading))
 	{
 		outBuffer[0] = 0;
 		while (inBuffer[ipos] != 0 && ocol < MAX_COL && icol < 512)
@@ -564,7 +583,7 @@ int showLine (char *inBuffer, int linesRead)
 			{
 				if (inBuffer[ipos] == separator)
 				{
-					if (getBitMask (icol))
+					if (getBitMask (MASK_COLS, icol))
 					{
 						if (opos)
 						{
@@ -583,7 +602,7 @@ int showLine (char *inBuffer, int linesRead)
 			}
 			++ipos;
 		}
-		if (getBitMask (icol))
+		if (getBitMask (MASK_COLS, icol))
 		{
 			if (opos)
 			{
