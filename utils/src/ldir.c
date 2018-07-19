@@ -428,6 +428,7 @@ void helpThem (char *progName)
 	printf ("     --display size  . . . . -Ds . . . . . Show the size of the file.\n");
 	printf ("     --display type  . . . . -Dt . . . . . Show the type of the file.\n");
 	printf ("     --display ver . . . . . -Dv . . . . . Show the version from file name.\n");
+	printf ("     --help  . . . . . . . . -?  . . . . . Show this help message.\n");
 	printf ("     --matching  . . . . . . -m  . . . . . Show only duplicated files.\n");
 	printf ("     --unique  . . . . . . . -M  . . . . . Show only files with no duplicate.\n");
 	printf ("     --number #  . . . . . . -n# . . . . . Display some, # > 0 first #, # < 0 last n.\n");
