@@ -93,7 +93,7 @@ static struct option long_options[] =
 	{	0,				0,					0,	0	}
 };
 
-void processStdin (void);
+void showStdIn (void);
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -149,7 +149,7 @@ int allocTable ()
  *  \param bit Bit to be set.
  *  \result None.
  */
-void setBitMask (int bitSet, int bit)
+int setBitMask (int bitSet, int bit)
 {
 	unsigned int mask = 1, maskNum = bit >> 5, bitNum = bit & 0x1F;
 
@@ -157,7 +157,9 @@ void setBitMask (int bitSet, int bit)
 	{
 		bitMask[bitSet][maskNum] |= (mask << bitNum);
 		bitMaskSet[bitSet] = 1;
+		return 1;
 	}
+	return 0;
 }
 
 /**********************************************************************************************************************
@@ -248,7 +250,7 @@ void version (void)
 /**
  *  \brief Allow you to input column number ranges and comma separated lists.
  *  \param bitSet Which bit set to use, rows or columns.
- *  \param value A number string that could be (1) (1-3) (1,2,3).
+ *  \param value A number string that could be (1) (1-3) (3-) (-3) (1,2,3).
  *  \result None.
  */
 void procNumberRange (int bitSet, char *value)
@@ -285,6 +287,7 @@ void procNumberRange (int bitSet, char *value)
 		}
 		else if (value[ipos] == ',' || value[ipos] == 0)
 		{
+			/* Got here with 1-2 or -2 */
 			if (start && end && range)
 			{
 				int l;
@@ -293,6 +296,16 @@ void procNumberRange (int bitSet, char *value)
 					setBitMask (bitSet, l - 1);
 				}
 			}
+			/* Got here with 1- */
+			else if (start && range)
+			{
+				int l = start;
+				while (setBitMask (bitSet, l - 1))
+				{
+					++l;
+				}
+			}
+			/* Got here with 1 */
 			else if (start)
 			{
 				setBitMask (bitSet, start - 1);
@@ -327,17 +340,17 @@ void helpThem (char *name)
 	version ();
 	printf ("Enter the command: %s [options] <file name>\n", basename(name));
 	printf ("Options: \n");
-	printf ("     --colour  . . . . . . -C . . . . Display output in colour.\n");
-	printf ("     --numbers . . . . . . -N . . . . Show column numbers as headers.\n");
-	printf ("     --pages . . . . . . . -P . . . . Stop the the end of each page.\n");
-	printf ("                                      (Not available when processing stdin)\n");
-	printf ("     --headers . . . . . . -h . . . . Use first line to generate headers.\n");
-	printf ("     --quiet . . . . . . . -q . . . . Quiet mode, only show file contents.\n");
-	printf ("     --white . . . . . . . -w . . . . Do not remove whitespace from fields.\n");
-	printf ("     --columns # . . . . . -c#  . . . Columns to display, [example 1,3-5,7].\n");
-	printf ("     --rows #  . . . . . . -r#  . . . Rows to display, [example 1,3-5,7].\n");
-	printf ("     --separator \"c\" . . . -sc  . . . Set separator character [default ,].\n");
-	printf ("     --help  . . . . . . . -? . . . . Display this help message.\n");
+	printf ("     --colour  . . . . . -C . . . . Display output in colour.\n");
+	printf ("     --numbers . . . . . -N . . . . Show column numbers as headers.\n");
+	printf ("     --pages . . . . . . -P . . . . Stop the the end of each page.\n");
+	printf ("                                    (Not available when processing stdin)\n");
+	printf ("     --headers . . . . . -h . . . . Use first line to generate headers.\n");
+	printf ("     --quiet . . . . . . -q . . . . Quiet mode, only show file contents.\n");
+	printf ("     --white . . . . . . -w . . . . Do not remove whitespace from fields.\n");
+	printf ("     --columns # . . . . -c#  . . . Columns to display, [example 1,3-5,7].\n");
+	printf ("     --rows #  . . . . . -r#  . . . Rows to display, [example 1,3-5,7].\n");
+	printf ("     --separator \"c\" . . -sc  . . . Set separator character [default ,].\n");
+	printf ("     --help  . . . . . . -? . . . . Display this help message.\n");
 }
 
 /**********************************************************************************************************************
@@ -372,9 +385,8 @@ int main (int argc, char *argv[])
 		/*--------------------------------------------------------------------*
 		 * getopt_long stores the option index here.                          *
 	     *--------------------------------------------------------------------*/
-		int option_index = 0, c;
-
-		c = getopt_long (argc, argv, "CNPhqwc:r:s:?", long_options, &option_index);
+		int option_index = 0;
+		int c = getopt_long (argc, argv, "CNPhqwc:r:s:?", long_options, &option_index);
 
 		/*--------------------------------------------------------------------*
 		 * Detect the end of the options.                                     *
@@ -478,7 +490,7 @@ int main (int argc, char *argv[])
 
 	if (optind == argc)
 	{
-		processStdin ();
+		showStdIn ();
 		exit (0);
 	}
 	for (; optind < argc; ++optind)
@@ -699,7 +711,7 @@ int showDir (DIR_ENTRY *file)
  *  \brief Read the input from stdin.
  *  \result None.
  */
-void processStdin (void)
+void showStdIn (void)
 {
 	char inBuffer[INBUFF_SIZE + 1];
 	int linesShown = 0, linesRead = 0;

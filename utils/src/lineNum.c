@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <dircmd.h>
 #include <libgen.h>
+#include <getopt.h>
 #ifdef HAVE_VALUES_H
 #include <values.h>
 #else
@@ -38,6 +39,7 @@
 #endif
 
 #define INBUFF_SIZE		2048
+#define MASK_SIZE		2048
 
 /*----------------------------------------------------------------------------*/
 /* Prototypes                                                                 */
@@ -78,8 +80,154 @@ int filesFound = 0;
 int totalLines = -1;
 int displayQuiet = 0;
 int displayFlags = 0;
-int startLine = 1;
-int endLine = MAXINT;
+int bitMaskSet = 0;
+unsigned int bitMask[MASK_SIZE];
+
+static struct option long_options[] =
+{
+	{	"colour",		no_argument,		0,	'C' },
+	{	"pages",		no_argument,		0,	'P' },
+	{	"quiet",		no_argument,		0,	'q' },
+	{	"totals",		no_argument,		0,	'T' },
+	{	"blank",		no_argument,		0,	'b' },
+	{	"lines",		required_argument,	0,	'l' },
+	{	"tabs",			required_argument,	0,	't' },
+	{	0,				0,					0,	0	}
+};
+
+void showStdIn (void);
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  S E T  B I T  M A S K                                                                                             *
+ *  =====================                                                                                             *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Set a bit can be in the range 0 to 511.
+ *  \param bit Bit to be set.
+ *  \result None.
+ */
+int setBitMask (int bit)
+{
+	unsigned int mask = 1, maskNum = bit >> 5, bitNum = bit & 0x1F;
+
+	if (maskNum < MASK_SIZE)
+	{
+		bitMask[maskNum] |= (mask << bitNum);
+		bitMaskSet = 1;
+		return 1;
+	}
+	return 0;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  G E T  B I T  M A S K                                                                                             *
+ *  =====================                                                                                             *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Get whether a bit is set.
+ *  \param bit Bit to check.
+ *  \result 1 if it is set, 0 if not.
+ */
+int getBitMask (int bit)
+{
+	if (bitMaskSet)
+	{
+		unsigned int mask = 1, maskNum = bit >> 5, bitNum = bit & 0x1F;
+
+		if (maskNum < MASK_SIZE)
+		{
+			return (bitMask[maskNum] & (mask << bitNum) ? 1 : 0);
+		}
+		return 0;
+	}
+	return 1;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  P R O C  N U M B E R  R A N G E                                                                                   *
+ *  ===============================                                                                                   *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Allow you to input column number ranges and comma separated lists.
+ *  \param value A number string that could be (1) (1-3) (3-) (-3) (1,2,3).
+ *  \result None.
+ */
+void procNumberRange (char *value)
+{
+	int start = 0, end = 0, range = 0, ipos = 0, done = 0;
+
+	while (!done)
+	{
+		if (value[ipos] >= '0' && value[ipos] <= '9')
+		{
+			if (range)
+			{
+				end = (end * 10) + (value[ipos] - '0');
+			}
+			else
+			{
+				start = (start * 10) + (value[ipos] - '0');
+			}
+		}
+		else if (value[ipos] == '-')
+		{
+			if (range == 0)
+			{
+				if (start == 0)
+				{
+					start = 1;
+				}
+				range = 1;
+			}
+			else
+			{
+				start = end = range = 0;
+			}
+		}
+		else if (value[ipos] == ',' || value[ipos] == 0)
+		{
+			/* Got here with 1-2 or -2 */
+			if (start && end && range)
+			{
+				int l;
+				for (l = start; l <= end; ++l)
+				{
+					setBitMask (l - 1);
+				}
+			}
+			/* Got here with 1- */
+			else if (start && range)
+			{
+				int l = start;
+				while (setBitMask (l - 1))
+				{
+					++l;
+				}
+			}
+			/* Got here with 1 */
+			else if (start)
+			{
+				setBitMask (start - 1);
+			}
+			start = end = range = 0;
+			if (value[ipos] == 0)
+			{
+				done = 1;
+			}
+		}
+		else
+		{
+			start = end = range = 0;
+		}
+		++ipos;
+	}
+}
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -113,14 +261,14 @@ void helpThem (char *name)
 	version ();
 	printf ("Enter the command: %s [options] <filename>\n", basename(name));
 	printf ("Options: \n");
-	printf ("     -b . . . Do not count blank lines.\n");
-	printf ("     -C . . . Display output in colour.\n");
-	printf ("     -P . . . Display output in pages.\n");
-	printf ("     -q . . . Quiet mode, only show file contents.\n");
-	printf ("     -eN  . . Set the ending line number.\n");
-	printf ("     -sN  . . Set the starting line number.\n");
-	printf ("     -tN  . . Set the desired tab size, defaults to 8.\n");
-	printf ("     -T . . . Show total lines in all files.\n");
+	printf ("     --colour . . . -C . . . Display output in colour.\n");
+	printf ("     --pages  . . . -P . . . Display output in pages.\n");
+	printf ("     --blank  . . . -b . . . Do not count blank lines.\n");
+	printf ("     --quiet  . . . -q . . . Quiet mode, only show file contents.\n");
+	printf ("     --lines #  . . -l#  . . Lines to display, [example 1,3-5,7].\n");
+	printf ("     --tabs # . . . -t#  . . Set the desired tab size, defaults to 8.\n");
+	printf ("     --totals . . . -T . . . Show total lines in all files.\n");
+	printf ("     --help . . . . -? . . . Display this help message.\n");
 }
 
 /**********************************************************************************************************************
@@ -149,11 +297,20 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "bCPqe:s:t:T?")) != -1)
+	while (1)
 	{
-		int t;
+		/*--------------------------------------------------------------------*
+		 * getopt_long stores the option index here.                          *
+	     *--------------------------------------------------------------------*/
+		int option_index = 0;
+		int c = getopt_long (argc, argv, "bCPql:t:T?", long_options, &option_index);
 
-		switch (i)
+		/*--------------------------------------------------------------------*
+		 * Detect the end of the options.                                     *
+	     *--------------------------------------------------------------------*/
+		if (c == -1) break;
+
+		switch (c)
 		{
 		case 'b':
 			showBlank = 0;
@@ -167,25 +324,16 @@ int main (int argc, char *argv[])
 		case 'q':
 			displayQuiet ^= 1;
 			break;
-		case 'e':
-			t = atoi (optarg);
-			if (t >= startLine)
-			{
-				endLine = t;
-			}
-			break;
-		case 's':
-			t = atoi (optarg);
-			if (t > 0 && t <= endLine)
-			{
-				startLine = t;
-			}
+		case 'l':
+			procNumberRange (optarg);
 			break;
 		case 't':
-			t = atoi (optarg);
-			if (t > 0 && t <= 32)
 			{
-				tabSize = t;
+				int t = atoi (optarg);
+				if (t > 0 && t <= 32)
+				{
+					tabSize = t;
+				}
 			}
 			break;
 		case 'T':
@@ -197,6 +345,11 @@ int main (int argc, char *argv[])
 		}
 	}
 
+	if (optind == argc)
+	{
+		showStdIn ();
+		exit (0);
+	}
 	for (; optind < argc; ++optind)
 	{
 		found += directoryLoad (argv[optind], ONLYFILES|ONLYLINKS, NULL, &fileList);
@@ -210,7 +363,7 @@ int main (int argc, char *argv[])
 		directorySort (&fileList);
 		directoryProcess (showDir, &fileList);
 
-		if (filesFound)
+		if (filesFound && !displayQuiet)
 		{
 			if (!displayColumnInit (2, ptrFileColumn, 0))
 			{
@@ -234,6 +387,90 @@ int main (int argc, char *argv[])
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  S H O W  F I L E                                                                                                  *
+ *  ================                                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Show the contents of a file (could be stdin).
+ *  \param readFile File handle to read from.
+ *  \result Number of lines shown.
+ */
+int showFile (FILE *readFile)
+{
+	char inBuffer[INBUFF_SIZE + 1], outBuffer[(8 * INBUFF_SIZE) + 1];
+	int linesFound = 0, terminated = 1, linesShown = 0;
+
+	while (fgets (inBuffer, INBUFF_SIZE, readFile) != NULL)
+	{
+		int inPos = 0, outPos = 0, curPosn = 0, nextPosn = 0, blankLine = 0;
+
+		if (terminated)
+		{
+			if (totalLines >= 0)
+			{
+				++totalLines;
+			}
+			++linesFound;
+			terminated = 0;
+		}
+		while (inBuffer[inPos] && outPos < (8 * INBUFF_SIZE))
+		{
+			if (inBuffer[inPos] == ' ')
+			{
+				++nextPosn;
+			}
+			else if (inBuffer[inPos] == '\t')
+			{
+				nextPosn = ((nextPosn + tabSize) / tabSize) * tabSize;
+			}
+			else
+			{
+				while (curPosn < nextPosn && inBuffer[inPos] != '\n')
+				{
+					outBuffer[outPos++] = ' ';
+					++curPosn;
+				}
+				if (inBuffer[inPos] >= ' ' && inBuffer[inPos] < 127)
+				{
+					outBuffer[outPos++] = inBuffer[inPos];
+				}
+				else if (inBuffer[inPos] < ' ' && inBuffer[inPos] != '\n')
+				{
+					outBuffer[outPos++] = '^';
+					outBuffer[outPos++] = (inBuffer[inPos] + 'A');
+				}
+				else if (inBuffer[inPos] == '\n')
+				{
+					terminated = 1;
+					if (showBlank)
+						blankLine = 1;
+				}
+				nextPosn = ++curPosn;
+			}
+			++inPos;
+		}
+		if (outPos || blankLine)
+		{
+			if (getBitMask (linesFound - 1))
+			{
+				outBuffer[outPos] = 0;
+				if (totalLines >= 0)
+				{
+					displayInColumn (0, "%d", totalLines);
+				}
+				displayInColumn (1, "%d", linesFound);
+				displayInColumn (2, "%s", outBuffer);
+				displayNewLine (0);
+				++linesShown;
+			}
+		}
+	}
+	return linesShown;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  S H O W  D I R                                                                                                    *
  *  ==============                                                                                                    *
  *                                                                                                                    *
@@ -245,7 +482,7 @@ int main (int argc, char *argv[])
  */
 int showDir (DIR_ENTRY *file)
 {
-	char inBuffer[INBUFF_SIZE + 1], outBuffer[(8 * INBUFF_SIZE) + 1];
+	char fileBuffer[PATH_MAX];
 	int linesShown = 0;
 	FILE *readFile;
 
@@ -263,98 +500,87 @@ int showDir (DIR_ENTRY *file)
 		displayHeading (0);
 		displayNewLine (0);
 		displayInColumn (0, "%s", file -> fileName);
-		displayInColumn (1, displayFileSize (file -> fileStat.st_size, (char *)inBuffer));
+		displayInColumn (1, displayFileSize (file -> fileStat.st_size, (char *)fileBuffer));
 		displayNewLine (DISPLAY_INFO);
 		displayAllLines ();
 	}
 	displayTidy ();
 
-	strcpy (inBuffer, file -> fullPath);
-	strcat (inBuffer, file -> fileName);
+	strcpy (fileBuffer, file -> fullPath);
+	strcat (fileBuffer, file -> fileName);
 
-	if ((readFile = fopen (inBuffer, "rb")) != NULL)
+	if ((readFile = fopen (fileBuffer, "rb")) != NULL)
 	{
-		int linesFound = 0, terminated = 1;
-
 		if (!displayColumnInit (3, ptrNumberColumn, displayFlags))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 0;
 		}
-
 		if (!displayQuiet)
 		{
 			displayDrawLine (0);
 		}
-		while (fgets (inBuffer, INBUFF_SIZE, readFile) != NULL)
-		{
-			int inPos = 0, outPos = 0, curPosn = 0, nextPosn = 0, blankLine = 0;
-
-			if (terminated)
-			{
-				if (totalLines >= 0)
-				{
-					++totalLines;
-				}
-				++linesFound;
-				terminated = 0;
-			}
-			while (inBuffer[inPos] && outPos < (8 * INBUFF_SIZE))
-			{
-				if (inBuffer[inPos] == ' ')
-				{
-					++nextPosn;
-				}
-				else if (inBuffer[inPos] == '\t')
-				{
-					nextPosn = ((nextPosn + tabSize) / tabSize) * tabSize;
-				}
-				else
-				{
-					while (curPosn < nextPosn && inBuffer[inPos] != '\n')
-					{
-						outBuffer[outPos++] = ' ';
-						++curPosn;
-					}
-					if (inBuffer[inPos] >= ' ' && inBuffer[inPos] < 127)
-					{
-						outBuffer[outPos++] = inBuffer[inPos];
-					}
-					else if (inBuffer[inPos] < ' ' && inBuffer[inPos] != '\n')
-					{
-						outBuffer[outPos++] = '^';
-						outBuffer[outPos++] = (inBuffer[inPos] + 'A');
-					}
-					else if (inBuffer[inPos] == '\n')
-					{
-						terminated = 1;
-						if (showBlank)
-							blankLine = 1;
-					}
-					nextPosn = ++curPosn;
-				}
-				++inPos;
-			}
-			if (outPos || blankLine)
-			{
-				if (linesFound >= startLine && linesFound <= endLine)
-				{
-					outBuffer[outPos] = 0;
-					if (totalLines >= 0)
-					{
-						displayInColumn (0, "%d", totalLines);
-					}
-					displayInColumn (1, "%d", linesFound);
-					displayInColumn (2, "%s", outBuffer);
-					displayNewLine (0);
-					++linesShown;
-				}
-			}
-		}
+		linesShown = showFile (readFile);
 		fclose (readFile);
 		displayAllLines ();
 		displayTidy ();
 	}
-	return linesShown ? 1 : 0;
+	if (linesShown)
+	{
+		++filesFound;
+		return 1;
+	}
+	return 0;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  S H O W  S T D  I N                                                                                               *
+ *  ===================                                                                                               *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Process stdin as if it was a file.
+ *  \result None.
+ */
+void showStdIn ()
+{
+	/*------------------------------------------------------------------------*/
+	/* First display a table with the file name and size.                     */
+	/*------------------------------------------------------------------------*/
+	if (!displayColumnInit (1, ptrFileColumn, 0))
+	{
+		fprintf (stderr, "ERROR in: displayColumnInit\n");
+		return;
+	}
+	if (!displayQuiet)
+	{
+		displayDrawLine (0);
+		displayHeading (0);
+		displayNewLine (0);
+		displayInColumn (0, "stdin");
+		displayNewLine (DISPLAY_INFO);
+		displayAllLines ();
+	}
+	displayTidy ();
+
+	if (!displayColumnInit (3, ptrNumberColumn, displayFlags))
+	{
+		fprintf (stderr, "ERROR in: displayColumnInit\n");
+		return;
+	}
+	if (!displayQuiet)
+	{
+		displayDrawLine (0);
+	}
+	if (showFile (stdin) != 0)
+	{
+		if (!displayQuiet)
+		{
+			displayDrawLine (0);
+		}
+	}
+	displayAllLines ();
+	displayTidy ();
 }
 
