@@ -37,83 +37,7 @@
  *----------------------------------------------------------------------------*/
 int showDir (DIR_ENTRY *file);
 
-/*----------------------------------------------------------------------------*
- * Globals                                                                    *
- * 00 00 00 00 00 00 00 00-08 13 50 00 00 00 00 00 : ..........P.....         *
- *----------------------------------------------------------------------------*/
-COLUMN_DESC colDumpDescs[] =
-{
-	{	8,	6,	0,	2,	0x07,	0,					"Offset",	1	},	/* 0    0  */
-	{	2,	2,	0,	1,	0x0A,	0,					"00",		0	},	/* 1    1  */
-	{	2,	2,	0,	1,	0x0E,	0,					"01",		0	},	/* 2    2  */
-	{	2,	2,	0,	1,	0x0A,	0,					"02",		0	},	/* 3    3  */
-	{	2,	2,	0,	1,	0x0E,	0,					"03",		0	},	/* 4    4  */
-	{	2,	2,	0,	1,	0x0A,	0,					"04",		0	},	/* 5    5  */
-	{	2,	2,	0,	1,	0x0E,	0,					"05",		0	},	/* 6    6  */
-	{	2,	2,	0,	1,	0x0A,	0,					"06",		0	},	/* 7    7  */
-	{	2,	2,	0,	1,	0x0E,	0,					"07",		0	},	/* 8    8  */
-	{	1,	1,	0,	0,	0x0B,	0,					"",			0	},	/*      9  */
-	{	2,	2,	0,	1,	0x0A,	0,					"08",		0	},	/* 9    10 */
-	{	2,	2,	0,	1,	0x0E,	0,					"09",		0	},	/* 10   11 */
-	{	2,	2,	0,	1,	0x0A,	0,					"0A",		0	},	/* 11   12 */
-	{	2,	2,	0,	1,	0x0E,	0,					"0B",		0	},	/* 12   13 */
-	{	2,	2,	0,	1,	0x0A,	0,					"0C",		0	},	/* 13   14 */
-	{	2,	2,	0,	1,	0x0E,	0,					"0D",		0	},	/* 14   15 */
-	{	2,	2,	0,	1,	0x0A,	0,					"0E",		0	},	/* 15   16 */
-	{	2,	2,	0,	1,	0x0E,	0,					"0F",		0	},	/* 16   17 */
-	{	1,	1,	0,	0,	0x0B,	0,					"",			0	},	/*      18 */
-	{	2,	2,	0,	1,	0x0A,	0,					"10",		0	},	/* 17   19 */
-	{	2,	2,	0,	1,	0x0E,	0,					"11",		0	},	/* 18   20 */
-	{	2,	2,	0,	1,	0x0A,	0,					"12",		0	},	/* 19   21 */
-	{	2,	2,	0,	1,	0x0E,	0,					"13",		0	},	/* 20   22 */
-	{	2,	2,	0,	1,	0x0A,	0,					"14",		0	},	/* 21   23 */
-	{	2,	2,	0,	1,	0x0E,	0,					"15",		0	},	/* 22   24 */
-	{	2,	2,	0,	1,	0x0A,	0,					"16",		0	},	/* 23   25 */
-	{	2,	2,	0,	1,	0x0E,	0,					"17",		0	},	/* 24   26 */
-	{	1,	1,	0,	0,	0x0B,	0,					"",			0	},	/*      27 */
-	{	2,	2,	0,	1,	0x0A,	0,					"18",		0	},	/* 25   28 */
-	{	2,	2,	0,	1,	0x0E,	0,					"19",		0	},	/* 26   29 */
-	{	2,	2,	0,	1,	0x0A,	0,					"1A",		0	},	/* 27   30 */
-	{	2,	2,	0,	1,	0x0E,	0,					"1B",		0	},	/* 28   31 */
-	{	2,	2,	0,	1,	0x0A,	0,					"1C",		0	},	/* 29   32 */
-	{	2,	2,	0,	1,	0x0E,	0,					"1D",		0	},	/* 30   33 */
-	{	2,	2,	0,	1,	0x0A,	0,					"1E",		0	},	/* 31   34 */
-	{	2,	2,	0,	1,	0x0E,	0,					"1F",		0	},	/* 32   35 */
-	{	1,	1,	0,	0,	0x0B,	0,					"",			0	},	/*      36 */
-	{	2,	2,	0,	1,	0x0A,	0,					"20",		0	},	/* 33   37 */
-	{	2,	2,	0,	1,	0x0E,	0,					"21",		0	},	/* 34   38 */
-	{	2,	2,	0,	1,	0x0A,	0,					"22",		0	},	/* 35   39 */
-	{	2,	2,	0,	1,	0x0E,	0,					"23",		0	},	/* 36   40 */
-	{	2,	2,	0,	1,	0x0A,	0,					"24",		0	},	/* 37   41 */
-	{	2,	2,	0,	1,	0x0E,	0,					"25",		0	},	/* 38   42 */
-	{	2,	2,	0,	1,	0x0A,	0,					"26",		0	},	/* 39   43 */
-	{	2,	2,	0,	1,	0x0E,	0,					"27",		0	},	/* 40   44 */
-	{	1,	1,	0,	0,	0x0B,	0,					"",			0	},	/*      45 */
-	{	2,	2,	0,	1,	0x0A,	0,					"28",		0	},	/* 41   46 */
-	{	2,	2,	0,	1,	0x0E,	0,					"29",		0	},	/* 42   47 */
-	{	2,	2,	0,	1,	0x0A,	0,					"2A",		0	},	/* 43   48 */
-	{	2,	2,	0,	1,	0x0E,	0,					"2B",		0	},	/* 44   49 */
-	{	2,	2,	0,	1,	0x0A,	0,					"2C",		0	},	/* 45   50 */
-	{	2,	2,	0,	1,	0x0E,	0,					"2D",		0	},	/* 46   51 */
-	{	2,	2,	0,	1,	0x0A,	0,					"2E",		0	},	/* 47   52 */
-	{	2,	2,	0,	1,	0x0E,	0,					"2F",		0	},	/* 48   53 */
-	{	1,	1,	0,	0,	0x0B,	0,					"",			0	},	/*      54 */
-	{	32, 16, 0,	0,	0x07,	0,					"Text",		2	},	/* 49   55 */
-};
-
-COLUMN_DESC *ptrDumpColumn[] =
-{
-	&colDumpDescs[0],  &colDumpDescs[1],  &colDumpDescs[2],	 &colDumpDescs[3],	&colDumpDescs[4],  &colDumpDescs[5],
-	&colDumpDescs[6],  &colDumpDescs[7],  &colDumpDescs[8],	 &colDumpDescs[9],	&colDumpDescs[10], &colDumpDescs[11],
-	&colDumpDescs[12], &colDumpDescs[13], &colDumpDescs[14], &colDumpDescs[15], &colDumpDescs[16], &colDumpDescs[17],
-	&colDumpDescs[18], &colDumpDescs[19], &colDumpDescs[20], &colDumpDescs[21], &colDumpDescs[22], &colDumpDescs[23],
-	&colDumpDescs[24], &colDumpDescs[25], &colDumpDescs[26], &colDumpDescs[27], &colDumpDescs[28], &colDumpDescs[29],
-	&colDumpDescs[30], &colDumpDescs[31], &colDumpDescs[32], &colDumpDescs[33], &colDumpDescs[34], &colDumpDescs[35],
-	&colDumpDescs[36], &colDumpDescs[37], &colDumpDescs[38], &colDumpDescs[39], &colDumpDescs[40], &colDumpDescs[41],
-	&colDumpDescs[42], &colDumpDescs[43], &colDumpDescs[44], &colDumpDescs[45], &colDumpDescs[46], &colDumpDescs[47],
-	&colDumpDescs[48], &colDumpDescs[49], &colDumpDescs[50], &colDumpDescs[51], &colDumpDescs[52], &colDumpDescs[53],
-	&colDumpDescs[54], &colDumpDescs[55]
-};
+COLUMN_DESC **ptrDumpColumn;
 
 COLUMN_DESC fileDescs[] =
 {
@@ -130,6 +54,7 @@ int filesFound = 0;
 int displayFlags = 0;
 int displayQuiet = 0;
 int displayWidth = -1;
+int displayCols = 0;
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -165,6 +90,97 @@ void helpThem(char *progName)
 	printf ("    -P . . . . . Display output in pages.\n");
 	printf ("    -q . . . . . Quite mode, only dump the hex codes.\n");
 	printf ("    -w <size>  . Set the display size (8, 16, 24, 32, 40 or 48).\n");
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  A L L O C  T A B L E                                                                                              *
+ *  ====================                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Allocate the table column descripters.
+ *  \result Number of columns.
+ */
+int allocTable (int displayCol)
+{
+	int totalCols = displayCol + (displayCol / 8) + 2;
+
+	printf ("totalCols: %d, displayCol: %d\n", totalCols, displayCol);
+	ptrDumpColumn = (COLUMN_DESC **) malloc (totalCols * sizeof (COLUMN_DESC *));
+
+	if (ptrDumpColumn != NULL)
+	{
+		int i, c = 0;
+
+		memset (ptrDumpColumn, 0, totalCols * sizeof (COLUMN_DESC *));
+
+		ptrDumpColumn[c] = (COLUMN_DESC *)malloc (sizeof (COLUMN_DESC));
+		if (ptrDumpColumn[c] != NULL)
+		{
+			ptrDumpColumn[c] -> maxWidth = 8;
+			ptrDumpColumn[c] -> minWidth = 6;
+			ptrDumpColumn[c] -> startWidth = 0 ;
+			ptrDumpColumn[c] -> gap = 2;
+			ptrDumpColumn[c] -> colour = 0x07;
+			ptrDumpColumn[c] -> attrib = 0;
+			ptrDumpColumn[c] -> priority = 0;
+			ptrDumpColumn[c] -> heading = (char *)malloc (11);
+			sprintf (ptrDumpColumn[i] -> heading, "Offset");
+			++c;
+		}
+		for (i = 0; i < displayCol; ++i)
+		{
+			ptrDumpColumn[c] = (COLUMN_DESC *)malloc (sizeof (COLUMN_DESC));
+			if (ptrDumpColumn[c] != NULL)
+			{
+				ptrDumpColumn[c] -> maxWidth = 2;
+				ptrDumpColumn[c] -> minWidth = 2;
+				ptrDumpColumn[c] -> startWidth = 0;
+				ptrDumpColumn[c] -> gap = 1;
+				ptrDumpColumn[c] -> colour = (i & 1 ? 0x06 : 0x02);
+				ptrDumpColumn[c] -> attrib = 0;
+				ptrDumpColumn[c] -> priority = i;
+				ptrDumpColumn[c] -> heading = (char *)malloc (5);
+				sprintf (ptrDumpColumn[c] -> heading, "%02X", i);
+				++c;
+			}
+			if ((i + 1) % 8 == 0)
+			{
+				ptrDumpColumn[c] = (COLUMN_DESC *)malloc (sizeof (COLUMN_DESC));
+				if (ptrDumpColumn[c] != NULL)
+				{
+					ptrDumpColumn[c] -> maxWidth = 1;
+					ptrDumpColumn[c] -> minWidth = 1;
+					ptrDumpColumn[c] -> startWidth = 0 ;
+					ptrDumpColumn[c] -> gap = 0;
+					ptrDumpColumn[c] -> colour = 0x00;
+					ptrDumpColumn[c] -> attrib = 0;
+					ptrDumpColumn[c] -> priority = 3;
+					ptrDumpColumn[c] -> heading = (char *)malloc (2);
+					ptrDumpColumn[c] -> heading[0] = 0;
+					++c;
+				}
+			}
+		}
+		ptrDumpColumn[c] = (COLUMN_DESC *)malloc (sizeof (COLUMN_DESC));
+		if (ptrDumpColumn[c] != NULL)
+		{
+			ptrDumpColumn[c] -> maxWidth = 32;
+			ptrDumpColumn[c] -> minWidth = 16;
+			ptrDumpColumn[c] -> startWidth = 0 ;
+			ptrDumpColumn[c] -> gap = 0;
+			ptrDumpColumn[c] -> colour = 0x07;
+			ptrDumpColumn[c] -> attrib = 0;
+			ptrDumpColumn[c] -> priority = 2;
+			ptrDumpColumn[c] -> heading = (char *)malloc (11);
+			sprintf (ptrDumpColumn[c] -> heading, "Text");
+			++c;
+		}
+		printf ("created: %d\n", c);
+		return c;
+	}
+	return 0;
 }
 
 /**********************************************************************************************************************
@@ -212,11 +228,13 @@ int main (int argc, char *argv[])
 
 		case 'w':
 			width = atoi (optarg);
-			if (width == 8 || width == 16 || width == 24 || width == 32 || width == 40 || width == 48)
+			displayWidth = (width / 8) * 8;
+			if (displayWidth < 8 || displayWidth > 80)
 			{
-				displayWidth = width;
-				break;
+				displayWidth = 16;
 			}
+			break;
+
 		case '?':
 			helpThem (argv[0]);
 			exit (1);
@@ -232,10 +250,23 @@ int main (int argc, char *argv[])
 	{
 		if (displayWidth == -1)
 		{
-			displayWidth = displayQuiet ?
-					(width < 48 ? 8 : width <  72 ? 16 : width < 96	 ? 24 : width < 120 ? 32 : width < 144 ? 40 : 48):
-					(width < 77 ? 8 : width < 110 ? 16 : width < 143 ? 24 : width < 176 ? 32 : width < 209 ? 40 : 48);
+			displayWidth = 8;
+			do
+			{
+				if ((displayWidth * 4) + (displayWidth / 8) + 10 > width)
+				{
+					displayWidth -= 8;
+					break;
+				}
+				displayWidth += 8;
+			}
+			while (displayWidth < 80);
+			if (displayWidth < 8)
+			{
+				displayWidth = 8;
+			}
 		}
+		displayCols = allocTable (displayWidth);
 
 		/*--------------------------------------------------------------------*
          * Now we can sort the directory.                                     *
@@ -324,7 +355,7 @@ int showDir (DIR_ENTRY *file)
 
 	if ((readFile = fopen ((char *)inFile, "rb")) != NULL)
 	{
-		if (!displayColumnInit (56, ptrDumpColumn, displayFlags))
+		if (!displayColumnInit (displayCols, ptrDumpColumn, displayFlags))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 0;
@@ -357,8 +388,8 @@ int showDir (DIR_ENTRY *file)
 					if (!displayQuiet)
 					{
 						displayInColumn (0, "%08X", filePosn);
-						displayInColumn (54, " ", saveChar);
-						displayInColumn (55, "%s", saveChar);
+						displayInColumn (displayCols - 2, " ", saveChar);
+						displayInColumn (displayCols - 1, "%s", saveChar);
 					}
 					displayNewLine(0);
 					filePosn += displayWidth;
