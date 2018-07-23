@@ -128,12 +128,6 @@
 #define HIDEVERCTL				0x0800
 
 /** 
- *  @def MAX_COLUMNS
- *  @brief Maximum number of columns allowed.
- */
-#define MAX_COLUMNS				80
-
-/** 
  *  @def COL_ALIGN_RIGHT
  *  @brief Flag set if the column should be right aligned.
  *

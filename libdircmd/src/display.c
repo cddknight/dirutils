@@ -99,12 +99,12 @@ FULL_COLUMN_DESC;
 typedef struct _rowDesc
 {
 	int rowType;
-	char *colString[MAX_COLUMNS];
-	int colColour[MAX_COLUMNS];
+	int *colColour;
+	char **colString;
 }
 ROW_DESC;
 
-static FULL_COLUMN_DESC *fullColDesc[MAX_COLUMNS];
+static FULL_COLUMN_DESC **fullColDesc;
 static int columnCount;
 
 static ROW_DESC *currentRow;
@@ -866,12 +866,17 @@ void displayForceSize (int cols, int rows)
  */
 int displayColumnInit (int colCount, COLUMN_DESC *colDesc[], int options)
 {
-	if (colCount > MAX_COLUMNS)
+	if (colCount <= 0 || fullColDesc != NULL)
 	{
 		return 0;
 	}
 	if ((rowQueue = queueCreate ()) == NULL)
 	{
+		return 0;
+	}
+	if ((fullColDesc = (FULL_COLUMN_DESC **)malloc (colCount * sizeof (FULL_COLUMN_DESC *))) == NULL)
+	{
+		queueDelete (rowQueue);
 		return 0;
 	}
 	for (columnCount = 0; columnCount < colCount; ++columnCount)
@@ -953,18 +958,34 @@ static int vDisplayInColumn (int column, char *format, va_list arg_ptr)
 	char tempBuff[TEMP_BUFF_SIZE];
 	int strSize, i, maxSize = TEMP_BUFF_SIZE - 1;
 
-	if (column < 0 && column >= columnCount)
+	if (column < 0 || column >= columnCount)
+	{
 		return 0;
-
+	}
 	if (currentRow == NULL)
 	{
 		if ((currentRow = (ROW_DESC *)malloc (sizeof (ROW_DESC))) == NULL)
+		{
 			return 0;
-
+		}
 		memset (currentRow, 0, sizeof (ROW_DESC));
 		currentRow -> rowType = ROW_NORMAL_LINE;
+		if ((currentRow -> colString = (char **) malloc (columnCount * sizeof (char *))) == NULL)
+		{
+			free (currentRow);
+			return 0;
+		}
+		if ((currentRow -> colColour = (int *) malloc (columnCount * sizeof (int))) == NULL)
+		{
+			free (currentRow -> colString);
+			free (currentRow);
+			return 0;
+		}
 		for (i = 0; i < columnCount; ++i)
+		{
+			currentRow -> colString[i] = NULL;
 			currentRow -> colColour[i] = -1;
+		}
 	}
 
 	tempBuff[0] = 0;
@@ -980,17 +1001,22 @@ static int vDisplayInColumn (int column, char *format, va_list arg_ptr)
 	strSize = strlen (tempBuff);
 
 	if ((currentRow -> colString[column] = (char *)malloc (strSize + 1)) == NULL)
+	{
 		return 0;
-
+	}
 	strcpy (currentRow -> colString[column], tempBuff);
 
 	if (strSize > fullColDesc[column] -> maxSize)
 	{
 		fullColDesc[column] -> maxSize = strSize;
 		if (strSize < fullColDesc[column] -> maxWidth)
+		{
 			fullColDesc[column] -> displaySize = strSize;
+		}
 		else
+		{
 			fullColDesc[column] -> displaySize = fullColDesc[column] -> maxWidth;
+		}
 	}
 	else if (strSize > fullColDesc[column] -> displaySize)
 	{
@@ -1616,8 +1642,21 @@ void displayAllLines (void)
 			{
 				while ((displayRow = (ROW_DESC *)queueGet (rowQueue)) != NULL)
 				{
+					if (displayRow -> colString != NULL)
+					{
+						for (i = 0; i < columnCount; ++i)
+						{
+							if (displayRow -> colString[i] != NULL)
+							{
+								free (displayRow -> colString[i]);
+							}
+						}
+						free (displayRow -> colString);
+					}
+					if (displayRow -> colColour != NULL) free (displayRow -> colColour);
 					free (displayRow);
 				}
+				/* Break out of the loop and return. */
 				break;
 			}
 			pageLine = 0;
@@ -1705,6 +1744,8 @@ void displayAllLines (void)
 			++line;
 			break;
 		}
+		if (displayRow -> colString) free (displayRow -> colString);
+		if (displayRow -> colColour) free (displayRow -> colColour);
 		free (displayRow);
 	}
 }
@@ -1759,31 +1800,61 @@ int displayKeyPress (void)
 void displayTidy (void)
 {
 	int i;
-
-	for (i = 0; i < MAX_COLUMNS; ++i)
-	{
-		if (fullColDesc[i] != NULL)
-		{
-			if (fullColDesc[i] -> heading != NULL)
-			{
-				free (fullColDesc[i] -> heading);
-				fullColDesc[i] -> heading = NULL;
-			}
-			free (fullColDesc[i]);
-			fullColDesc[i] = NULL;
-		}
-	}
-	columnCount = 0;
+	ROW_DESC *displayRow = NULL;
 
 	if (currentRow)
 	{
-		for (i = 0; i < MAX_COLUMNS; ++i)
+		for (i = 0; i < columnCount; ++i)
 		{
 			if (currentRow -> colString[i])
+			{
 				free (currentRow -> colString[i]);
+			}
 		}
+		if (currentRow -> colString) free (currentRow -> colString);
+		if (currentRow -> colColour) free (currentRow -> colColour);
 		free (currentRow);
 	}
+
+	while ((displayRow = (ROW_DESC *)queueGet (rowQueue)) != NULL)
+	{
+		if (displayRow -> colString != NULL)
+		{
+			for (i = 0; i < columnCount; ++i)
+			{
+				if (displayRow -> colString[i] != NULL)
+				{
+					free (displayRow -> colString[i]);
+				}
+			}
+			free (displayRow -> colString);
+		}
+		if (displayRow -> colColour != NULL) 
+		{
+			free (displayRow -> colColour);
+		}
+		free (displayRow);
+	}
+
+	if (fullColDesc != NULL)
+	{
+		for (i = 0; i < columnCount; ++i)
+		{
+			if (fullColDesc[i] != NULL)
+			{
+				if (fullColDesc[i] -> heading != NULL)
+				{
+					free (fullColDesc[i] -> heading);
+				}
+				free (fullColDesc[i]);
+			}
+		}
+		free (fullColDesc);
+		fullColDesc = NULL;
+	}
+
+	columnCount = 0;
 	queueDelete (rowQueue);
 	rowQueue = NULL;
 }
+
