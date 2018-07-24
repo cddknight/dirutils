@@ -210,7 +210,6 @@ int main (int argc, char *argv[])
 	}
 
 	displayInit ();
-
 	width = displayGetWidth();
 
 	while ((i = getopt(argc, argv, "CPqw:?")) != -1)
@@ -244,6 +243,9 @@ int main (int argc, char *argv[])
 		}
 	}
 
+	/*----------------------------------------------------------------------------------------------------------------*
+     * If the size option has not been used calculate the best one for this screen size.                              *
+	 *----------------------------------------------------------------------------------------------------------------*/
 	if (displayWidth == -1)
 	{
 		displayWidth = 8;
@@ -265,6 +267,9 @@ int main (int argc, char *argv[])
 	}
 	displayCols = allocTable (displayWidth);
 
+	/*----------------------------------------------------------------------------------------------------------------*
+     * If no file name has been passed in then use stdin.                                                             *
+	 *----------------------------------------------------------------------------------------------------------------*/
 	if (optind == argc)
 	{
 		showStdIn ();
@@ -278,9 +283,9 @@ int main (int argc, char *argv[])
 
 		if (found)
 		{
-			/*--------------------------------------------------------------------*
-    	     * Now we can sort the directory.                                     *
-    	     *--------------------------------------------------------------------*/
+			/*--------------------------------------------------------------------------------------------------------*
+    	     * Now we can sort the directory.                                                                         *
+			 *--------------------------------------------------------------------------------------------------------*/
 			directorySort (&fileList);
 			directoryProcess (showDir, &fileList);
 		}
@@ -402,9 +407,9 @@ int showDir (DIR_ENTRY *file)
 	unsigned char inFile[PATH_SIZE];
 	FILE *readFile;
 
-	/*------------------------------------------------------------------------*
-     * If the file is a link check it points to a regular file.               *
-     *------------------------------------------------------------------------*/
+	/*----------------------------------------------------------------------------------------------------------------*
+     * If the file is a link check it points to a regular file.                                                       *
+	 *----------------------------------------------------------------------------------------------------------------*/
 	if (S_ISLNK (file -> fileStat.st_mode))
 	{
 		mode_t type = directoryTrueLinkType (file);
@@ -415,9 +420,9 @@ int showDir (DIR_ENTRY *file)
 		}
 	}
 
-	/*------------------------------------------------------------------------*
-     * First display a table with the file name and size.                     *
-     *------------------------------------------------------------------------*/
+	/*----------------------------------------------------------------------------------------------------------------*
+     * First display a table with the file name and size.                                                             *
+	 *----------------------------------------------------------------------------------------------------------------*/
 	if (!displayColumnInit (2, ptrFileColumn, 0))
 	{
 		fprintf (stderr, "ERROR in: displayColumnInit\n");
@@ -435,9 +440,9 @@ int showDir (DIR_ENTRY *file)
 	}
 	displayTidy ();
 
-	/*------------------------------------------------------------------------*
-     * Open the file and display a table containing the hex dump.             *
-     *------------------------------------------------------------------------*/
+	/*----------------------------------------------------------------------------------------------------------------*
+     * Open the file and display a table containing the hex dump.                                                     *
+	 *----------------------------------------------------------------------------------------------------------------*/
 	strcpy ((char *)inFile, file -> fullPath);
 	strcat ((char *)inFile, file -> fileName);
 
