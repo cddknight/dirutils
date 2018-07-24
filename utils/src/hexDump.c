@@ -142,9 +142,7 @@ int allocTable (int displayCol)
 {
 	int totalCols = displayCol + (displayCol / 8) + 2;
 
-	printf ("totalCols: %d, displayCol: %d\n", totalCols, displayCol);
 	ptrDumpColumn = (COLUMN_DESC **) malloc (totalCols * sizeof (COLUMN_DESC *));
-
 	if (ptrDumpColumn != NULL)
 	{
 		int i, c = 0;
