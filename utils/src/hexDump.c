@@ -322,7 +322,7 @@ int main (int argc, char *argv[])
 void processFile (FILE *readFile)
 {
 	unsigned char inBuffer[2048 + 1];
-	unsigned char saveHex[4], saveChar[81];
+	unsigned char saveHex[4], saveChar[512];
 	int j = 0, c = 1, read, filePosn = 0, l = 0;
 
 	while ((read = fread (inBuffer, 1, 2048, readFile)) != 0)
@@ -350,6 +350,7 @@ void processFile (FILE *readFile)
 				{
 					displayInColumn (0, "%08X", filePosn);
 					displayInColumn (displayCols - 2, " ", saveChar);
+printf ("Display in col[%d]: [[%s]]\n", displayCols - 1, saveChar);
 					displayInColumn (displayCols - 1, "%s", saveChar);
 				}
 				displayNewLine(0);
@@ -374,8 +375,8 @@ void processFile (FILE *readFile)
 		if (!displayQuiet)
 		{
 			displayInColumn (0, "%08X", filePosn);
-			displayInColumn (54, " ", saveChar);
-			displayInColumn (55, "%s", saveChar);
+			displayInColumn (displayCols - 2, " ", saveChar);
+			displayInColumn (displayCols - 1, "%s", saveChar);
 		}
 		displayNewLine (0);
 	}
