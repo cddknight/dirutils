@@ -56,6 +56,8 @@ int displayQuiet = 0;
 int displayWidth = -1;
 int displayCols = 0;
 
+void showStdIn (void);
+
 /**********************************************************************************************************************
  *                                                                                                                    *
  *  V E R S I O N                                                                                                     *
@@ -94,12 +96,46 @@ void helpThem(char *progName)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  C O N F I G  C O L U M N                                                                                          *
+ *  ========================                                                                                          *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Helper function to fill in column details.
+ *  \param col Column to be configured.
+ *  \param maxWidth Maximum width of the column.
+ *  \param minWidth Minimum width of the column.
+ *  \param gap Gap between this and the next column.
+ *  \param colour Colour of the text, only used if colour is on.
+ *  \param priority Priority of the column.
+ *  \param heading Heading text, will be alloced and copied in the function.
+ *  \result None.
+ */
+void configColumn (COLUMN_DESC *col, int maxWidth, int minWidth, int gap, int colour, int priority, char *heading)
+{
+	col -> maxWidth = maxWidth;
+	col -> minWidth = minWidth;
+	col -> startWidth = 0;
+	col -> gap = gap;
+	col -> colour = colour;
+	col -> attrib = 0;
+	col -> priority = priority;
+	col -> heading = (char *)malloc (strlen (heading) + 1);
+	if (col -> heading != NULL)
+	{
+		strcpy (col -> heading, heading);
+	}
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  A L L O C  T A B L E                                                                                              *
  *  ====================                                                                                              *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
  *  \brief Allocate the table column descripters.
+ *  \param displayCol Number of colums displaying text in the middle.
  *  \result Number of columns.
  */
 int allocTable (int displayCol)
@@ -118,15 +154,7 @@ int allocTable (int displayCol)
 		ptrDumpColumn[c] = (COLUMN_DESC *)malloc (sizeof (COLUMN_DESC));
 		if (ptrDumpColumn[c] != NULL)
 		{
-			ptrDumpColumn[c] -> maxWidth = 8;
-			ptrDumpColumn[c] -> minWidth = 6;
-			ptrDumpColumn[c] -> startWidth = 0 ;
-			ptrDumpColumn[c] -> gap = 2;
-			ptrDumpColumn[c] -> colour = 0x07;
-			ptrDumpColumn[c] -> attrib = 0;
-			ptrDumpColumn[c] -> priority = 0;
-			ptrDumpColumn[c] -> heading = (char *)malloc (11);
-			sprintf (ptrDumpColumn[i] -> heading, "Offset");
+			configColumn (ptrDumpColumn[c], 8, 6, 2, 0x07, 1, "Offset");
 			++c;
 		}
 		for (i = 0; i < displayCol; ++i)
@@ -134,15 +162,9 @@ int allocTable (int displayCol)
 			ptrDumpColumn[c] = (COLUMN_DESC *)malloc (sizeof (COLUMN_DESC));
 			if (ptrDumpColumn[c] != NULL)
 			{
-				ptrDumpColumn[c] -> maxWidth = 2;
-				ptrDumpColumn[c] -> minWidth = 2;
-				ptrDumpColumn[c] -> startWidth = 0;
-				ptrDumpColumn[c] -> gap = 1;
-				ptrDumpColumn[c] -> colour = (i & 1 ? 0x06 : 0x02);
-				ptrDumpColumn[c] -> attrib = 0;
-				ptrDumpColumn[c] -> priority = i;
-				ptrDumpColumn[c] -> heading = (char *)malloc (5);
-				sprintf (ptrDumpColumn[c] -> heading, "%02X", i);
+				char tempbuff[11];
+				sprintf (tempbuff, "%02X", i);
+				configColumn (ptrDumpColumn[c], 2, 2, 1, (i & 1 ? 0x06 : 0x02), 2, tempbuff);
 				++c;
 			}
 			if ((i + 1) % 8 == 0)
@@ -150,15 +172,7 @@ int allocTable (int displayCol)
 				ptrDumpColumn[c] = (COLUMN_DESC *)malloc (sizeof (COLUMN_DESC));
 				if (ptrDumpColumn[c] != NULL)
 				{
-					ptrDumpColumn[c] -> maxWidth = 1;
-					ptrDumpColumn[c] -> minWidth = 1;
-					ptrDumpColumn[c] -> startWidth = 0 ;
-					ptrDumpColumn[c] -> gap = 0;
-					ptrDumpColumn[c] -> colour = 0x00;
-					ptrDumpColumn[c] -> attrib = 0;
-					ptrDumpColumn[c] -> priority = 3;
-					ptrDumpColumn[c] -> heading = (char *)malloc (2);
-					ptrDumpColumn[c] -> heading[0] = 0;
+					configColumn (ptrDumpColumn[c], 1, 1, 0, 0x07, 4, " ");
 					++c;
 				}
 			}
@@ -166,18 +180,9 @@ int allocTable (int displayCol)
 		ptrDumpColumn[c] = (COLUMN_DESC *)malloc (sizeof (COLUMN_DESC));
 		if (ptrDumpColumn[c] != NULL)
 		{
-			ptrDumpColumn[c] -> maxWidth = 32;
-			ptrDumpColumn[c] -> minWidth = 16;
-			ptrDumpColumn[c] -> startWidth = 0 ;
-			ptrDumpColumn[c] -> gap = 0;
-			ptrDumpColumn[c] -> colour = 0x07;
-			ptrDumpColumn[c] -> attrib = 0;
-			ptrDumpColumn[c] -> priority = 2;
-			ptrDumpColumn[c] -> heading = (char *)malloc (11);
-			sprintf (ptrDumpColumn[c] -> heading, "Text");
+			configColumn (ptrDumpColumn[c], 80, 8, 0, 0x07, 2, "Text");
 			++c;
 		}
-		printf ("created: %d\n", c);
 		return c;
 	}
 	return 0;
@@ -241,59 +246,141 @@ int main (int argc, char *argv[])
 		}
 	}
 
-	for (; optind < argc; ++optind)
+	if (displayWidth == -1)
 	{
-		found += directoryLoad (argv[optind], ONLYFILES|ONLYLINKS, NULL, &fileList);
-	}
-
-	if (found)
-	{
-		if (displayWidth == -1)
+		displayWidth = 8;
+		do
+		{
+			if ((displayWidth * 4) + (displayWidth / 8) + 10 > width)
+			{
+				displayWidth -= 8;
+				break;
+			}
+			displayWidth += 8;
+		}
+		while (displayWidth < 80);
+		if (displayWidth < 8)
 		{
 			displayWidth = 8;
-			do
-			{
-				if ((displayWidth * 4) + (displayWidth / 8) + 10 > width)
-				{
-					displayWidth -= 8;
-					break;
-				}
-				displayWidth += 8;
-			}
-			while (displayWidth < 80);
-			if (displayWidth < 8)
-			{
-				displayWidth = 8;
-			}
 		}
-		displayCols = allocTable (displayWidth);
+	}
+	displayCols = allocTable (displayWidth);
 
-		/*--------------------------------------------------------------------*
-         * Now we can sort the directory.                                     *
-         *--------------------------------------------------------------------*/
-		directorySort (&fileList);
-		directoryProcess (showDir, &fileList);
-
-		if (!displayQuiet && filesFound)
-		{
-			if (!displayColumnInit (2, ptrFileColumn, 0))
-			{
-				fprintf (stderr, "ERROR in: displayColumnInit\n");
-				return 0;
-			}
-			displayDrawLine (0);
-			displayInColumn (0, "%d %s shown\n", filesFound, filesFound == 1 ? "File" : "Files");
-			displayNewLine(DISPLAY_INFO);
-			displayAllLines ();
-		}
-		displayTidy ();
+	if (optind == argc)
+	{
+		showStdIn ();
 	}
 	else
 	{
-		version ();
-		printf ("No files found\n");
+		for (; optind < argc; ++optind)
+		{
+			found += directoryLoad (argv[optind], ONLYFILES|ONLYLINKS, NULL, &fileList);
+		}
+
+		if (found)
+		{
+			/*--------------------------------------------------------------------*
+    	     * Now we can sort the directory.                                     *
+    	     *--------------------------------------------------------------------*/
+			directorySort (&fileList);
+			directoryProcess (showDir, &fileList);
+		}
+		else
+		{
+			version ();
+			printf ("No files found\n");
+			return 0;
+		}
+	}
+	if (!displayQuiet && filesFound)
+	{
+		if (!displayColumnInit (2, ptrFileColumn, 0))
+		{
+			fprintf (stderr, "ERROR in: displayColumnInit\n");
+			return 0;
+		}
+		displayDrawLine (0);
+		displayInColumn (0, "%d %s shown\n", filesFound, filesFound == 1 ? "File" : "Files");
+		displayNewLine(DISPLAY_INFO);
+		displayAllLines ();
+		displayTidy ();
 	}
 	return 0;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  P R O C E S S  F I L E                                                                                            *
+ *  ======================                                                                                            *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Process the contents of a file (it could be stdin).
+ *  \param readFile File to read from.
+ *  \result None.
+ */
+void processFile (FILE *readFile)
+{
+	unsigned char inBuffer[2048 + 1];
+	unsigned char saveHex[4], saveChar[81];
+	int j = 0, c = 1, read, filePosn = 0, l = 0;
+
+	while ((read = fread (inBuffer, 1, 2048, readFile)) != 0)
+	{
+		int i = 0;
+		while (i < read)
+		{
+			sprintf ((char *)saveHex, "%02X", ((int)inBuffer[i]) & 0xFF);
+			saveChar[j++] = (inBuffer[i] < 127 && inBuffer[i] > ' ') ? inBuffer[i] : '.';
+			saveChar[j] = 0;
+
+			if (j > 1 && (j - 1) % 8 == 0)
+			{
+				if (!displayQuiet)
+				{
+					displayInColumn (c, " ");
+				}
+				++c;
+			}
+			displayInColumn (c++, "%s", saveHex);
+
+			if (j == displayWidth)
+			{
+				if (!displayQuiet)
+				{
+					displayInColumn (0, "%08X", filePosn);
+					displayInColumn (displayCols - 2, " ", saveChar);
+					displayInColumn (displayCols - 1, "%s", saveChar);
+				}
+				displayNewLine(0);
+				filePosn += displayWidth;
+				j = 0;
+
+				if (++l == displayWidth)
+				{
+					if (!displayQuiet)
+					{
+						displayBlank (0);
+					}
+					l = 0;
+				}
+				c = 1;
+			}
+			i++;
+		}
+	}
+	if (j)
+	{
+		if (!displayQuiet)
+		{
+			displayInColumn (0, "%08X", filePosn);
+			displayInColumn (54, " ", saveChar);
+			displayInColumn (55, "%s", saveChar);
+		}
+		displayNewLine (0);
+	}
+	displayAllLines ();
+	displayTidy ();
 }
 
 /**********************************************************************************************************************
@@ -309,10 +396,8 @@ int main (int argc, char *argv[])
  */
 int showDir (DIR_ENTRY *file)
 {
-	unsigned char inBuffer[2048 + 1], inFile[PATH_SIZE];
-	unsigned char saveHex[4], saveChar[80];
+	unsigned char inFile[PATH_SIZE];
 	FILE *readFile;
-	int j = 0, c = 1, read, filePosn = 0, l = 0;
 
 	/*------------------------------------------------------------------------*
      * If the file is a link check it points to a regular file.               *
@@ -341,7 +426,7 @@ int showDir (DIR_ENTRY *file)
 		displayHeading (0);
 		displayNewLine (0);
 		displayInColumn (0, "%s", file -> fileName);
-		displayInColumn (1, displayFileSize (file -> fileStat.st_size, (char *)inBuffer));
+		displayInColumn (1, displayFileSize (file -> fileStat.st_size, (char *)inFile));
 		displayNewLine (DISPLAY_INFO);
 		displayAllLines ();
 	}
@@ -364,66 +449,54 @@ int showDir (DIR_ENTRY *file)
 		if (!displayQuiet) displayDrawLine (0);
 		if (!displayQuiet) displayHeading (0);
 
-		while ((read = fread (inBuffer, 1, 2048, readFile)) != 0)
-		{
-			int i = 0;
-			while (i < read)
-			{
-				sprintf ((char *)saveHex, "%02X", ((int)inBuffer[i]) & 0xFF);
-				saveChar[j++] = (inBuffer[i] < 127 && inBuffer[i] > ' ') ? inBuffer[i] : '.';
-				saveChar[j] = 0;
-
-				if (j > 1 && (j - 1) % 8 == 0)
-				{
-					if (!displayQuiet)
-					{
-						displayInColumn (c, " ");
-					}
-					++c;
-				}
-				displayInColumn (c++, "%s", saveHex);
-
-				if (j == displayWidth)
-				{
-					if (!displayQuiet)
-					{
-						displayInColumn (0, "%08X", filePosn);
-						displayInColumn (displayCols - 2, " ", saveChar);
-						displayInColumn (displayCols - 1, "%s", saveChar);
-					}
-					displayNewLine(0);
-					filePosn += displayWidth;
-					j = 0;
-
-					if (++l == displayWidth)
-					{
-						if (!displayQuiet)
-						{
-							displayBlank (0);
-						}
-						l = 0;
-					}
-					c = 1;
-				}
-				i++;
-			}
-		}
-		if (j)
-		{
-			if (!displayQuiet)
-			{
-				displayInColumn (0, "%08X", filePosn);
-				displayInColumn (54, " ", saveChar);
-				displayInColumn (55, "%s", saveChar);
-			}
-			displayNewLine (0);
-		}
-		displayAllLines ();
-		displayTidy ();
-
+		processFile (readFile);
 		fclose (readFile);
 		++filesFound;
 	}
 	return 0;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  S H O W  S T D  I N                                                                                               *
+ *  ===================                                                                                               *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Process the contents of stdin.
+ *  \result 0 if all OK.
+ */
+void showStdIn (void)
+{
+	/*------------------------------------------------------------------------*
+     * First display a table with the file name and size.                     *
+     *------------------------------------------------------------------------*/
+	if (!displayColumnInit (1, ptrFileColumn, 0))
+	{
+		fprintf (stderr, "ERROR in: displayColumnInit\n");
+		return;
+	}
+	if (!displayQuiet)
+	{
+		displayDrawLine (0);
+		displayHeading (0);
+		displayNewLine (0);
+		displayInColumn (0, "stdin");
+		displayNewLine (DISPLAY_INFO);
+		displayAllLines ();
+	}
+	displayTidy ();
+
+	if (!displayColumnInit (displayCols, ptrDumpColumn, displayFlags))
+	{
+		fprintf (stderr, "ERROR in: displayColumnInit\n");
+		return;
+	}
+
+	if (!displayQuiet) displayDrawLine (0);
+	if (!displayQuiet) displayHeading (0);
+
+	processFile (stdin);
+	++filesFound;
 }
 

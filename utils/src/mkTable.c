@@ -368,7 +368,7 @@ void helpThem (char *name)
 int main (int argc, char *argv[])
 {
 	void *fileList = NULL;
-	int i, found = 0;
+	int found = 0;
 
 	if (strcmp (directoryVersion(), VERSION) != 0)
 	{
