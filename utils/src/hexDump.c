@@ -249,7 +249,8 @@ int main (int argc, char *argv[])
 		displayWidth = 8;
 		do
 		{
-			if ((displayWidth * 4) + (displayWidth / 8) + 10 > width)
+			int newWidth = (displayQuiet ? (displayWidth * 3) : ((displayWidth * 4) + (displayWidth / 8) + 10));
+			if (newWidth > width)
 			{
 				displayWidth -= 8;
 				break;
