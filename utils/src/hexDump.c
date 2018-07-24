@@ -350,7 +350,6 @@ void processFile (FILE *readFile)
 				{
 					displayInColumn (0, "%08X", filePosn);
 					displayInColumn (displayCols - 2, " ", saveChar);
-printf ("Display in col[%d]: [[%s]]\n", displayCols - 1, saveChar);
 					displayInColumn (displayCols - 1, "%s", saveChar);
 				}
 				displayNewLine(0);
@@ -368,6 +367,10 @@ printf ("Display in col[%d]: [[%s]]\n", displayCols - 1, saveChar);
 				c = 1;
 			}
 			i++;
+		}
+		if (read < 2048)
+		{
+			break;
 		}
 	}
 	if (j)
