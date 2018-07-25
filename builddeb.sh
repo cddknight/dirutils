@@ -6,6 +6,9 @@ for DIR in libdircmd utils
 do
 	if [ -d ${DIR} ]
 	then
+		lineDraw
+		echo Building: $DIR deb
+		lineDraw
 		cd ${DIR}
 		if [ -e builddeb.sh ]
 		then
