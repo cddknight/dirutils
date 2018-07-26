@@ -50,6 +50,7 @@
 /* Prototypes                                                                 */
 /*----------------------------------------------------------------------------*/
 int showDir (DIR_ENTRY *file);
+void showStdIn (void);
 
 /*----------------------------------------------------------------------------*/
 /* Global                                                                    */
@@ -82,7 +83,8 @@ unsigned int bitMask[MASK_COUNT][MASK_SIZE];
 static struct option long_options[] =
 {
 	{	"colour",		no_argument,		0,	'C' },
-	{	"numbers",		no_argument,		0,	'N' },
+	{	"incol",		no_argument,		0,	'n' },
+	{	"outcol",		no_argument,		0,	'N' },
 	{	"pages",		no_argument,		0,	'P' },
 	{	"headers",		no_argument,		0,	'h' },
 	{	"quiet",		no_argument,		0,	'q' },
@@ -92,8 +94,6 @@ static struct option long_options[] =
 	{	"separator",	required_argument,	0,	's' },
 	{	0,				0,					0,	0	}
 };
-
-void showStdIn (void);
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -341,10 +341,11 @@ void helpThem (char *name)
 	printf ("Enter the command: %s [options] <file name>\n", basename(name));
 	printf ("Options: \n");
 	printf ("     --colour  . . . . . -C . . . . Display output in colour.\n");
-	printf ("     --numbers . . . . . -N . . . . Show column numbers as headers.\n");
+	printf ("     --incol . . . . . . -n . . . . Show input column numbers in header.\n");
+	printf ("     --outcol  . . . . . -N . . . . Show output column numbers in header.\n");
 	printf ("     --pages . . . . . . -P . . . . Stop the the end of each page.\n");
 	printf ("                                    (Not available when processing stdin)\n");
-	printf ("     --headers . . . . . -h . . . . Use first line to generate headers.\n");
+	printf ("     --headers . . . . . -h . . . . Use first line to generate header.\n");
 	printf ("     --quiet . . . . . . -q . . . . Quiet mode, only show file contents.\n");
 	printf ("     --white . . . . . . -w . . . . Do not remove whitespace from fields.\n");
 	printf ("     --columns # . . . . -c#  . . . Columns to display, [example 1,3-5,7].\n");
@@ -386,7 +387,7 @@ int main (int argc, char *argv[])
 		 * getopt_long stores the option index here.                          *
 	     *--------------------------------------------------------------------*/
 		int option_index = 0;
-		int c = getopt_long (argc, argv, "CNPhqwc:r:s:?", long_options, &option_index);
+		int c = getopt_long (argc, argv, "CNPhnqwc:r:s:?", long_options, &option_index);
 
 		/*--------------------------------------------------------------------*
 		 * Detect the end of the options.                                     *
@@ -400,7 +401,8 @@ int main (int argc, char *argv[])
 			break;
 
 		case 'h':
-			lineHeading ^= 1;
+		case 'n':
+			lineHeading = (c == 'h' ? 1 : 2);
 		case 'N':
 			displayFlags |= DISPLAY_HEADINGS;
 			break;
@@ -541,31 +543,45 @@ int main (int argc, char *argv[])
  *  \param outBuffer The buffer to display.
  *  \result None.
  */
-void showData (int row, int col, char *outBuffer)
+void showData (int row, int col, int trueCol, char *outBuffer)
 {
+	int showLine = 1;
+
 	if (removeSpace)
 	{
 		rmWhiteSpace (outBuffer);
 	}
-	if (outBuffer[0])
+	if (row == 1 && lineHeading)
 	{
-		if (row == 1 && lineHeading)
+		char tempBuff[11];
+		char *outText = outBuffer;
+
+		if (ptrNumberColumn[col] -> heading != NULL)
 		{
-			if (ptrNumberColumn[col] -> heading != NULL)
-			{
-				free (ptrNumberColumn[col] -> heading);
-			}
-			ptrNumberColumn[col] -> heading = (char *)malloc (strlen (outBuffer) + 1);
-			if (ptrNumberColumn[col] -> heading != NULL)
-			{
-				strcpy (ptrNumberColumn[col] -> heading, outBuffer);
-				displayUpdateHeading (col, ptrNumberColumn[col] -> heading);
-			}
+			free (ptrNumberColumn[col] -> heading);
+		}
+		if (lineHeading == 1)
+		{
+			showLine = 0;
 		}
 		else
 		{
-			displayInColumn (col, "%s", outBuffer);
+			sprintf (tempBuff, "%d", trueCol + 1);
+			outText = tempBuff;
 		}
+		if (outText[0])
+		{
+			ptrNumberColumn[col] -> heading = (char *)malloc (strlen (outText) + 1);
+			if (ptrNumberColumn[col] -> heading != NULL)
+			{
+				strcpy (ptrNumberColumn[col] -> heading, outText);
+				displayUpdateHeading (col, ptrNumberColumn[col] -> heading);
+			}
+		}
+	}
+	if (outBuffer[0] && showLine)
+	{
+		displayInColumn (col, "%s", outBuffer);
 	}
 }
 
@@ -599,7 +615,7 @@ int showLine (char *inBuffer, int linesRead)
 					{
 						if (opos)
 						{
-							showData (linesRead, ocol, outBuffer);
+							showData (linesRead, ocol, icol, outBuffer);
 						}
 						++ocol;
 					}
@@ -618,7 +634,7 @@ int showLine (char *inBuffer, int linesRead)
 		{
 			if (opos)
 			{
-				showData (linesRead, ocol, outBuffer);
+				showData (linesRead, ocol, icol, outBuffer);
 				++ocol;
 			}
 		}
