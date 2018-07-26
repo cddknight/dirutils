@@ -127,7 +127,7 @@ int allocTable ()
 				ptrNumberColumn[i] -> attrib = 0;
 				ptrNumberColumn[i] -> priority = i;
 				ptrNumberColumn[i] -> heading = (char *)malloc (21);
-				sprintf (ptrNumberColumn[i] -> heading, "%d", i);
+				sprintf (ptrNumberColumn[i] -> heading, "%d", i + 1);
 				++c;
 			}
 		}
