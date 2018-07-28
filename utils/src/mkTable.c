@@ -559,7 +559,7 @@ void showData (int row, int col, int trueCol, char *outBuffer)
 	}
 	if (row == 1 && lineHeading)
 	{
-		char tempBuff[11];
+		char tempBuff[15];
 		char *outText = outBuffer;
 
 		if (ptrNumberColumn[col] -> heading != NULL)
