@@ -46,7 +46,8 @@
 #define MAX_COL			40
 #define MASK_COLS		0
 #define MASK_ROWS		1
-#define MASK_COUNT		2
+#define MASK_RIGHT		2
+#define MASK_COUNT		3
 #define MASK_SIZE		1024
 
 /**********************************************************************************************************************
@@ -80,14 +81,15 @@ int displayFlags = 0;
 int removeSpace = 1;
 int lineHeading = 0;
 char separator = ',';
-int bitMaskSet[2];
+int bitMaskSet[MASK_COUNT];
 unsigned int bitMask[MASK_COUNT][MASK_SIZE];
 
 /**********************************************************************************************************************
  * Command line params                                                                                                *
  **********************************************************************************************************************/
-static struct option long_options[] =
+static struct option longOptions[] =
 {
+	{	"align",		required_argument,	0,	'a' },
 	{	"colour",		no_argument,		0,	'C' },
 	{	"incol",		no_argument,		0,	'n' },
 	{	"outcol",		no_argument,		0,	'N' },
@@ -100,48 +102,6 @@ static struct option long_options[] =
 	{	"separator",	required_argument,	0,	's' },
 	{	0,				0,					0,	0	}
 };
-
-/**********************************************************************************************************************
- *                                                                                                                    *
- *  A L L O C  T A B L E                                                                                              *
- *  ====================                                                                                              *
- *                                                                                                                    *
- **********************************************************************************************************************/
-/**
- *  \brief Allocate the table column descripters.
- *  \result Number of columns.
- */
-int allocTable ()
-{
-	ptrNumberColumn = (COLUMN_DESC **) malloc ((MAX_COL + 1) * sizeof (COLUMN_DESC *));
-
-	if (ptrNumberColumn != NULL)
-	{
-		int i, c = 0;
-
-		memset (ptrNumberColumn, 0, (MAX_COL + 1) * sizeof (COLUMN_DESC *));
-		for (i = 0; i < MAX_COL; ++i)
-		{
-			ptrNumberColumn[i] = (COLUMN_DESC *)malloc (sizeof (COLUMN_DESC));
-			if (ptrNumberColumn[i] != NULL)
-			{
-				ptrNumberColumn[i] -> maxWidth = 81;
-				ptrNumberColumn[i] -> minWidth = 2;
-				ptrNumberColumn[i] -> startWidth = 0 ;
-				ptrNumberColumn[i] -> gap = 2;
-				ptrNumberColumn[i] -> colour = (i & 1 ? 0x06 : 0x02);
-				ptrNumberColumn[i] -> attrib = 0;
-				ptrNumberColumn[i] -> priority = i;
-				ptrNumberColumn[i] -> heading = (char *)malloc (21);
-				sprintf (ptrNumberColumn[i] -> heading, "%d", i + 1);
-				++c;
-			}
-		}
-		ptrNumberColumn[c] = NULL;
-		return c;
-	}
-	return 0;
-}
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -180,7 +140,7 @@ int setBitMask (int bitSet, int bit)
  *  \param bit Bit to check.
  *  \result 1 if it is set, 0 if not.
  */
-int getBitMask (int bitSet, int bit)
+int getBitMask (int bitSet, int bit, int def)
 {
 	if (bitMaskSet[bitSet])
 	{
@@ -192,7 +152,49 @@ int getBitMask (int bitSet, int bit)
 		}
 		return 0;
 	}
-	return 1;
+	return def;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  A L L O C  T A B L E                                                                                              *
+ *  ====================                                                                                              *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Allocate the table column descripters.
+ *  \result Number of columns.
+ */
+int allocTable ()
+{
+	ptrNumberColumn = (COLUMN_DESC **) malloc ((MAX_COL + 1) * sizeof (COLUMN_DESC *));
+
+	if (ptrNumberColumn != NULL)
+	{
+		int i, c = 0;
+
+		memset (ptrNumberColumn, 0, (MAX_COL + 1) * sizeof (COLUMN_DESC *));
+		for (i = 0; i < MAX_COL; ++i)
+		{
+			ptrNumberColumn[i] = (COLUMN_DESC *)malloc (sizeof (COLUMN_DESC));
+			if (ptrNumberColumn[i] != NULL)
+			{
+				ptrNumberColumn[i] -> maxWidth = 81;
+				ptrNumberColumn[i] -> minWidth = 2;
+				ptrNumberColumn[i] -> startWidth = 0 ;
+				ptrNumberColumn[i] -> gap = 2;
+				ptrNumberColumn[i] -> colour = (i & 1 ? 0x06 : 0x02);
+				ptrNumberColumn[i] -> attrib = (getBitMask (MASK_RIGHT, i, 0) ? COL_ALIGN_RIGHT : 0);
+				ptrNumberColumn[i] -> priority = i;
+				ptrNumberColumn[i] -> heading = (char *)malloc (21);
+				sprintf (ptrNumberColumn[i] -> heading, "%d", i + 1);
+				++c;
+			}
+		}
+		ptrNumberColumn[c] = NULL;
+		return c;
+	}
+	return 0;
 }
 
 /**********************************************************************************************************************
@@ -346,6 +348,7 @@ void helpThem (char *name)
 	version ();
 	printf ("Enter the command: %s [options] <file name>\n", basename(name));
 	printf ("Options: \n");
+	printf ("     --align # . . . . . -a#  . . . Right align a column.\n");
 	printf ("     --colour  . . . . . -C . . . . Display output in colour.\n");
 	printf ("     --incol . . . . . . -n . . . . Show input column numbers in header.\n");
 	printf ("     --outcol  . . . . . -N . . . . Show output column numbers in header.\n");
@@ -383,7 +386,6 @@ int main (int argc, char *argv[])
 		exit (1);
 	}
 
-	allocTable ();
 	displayInit ();
 	displayGetWidth ();
 
@@ -392,8 +394,8 @@ int main (int argc, char *argv[])
 		/**************************************************************************************************************
 		 * getopt_long stores the option index here.                                                                  *
 		 **************************************************************************************************************/
-		int option_index = 0;
-		int c = getopt_long (argc, argv, "CNPhnqwc:r:s:?", long_options, &option_index);
+		int optionIndex = 0;
+		int c = getopt_long (argc, argv, "a:CNPhnqwc:r:s:?", longOptions, &optionIndex);
 
 		/**************************************************************************************************************
 		 * Detect the end of the options.                                                                             *
@@ -402,6 +404,10 @@ int main (int argc, char *argv[])
 
 		switch (c)
 		{
+		case 'a':
+			procNumberRange (MASK_RIGHT, optarg);
+			break;
+
 		case 'C':
 			displayFlags |= DISPLAY_COLOURS;
 			break;
@@ -496,6 +502,7 @@ int main (int argc, char *argv[])
 		}
 	}
 
+	allocTable ();
 	if (optind == argc)
 	{
 		showStdIn ();
@@ -608,7 +615,7 @@ int showLine (char *inBuffer, int linesRead)
 	char outBuffer[INBUFF_SIZE + 1];
 	int ipos = 0, opos = 0, icol = 0, ocol = 0, shown = 0;
 
-	if (getBitMask (MASK_ROWS, linesRead - 1) || (linesRead == 1 && lineHeading))
+	if (getBitMask (MASK_ROWS, linesRead - 1, 1) || (linesRead == 1 && lineHeading))
 	{
 		outBuffer[0] = 0;
 		while (inBuffer[ipos] != 0 && ocol < MAX_COL && icol < 512)
@@ -617,7 +624,7 @@ int showLine (char *inBuffer, int linesRead)
 			{
 				if (inBuffer[ipos] == separator)
 				{
-					if (getBitMask (MASK_COLS, icol))
+					if (getBitMask (MASK_COLS, icol, 1))
 					{
 						if (opos)
 						{
@@ -636,7 +643,7 @@ int showLine (char *inBuffer, int linesRead)
 			}
 			++ipos;
 		}
-		if (getBitMask (MASK_COLS, icol))
+		if (getBitMask (MASK_COLS, icol, 1))
 		{
 			if (opos)
 			{
