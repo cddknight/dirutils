@@ -8,7 +8,8 @@ AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 REVISION=3
-PKG_CHECK_MODULES([DEPS], [dircmd libxml-2.0 glib-2.0 json-glib-1.0])
+PKG_CHECK_MODULES([S_DEPS], [dircmd])
+PKG_CHECK_MODULES([P_DEPS], [libxml-2.0 glib-2.0 json-glib-1.0])
 AC_CHECK_HEADERS([sys/acl.h values.h])
 AC_SUBST(DEPS_CFLAGS)
 AC_SUBST(DEPS_LIBS)
