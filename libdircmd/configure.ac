@@ -7,7 +7,7 @@ AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
-REVISION=3
+REVISION=4
 AC_CHECK_HEADERS([selinux/selinux.h sys/acl.h alues.h openssl/md5.h openssl/sha.h])
 AC_CHECK_LIB(crypto, MD5_Init, [DEPS_LIBS="$DEPS_LIBS -lcrypto"])
 AC_CHECK_LIB(selinux, lgetfilecon, [DEPS_LIBS="$DEPS_LIBS -lselinux"]) 
