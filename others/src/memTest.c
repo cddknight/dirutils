@@ -23,8 +23,10 @@
 #include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <dircmd.h>
+#include <stdbool.h>
+#include <sys/stat.h>
 #include <unistd.h>
+#include <dircmd.h>
 
 #define CHECKSIZE	(1024 * 1024)
 
