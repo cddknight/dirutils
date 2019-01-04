@@ -22,8 +22,32 @@
  */
 #define _GNU_SOURCE
 
+#include "config.h"
+#define _GNU_SOURCE
+#include <sys/stat.h>
+#include <time.h>
+#include <dirent.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <string.h>
+#include <unistd.h>
+#include <ctype.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#include <linux/fcntl.h>
 #include <ctype.h>
 #include <fnmatch.h>
+#ifdef HAVE_VALUES_H
+#include <values.h>
+#else
+#define MAXINT 2147483647
+#endif
+
 #include "dircmd.h"
 
 #define NO_CMD		0

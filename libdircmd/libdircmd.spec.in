@@ -40,11 +40,11 @@ mkdir -p $RPM_BUILD_ROOT%{_libdir}/pkgconfig
 mkdir -p $RPM_BUILD_ROOT%{_includedir}
 mkdir -p $RPM_BUILD_ROOT/etc
 
-install -s -m 755 .libs/libdircmd.so.4 $RPM_BUILD_ROOT%{_libdir}/libdircmd.so.%{version}
+install -s -m 755 .libs/libdircmd.so.5 $RPM_BUILD_ROOT%{_libdir}/libdircmd.so.%{version}
 install -s -m 755 .libs/libdircmd.a $RPM_BUILD_ROOT%{_libdir}/libdircmd.a
 install -m 644 pkgconfig/dircmd.pc $RPM_BUILD_ROOT%{_libdir}/pkgconfig/dircmd.pc
 install -m 644 src/dircmd.h $RPM_BUILD_ROOT%{_includedir}/dircmd.h
-ln -s libdircmd.so.%{version} $RPM_BUILD_ROOT%{_libdir}/libdircmd.so.4
+ln -s libdircmd.so.%{version} $RPM_BUILD_ROOT%{_libdir}/libdircmd.so.5
 ln -s libdircmd.so.%{version} $RPM_BUILD_ROOT%{_libdir}/libdircmd.so
 
 %clean

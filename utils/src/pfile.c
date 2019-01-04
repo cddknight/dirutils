@@ -20,17 +20,31 @@
  *  \file
  *  \brief Chris Knight's own path search program.
  */
-#include <config.h>
+#include "config.h"
+#define _GNU_SOURCE
+#include <sys/stat.h>
+#include <time.h>
+#include <dirent.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#include <ctype.h>
-#include <dirent.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <string.h>
 #include <unistd.h>
-#include <libgen.h>
-#include <sys/stat.h>
+#include <ctype.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#include <linux/fcntl.h>
 #include <getopt.h>
+#ifdef HAVE_VALUES_H
+#include <values.h>
+#else
+#define MAXINT 2147483647
+#endif
+
 #include <dircmd.h>
 
 /*----------------------------------------------------------------------------*
@@ -137,6 +151,7 @@ int main (int argc, char *argv[])
 	char *envPtr = getenv ("PATH");
 	int c, found = 0;
 	void *fileList = NULL;
+	char fullVersion[81];
 
 	static struct option long_options[] =
 	{
@@ -152,7 +167,11 @@ int main (int argc, char *argv[])
 		{0, 0, 0, 0}
 	};
 
-	if (strcmp (directoryVersion(), VERSION) != 0)
+	strcpy (fullVersion, VERSION);
+#ifdef USE_STATX
+	strcat (fullVersion, ".X");
+#endif
+	if (strcmp (directoryVersion(), fullVersion) != 0)
 	{
 		fprintf (stderr, "Library (%s) does not match Utility (%s).\n", directoryVersion(), VERSION);
 		exit (1);
@@ -421,6 +440,20 @@ int showDir (DIR_ENTRY *file)
 	if (file -> fileName[0] == '.' && !(showType & SHOW_DOT))
 		return 0;
 
+#ifdef USE_STATX
+	mode_t stMode = file -> fileStat.stx_mode;
+	uid_t stUId = file -> fileStat.stx_uid;
+	gid_t stGId = file -> fileStat.stx_gid;
+	off_t stSize = file -> fileStat.stx_size;
+	time_t stMTime = file -> fileStat.stx_mtime.tv_sec;
+#else
+	mode_t stMode = file -> fileStat.st_mode;
+	uid_t stUId = file -> fileStat.st_uid;
+	gid_t stGId = file -> fileStat.st_gid;
+	off_t stSize = file -> fileStat.st_size;
+	time_t stMTime = file -> fileStat.st_mtime;
+#endif
+
 	strcpy (fullName, file -> fullPath);
 	strcat (fullName, file -> fileName);
 
@@ -429,15 +462,15 @@ int showDir (DIR_ENTRY *file)
 	 *------------------------------------------------------------------------*/
 	if (showType & SHOW_QUIET)
 	{
-		if (S_ISLNK (file -> fileStat.st_mode))
+		if (S_ISLNK (stMode))
 		{
 			showFile = 1;
 		}
-		else if (S_ISDIR (file -> fileStat.st_mode))
+		else if (S_ISDIR (stMode))
 		{
 			showFile = 1;
 		}
-		else if (!file -> fileStat.st_mode || file -> fileStat.st_mode & S_IFREG)
+		else if (!stMode || stMode & S_IFREG)
 		{
 			showFile = 1;
 		}
@@ -460,7 +493,7 @@ int showDir (DIR_ENTRY *file)
 		/*--------------------------------------------------------------------*
 	   	 * If the file is a LINK then just them it is a link.                 *
 		 *--------------------------------------------------------------------*/
-		if (S_ISLNK (file -> fileStat.st_mode))
+		if (S_ISLNK (stMode))
 		{
 			int linkSize;
 			char linkBuff[1025];
@@ -472,9 +505,9 @@ int showDir (DIR_ENTRY *file)
 
 			displayInColumn (0, "<Lnk>");
 			displayInColumn (1, displayRightsStringACL (file, rightsBuff));
-			displayInColumn (2, displayOwnerString (file -> fileStat.st_uid, ownerString));
-			displayInColumn (3, displayGroupString (file -> fileStat.st_gid, groupString));
-			displayInColumn (5, displayDateString (file -> fileStat.st_mtime, dateString));
+			displayInColumn (2, displayOwnerString (stUId, ownerString));
+			displayInColumn (3, displayGroupString (stGId, groupString));
+			displayInColumn (5, displayDateString (stMTime, dateString));
 			displayInColumn (6, fullName);
 			displayInColumn (7, "->");
 			displayInColumn (8, linkBuff);
@@ -485,13 +518,13 @@ int showDir (DIR_ENTRY *file)
 		/*--------------------------------------------------------------------*
 	   	 * If the file is a directory then just show them the name.           *
 		 *--------------------------------------------------------------------*/
-		else if (S_ISDIR (file -> fileStat.st_mode))
+		else if (S_ISDIR (stMode))
 		{
 			displayInColumn (0, "<Dir>");
 			displayInColumn (1, displayRightsStringACL (file, rightsBuff));
-			displayInColumn (2, displayOwnerString (file -> fileStat.st_uid, ownerString));
-			displayInColumn (3, displayGroupString (file -> fileStat.st_gid, groupString));
-			displayInColumn (5, displayDateString (file -> fileStat.st_mtime, dateString));
+			displayInColumn (2, displayOwnerString (stUId, ownerString));
+			displayInColumn (3, displayGroupString (stGId, groupString));
+			displayInColumn (5, displayDateString (stMTime, dateString));
 			displayInColumn (6, fullName);
 			displayNewLine (0);
 			dirsFound ++;
@@ -500,18 +533,18 @@ int showDir (DIR_ENTRY *file)
 		/*--------------------------------------------------------------------*
    		 * If the file is a normal file then show the size/date/time.         *
 		 *--------------------------------------------------------------------*/
-		else if (!file -> fileStat.st_mode || file -> fileStat.st_mode & S_IFREG)
+		else if (!stMode || stMode & S_IFREG)
 		{
 			displayInColumn (1, displayRightsStringACL (file, rightsBuff));
-			displayInColumn (2, displayOwnerString (file -> fileStat.st_uid, ownerString));
-			displayInColumn (3, displayGroupString (file -> fileStat.st_gid, groupString));
-			displayInColumn (4, displayFileSize (file -> fileStat.st_size, numBuff));
-			displayInColumn (5, displayDateString (file -> fileStat.st_mtime, dateString));
+			displayInColumn (2, displayOwnerString (stUId, ownerString));
+			displayInColumn (3, displayGroupString (stGId, groupString));
+			displayInColumn (4, displayFileSize (stSize, numBuff));
+			displayInColumn (5, displayDateString (stMTime, dateString));
 			displayInColumn (6, fullName);
 			displayNewLine (0);
 			filesFound ++;
 
-			totalSize += file -> fileStat.st_size;
+			totalSize += stSize;
 		}
 		else
 			return 0;
@@ -521,19 +554,19 @@ int showDir (DIR_ENTRY *file)
 	 *------------------------------------------------------------------------*/
 	else
 	{
-		if (S_ISLNK (file -> fileStat.st_mode))
+		if (S_ISLNK (stMode))
 		{
 			linksFound ++;
 			showFile = 1;
 		}
-		else if (S_ISDIR (file -> fileStat.st_mode))
+		else if (S_ISDIR (stMode))
 		{
 			dirsFound ++;
 			showFile = 1;
 		}
-		else if (!file -> fileStat.st_mode || file -> fileStat.st_mode & S_IFREG)
+		else if (!stMode || stMode & S_IFREG)
 		{
-			totalSize += file -> fileStat.st_size;
+			totalSize += stSize;
 			filesFound ++;
 			showFile = 1;
 		}
@@ -562,6 +595,17 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 {
 	int retn = 0;
 	char fullName[1024];
+#ifdef USE_STATX
+	off_t stSizeOne = fileOne -> fileStat.stx_size;
+	off_t stSizeTwo = fileTwo -> fileStat.stx_size;
+	time_t stMTimeOne = fileOne -> fileStat.stx_mtime.tv_sec;
+	time_t stMTimeTwo = fileTwo -> fileStat.stx_mtime.tv_sec;
+#else
+	off_t stSizeOne = fileOne -> fileStat.st_size;
+	off_t stSizeTwo = fileTwo -> fileStat.st_size;
+	time_t stMTimeOne = fileOne -> fileStat.st_mtime;
+	time_t stMTimeTwo = fileTwo -> fileStat.st_mtime;
+#endif
 
 	switch (orderType)
 	{
@@ -572,7 +616,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	case ORDER_SIZE:
 		if (showType & SHOW_MATCH)
 		{
-			if (fileOne -> fileStat.st_size == fileTwo -> fileStat.st_size)
+			if (stSizeOne == stSizeTwo)
 			{
 				if (!fileOne -> doneCRC)
 				{
@@ -597,13 +641,11 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 				}
 			}
 		}
-		retn = (fileOne -> fileStat.st_size > fileTwo -> fileStat.st_size ? 1 :
-				fileOne -> fileStat.st_size < fileTwo -> fileStat.st_size ? -1 : 0);
+		retn = (stSizeOne > stSizeTwo ? 1 : stSizeOne < stSizeTwo ? -1 : 0);
 		break;
 
 	case ORDER_DATE:
-		retn = (fileOne -> fileStat.st_mtime > fileTwo -> fileStat.st_mtime ? -1 :
-				fileOne -> fileStat.st_mtime < fileTwo -> fileStat.st_mtime ? 1 : 0);
+		retn = (stMTimeOne > stMTimeTwo ? -1 : stMTimeOne < stMTimeTwo ? 1 : 0);
 		break;
 	}
 	if (retn == 0)

@@ -20,17 +20,31 @@
  *  \file
  *  \brief Functions to process directories.
  */
+#include "config.h"
+#define _GNU_SOURCE
+#include <sys/stat.h>
+#include <time.h>
+#include <dirent.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#include <ctype.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <string.h>
 #include <unistd.h>
+#include <ctype.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#include <linux/fcntl.h>
+#ifdef HAVE_VALUES_H
+#include <values.h>
+#else
+#define MAXINT 2147483647
+#endif
 
 #include "dircmd.h"
-#include "config.h"
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -38,8 +52,11 @@
  *                                                                                                                    *
  **********************************************************************************************************************/
 static int listCompare (const void **item1, const void **item2);
+#ifdef USE_STATX
+static int getEntryType (struct statx *fileStat);
+#else
 static int getEntryType (struct stat *fileStat);
-static char directoryVersionText[] = VERSION;
+#endif
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -53,7 +70,12 @@ static char directoryVersionText[] = VERSION;
  */
 char *directoryVersion(void)
 {
-	return directoryVersionText;
+	static char dirVer[81];
+	strcpy (dirVer, VERSION);
+#ifdef USE_STATX
+	strcat (dirVer, ".X");
+#endif
+	return dirVer;
 }
 
 /**********************************************************************************************************************
@@ -103,6 +125,18 @@ static char *strcat_ch (char *buff, char ch)
  */
 int directoryDefCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 {
+#ifdef USE_STATX
+	if (fileOne -> fileStat.stx_mode & S_IFDIR)
+	{
+		if (!(fileTwo -> fileStat.stx_mode & S_IFDIR))
+			return -1;
+	}
+	if (fileTwo -> fileStat.stx_mode & S_IFDIR)
+	{
+		if (!(fileOne -> fileStat.stx_mode & S_IFDIR))
+			return 1;
+	}
+#else
 	if (fileOne -> fileStat.st_mode & S_IFDIR)
 	{
 		if (!(fileTwo -> fileStat.st_mode & S_IFDIR))
@@ -113,6 +147,7 @@ int directoryDefCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 		if (!(fileOne -> fileStat.st_mode & S_IFDIR))
 			return 1;
 	}
+#endif
 	return strcasecmp (fileOne -> fileName, fileTwo -> fileName);
 }
 
@@ -183,7 +218,11 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags, compar
 					(dirList -> d_name[0] != '.' || findFlags & SHOWALL) &&
 					strcmp (dirList -> d_name, ".") && strcmp (dirList -> d_name, ".."))
 			{
+#ifdef USE_STATX
+				struct statx tempStat;
+#else
 				struct stat tempStat;
+#endif
 				char tempPath[PATH_SIZE];
 				char subPath[PATH_SIZE];
 
@@ -192,7 +231,11 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags, compar
 				strcat_ch (tempPath, DIRSEP);
 				strcat (tempPath, dirList -> d_name);
 
+#ifdef USE_STATX
+				if (statx (AT_FDCWD, tempPath, AT_SYMLINK_NOFOLLOW, STATX_ALL, &tempStat) == 0)
+#else
 				if (lstat (tempPath, &tempStat) == 0)
+#endif
 				{
 					if (getEntryType (&tempStat) & ONLYDIRS)
 					{
@@ -220,6 +263,10 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags, compar
 
 						filesFound += directoryLoadInt (tempPath, subPath, findFlags, compareFunc, fileList);
 					}
+				}
+				else
+				{
+					printf ("Stat failed: [%d]\n", errno);
 				}
 			}
 
@@ -250,7 +297,14 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags, compar
 		             * The 'STAT' function we get the full low down on file and   *
 		             * stores it in fileStat                                      *
 		             *------------------------------------------------------------*/
-					lstat (fullPath, &saveEntry -> fileStat);
+#ifdef USE_STATX
+					if (statx (AT_FDCWD, fullPath, AT_SYMLINK_NOFOLLOW, STATX_ALL, &saveEntry -> fileStat) != 0)
+#else
+					if (lstat (fullPath, &saveEntry -> fileStat) != 0)
+#endif
+					{
+						printf ("Stat failed: [2:%d]\n", errno);
+					}
 
 					if (getEntryType (&saveEntry -> fileStat) & findFlags)
 					{
@@ -379,7 +433,11 @@ int directoryProcess (int(*ProcFile)(DIR_ENTRY *dirEntry),	void **fileList)
 mode_t directoryTrueLinkType (DIR_ENTRY *dirEntry)
 {
 	int err = 0, level = 0;
+#ifdef USE_STATX
+	mode_t retn = dirEntry -> fileStat.stx_mode;
+#else
 	mode_t retn = dirEntry -> fileStat.st_mode;
+#endif
 
 	while (S_ISLNK (retn) && !err)
 	{
@@ -394,10 +452,17 @@ mode_t directoryTrueLinkType (DIR_ENTRY *dirEntry)
 		if ((linkSize = readlink(fullName, linkBuff, 1024)) >= 0)
 		{
 			linkBuff[linkSize] = 0;
+#ifdef USE_STATX
+			if (statx (AT_FDCWD, linkBuff, AT_SYMLINK_NOFOLLOW, STATX_ALL, &dirEntry -> fileStat) == 0)
+			{
+				retn = dirEntry -> fileStat.stx_mode;
+				if (S_ISLNK (dirEntry -> fileStat.stx_mode))
+#else
 			if (lstat (linkBuff, &dirEntry -> fileStat) == 0)
 			{
 				retn = dirEntry -> fileStat.st_mode;
 				if (S_ISLNK (dirEntry -> fileStat.st_mode))
+#endif
 				{
 					strncpy (fullName, linkBuff, PATH_SIZE - 1);
 				}
@@ -437,6 +502,44 @@ static int listCompare (const void **item1, const void **item2)
 	return (dirOne -> Compare (dirOne, dirTwo));
 }
 
+#ifdef USE_STATX
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  G E T  E N T R Y  T Y P E                                                                                         *
+ *  =========================                                                                                         *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Check the directory entry type, should we add it.
+ *  \param fileStat File stat of the found file.
+ *  \result The type of the file fond.
+ */
+static int getEntryType (struct statx *fileStat)
+{
+	if (S_ISLNK(fileStat -> stx_mode))
+		return ONLYLINKS;
+	if (S_ISDIR(fileStat -> stx_mode))
+		return ONLYDIRS;
+	if (!fileStat -> stx_mode || S_ISREG (fileStat -> stx_mode))
+	{
+		if (fileStat -> stx_mode & (S_IXOTH | S_IXGRP | S_IXUSR))
+			return ONLYEXECS;
+
+		return ONLYNEXCS;
+	}
+	if (S_ISBLK(fileStat -> stx_mode) || S_ISCHR(fileStat -> stx_mode))
+	{
+		return ONLYDEVS;
+	}
+	if (S_ISSOCK(fileStat -> stx_mode))
+		return ONLYSOCKS;
+	if (S_ISFIFO(fileStat -> stx_mode))
+		return ONLYPIPES;
+
+	printf ("OTHER: %X\n", fileStat -> stx_mode);
+	return 0;
+}
+#else
 /**********************************************************************************************************************
  *                                                                                                                    *
  *  G E T  E N T R Y  T Y P E                                                                                         *
@@ -473,3 +576,5 @@ static int getEntryType (struct stat *fileStat)
 	printf ("OTHER: %X\n", fileStat -> st_mode);
 	return 0;
 }
+#endif
+

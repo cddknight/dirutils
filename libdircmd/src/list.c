@@ -20,13 +20,31 @@
  *  \file
  *  \brief Functions to a generic linked list.
  */
-#include "dircmd.h"
-
-#ifdef MULTI_THREAD
-	#ifdef WIN32
-		#include <windows.h>
-	#endif
+#include "config.h"
+#define _GNU_SOURCE
+#include <sys/stat.h>
+#include <time.h>
+#include <dirent.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <string.h>
+#include <unistd.h>
+#include <ctype.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#include <linux/fcntl.h>
+#ifdef HAVE_VALUES_H
+#include <values.h>
+#else
+#define MAXINT 2147483647
 #endif
+
+#include "dircmd.h"
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -55,15 +73,7 @@ typedef struct _queueHeader
 	unsigned long freeData;
 
 #ifdef MULTI_THREAD
-#ifdef WIN32
-
-	HANDLE queueMutex;
-
-#else
-
 	pthread_mutex_t queueMutex;
-
-#endif
 #endif
 }
 QUEUE_HEADER;
@@ -82,15 +92,7 @@ QUEUE_HEADER;
 static void queueLock (QUEUE_HEADER *myQueue)
 {
 #ifdef MULTI_THREAD
-#ifdef WIN32
-
-	WaitForSingleObject (myQueue -> queueMutex, INFINITE);
-
-#else
-
 	pthread_mutex_lock(&myQueue -> queueMutex);
-
-#endif
 #endif
 }
 
@@ -108,15 +110,7 @@ static void queueLock (QUEUE_HEADER *myQueue)
 static void queueUnLock (QUEUE_HEADER *myQueue)
 {
 #ifdef MULTI_THREAD
-#ifdef WIN32
-
-	ReleaseMutex (myQueue -> queueMutex);
-
-#else
-
 	pthread_mutex_unlock(&myQueue -> queueMutex);
-
-#endif
 #endif
 }
 
@@ -144,15 +138,7 @@ void *queueCreate ()
 	newQueue -> freeData = 0;
 
 #ifdef MULTI_THREAD
-#ifdef WIN32
-
-	newQueue -> queueMutex = CreateMutex (NULL, FALSE, "Queue");
-
-#else
-
 	pthread_mutex_init(&newQueue -> queueMutex, NULL);
-
-#endif
 #endif
 	return newQueue;
 }
@@ -173,20 +159,9 @@ void queueDelete (void *queueHandle)
 	if (queueHandle)
 	{
 #ifdef MULTI_THREAD
-
 		QUEUE_HEADER *myQueue = (QUEUE_HEADER *)queueHandle;
-
-#ifdef WIN32
-
-		CloseHandle (myQueue -> queueMutex);
-
-#else
-
 		pthread_mutex_destroy(&myQueue -> queueMutex);
-
 #endif
-#endif
-
 		free (queueHandle);
 	}
 }

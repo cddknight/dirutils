@@ -21,27 +21,37 @@
  *  \brief Functions to display information on a console.
  */
 #include "config.h"
+#define _GNU_SOURCE
+#include <sys/stat.h>
+#include <time.h>
+#include <dirent.h>
+#include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <time.h>
+#include <ctype.h>
+#include <errno.h>
+#include <syscall.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/termios.h>
-#ifdef HAVE_SELINUX_SELINUX_H
-#include <selinux/selinux.h>
-#endif
+#include <fcntl.h>
+#include <termios.h>
 #include <pwd.h>
 #include <grp.h>
 #include <locale.h>
 #include <langinfo.h>
-#include <errno.h>
+#ifdef HAVE_SELINUX_SELINUX_H
+#include <selinux/selinux.h>
+#endif
 #ifdef HAVE_SYS_ACL_H
 #include <sys/acl.h>
+#endif
+#ifdef HAVE_VALUES_H
+#include <values.h>
+#else
+#define MAXINT 2147483647
 #endif
 
 #include "dircmd.h"
@@ -411,7 +421,11 @@ char *displayRightsStringACL (DIR_ENTRY *file, char *outString)
 	char fullName[1024];
 #endif
 
+#ifdef USE_STATX
+	displayRightsString (file -> fileStat.stx_mode, outString);
+#else
 	displayRightsString (file -> fileStat.st_mode, outString);
+#endif
 
 #ifdef HAVE_SYS_ACL_H
 	outString[10] = '.';

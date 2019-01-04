@@ -20,16 +20,31 @@
  *  \file
  *  \brief Convert the case in a file.
  */
-#include <config.h>
+#include "config.h"
+#define _GNU_SOURCE
+#include <sys/stat.h>
+#include <time.h>
+#include <dirent.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#include <ctype.h>
-#include <dirent.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <string.h>
 #include <unistd.h>
-#include <libgen.h>
-#include <sys/stat.h>
+#include <ctype.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#include <linux/fcntl.h>
+#include <getopt.h>
+#ifdef HAVE_VALUES_H
+#include <values.h>
+#else
+#define MAXINT 2147483647
+#endif
+
 #include <dircmd.h>
 
 /*----------------------------------------------------------------------------*
@@ -95,8 +110,13 @@ int main (int argc, char *argv[])
 {
 	void *fileList = NULL;
 	int i = 1, found =0;
+	char fullVersion[81];
 
-	if (strcmp (directoryVersion(), VERSION) != 0)
+	strcpy (fullVersion, VERSION);
+#ifdef USE_STATX
+	strcat (fullVersion, ".X");
+#endif
+	if (strcmp (directoryVersion(), fullVersion) != 0)
 	{
 		fprintf (stderr, "Library (%s) does not match Utility (%s).\n", directoryVersion(), VERSION);
 		exit (1);

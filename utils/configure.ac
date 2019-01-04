@@ -1,4 +1,4 @@
-AC_INIT([dircmdutils], [4.0.20])
+AC_INIT([dircmdutils], [5.0])
 AC_CONFIG_SRCDIR([src/ldir.c])
 AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE([subdir-objects])
@@ -7,7 +7,7 @@ AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
-REVISION=5
+REVISION=1
 PKG_CHECK_MODULES([S_DEPS], [dircmd])
 PKG_CHECK_MODULES([P_DEPS], [libxml-2.0 glib-2.0 json-glib-1.0])
 AC_CHECK_HEADERS([sys/acl.h values.h])

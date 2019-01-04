@@ -20,25 +20,32 @@
  *  \file
  *  \brief Chris Knight's own directory program.
  */
-#include <config.h>
+#include "config.h"
+#define _GNU_SOURCE
+#include <sys/stat.h>
+#include <time.h>
+#include <dirent.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <config.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <string.h>
+#include <unistd.h>
+#include <ctype.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#include <linux/fcntl.h>
+#include <getopt.h>
 #ifdef HAVE_VALUES_H
 #include <values.h>
 #else
 #define MAXINT 2147483647
 #endif
-#include <time.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <libgen.h>
-#include <sys/stat.h>
+
 #include <dircmd.h>
-#include <errno.h>
-#include <getopt.h>
 
 extern int errno;
 
@@ -104,6 +111,9 @@ void getFileVersion (DIR_ENTRY *fileOne);
 #define DATE_MOD		0
 #define DATE_ACC		1
 #define DATE_CHG		2
+#ifdef USE_STATX
+#define DATE_BTH		3
+#endif
 
 #define MAX_COL_DESC	18
 #define MAX_W_COL_DESC	3
@@ -302,6 +312,9 @@ CONFIG_WORD configWords[] =
 	{	8,	'a',	"accessed"	},
 	{	8,	'c',	"changed"	},
 	{	8,	'm',	"modified"	},
+#ifdef USE_STATX
+	{	8,	'b',	"birth"		},
+#endif
 	{	0,	'\0',	""			},
 };
 
@@ -412,6 +425,9 @@ void helpThem (char *progName)
 	printf ("     --case  . . . . . . . . -c  . . . . . Should the sort be case sensitive.\n");
 	printf ("     --colour  . . . . . . . -C  . . . . . Toggle colour display, defined in dirrc.\n");
 	printf ("     --date accessed . . . . -da . . . . . Show time of last access.\n");
+#ifdef USE_STATX
+	printf ("     --date birth  . . . . . -db . . . . . Show time of file creation.\n");
+#endif
 	printf ("     --date changed  . . . . -dc . . . . . Show time of last status change.\n");
 	printf ("     --date modified . . . . -dm . . . . . Show time of last modification.\n");
 	printf ("     --display context . . . -Dc . . . . . Show the context of the file.\n");
@@ -920,6 +936,12 @@ void commandOption (char option, char *optionVal, char *progName)
 					strcpy (dateType, "Accessed");
 					showDate = DATE_ACC;
 					break;
+#ifdef USE_STATX
+				case 'b':
+					strcpy (dateType, "Birth");
+					showDate = DATE_BTH;
+					break;
+#endif
 				case 'c':
 					strcpy (dateType, "Changed");
 					showDate = DATE_CHG;
@@ -1026,9 +1048,13 @@ int main (int argc, char *argv[])
 {
 	int found = 0, foundDir = 0, c;
 	void *fileList = NULL;
-	char defaultDir[PATH_SIZE];
+	char defaultDir[PATH_SIZE], fullVersion[81];
 
-	if (strcmp (directoryVersion(), VERSION) != 0)
+	strcpy (fullVersion, VERSION);
+#ifdef USE_STATX
+	strcat (fullVersion, ".X");
+#endif
+	if (strcmp (directoryVersion(), fullVersion) != 0)
 	{
 		fprintf (stderr, "Library (%s) does not match Utility (%s).\n", directoryVersion(), VERSION);
 		exit (1);
@@ -1368,6 +1394,21 @@ char *findExtn (char *fileName)
 int showDir (DIR_ENTRY *file)
 {
 	int fileAge = 0;
+#ifdef USE_STATX
+	mode_t stMode = file -> fileStat.stx_mode;
+	uid_t stUId = file -> fileStat.stx_uid;
+	gid_t stGId = file -> fileStat.stx_gid;
+    ino_t stINo = file -> fileStat.stx_ino;
+    nlink_t stNLink = file -> fileStat.stx_nlink;
+	off_t stSize = file -> fileStat.stx_size;
+#else
+	mode_t stMode = file -> fileStat.st_mode;
+	uid_t stUId = file -> fileStat.st_uid;
+	gid_t stGId = file -> fileStat.st_gid;
+    ino_t stINo = file -> fileStat.st_ino;
+    nlink_t stNLink = file -> fileStat.st_nlink;
+	off_t stSize = file -> fileStat.st_size;
+#endif
 
 	/*------------------------------------------------------------------------*
 	 * Only show files that have matches, or only show files with no match.   *
@@ -1411,6 +1452,20 @@ int showDir (DIR_ENTRY *file)
 
 	switch (showDate)
 	{
+#ifdef USE_STATX
+	case DATE_MOD:
+		fileAge = file -> fileStat.stx_mtime.tv_sec;
+		break;
+	case DATE_ACC:
+		fileAge = file -> fileStat.stx_atime.tv_sec;
+		break;
+	case DATE_CHG:
+		fileAge = file -> fileStat.stx_ctime.tv_sec;
+		break;
+	case DATE_BTH:
+		fileAge = file -> fileStat.stx_btime.tv_sec;
+		break;
+#else
 	case DATE_MOD:
 		fileAge = file -> fileStat.st_mtime;
 		break;
@@ -1420,6 +1475,7 @@ int showDir (DIR_ENTRY *file)
 	case DATE_CHG:
 		fileAge = file -> fileStat.st_ctime;
 		break;
+#endif
 	}
 
 	/*------------------------------------------------------------------------*
@@ -1441,7 +1497,7 @@ int showDir (DIR_ENTRY *file)
 		char marker1[2], marker2[2], displayName[PATH_SIZE];
 		int colour = -1;
 
-		if (S_ISLNK (file -> fileStat.st_mode))
+		if (S_ISLNK (stMode))
 		{
 			marker1[0] = '<';
 			marker2[0] = '>';
@@ -1449,7 +1505,7 @@ int showDir (DIR_ENTRY *file)
 			colour = colourType[1];
 			linksFound ++;
 		}
-		else if (S_ISDIR (file -> fileStat.st_mode))
+		else if (S_ISDIR (stMode))
 		{
 			marker1[0] = '[';
 			marker2[0] = ']';
@@ -1457,22 +1513,26 @@ int showDir (DIR_ENTRY *file)
 			colour = colourType[0];
 			dirsFound ++;
 		}
-		else if (!file -> fileStat.st_mode || file -> fileStat.st_mode & S_IFREG)
+		else if (!stMode || stMode)
 		{
 			marker1[0] = ' ';
 			marker2[0] = ' ';
 			marker1[1] = marker2[1] = 0;
+#ifdef USE_STATX
+			totalSize += file -> fileStat.stx_size;
+#else
 			totalSize += file -> fileStat.st_size;
+#endif
 			colour = colourType[2];
-			if (file -> fileStat.st_mode & 0100)
+			if (stMode & 0100)
 				colour |= colourType[3];
-			if (file -> fileStat.st_mode & 0200)
+			if (stMode & 0200)
 				colour |= colourType[4];
-			if (file -> fileStat.st_mode & 0400)
+			if (stMode & 0400)
 				colour |= colourType[5];
 			filesFound ++;
 		}
-		else if (S_ISBLK(file -> fileStat.st_mode) || S_ISCHR(file -> fileStat.st_mode))
+		else if (S_ISBLK(stMode) || S_ISCHR(stMode))
 		{
 			marker1[0] = '{';
 			marker2[0] = '}';
@@ -1480,7 +1540,7 @@ int showDir (DIR_ENTRY *file)
 			colour = colourType[6];
 			devsFound ++;
 		}
-		else if (S_ISSOCK(file -> fileStat.st_mode))
+		else if (S_ISSOCK(stMode))
 		{
 			marker1[0] = '{';
 			marker2[0] = '}';
@@ -1488,7 +1548,7 @@ int showDir (DIR_ENTRY *file)
 			colour = colourType[6];
 			socksFound ++;
 		}
-		else if (S_ISFIFO(file -> fileStat.st_mode))
+		else if (S_ISFIFO(stMode))
 		{
 			marker1[0] = '{';
 			marker2[0] = '}';
@@ -1504,7 +1564,7 @@ int showDir (DIR_ENTRY *file)
 		else
 			strcpy (displayName, file -> fileName);
 
-		if (S_ISDIR (file -> fileStat.st_mode))
+		if (S_ISDIR (stMode))
 		{
 			strcat (displayName, "/");
 		}
@@ -1527,7 +1587,7 @@ int showDir (DIR_ENTRY *file)
 		char fullName[PATH_SIZE], displayName[PATH_SIZE];
 
 		strcpy (displayName, file -> fileName);
-		if (S_ISDIR (file -> fileStat.st_mode))
+		if (S_ISDIR (stMode))
 			strcat (displayName, "/");
 
 		if (showType & SHOW_QUOTE)
@@ -1594,6 +1654,20 @@ int showDir (DIR_ENTRY *file)
 
 		switch (showDate)
 		{
+#ifdef USE_STATX
+		case DATE_MOD:
+			fileAge = file -> fileStat.stx_mtime.tv_sec;
+			break;
+		case DATE_ACC:
+			fileAge = file -> fileStat.stx_atime.tv_sec;
+			break;
+		case DATE_CHG:
+			fileAge = file -> fileStat.stx_ctime.tv_sec;
+			break;
+		case DATE_BTH:
+			fileAge = file -> fileStat.stx_btime.tv_sec;
+			break;
+#else
 		case DATE_MOD:
 			fileAge = file -> fileStat.st_mtime;
 			break;
@@ -1603,12 +1677,13 @@ int showDir (DIR_ENTRY *file)
 		case DATE_CHG:
 			fileAge = file -> fileStat.st_ctime;
 			break;
+#endif
 		}
 
 		/*--------------------------------------------------------------------*
          * If the file is a LINK then just them it is a link.                 *
          *--------------------------------------------------------------------*/
-		if (S_ISLNK (file -> fileStat.st_mode))
+		if (S_ISLNK (stMode))
 		{
 			int linkSize;
 			char linkBuff[1025];
@@ -1641,15 +1716,15 @@ int showDir (DIR_ENTRY *file)
 				}
 				if (showType & SHOW_NUM_LINKS)
 				{
-					displayInColumn (columnTranslate[COL_N_LINKS], "%s", displayCommaNumber (file -> fileStat.st_nlink, numBuff));
+					displayInColumn (columnTranslate[COL_N_LINKS], "%s", displayCommaNumber (stNLink, numBuff));
 				}
 				if (showType & SHOW_OWNER)
 				{
-					displayInColumn (columnTranslate[COL_OWNER], "%s", displayOwnerString (file -> fileStat.st_uid, ownerString));
+					displayInColumn (columnTranslate[COL_OWNER], "%s", displayOwnerString (stUId, ownerString));
 				}
 				if (showType & SHOW_GROUP)
 				{
-					displayInColumn (columnTranslate[COL_GROUP], "%s", displayGroupString (file -> fileStat.st_gid, groupString));
+					displayInColumn (columnTranslate[COL_GROUP], "%s", displayGroupString (stUId, groupString));
 				}
 				if (showType & SHOW_SELINUX)
 				{
@@ -1657,7 +1732,7 @@ int showDir (DIR_ENTRY *file)
 				}
 				if (showType & SHOW_INODE)
 				{
-					displayInColumn (columnTranslate[COL_INODE], "%s", displayCommaNumber (file -> fileStat.st_ino, numBuff));
+					displayInColumn (columnTranslate[COL_INODE], "%s", displayCommaNumber (stINo, numBuff));
 				}
 				if (showType & SHOW_EXTN)
 				{
@@ -1706,7 +1781,7 @@ int showDir (DIR_ENTRY *file)
 		/*--------------------------------------------------------------------*
          * If the file is a directory then just show them the name.           *
          *--------------------------------------------------------------------*/
-		else if (S_ISDIR (file -> fileStat.st_mode))
+		else if (S_ISDIR (stMode))
 		{
 			if (showType & SHOW_TYPE)
 			{
@@ -1724,15 +1799,15 @@ int showDir (DIR_ENTRY *file)
 				}
 				if (showType & SHOW_NUM_LINKS)
 				{
-					displayInColumn (columnTranslate[COL_N_LINKS], "%s", displayCommaNumber (file -> fileStat.st_nlink, numBuff));
+					displayInColumn (columnTranslate[COL_N_LINKS], "%s", displayCommaNumber (stNLink, numBuff));
 				}
 				if (showType & SHOW_OWNER)
 				{
-					displayInColumn (columnTranslate[COL_OWNER], "%s", displayOwnerString (file -> fileStat.st_uid, ownerString));
+					displayInColumn (columnTranslate[COL_OWNER], "%s", displayOwnerString (stUId, ownerString));
 				}
 				if (showType & SHOW_GROUP)
 				{
-					displayInColumn (columnTranslate[COL_GROUP], "%s", displayGroupString (file -> fileStat.st_gid, groupString));
+					displayInColumn (columnTranslate[COL_GROUP], "%s", displayGroupString (stGId, groupString));
 				}
 				if (showType & SHOW_SELINUX)
 				{
@@ -1740,7 +1815,7 @@ int showDir (DIR_ENTRY *file)
 				}
 				if (showType & SHOW_INODE)
 				{
-					displayInColumn (columnTranslate[COL_INODE], "%s", displayCommaNumber (file -> fileStat.st_ino, numBuff));
+					displayInColumn (columnTranslate[COL_INODE], "%s", displayCommaNumber (stINo, numBuff));
 				}
 				displayInColour (columnTranslate[COL_FILENAME], colourType[0], "%s/", displayName);
 
@@ -1767,27 +1842,26 @@ int showDir (DIR_ENTRY *file)
 		/*--------------------------------------------------------------------*
          * If the file is a device then just show them the name.              *
          *--------------------------------------------------------------------*/
-		else if (S_ISBLK(file -> fileStat.st_mode) || S_ISCHR(file -> fileStat.st_mode) ||
-				S_ISSOCK(file -> fileStat.st_mode) || S_ISFIFO(file -> fileStat.st_mode))
+		else if (S_ISBLK(stMode) || S_ISCHR(stMode) || S_ISSOCK(stMode) || S_ISFIFO(stMode))
 		{
 			if (showType & SHOW_TYPE)
 			{
-				if (S_ISBLK(file -> fileStat.st_mode))
+				if (S_ISBLK(stMode))
 				{
 					displayInColumn (columnTranslate[COL_TYPE], "<BlkD>");
 					devsFound ++;
 				}
-				else if (S_ISCHR(file -> fileStat.st_mode))
+				else if (S_ISCHR(stMode))
 				{
 					displayInColumn (columnTranslate[COL_TYPE], "<ChrD>");
 					devsFound ++;
 				}
-				else if (S_ISSOCK(file -> fileStat.st_mode))
+				else if (S_ISSOCK(stMode))
 				{
 					displayInColumn (columnTranslate[COL_TYPE], "<Sckt>");
 					socksFound ++;
 				}
-				else if (S_ISFIFO(file -> fileStat.st_mode))
+				else if (S_ISFIFO(stMode))
 				{
 					displayInColumn (columnTranslate[COL_TYPE], "<Pipe>");
 					socksFound ++;
@@ -1805,15 +1879,15 @@ int showDir (DIR_ENTRY *file)
 				}
 				if (showType & SHOW_NUM_LINKS)
 				{
-					displayInColumn (columnTranslate[COL_N_LINKS], "%s", displayCommaNumber (file -> fileStat.st_nlink, numBuff));
+					displayInColumn (columnTranslate[COL_N_LINKS], "%s", displayCommaNumber (stNLink, numBuff));
 				}
 				if (showType & SHOW_OWNER)
 				{
-					displayInColumn (columnTranslate[COL_OWNER], "%s", displayOwnerString (file -> fileStat.st_uid, ownerString));
+					displayInColumn (columnTranslate[COL_OWNER], "%s", displayOwnerString (stUId, ownerString));
 				}
 				if (showType & SHOW_GROUP)
 				{
-					displayInColumn (columnTranslate[COL_GROUP], "%s", displayGroupString (file -> fileStat.st_gid, groupString));
+					displayInColumn (columnTranslate[COL_GROUP], "%s", displayGroupString (stGId, groupString));
 				}
 				if (showType & SHOW_SELINUX)
 				{
@@ -1821,7 +1895,7 @@ int showDir (DIR_ENTRY *file)
 				}
 				if (showType & SHOW_INODE)
 				{
-					displayInColumn (columnTranslate[COL_INODE], "%s", displayCommaNumber (file -> fileStat.st_ino, numBuff));
+					displayInColumn (columnTranslate[COL_INODE], "%s", displayCommaNumber (stINo, numBuff));
 				}
 				if (showType & SHOW_EXTN)
 				{
@@ -1856,15 +1930,15 @@ int showDir (DIR_ENTRY *file)
 		/*--------------------------------------------------------------------*
          * If the file is a normal file then show the size/date/time.         *
          *--------------------------------------------------------------------*/
-		else if (!file -> fileStat.st_mode || file -> fileStat.st_mode & S_IFREG)
+		else if (!stMode || stMode & S_IFREG)
 		{
 			int colour = colourType[2];
 
-			if (file -> fileStat.st_mode & 0100)
+			if (stMode & 0100)
 				colour |= colourType[3];
-			if (file -> fileStat.st_mode & 0200)
+			if (stMode & 0200)
 				colour |= colourType[4];
-			if (file -> fileStat.st_mode & 0400)
+			if (stMode & 0400)
 				colour |= colourType[5];
 
 			if (showType & SHOW_PATH)
@@ -1879,15 +1953,15 @@ int showDir (DIR_ENTRY *file)
 				}
 				if (showType & SHOW_NUM_LINKS)
 				{
-					displayInColumn (columnTranslate[COL_N_LINKS], "%s", displayCommaNumber (file -> fileStat.st_nlink, numBuff));
+					displayInColumn (columnTranslate[COL_N_LINKS], "%s", displayCommaNumber (stNLink, numBuff));
 				}
 				if (showType & SHOW_OWNER)
 				{
-					displayInColumn (columnTranslate[COL_OWNER], displayOwnerString (file -> fileStat.st_uid, ownerString));
+					displayInColumn (columnTranslate[COL_OWNER], displayOwnerString (stUId, ownerString));
 				}
 				if (showType & SHOW_GROUP)
 				{
-					displayInColumn (columnTranslate[COL_GROUP], displayGroupString (file -> fileStat.st_gid, groupString));
+					displayInColumn (columnTranslate[COL_GROUP], displayGroupString (stGId, groupString));
 				}
 				if (showType & SHOW_SELINUX)
 				{
@@ -1911,7 +1985,7 @@ int showDir (DIR_ENTRY *file)
 				}
 				if (showType & SHOW_INODE)
 				{
-					displayInColumn (columnTranslate[COL_INODE], "%s", displayCommaNumber (file -> fileStat.st_ino, numBuff));
+					displayInColumn (columnTranslate[COL_INODE], "%s", displayCommaNumber (stINo, numBuff));
 				}
 				if (showType & SHOW_EXTN)
 				{
@@ -1926,7 +2000,7 @@ int showDir (DIR_ENTRY *file)
 
 				if (showType & SHOW_SIZE)
 				{
-					long long fileSize = file -> fileStat.st_size;
+					long long fileSize = stSize;
 					displayInColumn (columnTranslate[COL_SIZE], sizeFormat ? displayFileSize (fileSize, numBuff) :
 							displayCommaNumber (fileSize, numBuff));
 				}
@@ -1948,7 +2022,7 @@ int showDir (DIR_ENTRY *file)
 			}
 			displayNewLine (0);
 
-			totalSize += file -> fileStat.st_size;
+			totalSize += stSize;
 			filesFound ++;
 		}
 		else
@@ -2089,6 +2163,33 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 {
 	int retn = 0;
 	char fullName[1024];
+#ifdef USE_STATX
+	mode_t stModeOne = fileOne -> fileStat.stx_mode;
+	mode_t stModeTwo = fileTwo -> fileStat.stx_mode;
+	uid_t stUIdOne = fileOne -> fileStat.stx_uid;
+	uid_t stUIdTwo = fileTwo -> fileStat.stx_uid;
+	gid_t stGIdOne = fileOne -> fileStat.stx_gid;
+	gid_t stGIdTwo = fileTwo -> fileStat.stx_gid;
+    ino_t stINoOne = fileOne -> fileStat.stx_ino;
+    ino_t stINoTwo = fileTwo -> fileStat.stx_ino;
+    nlink_t stNLinkOne = fileOne -> fileStat.stx_nlink;
+    nlink_t stNLinkTwo = fileTwo -> fileStat.stx_nlink;
+	off_t stSizeOne = fileOne -> fileStat.stx_size;
+	off_t stSizeTwo = fileTwo -> fileStat.stx_size;
+#else
+	mode_t stModeOne = fileOne -> fileStat.st_mode;
+	mode_t stModeTwo = fileTwo -> fileStat.st_mode;
+	uid_t stUIdOne = fileOne -> fileStat.st_uid;
+	uid_t stUIdTwo = fileTwo -> fileStat.st_uid;
+	gid_t stGIdOne = fileOne -> fileStat.st_gid;
+	gid_t stGIdTwo = fileTwo -> fileStat.st_gid;
+    ino_t stINoOne = fileOne -> fileStat.st_ino;
+    ino_t stINoTwo = fileTwo -> fileStat.st_ino;
+    nlink_t stNLinkOne = fileOne -> fileStat.st_nlink;
+    nlink_t stNLinkTwo = fileTwo -> fileStat.st_nlink;
+	off_t stSizeOne = fileOne -> fileStat.st_size;
+	off_t stSizeTwo = fileTwo -> fileStat.st_size;
+#endif
 
 	if (orderType == ORDER_NONE)
 		return showType & SHOW_RORDER ? -1 : 1;
@@ -2096,84 +2197,84 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	/*------------------------------------------------------------------------*
      * Force the directories to the begining of the list                      *
      *------------------------------------------------------------------------*/
-	if (S_ISDIR (fileOne -> fileStat.st_mode))
+	if (S_ISDIR (stModeOne))
 	{
-		if (!(S_ISDIR (fileTwo -> fileStat.st_mode)))
+		if (!(S_ISDIR (stModeTwo)))
 			return -1;
 	}
-	if (S_ISDIR (fileTwo -> fileStat.st_mode))
+	if (S_ISDIR (stModeTwo))
 	{
-		if (!(S_ISDIR (fileOne -> fileStat.st_mode)))
+		if (!(S_ISDIR (stModeOne)))
 			return 1;
 	}
 
 	/*------------------------------------------------------------------------*
      * Force the links to follow the directories                              *
      *------------------------------------------------------------------------*/
-	if (S_ISLNK (fileOne -> fileStat.st_mode))
+	if (S_ISLNK (stModeOne))
 	{
-		if (!(S_ISLNK (fileTwo -> fileStat.st_mode)))
+		if (!(S_ISLNK (stModeTwo)))
 			return -1;
 	}
-	if (S_ISLNK (fileTwo -> fileStat.st_mode))
+	if (S_ISLNK (stModeTwo))
 	{
-		if (!(S_ISLNK (fileOne -> fileStat.st_mode)))
+		if (!(S_ISLNK (stModeOne)))
 			return 1;
 	}
 
 	/*------------------------------------------------------------------------*
      * Force the block devices to follow the links                            *
      *------------------------------------------------------------------------*/
-	if (S_ISBLK(fileOne -> fileStat.st_mode))
+	if (S_ISBLK(stModeOne))
 	{
-		if (!(S_ISBLK(fileTwo -> fileStat.st_mode)))
+		if (!(S_ISBLK(stModeTwo)))
 			return -1;
 	}
-	if (S_ISBLK(fileTwo -> fileStat.st_mode))
+	if (S_ISBLK(stModeTwo))
 	{
-		if (!(S_ISBLK(fileOne -> fileStat.st_mode)))
+		if (!(S_ISBLK(stModeOne)))
 			return 1;
 	}
 
 	/*------------------------------------------------------------------------*
      * Force the char devices to follow the block devices                     *
      *------------------------------------------------------------------------*/
-	if (S_ISCHR(fileOne -> fileStat.st_mode))
+	if (S_ISCHR(stModeOne))
 	{
-		if (!(S_ISCHR(fileTwo -> fileStat.st_mode)))
+		if (!(S_ISCHR(stModeTwo)))
 			return -1;
 	}
-	if (S_ISCHR(fileTwo -> fileStat.st_mode))
+	if (S_ISCHR(stModeTwo))
 	{
-		if (!(S_ISCHR(fileOne -> fileStat.st_mode)))
+		if (!(S_ISCHR(stModeOne)))
 			return 1;
 	}
 
 	/*------------------------------------------------------------------------*
      * Force the sockets to follow the char devices                           *
      *------------------------------------------------------------------------*/
-	if (S_ISSOCK (fileOne -> fileStat.st_mode))
+	if (S_ISSOCK (stModeOne))
 	{
-		if (!(S_ISSOCK (fileTwo -> fileStat.st_mode)))
+		if (!(S_ISSOCK (stModeTwo)))
 			return -1;
 	}
-	if (S_ISSOCK (fileTwo -> fileStat.st_mode))
+	if (S_ISSOCK (stModeTwo))
 	{
-		if (!(S_ISSOCK (fileOne -> fileStat.st_mode)))
+		if (!(S_ISSOCK (stModeOne)))
 			return 1;
 	}
 
 	/*------------------------------------------------------------------------*
      * Force the pipes to follow the sockets                                  *
      *------------------------------------------------------------------------*/
-	if (S_ISFIFO (fileOne -> fileStat.st_mode))
+	if (S_ISFIFO (stModeOne))
 	{
-		if (!(S_ISFIFO (fileTwo -> fileStat.st_mode)))
+		if (!(S_ISFIFO (stModeTwo)))
 			return -1;
 	}
-	if (S_ISFIFO (fileTwo -> fileStat.st_mode))
+	if (S_ISFIFO (stModeTwo))
 	{
-		if (!(S_ISFIFO (fileOne -> fileStat.st_mode)))
+		if (!(S_ISFIFO (stModeOne)))
 			return 1;
 	}
 
@@ -2182,7 +2283,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	case ORDER_SIZE:
 		if (showType & SHOW_MATCH)
 		{
-			if (fileOne -> fileStat.st_size == fileTwo -> fileStat.st_size)
+			if (stSizeOne == stSizeTwo)
 			{
 				int i;
 
@@ -2219,13 +2320,30 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 				}
 			}
 		}
-		retn = (fileOne -> fileStat.st_size > fileTwo -> fileStat.st_size ? 1 :
-				fileOne -> fileStat.st_size < fileTwo -> fileStat.st_size ? -1 : 0);
+		retn = (stSizeOne > stSizeTwo ? 1 : stSizeOne < stSizeTwo ? -1 : 0);
 		break;
 
 	case ORDER_DATE:
 		switch (showDate)
 		{
+#ifdef USE_STATX
+		case DATE_MOD:
+			retn = (fileOne -> fileStat.stx_mtime.tv_sec > fileTwo -> fileStat.stx_mtime.tv_sec ? -1 :
+					fileOne -> fileStat.stx_mtime.tv_sec < fileTwo -> fileStat.stx_mtime.tv_sec ? 1 : 0);
+			break;
+		case DATE_ACC:
+			retn = (fileOne -> fileStat.stx_atime.tv_sec > fileTwo -> fileStat.stx_atime.tv_sec ? -1 :
+					fileOne -> fileStat.stx_atime.tv_sec < fileTwo -> fileStat.stx_atime.tv_sec ? 1 : 0);
+			break;
+		case DATE_CHG:
+			retn = (fileOne -> fileStat.stx_ctime.tv_sec > fileTwo -> fileStat.stx_ctime.tv_sec ? -1 :
+					fileOne -> fileStat.stx_ctime.tv_sec < fileTwo -> fileStat.stx_ctime.tv_sec ? 1 : 0);
+			break;
+		case DATE_BTH:
+			retn = (fileOne -> fileStat.stx_btime.tv_sec > fileTwo -> fileStat.stx_btime.tv_sec ? -1 :
+					fileOne -> fileStat.stx_btime.tv_sec < fileTwo -> fileStat.stx_btime.tv_sec ? 1 : 0);
+			break;
+#else
 		case DATE_MOD:
 			retn = (fileOne -> fileStat.st_mtime > fileTwo -> fileStat.st_mtime ? -1 :
 					fileOne -> fileStat.st_mtime < fileTwo -> fileStat.st_mtime ? 1 : 0);
@@ -2238,6 +2356,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 			retn = (fileOne -> fileStat.st_ctime > fileTwo -> fileStat.st_ctime ? -1 :
 					fileOne -> fileStat.st_ctime < fileTwo -> fileStat.st_ctime ? 1 : 0);
 			break;
+#endif
 		}
 		break;
 
@@ -2267,8 +2386,8 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	case ORDER_OWNR:
 		{
 			char ownerOne[80], ownerTwo[80];
-			displayOwnerString (fileOne -> fileStat.st_uid, ownerOne);
-			displayOwnerString (fileTwo -> fileStat.st_uid, ownerTwo);
+			displayOwnerString (stUIdOne, ownerOne);
+			displayOwnerString (stUIdTwo, ownerTwo);
 			retn = strcasecmp (ownerOne, ownerTwo);
 		}
 		break;
@@ -2276,20 +2395,18 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	case ORDER_GRUP:
 		{
 			char groupOne[80], groupTwo[80];
-			displayGroupString (fileOne -> fileStat.st_gid, groupOne);
-			displayGroupString (fileTwo -> fileStat.st_gid, groupTwo);
+			displayGroupString (stGIdOne, groupOne);
+			displayGroupString (stGIdTwo, groupTwo);
 			retn = strcasecmp (groupOne, groupTwo);
 		}
 		break;
 
 	case ORDER_LINK:
-		retn = (fileOne -> fileStat.st_nlink > fileTwo -> fileStat.st_nlink ? -1 :
-				fileOne -> fileStat.st_nlink < fileTwo -> fileStat.st_nlink ? 1 : 0);
+		retn = (stNLinkOne > stNLinkTwo ? -1 : stNLinkOne < stNLinkTwo ? 1 : 0);
 		break;
 
 	case ORDER_INOD:
-		retn = (fileOne -> fileStat.st_ino > fileTwo -> fileStat.st_ino ? -1 :
-				fileOne -> fileStat.st_ino < fileTwo -> fileStat.st_ino ? 1 : 0);
+		retn = (stINoOne > stINoTwo ? -1 : stINoOne < stINoTwo ? 1 : 0);
 		break;
 
 	case ORDER_CNXT:

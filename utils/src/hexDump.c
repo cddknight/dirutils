@@ -20,16 +20,31 @@
  *  \file
  *  \brief Program to dump the contence of a file in Hex.
  */
-#include <config.h>
+#include "config.h"
+#define _GNU_SOURCE
+#include <sys/stat.h>
+#include <time.h>
+#include <dirent.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#include <ctype.h>
-#include <libgen.h>
-#include <dirent.h>
-#include <sys/stat.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <string.h>
 #include <unistd.h>
+#include <ctype.h>
+#include <errno.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#include <linux/fcntl.h>
+#include <getopt.h>
+#ifdef HAVE_VALUES_H
+#include <values.h>
+#else
+#define MAXINT 2147483647
+#endif
+
 #include <dircmd.h>
 
 /*----------------------------------------------------------------------------*
@@ -202,8 +217,13 @@ int main (int argc, char *argv[])
 {
 	void *fileList = NULL;
 	int i, found = 0, width = 80;
+	char fullVersion[81];
 
-	if (strcmp (directoryVersion(), VERSION) != 0)
+	strcpy (fullVersion, VERSION);
+#ifdef USE_STATX
+	strcat (fullVersion, ".X");
+#endif
+	if (strcmp (directoryVersion(), fullVersion) != 0)
 	{
 		fprintf (stderr, "Library (%s) does not match Utility (%s).\n", directoryVersion(), VERSION);
 		exit (1);
@@ -410,7 +430,11 @@ int showDir (DIR_ENTRY *file)
 	/*----------------------------------------------------------------------------------------------------------------*
      * If the file is a link check it points to a regular file.                                                       *
 	 *----------------------------------------------------------------------------------------------------------------*/
+#ifdef USE_STATX
+	if (S_ISLNK (file -> fileStat.stx_mode))
+#else
 	if (S_ISLNK (file -> fileStat.st_mode))
+#endif
 	{
 		mode_t type = directoryTrueLinkType (file);
 		if (!S_ISREG (type))
@@ -434,7 +458,11 @@ int showDir (DIR_ENTRY *file)
 		displayHeading (0);
 		displayNewLine (0);
 		displayInColumn (0, "%s", file -> fileName);
+#ifdef USE_STATX
+		displayInColumn (1, displayFileSize (file -> fileStat.stx_size, (char *)inFile));
+#else
 		displayInColumn (1, displayFileSize (file -> fileStat.st_size, (char *)inFile));
+#endif
 		displayNewLine (DISPLAY_INFO);
 		displayAllLines ();
 	}

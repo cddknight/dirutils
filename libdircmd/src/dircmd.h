@@ -23,29 +23,14 @@
 #ifndef INCLUDE_DIRCMD_H
 #define INCLUDE_DIRCMD_H
 
-#include <time.h>
-#include <dirent.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#ifdef STATX_ALL
+#define USE_STATX
+#endif
+
 #include <stdarg.h>
-#include <stdbool.h>
 
-#ifdef HAVE_VALUES_H
-#include <values.h>
-#else
-#define MAXINT 2147483647
-#endif
-#include <sys/stat.h>
-
-#ifdef DOS
-	#define DIRSEP				'\\'
-	#define PATHSEP				';'
-#else
-	#define DIRSEP				'/'
-	#define PATHSEP				':'
-#endif
+#define DIRSEP				'/'
+#define PATHSEP				':'
 
 #define PATH_SIZE				PATH_MAX
 
@@ -227,7 +212,11 @@ struct dirEntry
 	/** Version extracted from the name */
 	struct dirFileVerInfo *fileVer;
 	/** Directory information */
+#ifdef USE_STATX
+	struct statx fileStat;
+#else
 	struct stat fileStat;
+#endif
 	/** Has the CRC been calculated for this file */
 	unsigned int doneCRC;
 	/** CRC value for this file */
