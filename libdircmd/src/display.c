@@ -37,6 +37,7 @@
 #include <syscall.h>
 #include <sys/types.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
 #include <termios.h>
 #include <pwd.h>
 #include <grp.h>
@@ -57,6 +58,7 @@
 #include "dircmd.h"
 
 #define ONE_DAY (24 * 60 * 60)
+#define TIOCGWINSZ	0x5413
 
 #define ROW_NORMAL_LINE			0
 #define ROW_DISPLAY_LINE		1
