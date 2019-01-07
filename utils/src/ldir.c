@@ -145,6 +145,7 @@ time_t		timeNow			=	0;
 time_t		maxFileAge		=	-1;
 time_t		minFileAge		=	-1;
 char		*quoteMe		=	" *?|&;()<>#\t\\\"";
+char		dot[3]			=	"";
 
 int			coloursAlt[MAX_COL_DESC + MAX_W_COL_DESC];
 int			colourType[EXTRA_COLOURS];
@@ -1422,6 +1423,14 @@ int showDir (DIR_ENTRY *file)
     nlink_t stNLink = file -> fileStat.st_nlink;
 	off_t stSize = file -> fileStat.st_size;
 #endif
+	if (!dot[0])
+	{
+#ifdef RADIXCHAR
+		strncpy (dot, nl_langinfo(RADIXCHAR), 2);
+#else
+		strcpy (dot, ".");
+#endif
+	}
 
 	/*------------------------------------------------------------------------*
 	 * Only show files that have matches, or only show files with no match.   *
@@ -1807,7 +1816,7 @@ int showDir (DIR_ENTRY *file)
 					else
 					{
 						displayInColumn (columnTranslate[COL_DATE], displayCommaNumber (fileAge, numBuff));
-						displayInColumn (columnTranslate[COL_DATE], ".%03d", fileAgeMS);
+						displayInColumn (columnTranslate[COL_DATE], "%s%03d", dot, fileAgeMS);
 					}
 				}
 			}
@@ -1878,7 +1887,7 @@ int showDir (DIR_ENTRY *file)
 					else
 					{
 						displayInColumn (columnTranslate[COL_DATE], displayCommaNumber (fileAge, numBuff));
-						displayInColumn (columnTranslate[COL_DATE], ".%03d", fileAgeMS);
+						displayInColumn (columnTranslate[COL_DATE], "%s%03d", dot, fileAgeMS);
 					}
 				}
 			}
@@ -1977,7 +1986,7 @@ int showDir (DIR_ENTRY *file)
 					else
 					{
 						displayInColumn (columnTranslate[COL_DATE], displayCommaNumber (fileAge, numBuff));
-						displayInColumn (columnTranslate[COL_DATE], ".%03d", fileAgeMS);
+						displayInColumn (columnTranslate[COL_DATE], "%s%03d", dot, fileAgeMS);
 					}
 				}
 			}
@@ -2083,7 +2092,7 @@ int showDir (DIR_ENTRY *file)
 					else
 					{
 						displayInColumn (columnTranslate[COL_DATE], displayCommaNumber (fileAge, numBuff));
-						displayInColumn (columnTranslate[COL_DATE], ".%03d", fileAgeMS);
+						displayInColumn (columnTranslate[COL_DATE], "%s%03d", dot, fileAgeMS);
 					}
 				}
 			}

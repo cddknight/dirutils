@@ -123,6 +123,7 @@ static ROW_DESC *currentRow;
 static void *rowQueue;
 
 static int displayOptions;
+static char dispThouSep[3];
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -230,7 +231,7 @@ static void getTheTimes ()
 char *displayCommaNumber (long long number, char *outString)
 {
 	int i, j = 20, x = 0;
-	char inBuff[41], outBuff[41], sep[3];
+	char inBuff[41], outBuff[41];
 
 	if (displayOptions & DISPLAY_NO_THOUSEP)
 	{
@@ -238,21 +239,24 @@ char *displayCommaNumber (long long number, char *outString)
 	}
 	else
 	{
-	#ifdef THOUSEP
-		strncpy (sep, nl_langinfo(THOUSEP), 2);
-	#else
-		strcpy (sep, ",");
-	#endif
-
+		if (!dispThouSep[0])
+		{
+#ifdef THOUSEP
+			strncpy (dispThouSep, nl_langinfo(THOUSEP), 2);
+#else
+			strcpy (dispThouSep, ",");
+#endif
+		}
 		sprintf (inBuff, "%lld", number);
 		i = strlen (inBuff);
 		outBuff[j--] = 0;
 
 		while (i--)
 		{
-			if (x && !(x % 3) && sep[0])
-				outBuff[j--] = sep[0];
-
+			if (x && !(x % 3) && dispThouSep[0])
+			{
+				outBuff[j--] = dispThouSep[0];
+			}
 			outBuff[j--] = inBuff[i];
 			x ++;
 		}
