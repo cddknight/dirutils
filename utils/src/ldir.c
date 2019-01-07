@@ -1479,15 +1479,15 @@ int showDir (DIR_ENTRY *file)
 #else
 		case DATE_MOD:
 			fileAge = file -> fileStat.st_mtim.tv_sec;
-			fileAgeMS = file -> fileStat.st_mtim.tv_usec / 1000;
+			fileAgeMS = file -> fileStat.st_mtim.tv_nsec / 1000000;
 			break;
 		case DATE_ACC:
 			fileAge = file -> fileStat.st_atim.tv_sec;
-			fileAgeMS = file -> fileStat.st_atim.tv_usec / 1000;
+			fileAgeMS = file -> fileStat.st_atim.tv_nsec / 1000000;
 			break;
 		case DATE_CHG:
 			fileAge = file -> fileStat.st_ctim.tv_sec;
-			fileAgeMS = file -> fileStat.st_ctim.tv_usec / 1000;
+			fileAgeMS = file -> fileStat.st_ctim.tv_nsec / 1000000;
 			break;
 #endif
 	}
@@ -1688,15 +1688,15 @@ int showDir (DIR_ENTRY *file)
 #else
 		case DATE_MOD:
 			fileAge = file -> fileStat.st_mtim.tv_sec;
-			fileAgeMS = file -> fileStat.st_mtim.tv_usec / 1000;
+			fileAgeMS = file -> fileStat.st_mtim.tv_nsec / 1000000;
 			break;
 		case DATE_ACC:
 			fileAge = file -> fileStat.st_atim.tv_sec;
-			fileAgeMS = file -> fileStat.st_atim.tv_usec / 1000;
+			fileAgeMS = file -> fileStat.st_atim.tv_nsec / 1000000;
 			break;
 		case DATE_CHG:
 			fileAge = file -> fileStat.st_ctim.tv_sec;
-			fileAgeMS = file -> fileStat.st_ctim.tv_usec / 1000;
+			fileAgeMS = file -> fileStat.st_ctim.tv_nsec / 1000000;
 			break;
 #endif
 		}
@@ -2416,20 +2416,20 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 		case DATE_MOD:
 			retn = (fileOne -> fileStat.st_mtim.tv_sec > fileTwo -> fileStat.st_mtim.tv_sec ? -1 :
 					fileOne -> fileStat.st_mtim.tv_sec < fileTwo -> fileStat.st_mtim.tv_sec ? 1 :
-					fileOne -> fileStat.st_mtim.tv_usec > fileTwo -> fileStat.st_mtim.tv_usec ? -1 :
-					fileOne -> fileStat.st_mtim.tv_usec < fileTwo -> fileStat.st_mtim.tv_usec ? 1 : 0);
+					fileOne -> fileStat.st_mtim.tv_nsec > fileTwo -> fileStat.st_mtim.tv_nsec ? -1 :
+					fileOne -> fileStat.st_mtim.tv_nsec < fileTwo -> fileStat.st_mtim.tv_nsec ? 1 : 0);
 			break;
 		case DATE_ACC:
 			retn = (fileOne -> fileStat.st_atim.tv_sec > fileTwo -> fileStat.st_atim.tv_sec ? -1 :
 					fileOne -> fileStat.st_atim.tv_sec < fileTwo -> fileStat.st_atim.tv_sec ? 1 :
-					fileOne -> fileStat.st_atim.tv_usec > fileTwo -> fileStat.st_atim.tv_usec ? -1 :
-					fileOne -> fileStat.st_atim.tv_usec < fileTwo -> fileStat.st_atim.tv_usec ? 1 : 0);
+					fileOne -> fileStat.st_atim.tv_nsec > fileTwo -> fileStat.st_atim.tv_nsec ? -1 :
+					fileOne -> fileStat.st_atim.tv_nsec < fileTwo -> fileStat.st_atim.tv_nsec ? 1 : 0);
 			break;
 		case DATE_CHG:
 			retn = (fileOne -> fileStat.st_ctim.tv_sec > fileTwo -> fileStat.st_ctim.tv_sec ? -1 :
 					fileOne -> fileStat.st_ctim.tv_sec < fileTwo -> fileStat.st_ctim.tv_sec ? 1 :
-					fileOne -> fileStat.st_ctim.tv_usec > fileTwo -> fileStat.st_ctim.tv_usec ? -1 :
-					fileOne -> fileStat.st_ctim.tv_usec < fileTwo -> fileStat.st_ctim.tv_usec ? 1 : 0);
+					fileOne -> fileStat.st_ctim.tv_nsec > fileTwo -> fileStat.st_ctim.tv_nsec ? -1 :
+					fileOne -> fileStat.st_ctim.tv_nsec < fileTwo -> fileStat.st_ctim.tv_nsec ? 1 : 0);
 			break;
 #endif
 		}
