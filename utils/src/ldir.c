@@ -269,6 +269,7 @@ static struct option long_options[] =
 	{	"recursive",	no_argument,		0,	'r' },
 	{	"show",			required_argument,	0,	's' },
 	{	"size",			no_argument,		0,	'S' },
+	{	"thousep",		no_argument,		0,	't' },
 	{	"time",			required_argument,	0,	'T' },
 	{	"nocvs",		no_argument,		0,	'V' },
 	{	"wide",			no_argument,		0,	'w' },
@@ -400,7 +401,7 @@ int allValid (int flag, char *word)
  */
 void version ()
 {
-	printf ("TheKnight: New Directory, Version %s\n", directoryVersion());
+	printf ("TheKnight: Linux Directory, Version %s\n", directoryVersion());
 	displayLine ();
 }
 
@@ -477,6 +478,7 @@ void helpThem (char *progName)
 	printf ("     --show devices  . . . . -sv . . . . . Show only devices.\n");
 	printf ("     --show execs  . . . . . -sx . . . . . Show only executable files.\n");
 	printf ("     --size  . . . . . . . . -S  . . . . . Show the file size in full.\n");
+	printf ("     --thousep . . . . . . . -t  . . . . . Do not display the thousand seperator.\n");
 	printf ("     --time g{time}  . . . . -Tl{time} . . Greater/Less than #d#h#m#s.\n");
 	printf ("     --nocvs . . . . . . . . -V  . . . . . Do not show version control directories.\n");
 	printf ("     --wide  . . . . . . . . -w  . . . . . Show directory in wide format.\n");
@@ -688,6 +690,10 @@ void commandOption (char option, char *optionVal, char *progName)
 
 	case 'P':
 		dirDisplayFlags ^= DISPLAY_IN_PAGES;
+		break;
+
+	case 't':
+		dirDisplayFlags ^= DISPLAY_NO_THOUSEP;
 		break;
 
 	case 'm':
@@ -1078,7 +1084,7 @@ int main (int argc, char *argv[])
 	     *--------------------------------------------------------------------*/
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "aAbBcCd:D:emMn:o:pPqQrs:ST:VwW:?", long_options, &option_index);
+		c = getopt_long (argc, argv, "aAbBcCd:D:emMn:o:pPqQrs:StT:VwW:?", long_options, &option_index);
 
 		/*--------------------------------------------------------------------*
 		 * Detect the end of the options.                                     *

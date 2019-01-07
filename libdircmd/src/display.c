@@ -230,27 +230,34 @@ static void getTheTimes ()
 char *displayCommaNumber (long long number, char *outString)
 {
 	int i, j = 20, x = 0;
-	char inBuff[21], outBuff[21], sep[3];
+	char inBuff[41], outBuff[41], sep[3];
 
-#ifdef THOUSEP
-	strncpy (sep, nl_langinfo(THOUSEP), 2);
-#else
-	strcpy (sep, ",");
-#endif
-
-	sprintf (inBuff, "%lld", number);
-	i = strlen (inBuff);
-	outBuff[j--] = 0;
-
-	while (i--)
+	if (displayOptions & DISPLAY_NO_THOUSEP)
 	{
-		if (x && !(x % 3) && sep[0])
-			outBuff[j--] = sep[0];
-
-		outBuff[j--] = inBuff[i];
-		x ++;
+		sprintf (outString, "%lld", number);
 	}
-	strcpy (outString, &outBuff[j + 1]);
+	else
+	{
+	#ifdef THOUSEP
+		strncpy (sep, nl_langinfo(THOUSEP), 2);
+	#else
+		strcpy (sep, ",");
+	#endif
+
+		sprintf (inBuff, "%lld", number);
+		i = strlen (inBuff);
+		outBuff[j--] = 0;
+
+		while (i--)
+		{
+			if (x && !(x % 3) && sep[0])
+				outBuff[j--] = sep[0];
+
+			outBuff[j--] = inBuff[i];
+			x ++;
+		}
+		strcpy (outString, &outBuff[j + 1]);
+	}
 	return outString;
 }
 
