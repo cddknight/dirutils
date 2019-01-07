@@ -137,6 +137,7 @@ int			maxCol			=	4;
 int			showDate		=	DATE_MOD;
 int			showFound		=	MAXINT;
 int			sizeFormat		=	1;
+int			dateFormat		=	1;
 char		dateType[41]	=	"Modified";
 char		md5Type[41]		=	"MD5 Sum (hex)";
 char		shaType[41]		=	"SHA256 Sum (hex)";
@@ -257,6 +258,7 @@ static struct option long_options[] =
 	{	"date",			required_argument,	0,	'd' },
 	{	"number",		required_argument,	0,	'n' },
 	{	"display",		required_argument,	0,	'D' },
+	{	"epoch",		no_argument,		0,	'e' },
 	{	"matching",		no_argument,		0,	'm' },
 	{	"unique",		no_argument,		0,	'M' },
 	{	"order",		required_argument,	0,	'o' },
@@ -444,7 +446,7 @@ void helpThem (char *progName)
 	printf ("     --display size  . . . . -Ds . . . . . Show the size of the file.\n");
 	printf ("     --display type  . . . . -Dt . . . . . Show the type of the file.\n");
 	printf ("     --display ver . . . . . -Dv . . . . . Show the version from file name.\n");
-	printf ("     --help  . . . . . . . . -?  . . . . . Show this help message.\n");
+	printf ("     --epoch . . . . . . . . -e  . . . . . Show date in epoch with milli seconds.\n");
 	printf ("     --matching  . . . . . . -m  . . . . . Show only duplicated files.\n");
 	printf ("     --unique  . . . . . . . -M  . . . . . Show only files with no duplicate.\n");
 	printf ("     --number #  . . . . . . -n# . . . . . Display some, # > 0 first #, # < 0 last n.\n");
@@ -479,6 +481,7 @@ void helpThem (char *progName)
 	printf ("     --nocvs . . . . . . . . -V  . . . . . Do not show version control directories.\n");
 	printf ("     --wide  . . . . . . . . -w  . . . . . Show directory in wide format.\n");
 	printf ("     --width # . . . . . . . -W# . . . . . Ignore screen width default to 255.\n");
+	printf ("     --help  . . . . . . . . -?  . . . . . Show this help message.\n");
 	printf ("\nExpressions:\n");
 	printf ("     & . . . . . . . . Logical AND, eg. %s \"c*&*c\"\n", progName);
 	printf ("     | . . . . . . . . Logical OR,  eg. %s \"c*|d*\"\n", progName);
@@ -743,6 +746,10 @@ void commandOption (char option, char *optionVal, char *progName)
 
 	case 'c':
 		dirType ^= USECASE;
+		break;
+
+	case 'e':
+		dateFormat = !dateFormat;
 		break;
 
 	case 'r':
@@ -1071,7 +1078,7 @@ int main (int argc, char *argv[])
 	     *--------------------------------------------------------------------*/
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "aAbBcCd:D:mMn:o:pPqQrs:ST:VwW:?", long_options, &option_index);
+		c = getopt_long (argc, argv, "aAbBcCd:D:emMn:o:pPqQrs:ST:VwW:?", long_options, &option_index);
 
 		/*--------------------------------------------------------------------*
 		 * Detect the end of the options.                                     *
@@ -1393,7 +1400,7 @@ char *findExtn (char *fileName)
  */
 int showDir (DIR_ENTRY *file)
 {
-	int fileAge = 0;
+	long fileAge = 0, fileAgeMS = 0;
 #ifdef USE_STATX
 	mode_t stMode = file -> fileStat.stx_mode;
 	uid_t stUId = file -> fileStat.stx_uid;
@@ -1453,28 +1460,35 @@ int showDir (DIR_ENTRY *file)
 	switch (showDate)
 	{
 #ifdef USE_STATX
-	case DATE_MOD:
-		fileAge = file -> fileStat.stx_mtime.tv_sec;
-		break;
-	case DATE_ACC:
-		fileAge = file -> fileStat.stx_atime.tv_sec;
-		break;
-	case DATE_CHG:
-		fileAge = file -> fileStat.stx_ctime.tv_sec;
-		break;
-	case DATE_BTH:
-		fileAge = file -> fileStat.stx_btime.tv_sec;
-		break;
+		case DATE_MOD:
+			fileAge = file -> fileStat.stx_mtime.tv_sec;
+			fileAgeMS = file -> fileStat.stx_mtime.tv_nsec / 1000000;
+			break;
+		case DATE_ACC:
+			fileAge = file -> fileStat.stx_atime.tv_sec;
+			fileAgeMS = file -> fileStat.stx_atime.tv_nsec / 1000000;
+			break;
+		case DATE_CHG:
+			fileAge = file -> fileStat.stx_ctime.tv_sec;
+			fileAgeMS = file -> fileStat.stx_ctime.tv_nsec / 1000000;
+			break;
+		case DATE_BTH:
+			fileAge = file -> fileStat.stx_btime.tv_sec;
+			fileAgeMS = file -> fileStat.stx_btime.tv_nsec / 1000000;
+			break;
 #else
-	case DATE_MOD:
-		fileAge = file -> fileStat.st_mtime;
-		break;
-	case DATE_ACC:
-		fileAge = file -> fileStat.st_atime;
-		break;
-	case DATE_CHG:
-		fileAge = file -> fileStat.st_ctime;
-		break;
+		case DATE_MOD:
+			fileAge = file -> fileStat.st_mtim.tv_sec;
+			fileAgeMS = file -> fileStat.st_mtim.tv_usec / 1000;
+			break;
+		case DATE_ACC:
+			fileAge = file -> fileStat.st_atim.tv_sec;
+			fileAgeMS = file -> fileStat.st_atim.tv_usec / 1000;
+			break;
+		case DATE_CHG:
+			fileAge = file -> fileStat.st_ctim.tv_sec;
+			fileAgeMS = file -> fileStat.st_ctim.tv_usec / 1000;
+			break;
 #endif
 	}
 
@@ -1635,7 +1649,7 @@ int showDir (DIR_ENTRY *file)
 		char shaString[65];
 		char verString[201];
 		char rightsBuff[14];
-		char numBuff[21];
+		char numBuff[41];
 
 		if (showType & SHOW_QUOTE)
 		{
@@ -1657,25 +1671,32 @@ int showDir (DIR_ENTRY *file)
 #ifdef USE_STATX
 		case DATE_MOD:
 			fileAge = file -> fileStat.stx_mtime.tv_sec;
+			fileAgeMS = file -> fileStat.stx_mtime.tv_nsec / 1000000;
 			break;
 		case DATE_ACC:
 			fileAge = file -> fileStat.stx_atime.tv_sec;
+			fileAgeMS = file -> fileStat.stx_atime.tv_nsec / 1000000;
 			break;
 		case DATE_CHG:
 			fileAge = file -> fileStat.stx_ctime.tv_sec;
+			fileAgeMS = file -> fileStat.stx_ctime.tv_nsec / 1000000;
 			break;
 		case DATE_BTH:
 			fileAge = file -> fileStat.stx_btime.tv_sec;
+			fileAgeMS = file -> fileStat.stx_btime.tv_nsec / 1000000;
 			break;
 #else
 		case DATE_MOD:
-			fileAge = file -> fileStat.st_mtime;
+			fileAge = file -> fileStat.st_mtim.tv_sec;
+			fileAgeMS = file -> fileStat.st_mtim.tv_usec / 1000;
 			break;
 		case DATE_ACC:
-			fileAge = file -> fileStat.st_atime;
+			fileAge = file -> fileStat.st_atim.tv_sec;
+			fileAgeMS = file -> fileStat.st_atim.tv_usec / 1000;
 			break;
 		case DATE_CHG:
-			fileAge = file -> fileStat.st_ctime;
+			fileAge = file -> fileStat.st_ctim.tv_sec;
+			fileAgeMS = file -> fileStat.st_ctim.tv_usec / 1000;
 			break;
 #endif
 		}
@@ -1760,18 +1781,28 @@ int showDir (DIR_ENTRY *file)
 				}
 				if (showType & SHOW_DATE)
 				{
-					if (showType & SHOW_AGE)
+					if (dateFormat)
 					{
-						int age = timeNow - fileAge;
+						if (showType & SHOW_AGE)
+						{
+							int age = timeNow - fileAge;
 
-						displayInColumn (columnTranslate[COL_DAYS], "%d", age / 86400);
-						displayInColumn (columnTranslate[COL_TIME], "%2d:%02d:%02d",
-								(age / 3600) % 24,
-								(age / 60) % 60,
-								 age % 60);
+							displayInColumn (columnTranslate[COL_DAYS], "%d", age / 86400);
+							displayInColumn (columnTranslate[COL_TIME], "%2d:%02d:%02d",
+									(age / 3600) % 24,
+									(age / 60) % 60,
+									 age % 60);
+						}
+						else
+						{
+							displayInColumn (columnTranslate[COL_DATE], displayDateString (fileAge, dateString));
+						}
 					}
 					else
-						displayInColumn (columnTranslate[COL_DATE], displayDateString (fileAge, dateString));
+					{
+						displayInColumn (columnTranslate[COL_DATE], displayCommaNumber (fileAge, numBuff));
+						displayInColumn (columnTranslate[COL_DATE], ".%03d", fileAgeMS);
+					}
 				}
 			}
 			displayNewLine (0);
@@ -1821,18 +1852,28 @@ int showDir (DIR_ENTRY *file)
 
 				if (showType & SHOW_DATE)
 				{
-					if (showType & SHOW_AGE)
+					if (dateFormat)
 					{
-						int age = timeNow - fileAge;
+						if (showType & SHOW_AGE)
+						{
+							int age = timeNow - fileAge;
 
-						displayInColumn (columnTranslate[COL_DAYS], "%d", age / 86400);
-						displayInColumn (columnTranslate[COL_TIME], "%2d:%02d:%02d",
-								(age / 3600) % 24,
-								(age / 60) % 60,
-								 age % 60);
+							displayInColumn (columnTranslate[COL_DAYS], "%d", age / 86400);
+							displayInColumn (columnTranslate[COL_TIME], "%2d:%02d:%02d",
+									(age / 3600) % 24,
+									(age / 60) % 60,
+									 age % 60);
+						}
+						else
+						{
+							displayInColumn (columnTranslate[COL_DATE], displayDateString (fileAge, dateString));
+						}
 					}
 					else
-						displayInColumn (columnTranslate[COL_DATE], displayDateString (fileAge, dateString));
+					{
+						displayInColumn (columnTranslate[COL_DATE], displayCommaNumber (fileAge, numBuff));
+						displayInColumn (columnTranslate[COL_DATE], ".%03d", fileAgeMS);
+					}
 				}
 			}
 			displayNewLine (0);
@@ -1910,18 +1951,28 @@ int showDir (DIR_ENTRY *file)
 
 				if (showType & SHOW_DATE)
 				{
-					if (showType & SHOW_AGE)
+					if (dateFormat)
 					{
-						int age = timeNow - fileAge;
+						if (showType & SHOW_AGE)
+						{
+							int age = timeNow - fileAge;
 
-						displayInColumn (columnTranslate[COL_DAYS], "%d", age / 86400);
-						displayInColumn (columnTranslate[COL_TIME], "%2d:%02d:%02d",
-								(age / 3600) % 24,
-								(age / 60) % 60,
-								 age % 60);
+							displayInColumn (columnTranslate[COL_DAYS], "%d", age / 86400);
+							displayInColumn (columnTranslate[COL_TIME], "%2d:%02d:%02d",
+									(age / 3600) % 24,
+									(age / 60) % 60,
+									 age % 60);
+						}
+						else
+						{
+							displayInColumn (columnTranslate[COL_DATE], displayDateString (fileAge, dateString));
+						}
 					}
 					else
-						displayInColumn (columnTranslate[COL_DATE], displayDateString (fileAge, dateString));
+					{
+						displayInColumn (columnTranslate[COL_DATE], displayCommaNumber (fileAge, numBuff));
+						displayInColumn (columnTranslate[COL_DATE], ".%03d", fileAgeMS);
+					}
 				}
 			}
 			displayNewLine (0);
@@ -2006,18 +2057,28 @@ int showDir (DIR_ENTRY *file)
 				}
 				if (showType & SHOW_DATE)
 				{
-					if (showType & SHOW_AGE)
+					if (dateFormat)
 					{
-						int age = timeNow - fileAge;
+						if (showType & SHOW_AGE)
+						{
+							int age = timeNow - fileAge;
 
-						displayInColumn (columnTranslate[COL_DAYS], "%d", age / 86400);
-						displayInColumn (columnTranslate[COL_TIME], "%2d:%02d:%02d",
-								(age / 3600) % 24,
-								(age / 60) % 60,
-								 age % 60);
+							displayInColumn (columnTranslate[COL_DAYS], "%d", age / 86400);
+							displayInColumn (columnTranslate[COL_TIME], "%2d:%02d:%02d",
+									(age / 3600) % 24,
+									(age / 60) % 60,
+									 age % 60);
+						}
+						else
+						{
+							displayInColumn (columnTranslate[COL_DATE], displayDateString (fileAge, dateString));
+						}
 					}
 					else
-						displayInColumn (columnTranslate[COL_DATE], displayDateString (fileAge, dateString));
+					{
+						displayInColumn (columnTranslate[COL_DATE], displayCommaNumber (fileAge, numBuff));
+						displayInColumn (columnTranslate[COL_DATE], ".%03d", fileAgeMS);
+					}
 				}
 			}
 			displayNewLine (0);
@@ -2329,32 +2390,46 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 #ifdef USE_STATX
 		case DATE_MOD:
 			retn = (fileOne -> fileStat.stx_mtime.tv_sec > fileTwo -> fileStat.stx_mtime.tv_sec ? -1 :
-					fileOne -> fileStat.stx_mtime.tv_sec < fileTwo -> fileStat.stx_mtime.tv_sec ? 1 : 0);
+					fileOne -> fileStat.stx_mtime.tv_sec < fileTwo -> fileStat.stx_mtime.tv_sec ? 1 : 
+					fileOne -> fileStat.stx_mtime.tv_nsec > fileTwo -> fileStat.stx_mtime.tv_nsec ? -1 :
+					fileOne -> fileStat.stx_mtime.tv_nsec < fileTwo -> fileStat.stx_mtime.tv_nsec ? 1 : 0);
 			break;
 		case DATE_ACC:
 			retn = (fileOne -> fileStat.stx_atime.tv_sec > fileTwo -> fileStat.stx_atime.tv_sec ? -1 :
-					fileOne -> fileStat.stx_atime.tv_sec < fileTwo -> fileStat.stx_atime.tv_sec ? 1 : 0);
+					fileOne -> fileStat.stx_atime.tv_sec < fileTwo -> fileStat.stx_atime.tv_sec ? 1 :
+					fileOne -> fileStat.stx_atime.tv_nsec > fileTwo -> fileStat.stx_atime.tv_nsec ? -1 :
+					fileOne -> fileStat.stx_atime.tv_nsec < fileTwo -> fileStat.stx_atime.tv_nsec ? 1 : 0);
 			break;
 		case DATE_CHG:
 			retn = (fileOne -> fileStat.stx_ctime.tv_sec > fileTwo -> fileStat.stx_ctime.tv_sec ? -1 :
-					fileOne -> fileStat.stx_ctime.tv_sec < fileTwo -> fileStat.stx_ctime.tv_sec ? 1 : 0);
+					fileOne -> fileStat.stx_ctime.tv_sec < fileTwo -> fileStat.stx_ctime.tv_sec ? 1 :
+					fileOne -> fileStat.stx_ctime.tv_nsec > fileTwo -> fileStat.stx_ctime.tv_nsec ? -1 :
+					fileOne -> fileStat.stx_ctime.tv_nsec < fileTwo -> fileStat.stx_ctime.tv_nsec ? 1 : 0);
 			break;
 		case DATE_BTH:
 			retn = (fileOne -> fileStat.stx_btime.tv_sec > fileTwo -> fileStat.stx_btime.tv_sec ? -1 :
-					fileOne -> fileStat.stx_btime.tv_sec < fileTwo -> fileStat.stx_btime.tv_sec ? 1 : 0);
+					fileOne -> fileStat.stx_btime.tv_sec < fileTwo -> fileStat.stx_btime.tv_sec ? 1 :
+					fileOne -> fileStat.stx_btime.tv_nsec > fileTwo -> fileStat.stx_btime.tv_nsec ? -1 :
+					fileOne -> fileStat.stx_btime.tv_nsec < fileTwo -> fileStat.stx_btime.tv_nsec ? 1 : 0);
 			break;
 #else
 		case DATE_MOD:
-			retn = (fileOne -> fileStat.st_mtime > fileTwo -> fileStat.st_mtime ? -1 :
-					fileOne -> fileStat.st_mtime < fileTwo -> fileStat.st_mtime ? 1 : 0);
+			retn = (fileOne -> fileStat.st_mtim.tv_sec > fileTwo -> fileStat.st_mtim.tv_sec ? -1 :
+					fileOne -> fileStat.st_mtim.tv_sec < fileTwo -> fileStat.st_mtim.tv_sec ? 1 :
+					fileOne -> fileStat.st_mtim.tv_usec > fileTwo -> fileStat.st_mtim.tv_usec ? -1 :
+					fileOne -> fileStat.st_mtim.tv_usec < fileTwo -> fileStat.st_mtim.tv_usec ? 1 : 0);
 			break;
 		case DATE_ACC:
-			retn = (fileOne -> fileStat.st_atime > fileTwo -> fileStat.st_atime ? -1 :
-					fileOne -> fileStat.st_atime < fileTwo -> fileStat.st_atime ? 1 : 0);
+			retn = (fileOne -> fileStat.st_atim.tv_sec > fileTwo -> fileStat.st_atim.tv_sec ? -1 :
+					fileOne -> fileStat.st_atim.tv_sec < fileTwo -> fileStat.st_atim.tv_sec ? 1 :
+					fileOne -> fileStat.st_atim.tv_usec > fileTwo -> fileStat.st_atim.tv_usec ? -1 :
+					fileOne -> fileStat.st_atim.tv_usec < fileTwo -> fileStat.st_atim.tv_usec ? 1 : 0);
 			break;
 		case DATE_CHG:
-			retn = (fileOne -> fileStat.st_ctime > fileTwo -> fileStat.st_ctime ? -1 :
-					fileOne -> fileStat.st_ctime < fileTwo -> fileStat.st_ctime ? 1 : 0);
+			retn = (fileOne -> fileStat.st_ctim.tv_sec > fileTwo -> fileStat.st_ctim.tv_sec ? -1 :
+					fileOne -> fileStat.st_ctim.tv_sec < fileTwo -> fileStat.st_ctim.tv_sec ? 1 :
+					fileOne -> fileStat.st_ctim.tv_usec > fileTwo -> fileStat.st_ctim.tv_usec ? -1 :
+					fileOne -> fileStat.st_ctim.tv_usec < fileTwo -> fileStat.st_ctim.tv_usec ? 1 : 0);
 			break;
 #endif
 		}
