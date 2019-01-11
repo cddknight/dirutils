@@ -1,4 +1,4 @@
-AC_INIT([dircmdothers], [4.0.20])
+AC_INIT([dircmdothers], [5.0])
 AC_CONFIG_SRCDIR([src/memTest.c])
 AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE([subdir-objects])
@@ -7,7 +7,7 @@ AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
-REVISION=3
+REVISION=1
 PKG_CHECK_MODULES([DEPS], [dircmd])
 AC_CHECK_HEADERS([values.h])
 AC_SUBST(DEPS_CFLAGS)
