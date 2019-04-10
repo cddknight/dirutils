@@ -429,23 +429,33 @@ char *displayRightsString (int userRights, char *outString)
  */
 char *displayRightsStringACL (DIR_ENTRY *file, char *outString)
 {
+	int hasSEL = 0;
+	char fullName[1024];
+#ifdef HAVE_SELINUX_SELINUX_H
+	int size;
+	security_context_t getContext;
+#endif
 #ifdef HAVE_SYS_ACL_H
 	acl_t acl;
-	char fullName[1024];
 #endif
-
 #ifdef USE_STATX
 	displayRightsString (file -> fileStat.stx_mode, outString);
 #else
 	displayRightsString (file -> fileStat.st_mode, outString);
 #endif
-
-#ifdef HAVE_SYS_ACL_H
-	outString[10] = '.';
-	outString[11] = 0;
-
+	outString[10] = outString[11] = 0;
 	strcpy (fullName, file -> fullPath);
 	strcat (fullName, file -> fileName);
+#ifdef HAVE_SELINUX_SELINUX_H
+	size = lgetfilecon (fullName, &getContext);
+	if (size > 0)
+	{
+		outString[10] = '.';
+		freecon (getContext);
+		hasSEL = 1;
+	}
+#endif
+#ifdef HAVE_SYS_ACL_H
 	if ((acl = acl_get_file (fullName, ACL_TYPE_ACCESS)) != NULL)
 	{
 		acl_entry_t entry;
@@ -458,7 +468,7 @@ char *displayRightsStringACL (DIR_ENTRY *file, char *outString)
 			{
 				if (tag == ACL_USER || tag == ACL_GROUP)
 				{
-					outString[10] = '+';
+					outString[10] = hasSEL ? '+' : '-';
 					break;
 				}
 			}
