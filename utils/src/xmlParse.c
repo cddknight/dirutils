@@ -337,7 +337,11 @@ int main (int argc, char *argv[])
 			break;
 
 		case 's':
-			strncpy (xsdPath, optarg, PATH_SIZE);
+			if (strlen (optarg) > PATH_SIZE)
+			{
+				optarg[PATH_SIZE] = 0;
+			}
+			strcpy (xsdPath, optarg);
 			break;
 
 		case '?':
