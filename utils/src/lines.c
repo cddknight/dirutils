@@ -218,7 +218,7 @@ int main (int argc, char *argv[])
  */
 int showDir (DIR_ENTRY *file)
 {
-	char inBuffer[2048], inFile[PATH_SIZE];
+	char inBuffer[16384], inFile[PATH_SIZE];
 	long linesFound = 0;
 	FILE *readFile;
 
@@ -227,11 +227,19 @@ int showDir (DIR_ENTRY *file)
 
 	if ((readFile = fopen (inFile, "rb")) != NULL)
 	{
-		filesFound ++;
-
-		while (fgets (inBuffer, 2047, readFile))
-			linesFound++;
-
+		int readBytes;
+		++filesFound;
+		do
+		{
+			int i;
+			readBytes = fread (inBuffer, 1, 16384, readFile);
+			for (i = 0; i < readBytes; ++i)
+			{
+				if (inBuffer[i] == '\n')
+					++linesFound;
+			}
+		}
+		while (readBytes > 0);
 		fclose (readFile);
 	}
 	totalLines += linesFound;
