@@ -430,6 +430,8 @@ int showDir (DIR_ENTRY *file)
 	int lines = 0, i, showCols[3] = { 1, 0, 8 }, getTime = 1;
 	FILE *readFile, *writeFile;
 
+	if (inputMode != 0) showCols[2] = 2;
+
 	strcpy (inFile, file -> fullPath);
 	strcat (inFile, file -> fileName);
 	if (getcwd (outFile, 255) == NULL)
