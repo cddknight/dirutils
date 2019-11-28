@@ -77,9 +77,9 @@ int outputAll = 0;
 int outputMode = 0;
 int filesFound = 0;
 int totalProcessed = 0;
-float savedValues[21];
-int savedRead[21];
-char linePrefix[21];
+float savedValues[41];
+int savedRead[41];
+char linePrefix[41];
 
 /**********************************************************************************************************************
  *                                                                                                                    *
