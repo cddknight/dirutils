@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = dist-bzip2
 bin_PROGRAMS = ldir addComment casedir casefile findFunny hexDump inQuote jsonParse lineDraw lineNum lines listFunc \
-		mkTable modcr pfile rmCppCmt tabSpace xmlParse
+		mkTable modcr pfile rmCppCmt tabSpace xmlParse xmlCsv
 AM_CPPFLAGS = -D_FILE_OFFSET_BITS=64 $(S_DEPS_CFLAGS)
 LIBS = $(S_DEPS_LIBS) -lm
 ldir_SOURCES = src/ldir.c
@@ -26,6 +26,9 @@ tabSpace_SOURCES = src/tabSpace.c
 xmlParse_SOURCES = src/xmlParse.c
 xmlParse_CFLAGS = $(P_DEPS_CFLAGS)
 xmlParse_LDADD = $(P_DEPS_LIBS)
+xmlCsv_SOURCES = src/xmlCsv.c
+xmlCsv_CFLAGS = $(P_DEPS_CFLAGS)
+xmlCsv_LDADD = $(P_DEPS_LIBS)
 EXTRA_DIST = ldirrc
 Configdir = /etc
 Config_DATA = ldirrc 
