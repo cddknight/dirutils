@@ -3,7 +3,7 @@ bin_PROGRAMS = ldir addComment casedir casefile findFunny hexDump inQuote jsonPa
 		mkTable modcr pfile rmCppCmt tabSpace xmlParse xmlCsv
 AM_CPPFLAGS = -D_FILE_OFFSET_BITS=64 $(S_DEPS_CFLAGS)
 LIBS = $(S_DEPS_LIBS) -lm
-ldir_SOURCES = src/ldir.c
+ldir_SOURCES = src/ldir.c buildDate.h
 addComment_SOURCES = src/addComment.c
 addComment_LDADD = -lreadline
 casedir_SOURCES = src/casedir.c

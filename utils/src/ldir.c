@@ -46,6 +46,7 @@
 #endif
 
 #include <dircmd.h>
+#include "buildDate.h"
 
 extern int errno;
 
@@ -402,7 +403,7 @@ int allValid (int flag, char *word)
  */
 void version ()
 {
-	printf ("TheKnight: Linux Directory, Version %s\n", directoryVersion());
+	printf ("TheKnight: Linux Directory, Version %s, Built: %s\n", directoryVersion(), buildDate);
 	displayLine ();
 }
 
