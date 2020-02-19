@@ -46,6 +46,7 @@
 #endif
 
 #include <dircmd.h>
+#include "buildDate.h"
 
 /*----------------------------------------------------------------------------*
  * Prototypes                                                                 *
@@ -85,7 +86,7 @@ long totalLines = 0;
  */
 void version (void)
 {
-	printf ("TheKnight: Count the Lines in a File, Version %s\n", directoryVersion());
+	printf ("TheKnight: Count the Lines in a File, Version: %s, Built: %s\n", directoryVersion(), buildDate);
 	displayLine ();
 }
 

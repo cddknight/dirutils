@@ -46,6 +46,7 @@
 #endif
 
 #include <dircmd.h>
+#include "buildDate.h"
 
 /*----------------------------------------------------------------------------*
  * Prototypes                                                                 *
@@ -90,7 +91,7 @@ int useCase = CASE_LOWER;
  */
 void version (void)
 {
-	printf ("TheKnight: Case File Contents, Version %s\n", directoryVersion());
+	printf ("TheKnight: Case File Contents, Version: %s, Built: %s\n", directoryVersion(), buildDate);
 	displayLine ();
 }
 

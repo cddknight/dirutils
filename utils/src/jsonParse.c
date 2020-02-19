@@ -49,6 +49,7 @@
 #include <dircmd.h>
 #include <glib-object.h>
 #include <json-glib/json-glib.h>
+#include "buildDate.h"
 
 /*----------------------------------------------------------------------------*
  * Prototypes                                                                 *
@@ -132,7 +133,7 @@ void jsonObjectForEachFunc(JsonObject *object, const gchar *member_name, JsonNod
  */
 void version (void)
 {
-	printf ("TheKnight: JSON Parse a File, Version %s\n", directoryVersion());
+	printf ("TheKnight: JSON Parse a File, Version: %s, Built: %s\n", directoryVersion(), buildDate);
 	displayLine ();
 }
 

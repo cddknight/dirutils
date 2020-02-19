@@ -403,7 +403,7 @@ int allValid (int flag, char *word)
  */
 void version ()
 {
-	printf ("TheKnight: Linux Directory, Version %s, Built: %s\n", directoryVersion(), buildDate);
+	printf ("TheKnight: Linux Directory, Version: %s, Built: %s\n", directoryVersion(), buildDate);
 	displayLine ();
 }
 

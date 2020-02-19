@@ -46,6 +46,7 @@
 #endif
 
 #include <dircmd.h>
+#include "buildDate.h"
 
 /**********************************************************************************************************************
  * Defines                                                                                                            *
@@ -253,7 +254,7 @@ char *rmWhiteSpace (char *str)
  */
 void version (void)
 {
-	printf ("TheKnight: Display separated file, Version %s\n", directoryVersion());
+	printf ("TheKnight: Display separated file, Version: %s, Built: %s\n", directoryVersion(), buildDate);
 	displayLine ();
 }
 

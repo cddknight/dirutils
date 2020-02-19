@@ -46,6 +46,7 @@
 #endif
 
 #include <dircmd.h>
+#include "buildDate.h"
 
 /*----------------------------------------------------------------------------*
  * Prototypes															      *
@@ -130,7 +131,7 @@ int			displayColour = 0;
  */
 void version ()
 {
-	printf ("TheKnight: Find a File in the Path, Version %s\n", directoryVersion());
+	printf ("TheKnight: Find a File in the Path, Version: %s, Built: %s\n", directoryVersion(), buildDate);
 	displayLine ();
 }
 

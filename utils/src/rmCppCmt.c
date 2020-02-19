@@ -46,6 +46,7 @@
 #endif
 
 #include <dircmd.h>
+#include "buildDate.h"
 
 /*----------------------------------------------------------------------------*
  * Prototypes                                                                 *
@@ -83,7 +84,7 @@ int totalLines = 0;
  */
 void version (void)
 {
-	printf ("TheKnight: Remove C++ comments, Version %s\n", directoryVersion());
+	printf ("TheKnight: Remove C++ comments, Version: %s, Built: %s\n", directoryVersion(), buildDate);
 	displayLine ();
 }
 

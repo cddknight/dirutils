@@ -46,6 +46,7 @@
 #endif
 
 #include <dircmd.h>
+#include "buildDate.h"
 
 /*----------------------------------------------------------------------------*
  * Prototypes															      *
@@ -107,7 +108,7 @@ static char funtionChars[] =
  */
 void version (void)
 {
-	printf("TheKnight: List Functions, Version %s\n", directoryVersion());
+	printf("TheKnight: List Functions, Version: %s, Built: %s\n", directoryVersion(), buildDate);
 	displayLine();
 }
 

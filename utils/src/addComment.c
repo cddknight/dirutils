@@ -46,6 +46,7 @@
 #endif
 
 #include <dircmd.h>
+#include "buildDate.h"
 
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -108,7 +109,7 @@ static char funtionChars[] =
  */
 void version (char *progName, int helpThem)
 {
-	printf("TheKnight: Add Comment, Version %s\n", directoryVersion());
+	printf("TheKnight: Add Comment, Version: %s, Built: %s\n", directoryVersion(), buildDate);
 	displayLine();
 	if (helpThem)
 	{

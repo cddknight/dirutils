@@ -46,6 +46,7 @@
 #endif
 
 #include <dircmd.h>
+#include "buildDate.h"
 
 #define SQ	0x27
 #define DQ	0x22
@@ -85,7 +86,7 @@ int totalLines = 0;
  */
 void version (void)
 {
-	printf ("TheKnight: Extract Text in Quotes, Version %s\n", directoryVersion());
+	printf ("TheKnight: Extract Text in Quotes, Version: %s, Built: %s\n", directoryVersion(), buildDate);
 	displayLine ();
 }
 

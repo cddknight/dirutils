@@ -46,6 +46,7 @@
 #endif
 
 #include <dircmd.h>
+#include "buildDate.h"
 
 /*----------------------------------------------------------------------------*
  * Prototypes                                                                 *
@@ -85,7 +86,7 @@ int totalLines = 0;
  */
 void version (void)
 {
-	printf ("TheKnight: Modify Carrage Return, Version %s\n", directoryVersion());
+	printf ("TheKnight: Modify Carrage Return, Version: %s, Built: %s\n", directoryVersion(), buildDate);
 	displayLine ();
 }
 

@@ -46,6 +46,7 @@
 #endif
 
 #include <dircmd.h>
+#include "buildDate.h"
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -87,7 +88,7 @@ bool shownError = false;
  */
 void version (void)
 {
-	printf ("TheKnight: XML Parse a File, Version %s\n", directoryVersion());
+	printf ("TheKnight: XML Parse a File, Version: %s, Built: %s\n", directoryVersion(), buildDate);
 	displayLine ();
 }
 

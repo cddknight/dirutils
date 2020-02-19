@@ -46,6 +46,7 @@
 #endif
 
 #include <dircmd.h>
+#include "buildDate.h"
 
 #define INBUFF_SIZE		2048
 #define MASK_SIZE		2048
@@ -250,7 +251,7 @@ void procNumberRange (char *value)
  */
 void version (void)
 {
-	printf ("TheKnight: Show Line Numbers for text files, Version %s\n", directoryVersion());
+	printf ("TheKnight: Show Line Numbers for text files, Version: %s, Built: %s\n", directoryVersion(), buildDate);
 	displayLine ();
 }
 

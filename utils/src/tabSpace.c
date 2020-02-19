@@ -46,6 +46,7 @@
 #endif
 
 #include <dircmd.h>
+#include "buildDate.h"
 
 /*----------------------------------------------------------------------------*
  * Prototypes                                                                 *
@@ -86,7 +87,7 @@ int totalLines = 0;
  */
 void version (void)
 {
-	printf ("TheKnight: Convert Tabs and Spaces, Version %s\n", directoryVersion());
+	printf ("TheKnight: Convert Tabs and Spaces, Version: %s, Built: %s\n", directoryVersion(), buildDate);
 	displayLine ();
 }
 

@@ -46,6 +46,7 @@
 #endif
 
 #include <dircmd.h>
+#include "buildDate.h"
 
 /*----------------------------------------------------------------------------*
  * Prototypes                                                                 *
@@ -85,7 +86,7 @@ void showStdIn (void);
  */
 void version (void)
 {
-	printf ("TheKnight: Hex Dump a File, Version %s\n", directoryVersion());
+	printf ("TheKnight: Hex Dump a File, Version: %s, Built: %s\n", directoryVersion(), buildDate);
 	displayLine ();
 }
 
