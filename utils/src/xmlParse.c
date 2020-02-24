@@ -633,11 +633,27 @@ void myErrorFunc (void *ctx, const char *msg, ...)
 	{
 		if (displayCols & DISP_ERROR)
 		{
-			va_list arg_ptr;
+			int i = 0, delCR = 0;
+			char tmpErrBuff[4100] = "";
 
+			va_list arg_ptr;
 			va_start (arg_ptr, msg);
-			displayVInColumn (COL_ERROR, (char *)msg, arg_ptr);
+			vsnprintf (tmpErrBuff, 4096, msg, arg_ptr);
 			va_end (arg_ptr);
+			tmpErrBuff[4096] = 0;
+
+			while (tmpErrBuff[i] != 0)
+			{
+				if (tmpErrBuff[i] == '\n')
+				{
+					tmpErrBuff[i] = ' ';
+					delCR = 1;
+				}
+				++i;
+			}
+			displayInColumn (COL_ERROR, tmpErrBuff);
+			if (delCR)
+				displayNewLine (0);
 		}
 	}
 	else if (!shownError)
