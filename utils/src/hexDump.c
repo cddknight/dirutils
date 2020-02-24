@@ -86,7 +86,7 @@ void showStdIn (void);
  */
 void version (void)
 {
-	printf ("TheKnight: Hex Dump a File, Version: %s, Built: %s\n", directoryVersion(), buildDate);
+	printf ("TheKnight: Hex Dump a File, Version: %s, Built: %s\n", VERSION, buildDate);
 	displayLine ();
 }
 
@@ -226,7 +226,7 @@ int main (int argc, char *argv[])
 #endif
 	if (strcmp (directoryVersion(), fullVersion) != 0)
 	{
-		fprintf (stderr, "Library (%s) does not match Utility (%s).\n", directoryVersion(), VERSION);
+		fprintf (stderr, "Library (%s) does not match Utility (%s).\n", directoryVersion(), fullVersion);
 		exit (1);
 	}
 

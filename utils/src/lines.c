@@ -86,7 +86,7 @@ long totalLines = 0;
  */
 void version (void)
 {
-	printf ("TheKnight: Count the Lines in a File, Version: %s, Built: %s\n", directoryVersion(), buildDate);
+	printf ("TheKnight: Count the Lines in a File, Version: %s, Built: %s\n", VERSION, buildDate);
 	displayLine ();
 }
 
@@ -134,7 +134,7 @@ int main (int argc, char *argv[])
 #endif
 	if (strcmp (directoryVersion(), fullVersion) != 0)
 	{
-		fprintf (stderr, "Library (%s) does not match Utility (%s).\n", directoryVersion(), VERSION);
+		fprintf (stderr, "Library (%s) does not match Utility (%s).\n", directoryVersion(), fullVersion);
 		exit (1);
 	}
 
