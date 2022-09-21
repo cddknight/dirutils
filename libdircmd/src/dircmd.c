@@ -457,12 +457,6 @@ mode_t directoryTrueLinkType (DIR_ENTRY *dirEntry)
 			{
 				retn = dirEntry -> fileStat.stx_mode;
 				if (S_ISLNK (dirEntry -> fileStat.stx_mode))
-#else
-			if (lstat (linkBuff, &dirEntry -> fileStat) == 0)
-			{
-				retn = dirEntry -> fileStat.st_mode;
-				if (S_ISLNK (dirEntry -> fileStat.st_mode))
-#endif
 				{
 					strncpy (fullName, linkBuff, PATH_SIZE - 1);
 				}
@@ -472,6 +466,21 @@ mode_t directoryTrueLinkType (DIR_ENTRY *dirEntry)
 				/* Bad link */
 				err = 1;
 			}
+#else
+			if (lstat (linkBuff, &dirEntry -> fileStat) == 0)
+			{
+				retn = dirEntry -> fileStat.st_mode;
+				if (S_ISLNK (dirEntry -> fileStat.st_mode))
+				{
+					strncpy (fullName, linkBuff, PATH_SIZE - 1);
+				}
+			}
+			else
+			{
+				/* Bad link */
+				err = 1;
+			}
+#endif
 		}
 		else
 		{
