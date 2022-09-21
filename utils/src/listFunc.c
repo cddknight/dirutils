@@ -571,8 +571,8 @@ int showDir(DIR_ENTRY * file)
 		if (bracketLevel || braceLevel || inComment || inQuote || inDefine)
 		{
 			printf("WARNING unexpected EOF: Bracket: %d, Brace: %d, Comment: %d, "
-				   "Quote: %d, Define: %d\n", bracketLevel, braceLevel, inComment,
-				   inQuote, inDefine);
+				   "Quote: %d, Define: %d, File: %s\n", bracketLevel, braceLevel, inComment,
+				   inQuote, inDefine, file->fileName);
 		}
 		if (func)
 		{
