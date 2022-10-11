@@ -113,6 +113,12 @@
 #define HIDEVERCTL				0x0800
 
 /** 
+ *  @def RECULINK
+ *  @brief Recusive links if they point to a directory.
+ */
+#define RECULINK				0x1000
+
+/** 
  *  @def COL_ALIGN_RIGHT
  *  @brief Flag set if the column should be right aligned.
  *

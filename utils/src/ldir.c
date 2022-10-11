@@ -269,6 +269,7 @@ static struct option long_options[] =
 	{	"quiet",		no_argument,		0,	'q' },
 	{	"quote",		no_argument,		0,	'Q' },
 	{	"recursive",	no_argument,		0,	'r' },
+	{	"recurlink",	no_argument,		0,	'R' },
 	{	"show",			required_argument,	0,	's' },
 	{	"size",			no_argument,		0,	'S' },
 	{	"thousep",		no_argument,		0,	't' },
@@ -472,6 +473,7 @@ void helpThem (char *progName)
 	printf ("     --quiet . . . . . . . . -q  . . . . . Quiet mode, only paths and file names.\n");
 	printf ("     --quote . . . . . . . . -Q  . . . . . Quote special chars.\n");
 	printf ("     --recursive . . . . . . -r  . . . . . Recursive directory listing.\n");
+	printf ("     --recurlink . . . . . . -R  . . . . . Recursive including links.\n");
 	printf ("     --show dirs . . . . . . -sd . . . . . Show only directories.\n");
 	printf ("     --show files  . . . . . -sf . . . . . Show only files.\n");
 	printf ("     --show links  . . . . . -sl . . . . . Show only links.\n");
@@ -762,6 +764,10 @@ void commandOption (char option, char *optionVal, char *progName)
 
 	case 'r':
 		dirType ^= RECUDIR;
+		break;
+
+	case 'R':
+		dirType ^= (RECUDIR|RECULINK);
 		break;
 
 	case 's':
@@ -1086,7 +1092,7 @@ int main (int argc, char *argv[])
 	     *--------------------------------------------------------------------*/
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "aAbBcCd:D:emMn:o:pPqQrs:StT:VwW:?", long_options, &option_index);
+		c = getopt_long (argc, argv, "aAbBcCd:D:emMn:o:pPqQrRs:StT:VwW:?", long_options, &option_index);
 
 		/*--------------------------------------------------------------------*
 		 * Detect the end of the options.                                     *

@@ -166,13 +166,18 @@ int directoryDefCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
  *  \param fileList Where to save the directory.
  *  \result The number of files found.
  */
-static int directoryLoadInt (char *inPath, char *partPath, int findFlags, compareFile *Compare, void **fileList)
+static int directoryLoadInt (char *inPath, char *partPath, int findFlags, compareFile *Compare, void **fileList, int level)
 {
 	DIR *dirPtr;
 	int filesFound = 0;
 	struct dirent *dirList;
 	compareFile *compareFunc = Compare;
 	char fullPath[PATH_SIZE], filePattern[PATH_SIZE], *endPath;
+
+	if (++level > 10)
+	{
+		return filesFound;
+	}
 
 	strcpy (fullPath, inPath);
 	if ((endPath = strrchr (fullPath, DIRSEP)) != NULL)
@@ -237,7 +242,37 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags, compar
 				if (lstat (tempPath, &tempStat) == 0)
 #endif
 				{
-					if (getEntryType (&tempStat) & ONLYDIRS)
+					if (getEntryType (&tempStat) & ONLYLINKS && findFlags & RECULINK)
+					{
+						ssize_t linkSize;
+						char linkPath[PATH_SIZE + 4];
+						if ((linkSize = readlink (tempPath, linkPath, PATH_SIZE)) >= 0)
+						{
+#ifdef USE_STATX
+							struct statx linkStat;
+#else
+							struct stat linkStat;
+#endif
+							linkPath[linkSize] = 0;
+#ifdef USE_STATX
+							if (statx (AT_FDCWD, linkPath, AT_SYMLINK_NOFOLLOW, STATX_ALL, &linkStat) == 0)
+#else
+							if (lstat (linkPath, &linkStat) == 0)
+#endif
+							{
+								if (getEntryType (&linkStat) & ONLYDIRS)
+								{
+									char subPath[PATH_SIZE + 4];
+
+									strcat_ch (linkPath, DIRSEP);
+									strcpy (subPath, linkPath);
+									strcat (linkPath, filePattern);
+									filesFound += directoryLoadInt (linkPath, subPath, findFlags, compareFunc, fileList, level);
+								}
+							}
+						}
+					}
+					else if (getEntryType (&tempStat) & ONLYDIRS)
 					{
 						/*----------------------------------------------------*
                          * Hide any directories linked with version control   *
@@ -261,7 +296,7 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags, compar
 						strcat (subPath, dirList -> d_name);
 						strcat_ch (subPath, DIRSEP);
 
-						filesFound += directoryLoadInt (tempPath, subPath, findFlags, compareFunc, fileList);
+						filesFound += directoryLoadInt (tempPath, subPath, findFlags, compareFunc, fileList, level);
 					}
 				}
 				else
@@ -349,7 +384,7 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags, compar
  */
 int directoryLoad (char *inPath, int findFlags, compareFile *Compare, void **fileList)
 {
-	return directoryLoadInt (inPath, "", findFlags, Compare, fileList);
+	return directoryLoadInt (inPath, "", findFlags, Compare, fileList, 0);
 }
 
 /**********************************************************************************************************************
