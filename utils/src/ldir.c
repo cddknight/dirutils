@@ -767,7 +767,7 @@ void commandOption (char option, char *optionVal, char *progName)
 		break;
 
 	case 'R':
-		dirType ^= (RECUDIR|RECULINK);
+		dirType ^= RECULINK;
 		break;
 
 	case 's':

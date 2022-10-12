@@ -1,4 +1,4 @@
-AC_INIT([dircmdothers], [5.0])
+AC_INIT([dircmdothers], [5.1])
 AC_CONFIG_SRCDIR([src/memTest.c])
 AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE([subdir-objects])

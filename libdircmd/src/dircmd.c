@@ -174,8 +174,9 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags, compar
 	compareFile *compareFunc = Compare;
 	char fullPath[PATH_SIZE], filePattern[PATH_SIZE], *endPath;
 
-	if (++level > 10)
+	if (++level > 40)
 	{
+		fprintf (stderr, "Too many levels of recursion\n");
 		return filesFound;
 	}
 
