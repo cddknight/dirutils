@@ -108,6 +108,7 @@ void helpThem(char *progName)
 	printf ("    -c . . . . . Directory case sensitive\n");
 	printf ("    -p . . . . . Show the path and filename\n");
 	printf ("    -r . . . . . Search in subdirectories\n");
+	printf ("    -R . . . . . Search links to directories\n");
 }
 
 /**********************************************************************************************************************
@@ -140,7 +141,7 @@ int main (int argc, char *argv[])
 
 	displayInit ();
 
-	while ((i = getopt(argc, argv, "Ccpr?")) != -1)
+	while ((i = getopt(argc, argv, "CcprR?")) != -1)
 	{
 		switch (i)
 		{
@@ -154,6 +155,10 @@ int main (int argc, char *argv[])
 
 		case 'r':
 			dirType ^= RECUDIR;
+			break;
+
+		case 'R':
+			dirType ^= RECULINK;
 			break;
 
 		case 'p':
