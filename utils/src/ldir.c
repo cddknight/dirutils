@@ -120,6 +120,13 @@ void getFileVersion (DIR_ENTRY *fileOne);
 #define MAX_W_COL_DESC	3
 #define EXTRA_COLOURS	8
 
+#define HELP_ALL		0
+#define HELP_DATE		1
+#define HELP_DISPLAY	2
+#define HELP_ORDER		3
+#define HELP_SHOW		4
+#define HELP_TIME		5
+
 /*----------------------------------------------------------------------------*
  * Globals                                                                    *
  *----------------------------------------------------------------------------*/
@@ -417,81 +424,113 @@ void version ()
 /**
  *  \brief Display help information.
  *  \param progName The name of the program being run.
+ *  \param flags What help to show.
  *  \result None.
  */
-void helpThem (char *progName)
+void helpThem (char *progName, int flags)
 {
 	version ();
 	printf ("%s -[Options] [FileNames] [FileNames]...\n", progName);
 	printf ("\nOptions:\n");
-	printf ("     --all . . . . . . . . . -a  . . . . . Show all files including hidden files.\n");
-	printf ("     --age . . . . . . . . . -A  . . . . . Show the age of the file.\n");
-	printf ("     --backup  . . . . . . . -b  . . . . . Show backup files ending with ~.\n");
-	printf ("     --base64  . . . . . . . -B  . . . . . Encode checksums in base64.\n");
-	printf ("     --case  . . . . . . . . -c  . . . . . Should the sort be case sensitive.\n");
-	printf ("     --colour  . . . . . . . -C  . . . . . Toggle colour display, defined in dirrc.\n");
-	printf ("     --date accessed . . . . -da . . . . . Show time of last access.\n");
+	if (flags == 0)
+	{
+		printf ("     --all . . . . . . . . . -a  . . . . . Show all files including hidden files.\n");
+		printf ("     --age . . . . . . . . . -A  . . . . . Show the age of the file.\n");
+		printf ("     --backup  . . . . . . . -b  . . . . . Show backup files ending with ~.\n");
+		printf ("     --base64  . . . . . . . -B  . . . . . Encode checksums in base64.\n");
+		printf ("     --case  . . . . . . . . -c  . . . . . Should the sort be case sensitive.\n");
+		printf ("     --colour  . . . . . . . -C  . . . . . Toggle colour display, defined in dirrc.\n");
+	}
+	if (flags == 0 || flags == HELP_DATE)	// Date
+	{
+		printf ("     --date accessed . . . . -da . . . . . Show time of last access.\n");
 #ifdef USE_STATX
-	printf ("     --date birth  . . . . . -db . . . . . Show time of file creation.\n");
+		printf ("     --date birth  . . . . . -db . . . . . Show time of file creation.\n");
 #endif
-	printf ("     --date changed  . . . . -dc . . . . . Show time of last status change.\n");
-	printf ("     --date modified . . . . -dm . . . . . Show time of last modification.\n");
-	printf ("     --display context . . . -Dc . . . . . Show the context of the file.\n");
-	printf ("     --display date  . . . . -Dd . . . . . Show the date of the file.\n");
-	printf ("     --display extn  . . . . -De . . . . . Show the file extension.\n");
-	printf ("     --display group . . . . -Dg . . . . . Show the group of the file.\n");
-	printf ("     --display inode . . . . -Di . . . . . Show the inode of the file.\n");
-	printf ("     --display links . . . . -Dl . . . . . Show the target of the link.\n");
-	printf ("     --display MD5 . . . . . -Dm . . . . . Show the MD5 checksum of the file.\n");
-	printf ("     --display SHA . . . . . -Dh . . . . . Show the SHA256 checksum of the file.\n");
-	printf ("     --display num . . . . . -Dn . . . . . Show the number of links.\n");
-	printf ("     --display owner . . . . -Do . . . . . Show the owner of the file.\n");
-	printf ("     --display rights  . . . -Dr . . . . . Show the user rights of the file.\n");
-	printf ("     --display size  . . . . -Ds . . . . . Show the size of the file.\n");
-	printf ("     --display type  . . . . -Dt . . . . . Show the type of the file.\n");
-	printf ("     --display ver . . . . . -Dv . . . . . Show the version from file name.\n");
-	printf ("     --epoch . . . . . . . . -e  . . . . . Show date in epoch with milli seconds.\n");
-	printf ("     --matching  . . . . . . -m  . . . . . Show only duplicated files.\n");
-	printf ("     --unique  . . . . . . . -M  . . . . . Show only files with no duplicate.\n");
-	printf ("     --number #  . . . . . . -n# . . . . . Display some, # > 0 first #, # < 0 last n.\n");
-	printf ("     --order context . . . . -oc . . . . . Order the files by context.\n");
-	printf ("     --order date  . . . . . -od . . . . . Order the files by time and date.\n");
-	printf ("     --order extn  . . . . . -oe . . . . . Order the files by extension.\n");
-	printf ("     --order file  . . . . . -of . . . . . Order by the file name (default).\n");
-	printf ("     --order group . . . . . -og . . . . . Order the files by group name.\n");
-	printf ("     --order SHA . . . . . . -oh . . . . . Order by the SHA256 checksum.\n");
-	printf ("     --order inode . . . . . -oi . . . . . Order by the iNode number.\n");
-	printf ("     --order links . . . . . -ol . . . . . Order by the number of hard links.\n");
-	printf ("     --order MD5 . . . . . . -om . . . . . Order by the MD5 checksum.\n");
-	printf ("     --order none  . . . . . -on . . . . . Do not order, use directory order.\n");
-	printf ("     --order owner . . . . . -oo . . . . . Order the files by owners name.\n");
-	printf ("     --order size  . . . . . -os . . . . . Order the files by size.\n");
-	printf ("     --order rev . . . . . . -or . . . . . Reverse the current sort order.\n");
-	printf ("     --order ver . . . . . . -ov . . . . . Order by numbers in the file name.\n");
-	printf ("     --path  . . . . . . . . -p  . . . . . Show the full path to the file.\n");
-	printf ("     --pages . . . . . . . . -P  . . . . . Stop at the end of each page (q to quit).\n");
-	printf ("     --quiet . . . . . . . . -q  . . . . . Quiet mode, only paths and file names.\n");
-	printf ("     --quote . . . . . . . . -Q  . . . . . Quote special chars.\n");
-	printf ("     --recursive . . . . . . -r  . . . . . Recursive directory listing.\n");
-	printf ("     --recurlink . . . . . . -R  . . . . . Recursive including links.\n");
-	printf ("     --show dirs . . . . . . -sd . . . . . Show only directories.\n");
-	printf ("     --show files  . . . . . -sf . . . . . Show only files.\n");
-	printf ("     --show links  . . . . . -sl . . . . . Show only links.\n");
-	printf ("     --show pipes  . . . . . -sp . . . . . Show only pipes.\n");
-	printf ("     --show sockets  . . . . -ss . . . . . Show only sockets.\n");
-	printf ("     --show devices  . . . . -sv . . . . . Show only devices.\n");
-	printf ("     --show execs  . . . . . -sx . . . . . Show only executable files.\n");
-	printf ("     --size  . . . . . . . . -S  . . . . . Show the file size in full.\n");
-	printf ("     --thousep . . . . . . . -t  . . . . . Do not display the thousand seperator.\n");
-	printf ("     --time g{time}  . . . . -Tl{time} . . Greater/Less than #d#h#m#s.\n");
-	printf ("     --nocvs . . . . . . . . -V  . . . . . Do not show version control directories.\n");
-	printf ("     --wide  . . . . . . . . -w  . . . . . Show directory in wide format.\n");
-	printf ("     --width # . . . . . . . -W# . . . . . Ignore screen width default to 255.\n");
-	printf ("     --help  . . . . . . . . -?  . . . . . Show this help message.\n");
-	printf ("\nExpressions:\n");
-	printf ("     & . . . . . . . . Logical AND, eg. %s \"c*&*c\"\n", progName);
-	printf ("     | . . . . . . . . Logical OR,  eg. %s \"c*|d*\"\n", progName);
-	printf ("     ^ . . . . . . . . Logical NOT, eg. %s \"c*&^*c\"\n", progName);
+		printf ("     --date changed  . . . . -dc . . . . . Show time of last status change.\n");
+		printf ("     --date modified . . . . -dm . . . . . Show time of last modification.\n");
+	}
+	if (flags == 0 || flags == HELP_DISPLAY)	// Display
+	{
+		printf ("     --display context . . . -Dc . . . . . Show the context of the file.\n");
+		printf ("     --display date  . . . . -Dd . . . . . Show the date of the file.\n");
+		printf ("     --display extn  . . . . -De . . . . . Show the file extension.\n");
+		printf ("     --display group . . . . -Dg . . . . . Show the group of the file.\n");
+		printf ("     --display inode . . . . -Di . . . . . Show the inode of the file.\n");
+		printf ("     --display links . . . . -Dl . . . . . Show the target of the link.\n");
+		printf ("     --display MD5 . . . . . -Dm . . . . . Show the MD5 checksum of the file.\n");
+		printf ("     --display SHA . . . . . -Dh . . . . . Show the SHA256 checksum of the file.\n");
+		printf ("     --display num . . . . . -Dn . . . . . Show the number of links.\n");
+		printf ("     --display owner . . . . -Do . . . . . Show the owner of the file.\n");
+		printf ("     --display rights  . . . -Dr . . . . . Show the user rights of the file.\n");
+		printf ("     --display size  . . . . -Ds . . . . . Show the size of the file.\n");
+		printf ("     --display type  . . . . -Dt . . . . . Show the type of the file.\n");
+		printf ("     --display ver . . . . . -Dv . . . . . Show the version from file name.\n");
+	}
+	if (flags == 0)
+	{
+		printf ("     --epoch . . . . . . . . -e  . . . . . Show date in epoch with milli seconds.\n");
+		printf ("     --matching  . . . . . . -m  . . . . . Show only duplicated files.\n");
+		printf ("     --unique  . . . . . . . -M  . . . . . Show only files with no duplicate.\n");
+		printf ("     --number #  . . . . . . -n# . . . . . Display some, # > 0 first #, # < 0 last n.\n");
+	}
+	if (flags == 0 || flags == HELP_ORDER)	// Order
+	{
+		printf ("     --order context . . . . -oc . . . . . Order the files by context.\n");
+		printf ("     --order date  . . . . . -od . . . . . Order the files by time and date.\n");
+		printf ("     --order extn  . . . . . -oe . . . . . Order the files by extension.\n");
+		printf ("     --order file  . . . . . -of . . . . . Order by the file name (default).\n");
+		printf ("     --order group . . . . . -og . . . . . Order the files by group name.\n");
+		printf ("     --order SHA . . . . . . -oh . . . . . Order by the SHA256 checksum.\n");
+		printf ("     --order inode . . . . . -oi . . . . . Order by the iNode number.\n");
+		printf ("     --order links . . . . . -ol . . . . . Order by the number of hard links.\n");
+		printf ("     --order MD5 . . . . . . -om . . . . . Order by the MD5 checksum.\n");
+		printf ("     --order none  . . . . . -on . . . . . Do not order, use directory order.\n");
+		printf ("     --order owner . . . . . -oo . . . . . Order the files by owners name.\n");
+		printf ("     --order size  . . . . . -os . . . . . Order the files by size.\n");
+		printf ("     --order rev . . . . . . -or . . . . . Reverse the current sort order.\n");
+		printf ("     --order ver . . . . . . -ov . . . . . Order by numbers in the file name.\n");
+	}
+	if (flags == 0)
+	{
+		printf ("     --path  . . . . . . . . -p  . . . . . Show the full path to the file.\n");
+		printf ("     --pages . . . . . . . . -P  . . . . . Stop at the end of each page (q to quit).\n");
+		printf ("     --quiet . . . . . . . . -q  . . . . . Quiet mode, only paths and file names.\n");
+		printf ("     --quote . . . . . . . . -Q  . . . . . Quote special chars.\n");
+		printf ("     --recursive . . . . . . -r  . . . . . Recursive directory listing.\n");
+		printf ("     --recurlink . . . . . . -R  . . . . . Recursive including links.\n");
+	}
+	if (flags == 0 || flags == HELP_SHOW)	// Show
+	{
+		printf ("     --show dirs . . . . . . -sd . . . . . Show only directories.\n");
+		printf ("     --show files  . . . . . -sf . . . . . Show only files.\n");
+		printf ("     --show links  . . . . . -sl . . . . . Show only links.\n");
+		printf ("     --show pipes  . . . . . -sp . . . . . Show only pipes.\n");
+		printf ("     --show sockets  . . . . -ss . . . . . Show only sockets.\n");
+		printf ("     --show devices  . . . . -sv . . . . . Show only devices.\n");
+		printf ("     --show execs  . . . . . -sx . . . . . Show only executable files.\n");
+	}
+	if (flags == 0)
+	{
+		printf ("     --size  . . . . . . . . -S  . . . . . Show the file size in full.\n");
+		printf ("     --thousep . . . . . . . -t  . . . . . Do not display the thousand seperator.\n");
+	}
+	if (flags == 0 || flags == HELP_TIME)	// Time
+	{
+		printf ("     --time g{time}  . . . . -Tg{time} . . Show if time greater than #d#h#m#s.\n");
+		printf ("     --time l{time}  . . . . -Tl{time} . . Show if time less than #d#h#m#s.\n");
+	}
+	if (flags == 0)
+	{
+		printf ("     --nocvs . . . . . . . . -V  . . . . . Do not show version control directories.\n");
+		printf ("     --wide  . . . . . . . . -w  . . . . . Show directory in wide format.\n");
+		printf ("     --width # . . . . . . . -W# . . . . . Ignore screen width default to 255.\n");
+		printf ("     --help  . . . . . . . . -?  . . . . . Show this help message.\n");
+		printf ("\nExpressions:\n");
+		printf ("     & . . . . . . . . Logical AND, eg. %s \"c*&*c\"\n", progName);
+		printf ("     | . . . . . . . . Logical OR,  eg. %s \"c*|d*\"\n", progName);
+		printf ("     ^ . . . . . . . . Logical NOT, eg. %s \"c*&^*c\"\n", progName);
+	}
 	displayLine ();
 }
 
@@ -606,7 +645,7 @@ void commandOption (char option, char *optionVal, char *progName)
 			}
 			else if ((all = allValid (1, optionVal)) == 0)
 			{
-				helpThem (progName);
+				helpThem (progName, HELP_ORDER);
 				exit(1);
 			}
 			do
@@ -724,7 +763,7 @@ void commandOption (char option, char *optionVal, char *progName)
 				minFileAge = timeNow - parseTime(&optionVal[j], &len);
 				break;
 			default:
-				helpThem (progName);
+				helpThem (progName, HELP_TIME);
 				exit (1);
 			}
 			j += len;
@@ -783,7 +822,7 @@ void commandOption (char option, char *optionVal, char *progName)
 			}
 			else if ((all = allValid (4, optionVal)) == 0)
 			{
-				helpThem (progName);
+				helpThem (progName, HELP_SHOW);
 				exit(1);
 			}
 			dirType &= ~(ONLYDIRS|ONLYFILES|ONLYLINKS|ONLYDEVS|ONLYSOCKS|ONLYPIPES|ONLYEXECS);
@@ -843,7 +882,7 @@ void commandOption (char option, char *optionVal, char *progName)
 			}
 			else if ((all = allValid (2, optionVal)) == 0)
 			{
-				helpThem (progName);
+				helpThem (progName, HELP_DISPLAY);
 				exit(1);
 			}
 			do
@@ -938,7 +977,7 @@ void commandOption (char option, char *optionVal, char *progName)
 			}
 			else if ((all = allValid (8, optionVal)) == 0)
 			{
-				helpThem (progName);
+				helpThem (progName, HELP_DATE);
 				exit(1);
 			}
 			do
@@ -982,7 +1021,7 @@ void commandOption (char option, char *optionVal, char *progName)
 		break;
 
 	case '?':
-		helpThem(progName);
+		helpThem(progName, HELP_ALL);
 		exit (1);
 	}
 }
@@ -1419,15 +1458,15 @@ int showDir (DIR_ENTRY *file)
 	mode_t stMode = file -> fileStat.stx_mode;
 	uid_t stUId = file -> fileStat.stx_uid;
 	gid_t stGId = file -> fileStat.stx_gid;
-    ino_t stINo = file -> fileStat.stx_ino;
-    nlink_t stNLink = file -> fileStat.stx_nlink;
+	ino_t stINo = file -> fileStat.stx_ino;
+	nlink_t stNLink = file -> fileStat.stx_nlink;
 	off_t stSize = file -> fileStat.stx_size;
 #else
 	mode_t stMode = file -> fileStat.st_mode;
 	uid_t stUId = file -> fileStat.st_uid;
 	gid_t stGId = file -> fileStat.st_gid;
-    ino_t stINo = file -> fileStat.st_ino;
-    nlink_t stNLink = file -> fileStat.st_nlink;
+	ino_t stINo = file -> fileStat.st_ino;
+	nlink_t stNLink = file -> fileStat.st_nlink;
 	off_t stSize = file -> fileStat.st_size;
 #endif
 	if (!dot[0])
@@ -2253,10 +2292,10 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	uid_t stUIdTwo = fileTwo -> fileStat.stx_uid;
 	gid_t stGIdOne = fileOne -> fileStat.stx_gid;
 	gid_t stGIdTwo = fileTwo -> fileStat.stx_gid;
-    ino_t stINoOne = fileOne -> fileStat.stx_ino;
-    ino_t stINoTwo = fileTwo -> fileStat.stx_ino;
-    nlink_t stNLinkOne = fileOne -> fileStat.stx_nlink;
-    nlink_t stNLinkTwo = fileTwo -> fileStat.stx_nlink;
+	ino_t stINoOne = fileOne -> fileStat.stx_ino;
+	ino_t stINoTwo = fileTwo -> fileStat.stx_ino;
+	nlink_t stNLinkOne = fileOne -> fileStat.stx_nlink;
+	nlink_t stNLinkTwo = fileTwo -> fileStat.stx_nlink;
 	off_t stSizeOne = fileOne -> fileStat.stx_size;
 	off_t stSizeTwo = fileTwo -> fileStat.stx_size;
 #else
@@ -2266,10 +2305,10 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	uid_t stUIdTwo = fileTwo -> fileStat.st_uid;
 	gid_t stGIdOne = fileOne -> fileStat.st_gid;
 	gid_t stGIdTwo = fileTwo -> fileStat.st_gid;
-    ino_t stINoOne = fileOne -> fileStat.st_ino;
-    ino_t stINoTwo = fileTwo -> fileStat.st_ino;
-    nlink_t stNLinkOne = fileOne -> fileStat.st_nlink;
-    nlink_t stNLinkTwo = fileTwo -> fileStat.st_nlink;
+	ino_t stINoOne = fileOne -> fileStat.st_ino;
+	ino_t stINoTwo = fileTwo -> fileStat.st_ino;
+	nlink_t stNLinkOne = fileOne -> fileStat.st_nlink;
+	nlink_t stNLinkTwo = fileTwo -> fileStat.st_nlink;
 	off_t stSizeOne = fileOne -> fileStat.st_size;
 	off_t stSizeTwo = fileTwo -> fileStat.st_size;
 #endif
@@ -2412,7 +2451,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 #ifdef USE_STATX
 		case DATE_MOD:
 			retn = (fileOne -> fileStat.stx_mtime.tv_sec > fileTwo -> fileStat.stx_mtime.tv_sec ? -1 :
-					fileOne -> fileStat.stx_mtime.tv_sec < fileTwo -> fileStat.stx_mtime.tv_sec ? 1 : 
+					fileOne -> fileStat.stx_mtime.tv_sec < fileTwo -> fileStat.stx_mtime.tv_sec ? 1 :
 					fileOne -> fileStat.stx_mtime.tv_nsec > fileTwo -> fileStat.stx_mtime.tv_nsec ? -1 :
 					fileOne -> fileStat.stx_mtime.tv_nsec < fileTwo -> fileStat.stx_mtime.tv_nsec ? 1 : 0);
 			break;
