@@ -517,8 +517,8 @@ void helpThem (char *progName, int flags)
 	}
 	if (flags == 0 || flags == HELP_TIME)	// Time
 	{
-		printf ("     --time g{time}  . . . . -Tg{time} . . Show if time greater than #d#h#m#s.\n");
-		printf ("     --time l{time}  . . . . -Tl{time} . . Show if time less than #d#h#m#s.\n");
+		printf ("     --time g{time}  . . . . -Tg{time} . . Show when file age > #d#h#m#s.\n");
+		printf ("     --time l{time}  . . . . -Tl{time} . . Show when file age < #d#h#m#s.\n");
 	}
 	if (flags == 0)
 	{
@@ -546,9 +546,15 @@ void helpThem (char *progName, int flags)
  *  \param len Return the number of character used.
  *  \result The number of seconds specified in the string.
  */
-int parseTime (char *timeStr, int *len)
+time_t parseTime (char *timeStr, int *len)
 {
-	int l = 0, running = 0, current = 0, done = 0;
+	unsigned int l = 0, done = 0, used = 0;
+	time_t running = 0, current = 0;
+
+ 	if (len != NULL)
+	{
+		*len = 0;
+	}
 	while (timeStr[l] && !done)
 	{
 		switch (timeStr[l])
@@ -556,19 +562,22 @@ int parseTime (char *timeStr, int *len)
 		case 'd':
 			running += (current * (24 * 60 * 60));
 			current = 0;
+			used = l + 1;
 			break;
 		case 'h':
 			running += (current * (60 * 60));
 			current = 0;
+			used = l;
 			break;
 		case 'm':
 			running += (current * 60);
 			current = 0;
+			used = l + 1;
 			break;
 		case 's':
 			running += current;
 			current = 0;
-			done = 1;
+			used = l + 1;
 			break;
 		default:
 			if (timeStr[l] >= '0' && timeStr[l] <= '9')
@@ -584,13 +593,9 @@ int parseTime (char *timeStr, int *len)
 		}
 		++l;
 	}
-	if (current)
+ 	if (len != NULL)
 	{
-		running += current;
-	}
-	if (len != NULL)
-	{
-		*len = l;
+		*len = used;
 	}
 	return running;
 }
@@ -754,19 +759,22 @@ void commandOption (char option, char *optionVal, char *progName)
 		{
 			int len = 0, j = 0;
 			showType |= SHOW_IN_AGE;
-			switch (optionVal[j++])
+			while (j < strlen (optionVal))
 			{
-			case 'l':
-				maxFileAge = timeNow - parseTime(&optionVal[j], &len);
-				break;
-			case 'g':
-				minFileAge = timeNow - parseTime(&optionVal[j], &len);
-				break;
-			default:
-				helpThem (progName, HELP_TIME);
-				exit (1);
+				switch (optionVal[j++])
+				{
+				case 'l':
+					maxFileAge = timeNow - parseTime(&optionVal[j], &len);
+					break;
+				case 'g':
+					minFileAge = timeNow - parseTime(&optionVal[j], &len);
+					break;
+				default:
+					helpThem (progName, HELP_TIME);
+					exit (1);
+				}
+				j += len;
 			}
-			j += len;
 		}
 		break;
 
