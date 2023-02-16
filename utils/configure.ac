@@ -1,11 +1,11 @@
-AC_INIT([dircmdutils], [5.1])
+AC_INIT([dircmdutils],[5.1])
 AC_CONFIG_SRCDIR([src/ldir.c])
-AC_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([subdir-objects])
 AC_CANONICAL_HOST
 AC_PROG_CC
 AM_PROG_CC_C_O
-AC_PROG_LIBTOOL
+LT_INIT
 AC_PROG_INSTALL
 REVISION=1
 PKG_CHECK_MODULES([S_DEPS], [dircmd])
