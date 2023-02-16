@@ -1,11 +1,11 @@
-AC_INIT([libdircmd], [5.1])
+AC_INIT([libdircmd],[5.1])
 AC_CONFIG_SRCDIR([src/dircmd.c])
-AC_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([subdir-objects])
 AC_CANONICAL_HOST
 AC_PROG_CC
 AM_PROG_CC_C_O
-AC_PROG_LIBTOOL
+LT_INIT
 AC_PROG_INSTALL
 REVISION=1
 AC_CHECK_HEADERS([selinux/selinux.h sys/acl.h alues.h openssl/md5.h openssl/sha.h])
