@@ -82,6 +82,7 @@ void getFileVersion (DIR_ENTRY *fileOne);
 #define ORDER_SHAS		10
 #define ORDER_INOD		11
 #define ORDER_VERS		12
+#define ORDER_NAVE		13
 
 #define SHOW_NORMAL		0
 #define SHOW_WIDE		1
@@ -306,6 +307,7 @@ CONFIG_WORD configWords[] =
 	{	3,	'h',	"SHA"		},
 	{	3,	'i',	"inode"		},
 	{	3,	'v',	"ver"		},
+	{	3,	'V',	"namever"	},
 	{	3,	'l',	"links"		},
 	{	3,	'm',	"MD5"		},
 	{	1,	'n',	"none"		},
@@ -490,6 +492,7 @@ void helpThem (char *progName, int flags)
 		printf ("     --order size  . . . . . -os . . . . . Order the files by size.\n");
 		printf ("     --order rev . . . . . . -or . . . . . Reverse the current sort order.\n");
 		printf ("     --order ver . . . . . . -ov . . . . . Order by numbers in the file name.\n");
+		printf ("     --order namever . . . . -oV . . . . . Order by name then numbers.\n");
 	}
 	if (flags == 0)
 	{
@@ -551,7 +554,7 @@ time_t parseTime (char *timeStr, int *len)
 	unsigned int l = 0, done = 0, used = 0;
 	time_t running = 0, current = 0;
 
- 	if (len != NULL)
+	if (len != NULL)
 	{
 		*len = 0;
 	}
@@ -593,7 +596,7 @@ time_t parseTime (char *timeStr, int *len)
 		}
 		++l;
 	}
- 	if (len != NULL)
+	if (len != NULL)
 	{
 		*len = used;
 	}
@@ -702,6 +705,9 @@ void commandOption (char option, char *optionVal, char *progName)
 					break;
 				case 'v':
 					orderType = ORDER_VERS;
+					break;
+				case 'V':
+					orderType = ORDER_NAVE;
 					break;
 				}
 			}
@@ -2230,6 +2236,50 @@ void getFileVersion (DIR_ENTRY *fileOne)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  C O M P A R E  N A M E S                                                                                          *
+ *  ========================                                                                                          *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Compare two file names.
+ *  \param nameOne First name.
+ *  \param nameTwo Second name.
+ *  \param useCase Should the compare be case sensitive.
+ *  \result -1, 0 or 1 depending on compare.
+ */
+int compareNames (char *nameOne, char *nameTwo, int useCase)
+{
+	return (useCase ?
+			strcmp (nameOne, nameTwo) :
+			strcasecmp (nameOne, nameTwo));
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  C O M P A R E  V E R S I O N S                                                                                    *
+ *  ==============================                                                                                    *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Compare two file versions.
+ *  \param fileVerOne First file version.
+ *  \param fileVerTwo Second file version.
+ *  \result -1, 0 or 1 depending on compare.
+ */
+int compareVersions (struct dirFileVerInfo *fileVerOne, struct dirFileVerInfo *fileVerTwo)
+{
+	int retn = 0, i;
+
+	for (i = 1; i < 21 && retn == 0; ++i)
+	{
+		retn = (fileVerOne -> verVals[i] == fileVerTwo -> verVals[i] ? 0 :
+				fileVerOne -> verVals[i] < fileVerTwo -> verVals[i] ? -1 : 1);
+	}
+	return retn;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  C O M P A R E  F I L E  V E R S I O N                                                                             *
  *  =====================================                                                                             *
  *                                                                                                                    *
@@ -2257,22 +2307,22 @@ int compareFileVersion (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo, int useCase)
 	{
 		return retn;
 	}
-	retn = (useCase ?
-			strcmp (fileOne -> fileVer -> fileStart, fileTwo -> fileVer -> fileStart) :
-			strcasecmp (fileOne -> fileVer -> fileStart, fileTwo -> fileVer -> fileStart));
-	if (retn == 0)
+	
+	if (orderType == ORDER_NAVE)
 	{
-		int i;
-		for (i = 1; i < 21 && retn == 0; ++i)
-		{
-			retn = (fileOne -> fileVer -> verVals[i] == fileTwo -> fileVer -> verVals[i] ? 0 :
-					fileOne -> fileVer -> verVals[i] < fileTwo -> fileVer -> verVals[i] ? -1 : 1);
-		}
+		retn = compareNames (fileOne -> fileVer -> fileStart, fileTwo -> fileVer -> fileStart, useCase);
 	}
 	if (retn == 0)
 	{
-		retn = (useCase ? strcmp (fileOne -> fileName, fileTwo -> fileName) :
-				strcasecmp (fileOne -> fileName, fileTwo -> fileName));
+		retn = compareVersions (fileOne -> fileVer, fileTwo -> fileVer);
+	}
+	if (orderType == ORDER_VERS && retn == 0)
+	{
+		retn = compareNames (fileOne -> fileVer -> fileStart, fileTwo -> fileVer -> fileStart, useCase);
+	}
+	if (retn == 0)
+	{
+		retn = compareNames (fileOne -> fileName, fileTwo -> fileName, useCase);
 	}
 	return retn;
 }
@@ -2628,21 +2678,9 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 		}
 		break;
 
+	case  ORDER_NAVE:
 	case  ORDER_VERS:
-		if (showType & SHOW_PATH)
-		{
-			retn = (dirType & USECASE ? strcmp (fileOne -> fullPath, fileTwo -> fullPath) :
-					strcasecmp (fileOne -> fullPath, fileTwo -> fullPath));
-		}
-		else
-		{
-			retn = (dirType & USECASE ? strcmp (fileOne -> partPath, fileTwo -> partPath) :
-					strcasecmp (fileOne -> partPath, fileTwo -> partPath));
-		}
-		if (retn == 0)
-		{
-			retn = compareFileVersion (fileOne, fileTwo, dirType & USECASE);
-		}
+		retn = compareFileVersion (fileOne, fileTwo, dirType & USECASE);
 		break;
 	}
 	if (retn == 0)
@@ -2678,7 +2716,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 			strcpy (fileNameTwo, fileTwo -> fileName);
 
 		/*--------------------------------------------------------------------*/
-		retn = (dirType & USECASE ? strcmp (fileNameOne, fileNameTwo) : strcasecmp (fileNameOne, fileNameTwo));
+		retn = compareNames (fileNameOne, fileNameTwo, dirType & USECASE);
 	}
 	if (showType & SHOW_RORDER)
 	{
