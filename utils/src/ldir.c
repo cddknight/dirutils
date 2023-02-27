@@ -256,7 +256,7 @@ char *colourNames[] =
 	"colour_read",		"colour_write",		"colour_other",		"colour_block"
 };
 
-static struct option long_options[] =
+static struct option longOptions[] =
 {
 	{	"all",			no_argument,		0,	'a' },
 	{	"age",			no_argument,		0,	'A' },
@@ -1114,7 +1114,7 @@ void loadSettings (char *progName)
  */
 int main (int argc, char *argv[])
 {
-	int found = 0, foundDir = 0, c;
+	int found = 0, foundDir = 0, opt;
 	void *fileList = NULL;
 	char defaultDir[PATH_SIZE], fullVersion[81];
 
@@ -1137,16 +1137,16 @@ int main (int argc, char *argv[])
 		/*--------------------------------------------------------------------*
 		 * getopt_long stores the option index here.                          *
 	     *--------------------------------------------------------------------*/
-		int option_index = 0;
+		int optionIndex = 0;
 
-		c = getopt_long (argc, argv, "aAbBcCd:D:emMn:o:pPqQrRs:StT:VwW:?", long_options, &option_index);
+		opt = getopt_long (argc, argv, "aAbBcCd:D:emMn:o:pPqQrRs:StT:VwW:?", longOptions, &optionIndex);
 
 		/*--------------------------------------------------------------------*
 		 * Detect the end of the options.                                     *
 	     *--------------------------------------------------------------------*/
-		if (c == -1) break;
+		if (opt == -1) break;
 
-		switch (c)
+		switch (opt)
 		{
 		case 'd':
 		case 'D':
@@ -1155,11 +1155,11 @@ int main (int argc, char *argv[])
 		case 'n':
 		case 'T':
 		case 'W':
-			commandOption (c, optarg, basename (argv[0]));
+			commandOption (opt, optarg, basename (argv[0]));
 			break;
 
 		default:
-			commandOption (c, NULL, basename (argv[0]));
+			commandOption (opt, NULL, basename (argv[0]));
 			break;
 
 		}
