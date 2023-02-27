@@ -1879,6 +1879,14 @@ int showDir (DIR_ENTRY *file)
 						displayInColumn (columnTranslate[COL_DATE], "%s%03d", dot, fileAgeMS);
 					}
 				}
+				if (showType & SHOW_VERSION)
+				{
+					if (file -> fileVer == NULL)
+					{
+						getFileVersion (file);
+					}
+					displayInColumn (columnTranslate[COL_VERSION], "%s", displayVerString (file, verString));
+				}
 			}
 			displayNewLine (0);
 			linksFound ++;
@@ -1949,6 +1957,14 @@ int showDir (DIR_ENTRY *file)
 						displayInColumn (columnTranslate[COL_DATE], displayCommaNumber (fileAge, numBuff));
 						displayInColumn (columnTranslate[COL_DATE], "%s%03d", dot, fileAgeMS);
 					}
+				}
+				if (showType & SHOW_VERSION)
+				{
+					if (file -> fileVer == NULL)
+					{
+						getFileVersion (file);
+					}
+					displayInColumn (columnTranslate[COL_VERSION], "%s", displayVerString (file, verString));
 				}
 			}
 			displayNewLine (0);
@@ -2048,6 +2064,14 @@ int showDir (DIR_ENTRY *file)
 						displayInColumn (columnTranslate[COL_DATE], displayCommaNumber (fileAge, numBuff));
 						displayInColumn (columnTranslate[COL_DATE], "%s%03d", dot, fileAgeMS);
 					}
+				}
+				if (showType & SHOW_VERSION)
+				{
+					if (file -> fileVer == NULL)
+					{
+						getFileVersion (file);
+					}
+					displayInColumn (columnTranslate[COL_VERSION], "%s", displayVerString (file, verString));
 				}
 			}
 			displayNewLine (0);
