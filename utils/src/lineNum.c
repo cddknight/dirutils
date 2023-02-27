@@ -93,7 +93,7 @@ int displayFlags = 0;
 int bitMaskSet = 0;
 unsigned int bitMask[MASK_SIZE];
 
-static struct option long_options[] =
+static struct option longOptions[] =
 {
 	{	"colour",		no_argument,		0,	'C' },
 	{	"pages",		no_argument,		0,	'P' },
@@ -317,15 +317,15 @@ int main (int argc, char *argv[])
 		/*--------------------------------------------------------------------*
 		 * getopt_long stores the option index here.                          *
 	     *--------------------------------------------------------------------*/
-		int option_index = 0;
-		int c = getopt_long (argc, argv, "bCPql:t:T?", long_options, &option_index);
+		int optionIndex = 0;
+		int opt = getopt_long (argc, argv, "bCPql:t:T?", longOptions, &optionIndex);
 
 		/*--------------------------------------------------------------------*
 		 * Detect the end of the options.                                     *
 	     *--------------------------------------------------------------------*/
-		if (c == -1) break;
+		if (opt == -1) break;
 
-		switch (c)
+		switch (opt)
 		{
 		case 'b':
 			showBlank = 0;
