@@ -147,6 +147,7 @@ int setBitMask (int bitSet, int bit)
  *  \brief Get whether a bit is set.
  *  \param bitSet Which bit set to use, rows or columns.
  *  \param bit Bit to check.
+ *  \param def Default return value.
  *  \result 1 if it is set, 0 if not.
  */
 int getBitMask (int bitSet, int bit, int def)
@@ -567,6 +568,7 @@ int main (int argc, char *argv[])
  *  \brief Function to display in a column.
  *  \param row Which line are we showing (it coulb be line 1 for the headings).
  *  \param col Which column to display in.
+ *  \param trueCol True column number.
  *  \param outBuffer The buffer to display.
  *  \result None.
  */
@@ -750,8 +752,8 @@ int showDir (DIR_ENTRY *file)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  P R O C E S S  S T D I N                                                                                          *
- *  ========================                                                                                          *
+ *  S H O W  S T D  I N                                                                                               *
+ *  ===================                                                                                               *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**

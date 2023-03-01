@@ -579,35 +579,41 @@ void getComment (char *retnBuff, int type, char *name)
  *  \brief Add text to a box, with a simple wrap.
  *  \param outBuff Save the line so far here.
  *  \param inBuff Line to process.
+ *  \param pad Add padding to the end of the line.
  *  \result Number of bytes read from the input.
  */
-int addBoxText (char *outBuff, char *inBuff)
+int addBoxText (char *outBuff, char *inBuff, int pad)
 {
-	int width = boxWidth - 4;
-	int i = 0, s = strlen(inBuff), j = 0;
+	int i = 0, s = 0, k = 0;
 
-	while (i < width && inBuff[i])
+	if (inBuff[0])
 	{
-		outBuff[i] = inBuff[i];
-		if (outBuff[i] == ' ')
+		outBuff[i++] = ' ';
+		outBuff[i++] = ' ';
+		while (i < boxWidth - 1 && inBuff[k])
 		{
-			s = i;
-			j = 1;
+			outBuff[i] = inBuff[k++];
+			if (outBuff[i] == ' ')
+			{
+				s = k;
+			}
+			++i;
 		}
-		++i;
-	}
-	if (i < width)
-	{
-		s = strlen(inBuff);
-	}
-	i = s;
-	while (i < width)
-	{
-		outBuff[i] = ' ';
-		++i;
+		if (i < boxWidth - 1)
+		{
+			s = k;
+		}
+		else
+		{
+			i = s + 1;
+		}
+		while (i < boxWidth && pad)
+		{
+			outBuff[i++] = ' ';
+		}
 	}
 	outBuff[i] = 0;
-	return s + j;
+	return s;
 }
 
 /**********************************************************************************************************************
@@ -654,16 +660,17 @@ void boxLine (char *boxText, int first, int last, int addBlank, FILE *outFile)
 		strcpy (lastStart, " *");
 		strcpy (lastEnd, "*/");
 	}
-	if (first || last|| addBlank)
+	if (first || last || addBlank)
 	{
-		int i;
+		int i, f = 0;
 		for (i = 0; i < boxWidth; i++)
 		{
 			boxLine[i] = lineChar;
-			boxFill[i] = ' ';
+			if (middleEnd[0] > 0)
+				boxFill[f++] = ' ';
 		}
 		boxLine[i] = 0;
-		boxFill[i] = 0;
+		boxFill[f] = 0;
 	}
 	if (first)
 	{
@@ -672,8 +679,8 @@ void boxLine (char *boxText, int first, int last, int addBlank, FILE *outFile)
 	}
 	do
 	{
-		pos += addBoxText (txtBuff, &boxText[pos]);
-		fprintf(outFile, "%s  %s  %s\n", middleStart, txtBuff, middleEnd);
+		pos += addBoxText (txtBuff, &boxText[pos], middleEnd[0] > 0);
+		fprintf(outFile, "%s%s%s\n", middleStart, txtBuff, middleEnd);
 	}
 	while (pos < len);
 	if (addBlank)
