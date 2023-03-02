@@ -39,6 +39,12 @@
 #include <sys/types.h>
 #include <linux/fcntl.h>
 #include <getopt.h>
+#ifdef HAVE_OPENSSL_EVP_H
+#include <openssl/evp.h>
+#define CRC_BUFF_SIZE EVP_MAX_MD_SIZE
+#else
+#define CRC_BUFF_SIZE 64
+#endif
 #ifdef HAVE_VALUES_H
 #include <values.h>
 #else
@@ -2493,7 +2499,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 
 				if (fileOne -> sha256Sum == NULL)
 				{
-					if ((fileOne -> sha256Sum = malloc (33)) != NULL)
+					if ((fileOne -> sha256Sum = malloc (CRC_BUFF_SIZE)) != NULL)
 					{
 						strcpy (fullName, fileOne -> fullPath);
 						strcat (fullName, fileOne -> fileName);
@@ -2502,7 +2508,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 				}
 				if (fileTwo -> sha256Sum == NULL)
 				{
-					if ((fileTwo -> sha256Sum = malloc (33)) != NULL)
+					if ((fileTwo -> sha256Sum = malloc (CRC_BUFF_SIZE)) != NULL)
 					{
 						strcpy (fullName, fileTwo -> fullPath);
 						strcat (fullName, fileTwo -> fileName);
@@ -2645,7 +2651,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	case ORDER_MD5S:
 		if (fileOne -> md5Sum == NULL)
 		{
-			if ((fileOne -> md5Sum = malloc (16)) != NULL)
+			if ((fileOne -> md5Sum = malloc (CRC_BUFF_SIZE)) != NULL)
 			{
 				strcpy (fullName, fileOne -> fullPath);
 				strcat (fullName, fileOne -> fileName);
@@ -2654,7 +2660,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 		}
 		if (fileTwo -> md5Sum == NULL)
 		{
-			if ((fileTwo -> md5Sum = malloc (16)) != NULL)
+			if ((fileTwo -> md5Sum = malloc (CRC_BUFF_SIZE)) != NULL)
 			{
 				strcpy (fullName, fileTwo -> fullPath);
 				strcat (fullName, fileTwo -> fileName);
@@ -2675,7 +2681,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 	case ORDER_SHAS:
 		if (fileOne -> sha256Sum == NULL)
 		{
-			if ((fileOne -> sha256Sum = malloc (32)) != NULL)
+			if ((fileOne -> sha256Sum = malloc (CRC_BUFF_SIZE)) != NULL)
 			{
 				strcpy (fullName, fileOne -> fullPath);
 				strcat (fullName, fileOne -> fileName);
@@ -2684,7 +2690,7 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 		}
 		if (fileTwo -> sha256Sum == NULL)
 		{
-			if ((fileTwo -> sha256Sum = malloc (32)) != NULL)
+			if ((fileTwo -> sha256Sum = malloc (CRC_BUFF_SIZE)) != NULL)
 			{
 				strcpy (fullName, fileTwo -> fullPath);
 				strcat (fullName, fileTwo -> fileName);

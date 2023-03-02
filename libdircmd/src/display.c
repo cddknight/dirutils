@@ -433,7 +433,7 @@ char *displayRightsStringACL (DIR_ENTRY *file, char *outString)
 	char fullName[1024];
 #ifdef HAVE_SELINUX_SELINUX_H
 	int size;
-	security_context_t getContext;
+	char *fileContext;
 #endif
 #ifdef HAVE_SYS_ACL_H
 	acl_t acl;
@@ -447,11 +447,11 @@ char *displayRightsStringACL (DIR_ENTRY *file, char *outString)
 	strcpy (fullName, file -> fullPath);
 	strcat (fullName, file -> fileName);
 #ifdef HAVE_SELINUX_SELINUX_H
-	size = lgetfilecon (fullName, &getContext);
+	size = lgetfilecon (fullName, &fileContext);
 	if (size > 0)
 	{
 		outString[10] = '.';
-		freecon (getContext);
+		freecon (fileContext);
 		hasSEL = 1;
 	}
 #endif
@@ -543,15 +543,14 @@ char *displayGroupString (int groupID, char *outString)
 char *displayContextString (char *fullpath, char *outString)
 {
 #ifdef HAVE_SELINUX_SELINUX_H
-	security_context_t getContext;
-	int size = lgetfilecon (fullpath, &getContext);
-	char *ptr = (char *)getContext;
+	char *fileContext;
+	int size = lgetfilecon (fullpath, &fileContext);
 
 	if (size > 0)
 	{
-		strncpy (outString, ptr, 80);
+		strncpy (outString, fileContext, 80);
 		outString[80] = 0;
-		freecon (getContext);
+		freecon (fileContext);
 	}
 	else
 	{
@@ -971,7 +970,7 @@ void displayUpdateHeading (int column, char *heading)
 			fullColDesc[column] -> heading	= (char *)malloc (strlen (heading) + 1);
 			if (fullColDesc[column] -> heading != NULL)
 			{
-				strcpy (fullColDesc[column] -> heading = heading, heading);
+				strcpy (fullColDesc[column] -> heading, heading);
 			}
 		}
 	}

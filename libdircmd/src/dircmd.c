@@ -326,7 +326,7 @@ static int directoryLoadInt (char *inPath, char *partPath, int findFlags, compar
 					strcpy (saveEntry -> fullPath, fullPath);
 					strcpy (saveEntry -> partPath, partPath);
 					strcpy (endPath, dirList -> d_name);
-					saveEntry -> doneCRC = saveEntry -> CRC = saveEntry -> match = 0;
+					saveEntry -> match = 0;
 					saveEntry -> Compare = (comparePtr *)compareFunc;
 
 					/*------------------------------------------------------------*

@@ -60,8 +60,9 @@ int mdCheckSum (char *digestname, char *filename, unsigned char *outBuffer)
 		FILE *inFile = NULL;
 		if ((inFile = fopen (filename, "rb")) != NULL)
 		{
-			int mdLen, readSize;
+			unsigned int mdLen;
 			char readBuff[4100];
+			int readSize;
 			
 			OpenSSL_add_all_digests();
 			if ((md = EVP_get_digestbyname(digestname)) != NULL)
