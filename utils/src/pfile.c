@@ -66,7 +66,6 @@ int showDir (DIR_ENTRY *file);
 #define SHOW_FULL	1
 #define SHOW_DOT	2
 #define SHOW_PATH	4
-#define SHOW_MATCH	8
 #define SHOW_RORDER 16
 #define SHOW_QUIET	32
 #define SHOW_EXE	64
@@ -615,33 +614,6 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 		break;
 
 	case ORDER_SIZE:
-		if (showType & SHOW_MATCH)
-		{
-			if (stSizeOne == stSizeTwo)
-			{
-				if (!fileOne -> doneCRC)
-				{
-					sprintf (fullName, "%s%s", fileOne -> fullPath,
-							fileOne -> fileName);
-
-					fileOne -> CRC = CRCFile (fullName);
-					fileOne -> doneCRC = 1;
-				}
-				if (!fileTwo -> doneCRC)
-				{
-					sprintf (fullName, "%s%s", fileTwo -> fullPath,
-							fileTwo -> fileName);
-
-					fileTwo -> CRC = CRCFile (fullName);
-					fileTwo -> doneCRC = 1;
-				}
-				if (fileOne -> CRC == fileTwo -> CRC)
-				{
-					fileOne -> match = 1;
-					fileTwo -> match = 1;
-				}
-			}
-		}
 		retn = (stSizeOne > stSizeTwo ? 1 : stSizeOne < stSizeTwo ? -1 : 0);
 		break;
 

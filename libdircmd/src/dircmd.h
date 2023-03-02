@@ -224,10 +224,6 @@ struct dirEntry
 #else
 	struct stat fileStat;
 #endif
-	/** Has the CRC been calculated for this file */
-	unsigned int doneCRC;
-	/** CRC value for this file */
-	unsigned int CRC;
 	/** Was a match found for this file */
 	unsigned int match;
 	/** Pointer to function used to compare the files */

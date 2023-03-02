@@ -382,6 +382,17 @@ int xmlChildElementCount (xmlNode *curNode)
 }
 #endif
 
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  G E T  C O L U M N  N U M                                                                                         *
+ *  =========================                                                                                         *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Get the column number.
+ *  \param colName Name of the column.
+ *  \result Number of the column.
+ */
 int getColumnNum (char *colName)
 {
 	int i;
