@@ -288,6 +288,7 @@ static struct option longOptions[] =
 	{	"size",			no_argument,		0,	'S' },
 	{	"thousep",		no_argument,		0,	't' },
 	{	"time",			required_argument,	0,	'T' },
+	{	"version",		no_argument,		0,	'v'	},
 	{	"nocvs",		no_argument,		0,	'V' },
 	{	"wide",			no_argument,		0,	'w' },
 	{	"width",		required_argument,	0,	'W' },
@@ -417,10 +418,13 @@ int allValid (int flag, char *word)
  *  \brief Display version information for the library.
  *  \result None.
  */
-void version ()
+void version (int showLine)
 {
 	printf ("TheKnight: Linux Directory, Version: %s, Built: %s\n", VERSION, buildDate);
-	displayLine ();
+	if (showLine)
+	{
+		displayLine ();
+	}
 }
 
 /**********************************************************************************************************************
@@ -437,7 +441,7 @@ void version ()
  */
 void helpThem (char *progName, int flags)
 {
-	version ();
+	version (1);
 	printf ("%s -[Options] [FileNames] [FileNames]...\n", progName);
 	printf ("\nOptions:\n");
 	if (flags == 0)
@@ -531,6 +535,7 @@ void helpThem (char *progName, int flags)
 	}
 	if (flags == 0)
 	{
+		printf ("     --version . . . . . . . -v  . . . . . Show version information.\n");
 		printf ("     --nocvs . . . . . . . . -V  . . . . . Do not show version control directories.\n");
 		printf ("     --wide  . . . . . . . . -w  . . . . . Show directory in wide format.\n");
 		printf ("     --width # . . . . . . . -W# . . . . . Ignore screen width default to 255.\n");
@@ -1036,6 +1041,10 @@ void commandOption (char option, char *optionVal, char *progName)
 		sizeFormat = !sizeFormat;
 		break;
 
+	case 'v':
+		version (0);
+		exit (0);
+
 	case 'V':
 		dirType ^= HIDEVERCTL;
 		break;
@@ -1151,7 +1160,7 @@ int main (int argc, char *argv[])
 	     *--------------------------------------------------------------------*/
 		int optionIndex = 0;
 
-		opt = getopt_long (argc, argv, "aAbBcCd:D:emMn:o:pPqQrRs:StT:VwW:?", longOptions, &optionIndex);
+		opt = getopt_long (argc, argv, "aAbBcCd:D:emMn:o:pPqQrRs:StT:vVwW:?", longOptions, &optionIndex);
 
 		/*--------------------------------------------------------------------*
 		 * Detect the end of the options.                                     *
@@ -1385,7 +1394,7 @@ int main (int argc, char *argv[])
 		}
 		else
 		{
-			version ();
+			version (1);
 			printf ("     No matches found\n");
 		}
 	}
