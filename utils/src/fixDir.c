@@ -60,6 +60,7 @@ int showDir (DIR_ENTRY *file);
 #define TEST_MODE	2
 #define SHOW_ALL	4
 #define CASE_EXTN	8
+#define NO_CORRECT	16
 
 #define CASE_NONE	0
 #define CASE_LOWER	1
@@ -142,7 +143,7 @@ int main (int argc, char *argv[])
      * If we got a path then split it into a path and a file pattern to match *
      * files with.                                                            *
      *------------------------------------------------------------------------*/
-	while ((i = getopt(argc, argv, "aAc:etX")) != -1)
+	while ((i = getopt(argc, argv, "aAc:entX")) != -1)
 	{
 		switch (i)
 		{
@@ -171,6 +172,10 @@ int main (int argc, char *argv[])
 
 		case 'e':
 			dispFlags ^= CASE_EXTN;
+			break;
+
+		case 'n':
+			dispFlags ^= NO_CORRECT;
 			break;
 
 		case 't':
@@ -269,91 +274,115 @@ int showDir (DIR_ENTRY *file)
 
 	while (inFileName[i])
 	{
-		if (strchr (updateChars, inFileName[i]) || inFileName[i] == '_')
+		int corrected = 0;
+		if (!(dispFlags & NO_CORRECT))
 		{
-			if (lastAdd != '_')
+			corrected = 1;
+			if (strchr (updateChars, inFileName[i]) || inFileName[i] == '_')
 			{
-				*outPtr++ = lastAdd = '_';
+				if (lastAdd != '_')
+				{
+					*outPtr++ = lastAdd = '_';
+					nextUpper = 1;
+				}
+			}
+		    else if (strchr (removeChars, inFileName[i]))
+		    {
 				nextUpper = 1;
+		    }
+			else if (inFileName[i] == '.')
+			{
+				if (extn)
+				{
+					strcat (outFileName, outExtn);
+				}
+				outPtr = &outExtn[0];
+				*outPtr++ = lastAdd = '.';
+				nextUpper = 1;
+				extn = 1;
+			}
+		    else if (inFileName[i] == '-')
+		    {
+				if (lastAdd != '_' && lastAdd != '-')
+				{
+					*outPtr++ = lastAdd = '-';
+					nextUpper = 1;
+				}
+		    }
+		    else if (inFileName[i] == '#')
+		    {
+				*outPtr++ = (fixCase == CASE_LOWER) ? 'h' : 'H';
+				*outPtr++ = (fixCase == CASE_UPPER) ? 'A' : 'a';
+				*outPtr++ = (fixCase == CASE_UPPER) ? 'S' : 's';
+				*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'H' : 'h';
+				nextUpper = 1;
+		    }
+		    else if (inFileName[i] == '+')
+		    {
+				*outPtr++ = (fixCase == CASE_LOWER) ? 'p' : 'P';
+				*outPtr++ = (fixCase == CASE_UPPER) ? 'L' : 'l';
+				*outPtr++ = (fixCase == CASE_UPPER) ? 'U' : 'u';
+				*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'S' : 's';
+				nextUpper = 1;
+		    }
+		    else if (inFileName[i] == '*')
+		    {
+				*outPtr++ = (fixCase == CASE_LOWER) ? 's' : 'S';
+				*outPtr++ = (fixCase == CASE_UPPER) ? 'T' : 't';
+				*outPtr++ = (fixCase == CASE_UPPER) ? 'A' : 'a';
+				*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'R' : 'r';
+				nextUpper = 1;
+		    }
+		    else if (inFileName[i] == '!')
+		    {
+				*outPtr++ = (fixCase == CASE_LOWER) ? 'p' : 'P';
+				*outPtr++ = (fixCase == CASE_UPPER) ? 'I' : 'i';
+				*outPtr++ = (fixCase == CASE_UPPER) ? 'N' : 'n';
+				*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'G' : 'g';
+				nextUpper = 1;
+		    }
+		    else if (inFileName[i] == '&')
+		    {
+				*outPtr++ = (fixCase == CASE_LOWER) ? 'a' : 'A';
+				*outPtr++ = (fixCase == CASE_UPPER) ? 'N' : 'n';
+				*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'D' :'d';
+				nextUpper = 1;
+		    }
+		    else if (inFileName[i] == '@')
+		    {
+				*outPtr++ = (fixCase == CASE_UPPER || fixCase == CASE_PROPER) ? 'A' :'a';
+				*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'T' :'t';
+				nextUpper = 1;
+		    }
+		    else if (inFileName[i] < ' ')
+		    {
+				*outPtr++ = lastAdd = 'x';
+		    }
+		    else if (inFileName[i] > 126 && (dispFlags & REMOVE_BIG))
+		    {
+				*outPtr++ = lastAdd = 'X';
+		    }
+			else
+			{
+				corrected = 0;
 			}
 		}
-        else if (strchr (removeChars, inFileName[i]))
-        {
-			nextUpper = 1;
-        }
-		else if (inFileName[i] == '.')
-		{
-			if (extn)
-			{
-				strcat (outFileName, outExtn);
-			}
-			outPtr = &outExtn[0];
-			*outPtr++ = lastAdd = '.';
-			nextUpper = 1;
-			extn = 1;
-		}
-        else if (inFileName[i] == '-')
-        {
-			if (lastAdd != '_' && lastAdd != '-')
-			{
-				*outPtr++ = lastAdd = '-';
-				nextUpper = 1;
-			}
-        }
-        else if (inFileName[i] == '#')
-        {
-			*outPtr++ = (fixCase == CASE_LOWER) ? 'h' : 'H';
-			*outPtr++ = (fixCase == CASE_UPPER) ? 'A' : 'a';
-			*outPtr++ = (fixCase == CASE_UPPER) ? 'S' : 's';
-			*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'H' : 'h';
-			nextUpper = 1;
-        }
-        else if (inFileName[i] == '+')
-        {
-			*outPtr++ = (fixCase == CASE_LOWER) ? 'p' : 'P';
-			*outPtr++ = (fixCase == CASE_UPPER) ? 'L' : 'l';
-			*outPtr++ = (fixCase == CASE_UPPER) ? 'U' : 'u';
-			*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'S' : 's';
-			nextUpper = 1;
-        }
-        else if (inFileName[i] == '*')
-        {
-			*outPtr++ = (fixCase == CASE_LOWER) ? 's' : 'S';
-			*outPtr++ = (fixCase == CASE_UPPER) ? 'T' : 't';
-			*outPtr++ = (fixCase == CASE_UPPER) ? 'A' : 'a';
-			*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'R' : 'r';
-			nextUpper = 1;
-        }
-        else if (inFileName[i] == '!')
-        {
-			*outPtr++ = (fixCase == CASE_LOWER) ? 'p' : 'P';
-			*outPtr++ = (fixCase == CASE_UPPER) ? 'I' : 'i';
-			*outPtr++ = (fixCase == CASE_UPPER) ? 'N' : 'n';
-			*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'G' : 'g';
-			nextUpper = 1;
-        }
-        else if (inFileName[i] == '&')
-        {
-			*outPtr++ = (fixCase == CASE_LOWER) ? 'a' : 'A';
-			*outPtr++ = (fixCase == CASE_UPPER) ? 'N' : 'n';
-			*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'D' :'d';
-			nextUpper = 1;
-        }
-        else if (inFileName[i] == '@')
-        {
-			*outPtr++ = (fixCase == CASE_UPPER || fixCase == CASE_PROPER) ? 'A' :'a';
-			*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'T' :'t';
-			nextUpper = 1;
-        }
-        else if (inFileName[i] < ' ')
-        {
-			*outPtr++ = lastAdd = 'x';
-        }
-        else if (inFileName[i] > 126 && (dispFlags & REMOVE_BIG))
-        {
-			*outPtr++ = lastAdd = 'X';
-        }
 		else
+		{
+			if (inFileName[i] == '.')
+			{
+				if (extn)
+				{
+					strcat (outFileName, outExtn);
+				}
+				outPtr = &outExtn[0];
+				*outPtr++ = lastAdd = '.';
+				nextUpper = 1;
+				extn = 1;
+				corrected = 1;
+			}
+		}
+		if (!corrected)
 		{
 			char ch = inFileName[i];
 
