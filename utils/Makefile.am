@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = dist-bzip2
 bin_PROGRAMS = ldir addComment casedir casefile fileChop findFunny hexDump inQuote jsonParse lineDraw lineNum lines \
-		listFunc mkTable modcr pfile rmCppCmt tabSpace xmlParse xmlCsv
+		listFunc mkTable modcr pfile rmCppCmt tabSpace xmlParse xmlCsv fixDir
 AM_CPPFLAGS = -D_FILE_OFFSET_BITS=64 $(S_DEPS_CFLAGS)
 LIBS = $(S_DEPS_LIBS) -lm
 ldir_SOURCES = src/ldir.c buildDate.h
@@ -24,6 +24,7 @@ modcr_SOURCES = src/modcr.c
 pfile_SOURCES = src/pfile.c
 rmCppCmt_SOURCES = src/rmCppCmt.c
 tabSpace_SOURCES = src/tabSpace.c
+fixDir_SOURCES = src/fixDir.c
 xmlParse_SOURCES = src/xmlParse.c
 xmlParse_CFLAGS = $(P_DEPS_CFLAGS)
 xmlParse_LDADD = $(P_DEPS_LIBS)
