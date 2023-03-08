@@ -1,16 +1,16 @@
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  C A S E D I R . C                                                                                                 *
- *  =================                                                                                                 *
+ *  F I X  D I R . C                                                                                                  *
+ *  ================                                                                                                  *
  *                                                                                                                    *
  *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
  *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
  *  redistribute or modify this under the terms of any later version of the General Public License.                   *
- *                                                                                                                    *
+ **
  *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied        *
  *  warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more     *
  *  details.                                                                                                          *
- *                                                                                                                    *
+ **
  *  You should have received a copy of the GNU General Public License along with this program (in the file            *
  *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
  *  USA.                                                                                                              *
@@ -18,7 +18,7 @@
  **********************************************************************************************************************/
 /**
  *  \file
- *  \brief Change the case of the files in a directory.
+ *  \brief Fix issues with the files in a directory.
  */
 #include "config.h"
 #define _GNU_SOURCE
@@ -59,6 +59,7 @@ int showDir (DIR_ENTRY *file);
 #define REMOVE_BIG	1
 #define TEST_MODE	2
 #define SHOW_ALL	4
+#define CASE_EXTN	8
 
 #define CASE_NONE	0
 #define CASE_LOWER	1
@@ -103,7 +104,7 @@ int fixCase = CASE_NONE;
  */
 void version (void)
 {
-	printf ("TheKnight: Case Directory Contents, Version: %s, Built: %s\n", VERSION, buildDate);
+	printf ("TheKnight: Fix Directory Contents, Version: %s, Built: %s\n", VERSION, buildDate);
 	displayLine ();
 }
 
@@ -141,7 +142,7 @@ int main (int argc, char *argv[])
      * If we got a path then split it into a path and a file pattern to match *
      * files with.                                                            *
      *------------------------------------------------------------------------*/
-	while ((i = getopt(argc, argv, "aATXc:")) != -1)
+	while ((i = getopt(argc, argv, "aAc:etX")) != -1)
 	{
 		switch (i)
 		{
@@ -151,14 +152,6 @@ int main (int argc, char *argv[])
 
 		case 'A':
 			dispFlags ^= SHOW_ALL;
-			break;
-
-		case 'T':
-			dispFlags ^= TEST_MODE;
-			break;
-
-		case 'X':
-			dispFlags ^= REMOVE_BIG;
 			break;
 
 		case 'c':
@@ -176,10 +169,27 @@ int main (int argc, char *argv[])
 			}
 			break;
 
+		case 'e':
+			dispFlags ^= CASE_EXTN;
+			break;
+
+		case 't':
+			dispFlags ^= TEST_MODE;
+			break;
+
+		case 'X':
+			dispFlags ^= REMOVE_BIG;
+			break;
+
 		case '?':
 			version ();
 			printf ("%s -[options] <file names>\n\n", basename (argv[0]));
-			printf ("        -X  Change letters > 126 to X.\n");
+			printf ("      -a . . . . Change all file even hidden ones.\n");
+			printf ("      -A . . . . Show all files including ones not changing.\n");
+			printf ("      -c[ulp]  . Change the case upper, lower and proper.\n");
+			printf ("      -e . . . . Change the case of the file extension.\n");
+			printf ("      -t . . . . Test mode, do not rename the files.\n");
+			printf ("      -X . . . . Change letters > 126 to X.\n");
 			displayLine ();
 			exit (1);
 		}
@@ -269,7 +279,7 @@ int showDir (DIR_ENTRY *file)
 		}
         else if (strchr (removeChars, inFileName[i]))
         {
-            ;
+			nextUpper = 1;
         }
 		else if (inFileName[i] == '.')
 		{
@@ -346,7 +356,12 @@ int showDir (DIR_ENTRY *file)
 		else
 		{
 			char ch = inFileName[i];
-			if (fixCase == CASE_UPPER || (fixCase == CASE_PROPER && nextUpper))
+
+			if (extn && !(dispFlags & CASE_EXTN))
+			{
+				/* Don't play with extensions */
+			}
+			else if (fixCase == CASE_UPPER || (fixCase == CASE_PROPER && nextUpper))
 			{
 				ch = toupper (ch);
 				if (isalpha (ch))
