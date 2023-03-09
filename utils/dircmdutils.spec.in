@@ -60,8 +60,8 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 %{_bindir}/addComment
-%{_bindir}/casedir
 %{_bindir}/casefile
+%{_bindir}/fixDir
 %{_bindir}/hexDump
 %{_bindir}/jsonParse
 %{_bindir}/ldir
@@ -69,9 +69,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/lineNum
 %{_bindir}/lines
 %{_bindir}/listFunc
-%{_bindir}/pfile
 %{_bindir}/mkTable
 %{_bindir}/modcr
+%{_bindir}/pfile
 %{_bindir}/rmCppCmt
 %{_bindir}/tabSpace
 %{_bindir}/xmlParse
