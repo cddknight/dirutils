@@ -34,4 +34,7 @@ xmlCsv_LDADD = $(P_DEPS_LIBS)
 EXTRA_DIST = ldirrc
 Configdir = /etc
 Config_DATA = ldirrc 
-
+BUILT_SOURCES = buildDate.h
+CLEANFILES = buildDate.h
+buildDate.h:
+	setBuildDate -c
