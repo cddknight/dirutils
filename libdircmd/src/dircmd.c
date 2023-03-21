@@ -3,17 +3,18 @@
  *  D I R C M D . C                                                                                                   *
  *  ===============                                                                                                   *
  *                                                                                                                    *
- *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
- *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
- *  redistribute or modify this under the terms of any later version of the General Public License.                   *
+ *  Copyright (c) 2023 Chris Knight                                                                                   *
  *                                                                                                                    *
- *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied        *
+ *  File dircmd.c part of LibDirCmd is free software: you can redistribute it and/or modify it under the terms of     *
+ *  the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or  *
+ *  (at your option) any later version.                                                                               *
+ *                                                                                                                    *
+ *  LibDirCmd is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied   *
  *  warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more     *
  *  details.                                                                                                          *
  *                                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program (in the file            *
- *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
- *  USA.                                                                                                              *
+ *  You should have received a copy of the GNU General Public License along with this program. If not, see            *
+ *  <http://www.gnu.org/licenses/>.                                                                                   *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
@@ -164,6 +165,7 @@ int directoryDefCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
  *  \param findFlags Various options to select what files to read.
  *  \param Compare Function to compare two files.
  *  \param fileList Where to save the directory.
+ *  \param level Level of recursion.
  *  \result The number of files found.
  */
 static int directoryLoadInt (char *inPath, char *partPath, int findFlags, compareFile *Compare, void **fileList, int level)

@@ -2,7 +2,7 @@ Summary: Directory utilities
 Name: @PACKAGE@
 Version: @VERSION@
 Release: @REVISION@%{?dist}
-License: GPLv2
+License: GPLv3+
 URL: http://www.tzclock.org
 Group: Applications/Productivity
 Source: http://www.tzclock.org/releases/%{name}-%{version}.tar.bz2
