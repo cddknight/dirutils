@@ -1,12 +1,11 @@
 AUTOMAKE_OPTIONS = dist-bzip2
-bin_PROGRAMS = ldir addComment casedir casefile fileChop findFunny hexDump inQuote jsonParse lineDraw lineNum lines \
+bin_PROGRAMS = ldir addComment casefile fileChop findFunny hexDump inQuote jsonParse lineDraw lineNum lines \
 		listFunc mkTable modcr pfile rmCppCmt tabSpace xmlParse xmlCsv fixDir
 AM_CPPFLAGS = -D_FILE_OFFSET_BITS=64 $(S_DEPS_CFLAGS)
 LIBS = $(S_DEPS_LIBS) -lm
 ldir_SOURCES = src/ldir.c buildDate.h
 addComment_SOURCES = src/addComment.c
 addComment_LDADD = -lreadline
-casedir_SOURCES = src/casedir.c
 casefile_SOURCES = src/casefile.c
 fileChop_SOURCES = src/fileChop.c
 findFunny_SOURCES = src/findFunny.c
@@ -34,4 +33,7 @@ xmlCsv_LDADD = $(P_DEPS_LIBS)
 EXTRA_DIST = ldirrc
 Configdir = /etc
 Config_DATA = ldirrc 
-
+BUILT_SOURCES = buildDate.h
+CLEANFILES = buildDate.h
+buildDate.h:
+	setBuildDate -c

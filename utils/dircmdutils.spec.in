@@ -2,7 +2,7 @@ Summary: Directory utilities
 Name: @PACKAGE@
 Version: @VERSION@
 Release: @REVISION@%{?dist}
-License: GPLv2
+License: GPLv3+
 URL: http://www.tzclock.org
 Group: Applications/Productivity
 Source: http://www.tzclock.org/releases/%{name}-%{version}.tar.bz2
@@ -11,6 +11,7 @@ BuildRequires: ncurses-devel readline-devel libselinux-devel json-glib-devel lib
 BuildRequires: libdircmd libdircmd-devel
 
 %define debug_package %{nil}
+%define _build_id_links none
 
 %description
 dirutils consists of a general purpose directory library and a number

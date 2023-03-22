@@ -2,19 +2,20 @@ Summary: Directory command library
 Name: @PACKAGE@
 Version: @VERSION@
 Release: @REVISION@%{?dist}
-License: GPLv2
+License: GPLv3+
 URL: http://www.tzclock.org
 Group: Applications/Productivity
 Source: http://www.tzclock.org/releases/%{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildRequires: libselinux-devel libacl-devel openssl-devel gcc
 %define debug_package %{nil}
+%define _build_id_links none
 
 %description
 dircmd consists of a general purpose directory library.
  
 %package devel
-Summary: libdircmd development files
+Summary: Libdircmd development files
 Provides: dircmd-devel
 Group: Development/C
 
@@ -41,7 +42,6 @@ mkdir -p $RPM_BUILD_ROOT%{_includedir}
 mkdir -p $RPM_BUILD_ROOT/etc
 
 install -s -m 755 .libs/libdircmd.so.5 $RPM_BUILD_ROOT%{_libdir}/libdircmd.so.%{version}
-install -s -m 755 .libs/libdircmd.a $RPM_BUILD_ROOT%{_libdir}/libdircmd.a
 install -m 644 pkgconfig/dircmd.pc $RPM_BUILD_ROOT%{_libdir}/pkgconfig/dircmd.pc
 install -m 644 src/dircmd.h $RPM_BUILD_ROOT%{_includedir}/dircmd.h
 ln -s libdircmd.so.%{version} $RPM_BUILD_ROOT%{_libdir}/libdircmd.so.5
@@ -62,9 +62,11 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %{_libdir}/pkgconfig/dircmd.pc
 %{_includedir}/dircmd.h
-%{_libdir}/libdircmd.a
 
 %changelog
+* Tue Mar 21 2023 Chris Knight <chris@theknight.co.uk> 5.2-1%{?dist}
+- Many updates and fixes.
+
 * Wed Sep 26 2007 Chris Knight <chris@theknight.co.uk> 4.0.5-1%{?dist}
 - Fixes to the build and distribution system.
 

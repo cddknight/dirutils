@@ -3,17 +3,18 @@
  *  A D D  C O M M E N T . C                                                                                          *
  *  ========================                                                                                          *
  *                                                                                                                    *
- *  This is free software; you can redistribute it and/or modify it under the terms of the GNU General Public         *
- *  License version 2 as published by the Free Software Foundation.  Note that I am not granting permission to        *
- *  redistribute or modify this under the terms of any later version of the General Public License.                   *
+ *  Copyright (c) 2023 Chris Knight                                                                                   *
  *                                                                                                                    *
- *  This is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied        *
- *  warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more     *
- *  details.                                                                                                          *
+ *  File addComment.c part of DirCmdUtils is free software: you can redistribute it and/or modify it under the terms  *
+ *  of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License,  *
+ *  or (at your option) any later version.                                                                            *
  *                                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program (in the file            *
- *  "COPYING"); if not, write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111,   *
- *  USA.                                                                                                              *
+ *  DirCmdUtils is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the         *
+ *  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for  *
+ *  more details.                                                                                                     *
+ *                                                                                                                    *
+ *  You should have received a copy of the GNU General Public License along with this program. If not, see            *
+ *  <http://www.gnu.org/licenses/>.                                                                                   *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
@@ -83,7 +84,8 @@ static char possibleName[30][81];
 static char inBuffer[BUFFER_SIZE];
 static char outBuffer[BUFFER_SIZE];
 static char comBuffer[BUFFER_SIZE];
-static char companyName[128] = "TheKnight.co.uk";
+static char companyName[128];
+static char productName[128];
 static int outBuffPos = 0;
 static int comBuffPos = 0;
 static int firstWrite = 1;
@@ -113,18 +115,19 @@ void version (char *progName, int helpThem)
 	displayLine();
 	if (helpThem)
 	{
-		printf("Enter the command: %s [-option] <filename>\n", basename(progName));
-		printf("Options are:\n\n");
-		printf("    -l<n> ... Add a comment only at line n.\n");
-		printf("    -w<n> ... Set the width of the box to n.\n");
-		printf("    -c<c> ... Set the character used to draw lines to c.\n");
-		printf("    -C<n> ... Copyright type n. 0 GPL, 1 Company, 2 Generic\n");
-		printf("    -h ...... Only add a header to the file.\n");
-		printf("    -i ...... Include a CVS ID tag in the file header.\n");
-		printf("    -d ...... Switch on debug output, don't overwrite.\n");
-		printf("    -p ...... Use c++ comments and a default - line.\n");
-		printf("    -q ...... Quiet mode, don't prompt for text.\n");
-		printf("    -m ...... Detect the main function and fill it in.\n");
+		printf ("Enter the command: %s [-option] <filename>\n", basename(progName));
+		printf ("Options are:\n\n");
+		printf ("    -l<n>  . . . . . Add a comment only at line n.\n");
+		printf ("    -w<n>  . . . . . Set the width of the box to n.\n");
+		printf ("    -c<c>  . . . . . Set the character used to draw lines to c.\n");
+		printf ("    -C<n>{owner} . . Copyright type n. 0 GPL, 1 Company, 2 Generic\n");
+		printf ("    -P{name} . . . . Product name used in header.\n");
+		printf ("    -h . . . . . . . Only add a header to the file.\n");
+		printf ("    -i . . . . . . . Include a CVS ID tag in the file header.\n");
+		printf ("    -d . . . . . . . Switch on debug output, don't overwrite.\n");
+		printf ("    -p . . . . . . . Use c++ comments and a default - line.\n");
+		printf ("    -q . . . . . . . Quiet mode, don't prompt for text.\n");
+		printf ("    -m . . . . . . . Detect the main function and fill it in.\n");
 	}
 }
 
@@ -159,7 +162,7 @@ int main(int argc, char *argv[])
 	displayInit();
 	rl_bind_key ('\t',rl_abort);		/* disable auto-complete */
 
-	while ((i = getopt(argc, argv, "hdipqmvl:w:c:C:?")) != -1)
+	while ((i = getopt(argc, argv, "hdipqmvl:w:c:C:o:P:?")) != -1)
 	{
 		switch (i)
 		{
@@ -188,10 +191,14 @@ int main(int argc, char *argv[])
 
 		case 'C':
 			copyrightType = atoi (optarg);
-			if (optarg[1] != 0 && copyrightType == 1)
+			if (strlen (optarg) > 1)
 			{
 				strncpy (companyName, &optarg[1], 127);
 			}
+			break;
+
+		case 'P':
+			strncpy (productName, optarg, 127);
 			break;
 
 		case 'd':
@@ -734,7 +741,7 @@ int displayBox(int type, int count, FILE *outFile)
 
 	if (type == 0)
 	{
-		char dateBuff[MAX_BOXWIDTH + 1];
+		char tempBuff[2048];
 
 		doubleName(curFilename, doubled, underLn);
 
@@ -742,34 +749,51 @@ int displayBox(int type, int count, FILE *outFile)
 		boxLine (underLn, 0, 0, 1, outFile);
 		if (copyrightType == 0)
 		{
-			boxLine ("This is free software; you can redistribute it and/or modify it under "
-					 "the terms of the GNU General Public License version 2 as published by "
-					 "the Free Software Foundation.  Note that I am not granting permission "
-					 "to redistribute or modify this under the terms of any later version "
-					 "of the General Public License.", 0, 0, 0, outFile);
-			boxLine ("", 0, 0, 0, outFile);
-			boxLine ("This is distributed in the hope that it will be useful, but WITHOUT "
-					 "ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
-					 "FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License "
-					 "for more details.", 0, 0, 0, outFile);
-			boxLine ("", 0, 0, 0, outFile);
-			boxLine ("You should have received a copy of the GNU General Public License "
-					 "along with this program (in the file \"COPYING\"); if not, write to "
-					 "the Free Software Foundation, Inc., 59 Temple Place - Suite 330, "
-					 "Boston, MA 02111, USA.", 0, 1, 0, outFile);
+			sprintf (tempBuff, "Copyright (c) %d %s", tm -> tm_year + 1900, companyName);
+			boxLine (tempBuff, 0, 0, 1, outFile);
+			if (productName[0])
+			{
+				sprintf (tempBuff, "File %s part of %s", curFilename, productName);
+			}
+			else
+			{
+				sprintf (tempBuff, "File %s", curFilename);
+			}
+			strncat (tempBuff, " is free software: you can redistribute it and/or modify "
+					 "it under the terms of the GNU General Public License as published by "
+					 "the Free Software Foundation, either version 3 of the License, or (at "
+					 "your option) any later version.", 2040);
+			boxLine (tempBuff, 0, 0, 1, outFile);
+
+			if (productName[0])
+			{
+				sprintf (tempBuff, "%s", productName);
+			}
+			else
+			{
+				sprintf (tempBuff, "File %s", curFilename);
+			}
+			strncat (tempBuff, " is distributed in the hope that it will be useful, but "
+					 "WITHOUT ANY WARRANTY; without even the implied warranty of "
+					 "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU "
+					 "General Public License for more details.", 2040);
+			boxLine (tempBuff, 0, 0, 1, outFile);
+
+            boxLine ("You should have received a copy of the GNU General Public License "
+					 "along with this program. If not, see: <http://www.gnu.org/licenses/>",
+					 0, 1, 0, outFile);
 		}
 		else if (copyrightType == 1)
 		{
+			sprintf (tempBuff, "Copyright (c) %d %s", tm -> tm_year + 1900, companyName);
+			boxLine (tempBuff, 0, 0, 1, outFile);
 			boxLine ("All rights reserved. Reproduction, modification, use or disclosure "
-					 "to third parties without express authority is forbidden.", 0, 0, 0, outFile);
-			boxLine ("", 0, 0, 0, outFile);
-			sprintf (dateBuff, "(c) Copyright %d %s", tm -> tm_year + 1900, companyName);
-			boxLine (dateBuff, 0, 1, 0, outFile);
+					 "to third parties without express authority is forbidden.", 0, 1, 0, outFile);
 		}
 		else
 		{
-			sprintf (dateBuff, "(c) Copyright %d.", tm -> tm_year + 1900);
-			boxLine (dateBuff, 0, 1, 0, outFile);
+			sprintf (tempBuff, "Copyright (c) %d.", tm -> tm_year + 1900);
+			boxLine (tempBuff, 0, 1, 0, outFile);
 		}
 
 		getComment (readLine, 0, curFilename);
