@@ -7,12 +7,12 @@ do
 	if [ -d ${DIR} ]
 	then
 		lineDraw
-		echo Building: $DIR deb
+		echo Building: $DIR package
 		lineDraw
 		cd ${DIR}
-		if [ -e builddeb.sh ]
+		if [ -e buildpkg.sh ]
 		then
-			./builddeb.sh
+			./buildpkg.sh
 		fi
 		cd ${START_PWD}
 	fi

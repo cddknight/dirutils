@@ -17,8 +17,7 @@ AC_SUBST(P_DEPS_CFLAGS)
 AC_SUBST(P_DEPS_LIBS)
 AC_SUBST([REVISION])
 AC_CONFIG_FILES([Makefile dircmdutils.spec])
-AC_CONFIG_FILES([buildrpm.sh],[chmod +x buildrpm.sh])
+AC_CONFIG_FILES([buildpkg.sh],[chmod +x buildpkg.sh])
 AC_CONFIG_FILES([debian/control debian/changelog])
-AC_CONFIG_FILES([builddeb.sh],[chmod +x builddeb.sh])
 AC_OUTPUT
 
