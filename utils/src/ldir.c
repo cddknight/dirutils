@@ -2335,7 +2335,7 @@ int compareNames (char *nameOne, char *nameTwo, int useCase)
  */
 char *findFileWord (char *name)
 {
-	int i, len = strlen (name), lastType = 0, word = 0, start = 0;
+	int i, len = strlen (name), lastType = 0, word = 0;
 	
 	for (i = 0; i < len; ++i)
 	{
@@ -2343,7 +2343,6 @@ char *findFileWord (char *name)
 		{
 			if (lastType == 2 || lastType == 3 || lastType == 4)
 			{
-				start = i;
 				++word;
 			}
 			lastType = 1;
@@ -2352,7 +2351,6 @@ char *findFileWord (char *name)
 		{
 			if (lastType == 3 || lastType == 4)
 			{
-				start = i;
 				++word;
 			}
 			lastType = 2;
@@ -2361,7 +2359,6 @@ char *findFileWord (char *name)
 		{
 			if (lastType == 1 || lastType == 2 || lastType == 4)
 			{
-				start = i;
 				++word;
 			}
 			lastType = 3;
