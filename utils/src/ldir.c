@@ -546,7 +546,7 @@ void helpThem (char *progName, int flags)
 		printf ("     --nocvs . . . . . . . . -V  . . . . . Do not show version control directories.\n");
 		printf ("     --wide  . . . . . . . . -w  . . . . . Show directory in wide format.\n");
 		printf ("     --width # . . . . . . . -W# . . . . . Ignore screen width default to 255.\n");
-		printf ("     --word #  . . . . . . . -x# . . . . . Word in file name to use for word sort.\n");
+		printf ("     --word #  . . . . . . . -x# . . . . . Which word to start word sort from.\n");
 		printf ("     --help  . . . . . . . . -?  . . . . . Show this help message.\n");
 		printf ("\nExpressions:\n");
 		printf ("     & . . . . . . . . Logical AND, eg. %s \"c*&*c\"\n", progName);
