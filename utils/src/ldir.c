@@ -13,14 +13,14 @@
  *  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for  *
  *  more details.                                                                                                     *
  *                                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program. If not, see            *
- *  <http://www.gnu.org/licenses/>.                                                                                   *
+ *  You should have received a copy of the GNU General Public License along with this program. If not, see:           *
+ *  <http://www.gnu.org/licenses/>                                                                                    *
  *                                                                                                                    *
  **********************************************************************************************************************/
-/**
- *  \file
- *  \brief Chris Knight's own directory program.
- */
+/**********************************************************************************************************************
+ *  \file                                                                                                             *
+ *  \brief Chris Knight's own directory program.                                                                      *
+ **********************************************************************************************************************/
 #include "config.h"
 #define _GNU_SOURCE
 #include <sys/stat.h>
@@ -90,6 +90,7 @@ void getFileVersion (DIR_ENTRY *fileOne);
 #define ORDER_INOD		11
 #define ORDER_VERS		12
 #define ORDER_NAVE		13
+#define ORDER_WORD		14
 
 #define SHOW_NORMAL		0
 #define SHOW_WIDE		1
@@ -154,6 +155,7 @@ int			showDate		=	DATE_MOD;
 int			showFound		=	MAXINT;
 int			sizeFormat		=	1;
 int			dateFormat		=	1;
+int			wordNumber		=	0;
 char		dateType[41]	=	"Modified";
 char		md5Type[41]		=	"MD5 Sum (hex)";
 char		shaType[41]		=	"SHA256 Sum (hex)";
@@ -293,6 +295,7 @@ static struct option longOptions[] =
 	{	"nocvs",		no_argument,		0,	'V' },
 	{	"wide",			no_argument,		0,	'w' },
 	{	"width",		required_argument,	0,	'W' },
+	{	"word",			required_argument,	0,	'x' },
 	{	"help",			no_argument,		0,	'?' },
 	{	0,				0,					0,	0	}
 };
@@ -321,6 +324,7 @@ CONFIG_WORD configWords[] =
 	{	1,	'n',	"none"		},
 	{	3,	'o',	"owner"		},
 	{	3,	's',	"size"		},
+	{	3,	'w',	"word"		},
 	{	1,	'r',	"rev"		},
 	{	2,	'n',	"num"		},
 	{	2,	't',	"type"		},
@@ -505,6 +509,7 @@ void helpThem (char *progName, int flags)
 		printf ("     --order rev . . . . . . -or . . . . . Reverse the current sort order.\n");
 		printf ("     --order ver . . . . . . -ov . . . . . Order by numbers in the file name.\n");
 		printf ("     --order namever . . . . -oV . . . . . Order by name then numbers.\n");
+		printf ("     --order word  . . . . . -ow . . . . . Order by word selected by -x.\n");
 	}
 	if (flags == 0)
 	{
@@ -541,6 +546,7 @@ void helpThem (char *progName, int flags)
 		printf ("     --nocvs . . . . . . . . -V  . . . . . Do not show version control directories.\n");
 		printf ("     --wide  . . . . . . . . -w  . . . . . Show directory in wide format.\n");
 		printf ("     --width # . . . . . . . -W# . . . . . Ignore screen width default to 255.\n");
+		printf ("     --word #  . . . . . . . -x# . . . . . Word in file name to use for word sort.\n");
 		printf ("     --help  . . . . . . . . -?  . . . . . Show this help message.\n");
 		printf ("\nExpressions:\n");
 		printf ("     & . . . . . . . . Logical AND, eg. %s \"c*&*c\"\n", progName);
@@ -721,6 +727,9 @@ void commandOption (char option, char *optionVal, char *progName)
 					break;
 				case 'V':
 					orderType = ORDER_NAVE;
+					break;
+				case 'w':
+					orderType = ORDER_WORD;
 					break;
 				}
 			}
@@ -1051,6 +1060,23 @@ void commandOption (char option, char *optionVal, char *progName)
 		dirType ^= HIDEVERCTL;
 		break;
 
+	case 'x':
+		if (optionVal != NULL)
+		{
+			int word = 0, j = 0, k = 0;
+			while (optionVal[j + k])
+			{
+				if (optionVal[j + k] >= '0' && optionVal[j + k] <= '9')
+					word = (word * 10) + (optionVal[j + k] - '0');
+				else
+					break;
+				++k;
+			}
+			j += k;
+			wordNumber = word;
+		}
+		break;
+
 	case '?':
 		helpThem(progName, HELP_ALL);
 		exit (1);
@@ -1162,7 +1188,7 @@ int main (int argc, char *argv[])
 	     *--------------------------------------------------------------------*/
 		int optionIndex = 0;
 
-		opt = getopt_long (argc, argv, "aAbBcCd:D:emMn:o:pPqQrRs:StT:vVwW:?", longOptions, &optionIndex);
+		opt = getopt_long (argc, argv, "aAbBcCd:D:emMn:o:pPqQrRs:StT:vVwW:x:?", longOptions, &optionIndex);
 
 		/*--------------------------------------------------------------------*
 		 * Detect the end of the options.                                     *
@@ -1178,6 +1204,7 @@ int main (int argc, char *argv[])
 		case 'n':
 		case 'T':
 		case 'W':
+		case 'x':
 			commandOption (opt, optarg, basename (argv[0]));
 			break;
 
@@ -2297,6 +2324,63 @@ int compareNames (char *nameOne, char *nameTwo, int useCase)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  F I N D  F I L E  W O R D                                                                                         *
+ *  =========================                                                                                         *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Find the start of the nth word in a filename.
+ *  \param name Filename to search.
+ *  \result None if word not found, pointer to word if found.
+ */
+char *findFileWord (char *name)
+{
+	int i, len = strlen (name), lastType = 0, word = 0, start = 0;
+	
+	for (i = 0; i < len; ++i)
+	{
+		if (name[i] >= 'A' && name[i] <= 'Z')
+		{
+			if (lastType == 2 || lastType == 3 || lastType == 4)
+			{
+				start = i;
+				++word;
+			}
+			lastType = 1;
+		}
+		else if (name[i] >= 'a' && name[i] <= 'z')
+		{
+			if (lastType == 3 || lastType == 4)
+			{
+				start = i;
+				++word;
+			}
+			lastType = 2;
+		}
+		else if (name[i] >= '0' && name[i] <= '9')
+		{
+			if (lastType == 1 || lastType == 2 || lastType == 4)
+			{
+				start = i;
+				++word;
+			}
+			lastType = 3;
+		}
+		else
+		{
+			lastType = 4;
+		}
+
+		if (word >= wordNumber)
+		{
+			return &name[i];
+		}
+	}
+	return NULL;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  C O M P A R E  V E R S I O N S                                                                                    *
  *  ==============================                                                                                    *
  *                                                                                                                    *
@@ -2719,9 +2803,24 @@ int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 		}
 		break;
 
-	case  ORDER_NAVE:
-	case  ORDER_VERS:
+	case ORDER_NAVE:
+	case ORDER_VERS:
 		retn = compareFileVersion (fileOne, fileTwo, dirType & USECASE);
+		break;
+
+	case ORDER_WORD:
+		{
+			char *nameOne = findFileWord (fileOne -> fileName);
+			char *nameTwo = findFileWord (fileTwo -> fileName);
+			if (nameOne != NULL && nameTwo != NULL)
+			{
+				retn = compareNames (nameOne, nameTwo, dirType & USECASE);
+			}
+			else
+			{
+				retn = nameOne != NULL ? 1 : nameTwo != NULL ? -1 : retn;
+			}
+		}
 		break;
 	}
 	if (retn == 0)
