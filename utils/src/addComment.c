@@ -155,9 +155,7 @@ int main(int argc, char *argv[])
 
 	strcpy (fullVersion, VERSION);
 #ifdef USE_STATX
-	strcat (fullVersion, ".1");
-#else
-	strcat (fullVersion, ".0");
+	strcat (fullVersion, ".X");
 #endif
 	if (strcmp (directoryVersion(), fullVersion) != 0)
 	{
