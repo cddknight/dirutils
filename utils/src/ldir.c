@@ -65,9 +65,9 @@ extern int errno;
 #define DIRDEF "\057*"		/* Make the editor look nice */
 #endif
 
-/*----------------------------------------------------------------------------*
+/**---------------------------------------------------------------------------*
  * Prototypes															      *
- *----------------------------------------------------------------------------*/
+ *---------------------------------------------------------------------------**/
 int showDir (DIR_ENTRY *file);
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo);
 char *quoteCopy (char *dst, char *src);
@@ -1063,17 +1063,21 @@ void commandOption (char option, char *optionVal, char *progName)
 	case 'x':
 		if (optionVal != NULL)
 		{
-			int word = 0, j = 0, k = 0;
-			while (optionVal[j + k])
+			int word = 0, k = 0, s = 1;
+			if (optionVal[k] == '-')
 			{
-				if (optionVal[j + k] >= '0' && optionVal[j + k] <= '9')
-					word = (word * 10) + (optionVal[j + k] - '0');
+				s = -1;
+				++k;
+			}
+			while (optionVal[k])
+			{
+				if (optionVal[k] >= '0' && optionVal[k] <= '9')
+					word = (word * 10) + (optionVal[k] - '0');
 				else
 					break;
 				++k;
 			}
-			j += k;
-			wordNumber = word;
+			wordNumber = word * s;
 		}
 		break;
 
@@ -2324,6 +2328,53 @@ int compareNames (char *nameOne, char *nameTwo, int useCase)
 			strcasecmp (nameOne, nameTwo));
 }
 
+char *findFileWordRev (char *name, int len, int wordNum)
+{
+	int i, lastType = 0, word = 0;
+	
+	for (i = len - 1; i >= 0; --i)
+	{
+		if (name[i] >= 'A' && name[i] <= 'Z')
+		{
+			if (lastType == 3)
+			{
+				++word;
+			}
+			lastType = 1;
+		}
+		else if (name[i] >= 'a' && name[i] <= 'z')
+		{
+			if (lastType == 1 || lastType == 3)
+			{
+				++word;
+			}
+			lastType = 2;
+		}
+		else if (name[i] >= '0' && name[i] <= '9')
+		{
+			if (lastType == 1 || lastType == 2)
+			{
+				++word;
+			}
+			lastType = 3;
+		}
+		else
+		{
+			if (lastType == 1 || lastType == 2 || lastType == 3)
+			{
+				++word;
+			}
+			lastType = 4;
+		}
+
+		if (word >= wordNum)
+		{
+			return &name[i + 1];
+		}
+	}
+	return NULL;
+}
+
 /**********************************************************************************************************************
  *                                                                                                                    *
  *  F I N D  F I L E  W O R D                                                                                         *
@@ -2338,6 +2389,11 @@ int compareNames (char *nameOne, char *nameTwo, int useCase)
 char *findFileWord (char *name)
 {
 	int i, len = strlen (name), lastType = 0, word = 0;
+	
+	if (wordNumber < 0)
+	{
+		return findFileWordRev (name, len, wordNumber * -1);
+	}
 	
 	for (i = 0; i < len; ++i)
 	{
