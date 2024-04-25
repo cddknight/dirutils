@@ -74,7 +74,9 @@ char *directoryVersion(void)
 	static char dirVer[81];
 	strcpy (dirVer, VERSION);
 #ifdef USE_STATX
-	strcat (dirVer, ".X");
+	strcat (dirVer, ".1");
+#else
+	strcat (dirVer, ".0");
 #endif
 	return dirVer;
 }

@@ -13,8 +13,8 @@
  *  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for  *
  *  more details.                                                                                                     *
  *                                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program. If not, see            *
- *  <http://www.gnu.org/licenses/>.                                                                                   *
+ *  You should have received a copy of the GNU General Public License along with this program. If not, see:           *
+ *  <http://www.gnu.org/licenses/>                                                                                    *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
@@ -48,15 +48,15 @@
 
 #include <dircmd.h>
 #include "buildDate.h"
-
 #include <readline/readline.h>
 #include <readline/history.h>
 
-/******************************************************************************************************
- * Prototypes                                                                                         *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *  Prototypes                                                                                                        *
+ **********************************************************************************************************************/
 int addComments (DIR_ENTRY * file);
 int displayBox(int type, int count, FILE *outFile);
+void commentWrite(char inChar, FILE *outFile);
 
 #define BUFFER_SIZE 4096
 #define MAX_BOXWIDTH 250
@@ -64,19 +64,21 @@ int displayBox(int type, int count, FILE *outFile);
 #define SQ	0x27
 #define DQ	0x22
 
-/******************************************************************************************************
- * Globals                                                                                            *
- ******************************************************************************************************/
+/**********************************************************************************************************************
+ *  Globals                                                                                                           *
+ **********************************************************************************************************************/
 int commentLine = 0;
 int filesFound = 0;
 int lineChar = '*';
 int boxWidth = DEF_BOXWIDTH;
+int tabSize = 8;
 int debug = 0;
 int cvsID = 0;
 int cppStyle = 0;
 int quietMode = 0;
 int copyrightType = 0;
 int autoMain = 0;
+int boxCheck = 0;
 
 static int addedComments = 0;
 static char curFilename[81];
@@ -120,6 +122,7 @@ void version (char *progName, int helpThem)
 		printf ("    -l<n>  . . . . . Add a comment only at line n.\n");
 		printf ("    -w<n>  . . . . . Set the width of the box to n.\n");
 		printf ("    -c<c>  . . . . . Set the character used to draw lines to c.\n");
+		printf ("    -t<n>  . . . . . Set the tab size.\n");
 		printf ("    -C<n>{owner} . . Copyright type n. 0 GPL, 1 Company, 2 Generic\n");
 		printf ("    -P{name} . . . . Product name used in header.\n");
 		printf ("    -h . . . . . . . Only add a header to the file.\n");
@@ -128,6 +131,7 @@ void version (char *progName, int helpThem)
 		printf ("    -p . . . . . . . Use c++ comments and a default - line.\n");
 		printf ("    -q . . . . . . . Quiet mode, don't prompt for text.\n");
 		printf ("    -m . . . . . . . Detect the main function and fill it in.\n");
+		printf ("    -B . . . . . . . Look for comments in boxes and fix them.\n");
 	}
 }
 
@@ -162,7 +166,7 @@ int main(int argc, char *argv[])
 	displayInit();
 	rl_bind_key ('\t',rl_abort);		/* disable auto-complete */
 
-	while ((i = getopt(argc, argv, "hdipqmvl:w:c:C:o:P:?")) != -1)
+	while ((i = getopt(argc, argv, "hdipqmvBl:w:c:C:o:P:t:?")) != -1)
 	{
 		switch (i)
 		{
@@ -179,6 +183,14 @@ int main(int argc, char *argv[])
 			if (boxWidth < 40 || boxWidth > MAX_BOXWIDTH)
 			{
 				boxWidth = DEF_BOXWIDTH;
+			}
+			break;
+
+		case 't':
+			tabSize = atoi (optarg);
+			if (tabSize < 1 || tabSize > 16)
+			{
+				tabSize = 8;
 			}
 			break;
 
@@ -225,6 +237,10 @@ int main(int argc, char *argv[])
 		case 'v':
 			version (argv[0], 0);
 			return 0;
+
+		case 'B':
+			boxCheck = !boxCheck;
+			break;
 
 		case '?':
 			version (argv[0], 1);
@@ -295,6 +311,9 @@ void bufferFlush(FILE * outFile, int removeSpace)
 
 	if (outBuffPos)
 	{
+		outBuffer[outBuffPos] = 0;
+		printf ("[Buffer: [%s]]\n", outBuffer);
+
 		if (firstWrite && commentLine == -1)
 		{
 			displayBox(0, 1, outFile);
@@ -313,6 +332,14 @@ void bufferFlush(FILE * outFile, int removeSpace)
 				outBuffPos -= saveSize;
 				memcpy (outBuffer, &outBuffer[saveSize], outBuffPos);
 			}
+			if (removeSpace == 2)
+			{
+				while (saveSize < outBuffPos)
+				{
+					commentWrite(outBuffer[saveSize], outFile);
+					++saveSize;
+				}
+			}
 		}
 		else
 		{
@@ -321,6 +348,170 @@ void bufferFlush(FILE * outFile, int removeSpace)
 			outBuffPos = 0;
 		}
 	}
+}
+
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  L O O K  F O R  A B O X                                                                                           *
+ *  =======================                                                                                           *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Look to see if there is a box to be drawn.
+ *  \param outFile Look for a comment box and expand it.
+ *  \param braceLevel How many tabs to start with.
+ *  \result 1 if a box was found.
+ */
+int lookForABox (FILE *outFile, int braceLevel)
+{
+	int outSize = boxWidth - (braceLevel * tabSize), firstText, lastText;
+	int found = 0, level = 0, boxPos, textPos = 0, done = 0, retn = 0, i, j;
+	char boxBuffer[BUFFER_SIZE], textBuffer[1024], lastChar = -1;
+
+	comBuffer[comBuffPos] = 0;
+	boxBuffer[boxPos = 0] = 0;
+	for (i = 0; i < comBuffPos && !done; ++i)
+	{
+		if (level == 0)
+		{
+			if (strncmp (&comBuffer[i], "/***", 4) == 0)
+			{
+				for (j = 0; j < braceLevel; ++j)
+				{
+					boxBuffer[boxPos++] = '\t';
+				}
+				boxBuffer[boxPos++] = '/';
+				boxBuffer[boxPos++] = '*';
+				for (j = 0; j < outSize; ++j)
+				{
+					boxBuffer[boxPos++] = '*';
+				}
+				boxBuffer[boxPos++] = '*';
+				boxBuffer[boxPos++] = '\n';
+				boxBuffer[boxPos] = 0;
+				level = 2;
+			}
+		}
+		else if (level == 2)
+		{
+			if (comBuffer[i] == '\n')
+			{
+				for (j = 0; j < braceLevel; ++j)
+				{
+					boxBuffer[boxPos++] = '\t';
+				}
+				boxBuffer[boxPos++] = ' ';
+				boxBuffer[boxPos++] = '*';
+				boxBuffer[boxPos] = 0;
+				level = 3;
+			}
+			else if (!(comBuffer[i] == '*' || comBuffer[i] == ' ' || comBuffer[i] == '\t'))
+			{
+				done = 1;
+			}
+		}
+		else if (level == 3)
+		{
+			if (comBuffer[i] == '*')
+			{
+				textBuffer[firstText = lastText = textPos = 0] = 0;
+				level = 4;
+			}
+			else if (!(comBuffer[i] == ' ' || comBuffer[i] == '\t'))
+			{
+				done = 1;
+			}
+		}
+		else if (level == 4)
+		{
+			if (lastChar == '*' && comBuffer[i] == '/')
+			{
+				if (textPos > 0)
+				{
+					textBuffer[lastText] = 0;
+					boxBuffer[boxPos++] = ' ';
+					boxBuffer[boxPos++] = ' ';
+					for (j = 0; j < lastText; ++j)
+					{
+						boxBuffer[boxPos++] = textBuffer[j];
+					}
+					firstText = lastText = textPos = 0;
+					for (; j < outSize - 2; ++j)
+					{
+						boxBuffer[boxPos++] = ' ';
+					}
+					boxBuffer[boxPos++] = '*';
+					boxBuffer[boxPos++] = '\n';
+
+					for (j = 0; j < braceLevel; ++j)
+					{
+						boxBuffer[boxPos++] = '\t';
+					}
+					boxBuffer[boxPos++] = ' ';
+					boxBuffer[boxPos++] = '*';
+				}
+				for (j = 0; j < outSize; ++j)
+				{
+					boxBuffer[boxPos++] = '*';
+				}
+				boxBuffer[boxPos++] = '*';
+				boxBuffer[boxPos++] = '/';
+				boxBuffer[boxPos] = 0;
+				retn = 1;
+				level = 0;
+			}
+			else if (comBuffer[i] == '\n')
+			{
+				textBuffer[lastText] = 0;
+				boxBuffer[boxPos++] = ' ';
+				boxBuffer[boxPos++] = ' ';
+				for (j = 0; j < lastText; ++j)
+				{
+					boxBuffer[boxPos++] = textBuffer[j];
+				}
+				firstText = lastText = textPos = 0;
+				for (; j < outSize - 2; ++j)
+				{
+					boxBuffer[boxPos++] = ' ';
+				}
+				boxBuffer[boxPos++] = '*';
+				boxBuffer[boxPos++] = '\n';
+				for (j = 0; j < braceLevel; ++j)
+				{
+					boxBuffer[boxPos++] = '\t';
+				}
+				boxBuffer[boxPos++] = ' ';
+				boxBuffer[boxPos++] = '*';
+			}
+			else if (comBuffer[i] != '*' && comBuffer[i] >= ' ')
+			{
+				if (comBuffer[i] > ' ')
+				{
+					if (firstText == 0)
+					{
+						firstText = 1;
+					}
+					lastText = textPos + 1;
+				}
+				if (firstText)
+				{
+					textBuffer[textPos++] = comBuffer[i];
+				}
+			}
+		}
+		lastChar = comBuffer[i];
+	}	
+	if (retn == 1)
+	{
+		boxBuffer[boxPos] = 0;
+		if (fwrite (boxBuffer, 1, boxPos, outFile) != boxPos)
+		{
+			printf ("Box write problem!\n");
+			retn = 0;
+		}
+	}
+	return retn;
 }
 
 /**********************************************************************************************************************
@@ -332,27 +523,37 @@ void bufferFlush(FILE * outFile, int removeSpace)
 /**
  *  \brief Flush the contents of the comment buffer.
  *  \param outFile File to write any bytes in the buffer too.
+ *  \param braceLevel How many tabs to start with.
  *  \result None.
  */
-void commentFlush(FILE * outFile)
+void commentFlush(FILE * outFile, int braceLevel)
 {
 	if (comBuffPos)
 	{
+		comBuffer[comBuffPos] = 0;
+		printf ("[Comment: [%s]]\n", comBuffer);
+
 		if (firstWrite && commentLine == -1)
 		{
 			displayBox(0, 1, outFile);
 			++addedComments;
 			firstWrite = 0;
 		}
-		else if (fwrite(comBuffer, 1, comBuffPos, outFile) != comBuffPos)
-		{
-			printf ("Buffer write problem!\n");
-		}
 		else
 		{
-/*          comBuffer[comBuffPos] = 0;
-            printf (">>>>%s<<<<\n", comBuffer);
-*/		}
+			if (boxCheck)
+			{
+				if (lookForABox	(outFile, braceLevel))
+				{
+					comBuffPos = 0;
+					return;
+				}
+			}
+			if (fwrite(comBuffer, 1, comBuffPos, outFile) != comBuffPos)
+			{
+				printf ("Buffer write problem!\n");
+			}
+		}
 		comBuffPos = 0;
 	}
 }
@@ -374,7 +575,7 @@ void bufferWrite(char inChar, FILE * outFile)
 	outBuffer[outBuffPos++] = inChar;
 	if (outBuffPos == BUFFER_SIZE)
 	{
-		commentFlush(outFile);
+		commentFlush(outFile, 0);
 		bufferFlush(outFile, 0);
 	}
 }
@@ -396,7 +597,7 @@ void commentWrite(char inChar, FILE * outFile)
 	comBuffer[comBuffPos++] = inChar;
 	if (comBuffPos == BUFFER_SIZE)
 	{
-		commentFlush(outFile);
+		commentFlush(outFile, 0);
 	}
 }
 
@@ -965,6 +1166,7 @@ int addComments(DIR_ENTRY * file)
 					if (lastChar == '*' && inChar == '/')
 					{
 						debugLine("Line %d: Ending C comment\n", line);
+						commentFlush(writeFile, braceLevel);
 						if (braceLevel) clear = 1;
 						inComment = 0;
 					}
@@ -990,8 +1192,8 @@ int addComments(DIR_ENTRY * file)
 					if (outBuffPos)
 					{
 						--outBuffPos;
-						commentFlush(writeFile);
-						bufferFlush(writeFile, 0);
+						commentFlush(writeFile, braceLevel);
+						bufferFlush(writeFile, boxCheck ? 2 : 0);
 						commentWrite('/', writeFile);
 					}
 					inComment = 1;
@@ -1002,7 +1204,7 @@ int addComments(DIR_ENTRY * file)
 					if (outBuffPos)
 					{
 						--outBuffPos;
-						commentFlush(writeFile);
+						commentFlush(writeFile, braceLevel);
 						bufferFlush(writeFile, 0);
 						commentWrite('/', writeFile);
 					}
@@ -1049,7 +1251,7 @@ int addComments(DIR_ENTRY * file)
 				else if (inChar == '#')
 				{
 					debugLine("Line %d: Starting define\n", line);
-					commentFlush(writeFile);
+					commentFlush(writeFile, braceLevel);
 					bufferFlush(writeFile, 0);
 					inDefine = 1;
 				}
@@ -1085,7 +1287,7 @@ int addComments(DIR_ENTRY * file)
 					debugLine("Line %d: Ending brace level (%d)\n", line, braceLevel);
 					if (--braceLevel == 0)
 					{
-						commentFlush(writeFile);
+						commentFlush(writeFile, braceLevel);
 						colonCount = 0;
 						clear = 1;
 					}
@@ -1141,7 +1343,7 @@ int addComments(DIR_ENTRY * file)
 				}
 				else if (inChar == ';' && !bracketLevel && !braceLevel)
 				{
-					commentFlush(writeFile);
+					commentFlush(writeFile, braceLevel);
 					colonCount = 0;
 					curParam = 0;
 					clear = 1;
@@ -1163,14 +1365,16 @@ int addComments(DIR_ENTRY * file)
 				else
 				{
 					if (strchr(whiteSpace, inChar) && addComment)
+					{
 						commentWrite(inChar, writeFile);
+					}
 					else
 					{
 						addComment = 0;
 						bufferWrite(inChar, writeFile);
 						if (clear)
 						{
-							commentFlush(writeFile);
+							commentFlush(writeFile, braceLevel);
 							bufferFlush(writeFile, 0);
 							clear = 0;
 						}
@@ -1181,7 +1385,7 @@ int addComments(DIR_ENTRY * file)
 				else
 					lastChar = inChar;
 			}
-			commentFlush(writeFile);
+			commentFlush(writeFile, braceLevel);
 			bufferFlush(writeFile, 0);
 			fclose(writeFile);
 		}
