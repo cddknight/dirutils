@@ -2328,6 +2328,19 @@ int compareNames (char *nameOne, char *nameTwo, int useCase)
 			strcasecmp (nameOne, nameTwo));
 }
 
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  F I N D  F I L E  W O R D  R E V                                                                                  *
+ *  ================================                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Search for a word backwards.
+ *  \param name Full file name.
+ *  \param len Length of the filename.
+ *  \param wordNum Word to find.
+ *  \result Pointer if found, NULL if not.
+ */
 char *findFileWordRev (char *name, int len, int wordNum)
 {
 	int i, lastType = 0, word = 0;
