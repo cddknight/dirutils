@@ -458,7 +458,7 @@ char *rmWhiteSpace (char *inBuff, char *outBuff, int maxLen)
 			if (!lastCharWS || inBuff[i] > ' ')
 			{
 				lastCharWS = inBuff[i] > ' ' ? 0 : 1;
-				outBuff[j] = (lastCharWS ? ' ' : inBuff[i]);
+				outBuff[j] = (lastCharWS ? ' ' : (inBuff[i] == '\"' ? '\'' : inBuff[i]));
 				outBuff[++j] = 0;
 				if (!lastCharWS) lastSave = j;
 			}
