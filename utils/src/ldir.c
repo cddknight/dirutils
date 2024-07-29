@@ -117,6 +117,7 @@ void getFileVersion (DIR_ENTRY *fileOne);
 #define SHOW_INODE		(1 << 21)
 #define SHOW_IN_AGE		(1 << 22)
 #define SHOW_VERSION	(1 << 23)
+#define SHOW_EXTRA		(1 << 24)
 
 #define DATE_MOD		0
 #define DATE_ACC		1
@@ -140,7 +141,7 @@ void getFileVersion (DIR_ENTRY *fileOne);
  * Globals                                                                    *
  *----------------------------------------------------------------------------*/
 int			orderType		=	ORDER_NAME;
-int			showType		=	SHOW_NORMAL|SHOW_SIZE|SHOW_DATE;
+int			showType		=	SHOW_NORMAL|SHOW_SIZE|SHOW_DATE|SHOW_EXTRA;
 int			dirType			=	ALLFILES;
 long		dirsFound		=	0;
 long		filesFound		=	0;
@@ -291,11 +292,12 @@ static struct option longOptions[] =
 	{	"size",			no_argument,		0,	'S' },
 	{	"thousep",		no_argument,		0,	't' },
 	{	"time",			required_argument,	0,	'T' },
-	{	"version",		no_argument,		0,	'v'	},
+	{	"version",		no_argument,		0,	'v' },
 	{	"nocvs",		no_argument,		0,	'V' },
 	{	"wide",			no_argument,		0,	'w' },
 	{	"width",		required_argument,	0,	'W' },
 	{	"word",			required_argument,	0,	'x' },
+	{	"extra",		no_argument,		0,	'X' },
 	{	"help",			no_argument,		0,	'?' },
 	{	0,				0,					0,	0	}
 };
@@ -547,6 +549,7 @@ void helpThem (char *progName, int flags)
 		printf ("     --wide  . . . . . . . . -w  . . . . . Show directory in wide format.\n");
 		printf ("     --width # . . . . . . . -W# . . . . . Ignore screen width default to 255.\n");
 		printf ("     --word #  . . . . . . . -x# . . . . . Which word to start word sort from.\n");
+		printf ("     --extra . . . . . . . . -X  . . . . . Turn on and off directory extras.\n");
 		printf ("     --help  . . . . . . . . -?  . . . . . Show this help message.\n");
 		printf ("\nExpressions:\n");
 		printf ("     & . . . . . . . . Logical AND, eg. %s \"c*&*c\"\n", progName);
@@ -1081,6 +1084,10 @@ void commandOption (char option, char *optionVal, char *progName)
 		}
 		break;
 
+	case 'X':
+		showType ^= SHOW_EXTRA;
+		break;
+
 	case '?':
 		helpThem(progName, HELP_ALL);
 		exit (1);
@@ -1194,7 +1201,7 @@ int main (int argc, char *argv[])
 	     *--------------------------------------------------------------------*/
 		int optionIndex = 0;
 
-		opt = getopt_long (argc, argv, "aAbBcCd:D:emMn:o:pPqQrRs:StT:vVwW:x:?", longOptions, &optionIndex);
+		opt = getopt_long (argc, argv, "aAbBcCd:D:emMn:o:pPqQrRs:StT:vVwW:x:X?", longOptions, &optionIndex);
 
 		/*--------------------------------------------------------------------*
 		 * Detect the end of the options.                                     *
@@ -1211,6 +1218,7 @@ int main (int argc, char *argv[])
 		case 'T':
 		case 'W':
 		case 'x':
+		case 'X':
 			commandOption (opt, optarg, basename (argv[0]));
 			break;
 
@@ -1275,14 +1283,14 @@ int main (int argc, char *argv[])
 		}
 		else
 		{
-			int colNum;
+			int colNum, flags = (showType & SHOW_EXTRA) ? DISPLAY_HEADINGS : 0;
 
 			for (colNum = 0; colNum < MAX_COL_DESC; colNum++)
 			{
 				ptrAllColumns[colNum] = &allColumnDescs [columnTranslate[colNum]];
 			}
 
-			if (!displayColumnInit (colNum, ptrAllColumns, DISPLAY_HEADINGS | dirDisplayFlags))
+			if (!displayColumnInit (colNum, ptrAllColumns, flags | dirDisplayFlags))
 			{
 				fprintf (stderr, "ERROR in: displayColumnInit\n");
 				return 1;
@@ -1309,14 +1317,15 @@ int main (int argc, char *argv[])
 			char foundBuff[11], sizeBuff[21];
 
 			displayNewLine (0);
-			if (showFound != 0)
+			if (showFound != 0 && showType & SHOW_EXTRA)
 				displayDrawLine (0);
 
 			if (showType & SHOW_WIDE)
 			{
 				displayMatchWidth ();
-				displayDrawLine (DISPLAY_FIRST);
-				if (filesFound)
+				if (showType & SHOW_EXTRA)
+					displayDrawLine (DISPLAY_FIRST);
+				if (filesFound && showType & SHOW_EXTRA)
 				{
 					displayInColumn (1, "Files: %s", displayCommaNumber (filesFound, foundBuff));
 					displayNewLine(DISPLAY_INFO);
@@ -1324,33 +1333,36 @@ int main (int argc, char *argv[])
 							displayCommaNumber (totalSize, sizeBuff));
 					displayNewLine(DISPLAY_INFO);
 				}
-				if (linksFound)
+				if (showType & SHOW_EXTRA)
 				{
-					displayInColumn (1, "Links: %s", displayCommaNumber (linksFound, foundBuff));
-					displayNewLine(DISPLAY_INFO);
-				}
-				if (dirsFound)
-				{
-					displayInColumn (1, "Dirs:  %s", displayCommaNumber (dirsFound, foundBuff));
-					displayNewLine(DISPLAY_INFO);
-				}
-				if (devsFound)
-				{
-					displayInColumn (1, "Devs:  %s", displayCommaNumber (devsFound, foundBuff));
-					displayNewLine(DISPLAY_INFO);
-				}
-				if (socksFound)
-				{
-					displayInColumn (1, "Devs:  %s", displayCommaNumber (socksFound, foundBuff));
-					displayNewLine(DISPLAY_INFO);
-				}
-				if (pipesFound)
-				{
-					displayInColumn (1, "Devs:  %s", displayCommaNumber (pipesFound, foundBuff));
-					displayNewLine(DISPLAY_INFO);
+					if (linksFound)
+					{
+						displayInColumn (1, "Links: %s", displayCommaNumber (linksFound, foundBuff));
+						displayNewLine(DISPLAY_INFO);
+					}
+					if (dirsFound)
+					{
+						displayInColumn (1, "Dirs:  %s", displayCommaNumber (dirsFound, foundBuff));
+						displayNewLine(DISPLAY_INFO);
+					}
+					if (devsFound)
+					{
+						displayInColumn (1, "Devs:  %s", displayCommaNumber (devsFound, foundBuff));
+						displayNewLine(DISPLAY_INFO);
+					}
+					if (socksFound)
+					{
+						displayInColumn (1, "Devs:  %s", displayCommaNumber (socksFound, foundBuff));
+						displayNewLine(DISPLAY_INFO);
+					}
+					if (pipesFound)
+					{
+						displayInColumn (1, "Devs:  %s", displayCommaNumber (pipesFound, foundBuff));
+						displayNewLine(DISPLAY_INFO);
+					}
 				}
 			}
-			else if (showType & SHOW_PATH)
+			else if (showType & SHOW_PATH && showType & SHOW_EXTRA)
 			{
 				if (filesFound)
 				{
@@ -1388,7 +1400,7 @@ int main (int argc, char *argv[])
 			}
 			else
 			{
-				if (filesFound)
+				if (filesFound && showType & SHOW_EXTRA)
 				{
 					if (showType & SHOW_SIZE)
 					{
@@ -1398,30 +1410,33 @@ int main (int argc, char *argv[])
 					displayInColumn (columnTranslate[COL_FILENAME], "Files: %s", displayCommaNumber (filesFound, foundBuff));
 					displayNewLine(DISPLAY_INFO);
 				}
-				if (linksFound)
+				if (showType & SHOW_EXTRA)
 				{
-					displayInColumn (columnTranslate[COL_FILENAME], "Links: %s", displayCommaNumber (linksFound, foundBuff));
-					displayNewLine(DISPLAY_INFO);
-				}
-				if (dirsFound)
-				{
-					displayInColumn (columnTranslate[COL_FILENAME], "Dirs:  %s", displayCommaNumber (dirsFound, foundBuff));
-					displayNewLine(DISPLAY_INFO);
-				}
-				if (devsFound)
-				{
-					displayInColumn (columnTranslate[COL_FILENAME], "Devs:  %s", displayCommaNumber (devsFound, foundBuff));
-					displayNewLine(DISPLAY_INFO);
-				}
-				if (socksFound)
-				{
-					displayInColumn (columnTranslate[COL_FILENAME], "Socks: %s", displayCommaNumber (socksFound, foundBuff));
-					displayNewLine(DISPLAY_INFO);
-				}
-				if (pipesFound)
-				{
-					displayInColumn (columnTranslate[COL_FILENAME], "Pipes: %s", displayCommaNumber (pipesFound, foundBuff));
-					displayNewLine(DISPLAY_INFO);
+					if (linksFound)
+					{
+						displayInColumn (columnTranslate[COL_FILENAME], "Links: %s", displayCommaNumber (linksFound, foundBuff));
+						displayNewLine(DISPLAY_INFO);
+					}
+					if (dirsFound)
+					{
+						displayInColumn (columnTranslate[COL_FILENAME], "Dirs:  %s", displayCommaNumber (dirsFound, foundBuff));
+						displayNewLine(DISPLAY_INFO);
+					}
+					if (devsFound)
+					{
+						displayInColumn (columnTranslate[COL_FILENAME], "Devs:  %s", displayCommaNumber (devsFound, foundBuff));
+						displayNewLine(DISPLAY_INFO);
+					}
+					if (socksFound)
+					{
+						displayInColumn (columnTranslate[COL_FILENAME], "Socks: %s", displayCommaNumber (socksFound, foundBuff));
+						displayNewLine(DISPLAY_INFO);
+					}
+					if (pipesFound)
+					{
+						displayInColumn (columnTranslate[COL_FILENAME], "Pipes: %s", displayCommaNumber (pipesFound, foundBuff));
+						displayNewLine(DISPLAY_INFO);
+					}
 				}
 			}
 			displaySomeLines (showFound);
@@ -2344,7 +2359,7 @@ int compareNames (char *nameOne, char *nameTwo, int useCase)
 char *findFileWordRev (char *name, int len, int wordNum)
 {
 	int i, lastType = 0, word = 0;
-	
+
 	for (i = len - 1; i >= 0; --i)
 	{
 		if (name[i] >= 'A' && name[i] <= 'Z')
@@ -2402,12 +2417,12 @@ char *findFileWordRev (char *name, int len, int wordNum)
 char *findFileWord (char *name)
 {
 	int i, len = strlen (name), lastType = 0, word = 0;
-	
+
 	if (wordNumber < 0)
 	{
 		return findFileWordRev (name, len, wordNumber * -1);
 	}
-	
+
 	for (i = 0; i < len; ++i)
 	{
 		if (name[i] >= 'A' && name[i] <= 'Z')
@@ -2500,7 +2515,7 @@ int compareFileVersion (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo, int useCase)
 	{
 		return retn;
 	}
-	
+
 	if (orderType == ORDER_NAVE)
 	{
 		retn = compareNames (fileOne -> fileVer -> fileStart, fileTwo -> fileVer -> fileStart, useCase);
