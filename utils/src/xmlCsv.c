@@ -208,7 +208,7 @@ int testFile (char *fileName)
 int main (int argc, char *argv[])
 {
 	void *fileList = NULL;
-	int i, j, found = 0;
+	int i, found = 0;
 	char fullVersion[81];
 
 	strcpy (fullVersion, VERSION);
@@ -441,7 +441,7 @@ processElementNames (xmlDoc *doc, xmlNode * aNode, char *curPath, int readLevel)
 	xmlChar *key;
 	xmlNode *curNode = NULL;
 	char tempBuff[1024], fullPath[1024];
-	int i, addCr = 0, colNum, maxColNum = -1, startLevel = 0;
+	int i, colNum, maxColNum = -1, startLevel = 0;
 
 	for (curNode = aNode; curNode; curNode = curNode->next)
 	{

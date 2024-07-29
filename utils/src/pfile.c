@@ -597,7 +597,6 @@ int showDir (DIR_ENTRY *file)
 int fileCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 {
 	int retn = 0;
-	char fullName[1024];
 #ifdef USE_STATX
 	off_t stSizeOne = fileOne -> fileStat.stx_size;
 	off_t stSizeTwo = fileTwo -> fileStat.stx_size;
