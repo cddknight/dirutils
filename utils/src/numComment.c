@@ -107,6 +107,7 @@ void helpThem (char *name)
 {
 	version ();
 	printf ("Enter the command: %s -[options] <filename>\n", basename(name));
+	printf ("     -h . . . . Count up in hex.\n");
 	printf ("     -p # . . . Pad the number up to # chars.\n");
 	printf ("     -s # . . . Set the starting number.\n");
 	printf ("     -z . . . . Zero pad the numbers.\n");
@@ -126,7 +127,7 @@ void helpThem (char *name)
  */
 int main (int argc, char *argv[])
 {
-	int i, found = 0, padSize = 1, zeroPad = 0;
+	int i, found = 0, padSize = 1, zeroPad = 0, hexNum = 0;
 	void *fileList = NULL;
 	char fullVersion[81];
 
@@ -145,7 +146,7 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "p:s:z?")) != -1)
+	while ((i = getopt(argc, argv, "hp:s:z?")) != -1)
 	{
 		switch (i)
 		{
@@ -168,6 +169,10 @@ int main (int argc, char *argv[])
 		case 'z':
 			zeroPad = !zeroPad;
 			break;
+
+		case 'h':
+			hexNum = !hexNum;
+			break;
 			
 		case '?':
 			helpThem (argv[0]);
@@ -178,11 +183,11 @@ int main (int argc, char *argv[])
 	printf ("padSize: %d\n", padSize);
 	if (zeroPad)
 	{
-		sprintf (formatStr, "/* %%0%dd */", padSize);
+		sprintf (formatStr, "/* %%0%d%c */", padSize, hexNum ? 'X' : 'd');
 	}
 	else
 	{
-		sprintf (formatStr, "/* %%%dd */", padSize);
+		sprintf (formatStr, "/* %%%d%c */", padSize, hexNum ? 'X' : 'd');
 	}
 	for (; optind < argc; ++optind)
 	{

@@ -45,6 +45,7 @@ install -s -m 755 lines $RPM_BUILD_ROOT%{_bindir}/lines
 install -s -m 755 listFunc $RPM_BUILD_ROOT%{_bindir}/listFunc
 install -s -m 755 mkTable $RPM_BUILD_ROOT%{_bindir}/mkTable
 install -s -m 755 modcr $RPM_BUILD_ROOT%{_bindir}/modcr
+install -s -m 755 numComment $RPM_BUILD_ROOT%{_bindir}/numComment
 install -s -m 755 pfile $RPM_BUILD_ROOT%{_bindir}/pfile
 install -s -m 755 rmCppCmt $RPM_BUILD_ROOT%{_bindir}/rmCppCmt
 install -s -m 755 tabSpace $RPM_BUILD_ROOT%{_bindir}/tabSpace
@@ -72,6 +73,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/listFunc
 %{_bindir}/mkTable
 %{_bindir}/modcr
+%{_bindir}/numComment
 %{_bindir}/pfile
 %{_bindir}/rmCppCmt
 %{_bindir}/tabSpace
@@ -79,6 +81,9 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/ldirrc
 
 %changelog
+* Tue Jul 30 2024 Chris Knight <chris@theknight.co.uk> 4.0.16-1%{?dist}
+- Added a numComment command to help number comments.
+
 * Wed Jan 31 2018 Chris Knight <chris@theknight.co.uk> 4.0.16-1%{?dist}
 - Combined addrc and rmcr into one moderc.
 
