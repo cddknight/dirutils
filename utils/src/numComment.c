@@ -157,7 +157,7 @@ int main (int argc, char *argv[])
 		case 'h':
 			hexNum = !hexNum;
 			break;
-			
+
 		case 'i':
 			sscanf (optarg, "%d", &incCount);
 			if (incCount < -100 || incCount > 100)
@@ -173,7 +173,7 @@ int main (int argc, char *argv[])
 				padSize = 1;
 			}
 			break;
-			
+
 		case 's':
 			sscanf (optarg, "%d", &startCount);
 			if (startCount < -32767 || startCount > 32767)
@@ -181,7 +181,7 @@ int main (int argc, char *argv[])
 				startCount = 1;
 			}
 			break;
-			
+
 		case 'z':
 			zeroPad = !zeroPad;
 			break;
@@ -191,7 +191,7 @@ int main (int argc, char *argv[])
 			exit (1);
 		}
 	}
-	
+
 	if (zeroPad)
 	{
 		sprintf (formatStr, "/* %%0%d%c */", padSize, hexNum ? 'X' : 'd');
@@ -250,7 +250,7 @@ int main (int argc, char *argv[])
 int showDir (DIR_ENTRY *file)
 {
 	char inBuffer[256], outBuffer[600], inFile[PATH_SIZE], outFile[PATH_SIZE];
-	int linesFixed = 0, bytesIn, match = 0, count = startCount;
+	int linesFixed = 0, bytesIn, match = 0, count = startCount, err = 0;
 	FILE *readFile, *writeFile;
 
 	strcpy (inFile, file -> fullPath);
@@ -262,10 +262,10 @@ int showDir (DIR_ENTRY *file)
 	{
 		if ((writeFile = fopen (outFile, "wb")) != NULL)
 		{
-			while ((bytesIn = fread (inBuffer, 1, 255, readFile)) != 0)
+			while ((bytesIn = fread (inBuffer, 1, 255, readFile)) != 0 && !err)
 			{
 				int i, j;
-				
+
 				inBuffer[bytesIn] = 0;
 				for (i = j = 0; i < bytesIn; i++)
 				{
@@ -306,18 +306,16 @@ int showDir (DIR_ENTRY *file)
 					{
 						if (!fwrite (outBuffer, j, 1, writeFile))
 						{
-							j = linesFixed = 0;
-							break;
+							err = 1;
 						}
-						j = 0;
+						outBuffer[j = 0] = 0;
 					}
 				}
-				if (j)
+				if (j && !err)
 				{
 					if (!fwrite (outBuffer, j, 1, writeFile))
 					{
-						linesFixed = 0;
-						break;
+						err = 1;
 					}
 				}
 			}
@@ -325,7 +323,7 @@ int showDir (DIR_ENTRY *file)
 		}
 		fclose (readFile);
 
-		if (linesFixed)
+		if (linesFixed && !err)
 		{
 			unlink (inFile);
 			rename (outFile, inFile);
