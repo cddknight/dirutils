@@ -108,11 +108,13 @@ void helpThem (char *name)
 {
 	version ();
 	printf ("Enter the command: %s -[options] <filename>\n", basename(name));
-	printf ("     -h . . . . Count up in hex.\n");
-	printf ("     -i # . . . Number to increment by (can be negative).\n");
-	printf ("     -p # . . . Pad the number up to # chars (1 to 20).\n");
-	printf ("     -s # . . . Set starting number (can be negative).\n");
-	printf ("     -z . . . . Zero pad the numbers.\n");
+	printf ("     -h . . . . Count up in hex [false].\n");
+	printf ("     -i # . . . Number to increment by [1] (can be negative).\n");
+	printf ("     -p # . . . Pad the number up to # chars [1] (1 to 20).\n");
+	printf ("     -s # . . . Set starting number [1] (can be negative).\n");
+	printf ("     -z . . . . Zero pad the numbers [false].\n");
+	printf ("This utility replaces \"/* # */\" with \"/* 123 */\".\n");
+	displayLine ();
 }
 
 /**********************************************************************************************************************
