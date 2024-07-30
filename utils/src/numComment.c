@@ -1,24 +1,25 @@
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  M O D C R . C                                                                                                     *
- *  =============                                                                                                     *
+ *  N U M  C O M M E N T . C                                                                                          *
+ *  ========================                                                                                          *
  *                                                                                                                    *
- *  Copyright (c) 2023 Chris Knight                                                                                   *
+ *  Copyright (c) 2024                                                                                                *
  *                                                                                                                    *
- *  File modcr.c part of DirCmdUtils is free software: you can redistribute it and/or modify it under the terms of    *
- *  the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or  *
- *  (at your option) any later version.                                                                               *
+ *  File numComment.c is free software: you can redistribute it and/or modify it under the terms of the GNU General   *
+ *  Public License as published by the Free Software Foundation, either version 3 of the License, or (at your         *
+ *  option) any later version.                                                                                        *
  *                                                                                                                    *
- *  DirCmdUtils is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the         *
+ *  File numComment.c is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the   *
  *  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for  *
  *  more details.                                                                                                     *
  *                                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program. If not, see            *
- *  <http://www.gnu.org/licenses/>.                                                                                   *
+ *  You should have received a copy of the GNU General Public License along with this program. If not, see:           *
+ *  <http://www.gnu.org/licenses/>                                                                                    *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
  *  \file
+ *  \brief Replace marker with numbered comments.
  */
 #include "config.h"
 #define _GNU_SOURCE
@@ -48,14 +49,14 @@
 #include <dircmd.h>
 #include "buildDate.h"
 
-/*----------------------------------------------------------------------------*
- * Prototypes                                                                 *
- *----------------------------------------------------------------------------*/
+/**********************************************************************************************************************
+ * Prototypes                                                                                                         *
+ **********************************************************************************************************************/
 int showDir (DIR_ENTRY *file);
 
-/*----------------------------------------------------------------------------*
- * Globals                                                                    *
- *----------------------------------------------------------------------------*/
+/**********************************************************************************************************************
+ * Globals                                                                                                            *
+ **********************************************************************************************************************/
 COLUMN_DESC colChangeDescs[3] =
 {
 	{	10, 10, 0,	3,	0x07,	COL_ALIGN_RIGHT,	"Updated",	1	},	/* 1 */
@@ -69,10 +70,11 @@ COLUMN_DESC *ptrChangeColumn[3] =
 	&colChangeDescs[2]
 };
 
-int startCount = 0;
+int startCount = 1;
 int filesFound = 0;
 int totalLines = 0;
 char *matchStr = "/* # */";
+char formatStr[41] = "/* %1d */";
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -86,7 +88,7 @@ char *matchStr = "/* # */";
  */
 void version (void)
 {
-	printf ("TheKnight: Modify Carrage Return, Version: %s, Built: %s\n", VERSION, buildDate);
+	printf ("TheKnight: Add numbered comments, Version: %s, Built: %s\n", VERSION, buildDate);
 	displayLine ();
 }
 
@@ -104,7 +106,10 @@ void version (void)
 void helpThem (char *name)
 {
 	version ();
-	printf ("Enter the command: %s [-a|-r] <filename>\n", basename(name));
+	printf ("Enter the command: %s -[options] <filename>\n", basename(name));
+	printf ("     -p # . . . Pad the number up to # chars.\n");
+	printf ("     -s # . . . Set the starting number.\n");
+	printf ("     -z . . . . Zero pad the numbers.\n");
 }
 
 /**********************************************************************************************************************
@@ -121,8 +126,8 @@ void helpThem (char *name)
  */
 int main (int argc, char *argv[])
 {
+	int i, found = 0, padSize = 1, zeroPad = 0;
 	void *fileList = NULL;
-	int i, found = 0;
 	char fullVersion[81];
 
 	strcpy (fullVersion, VERSION);
@@ -140,24 +145,49 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "?")) != -1)
+	while ((i = getopt(argc, argv, "p:s:z?")) != -1)
 	{
 		switch (i)
 		{
+		case 'p':
+			padSize = atoi (optarg);
+			if (padSize < 1 || padSize > 20)
+			{
+				padSize = 1;
+			}
+			break;
+			
+		case 's':
+			startCount = atoi (optarg);
+			if (startCount < 1 || startCount > 32767)
+			{
+				startCount = 1;
+			}
+			break;
+			
+		case 'z':
+			zeroPad = !zeroPad;
+			break;
+			
 		case '?':
 			helpThem (argv[0]);
 			exit (1);
 		}
 	}
-
+	
+	printf ("padSize: %d\n", padSize);
+	if (zeroPad)
+	{
+		sprintf (formatStr, "/* %%0%dd */", padSize);
+	}
+	else
+	{
+		sprintf (formatStr, "/* %%%dd */", padSize);
+	}
 	for (; optind < argc; ++optind)
 	{
 		found += directoryLoad (argv[optind], ONLYFILES, NULL, &fileList);
 	}
-
-	/*------------------------------------------------------------------------*
-     * Now we can sort the directory.                                         *
-     *------------------------------------------------------------------------*/
 	directorySort (&fileList);
 
 	if (found)
@@ -227,7 +257,7 @@ int showDir (DIR_ENTRY *file)
 					{
 						if (matchStr[++match] == 0)
 						{
-							sprintf (&outBuffer[j], "/* %d */", ++count);
+							sprintf (&outBuffer[j], formatStr, count++);
 							j = strlen (outBuffer);
 							++linesFixed;
 							match = 0;

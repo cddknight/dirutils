@@ -76,19 +76,19 @@ int showDir (DIR_ENTRY *file);
  *----------------------------------------------------------------------------*/
 COLUMN_DESC colNormDescs[10] =
 {
-	{	5,	5,	0,	3,	0x03,	COL_ALIGN_RIGHT,	"Type",		8	},	/*  0 */
+	{	5,	5,	0,	3,	0x03,	COL_ALIGN_RIGHT,	"Type",		8	},	/* 0 */
 #ifdef HAVE_SYS_ACL_H
-	{	11, 11, 0,	3,	0x02,	0,					"Rights",	3	},	/*  1 */
+	{	11, 11, 0,	3,	0x02,	0,					"Rights",	3	},	/* 1 */
 #else
-	{	10, 10, 0,	3,	0x02,	0,					"Rights",	3	},	/*  1 */
+	{	10, 10, 0,	3,	0x02,	0,					"Rights",	3	},	/* 1 */
 #endif
-	{	20, 6,	0,	1,	0x05,	0,					"Owner",	4	},	/*  2 */
-	{	20, 6,	0,	3,	0x05,	0,					"Group",	5	},	/*  3 */
-	{	7,	7,	0,	3,	0x06,	COL_ALIGN_RIGHT,	"Size",		1	},	/*  4 */
-	{	160,12, 0,	3,	0x02,	COL_ALIGN_RIGHT,	"Modified", 2	},	/*  5 */
-	{	160,12, 0,	3,	0x07,	0,					"Filename", 0	},	/*  6 */
-	{	3,	3,	0,	3,	0x01,	0,					NULL,		7	},	/*  7 */
-	{	160,12, 0,	0,	0x07,	0,					"Target",	6	},	/*  8 */
+	{	20, 6,	0,	1,	0x05,	0,					"Owner",	4	},	/* 2 */
+	{	20, 6,	0,	3,	0x05,	0,					"Group",	5	},	/* 3 */
+	{	7,	7,	0,	3,	0x06,	COL_ALIGN_RIGHT,	"Size",		1	},	/* 4 */
+	{	160,12, 0,	3,	0x02,	COL_ALIGN_RIGHT,	"Modified", 2	},	/* 5 */
+	{	160,12, 0,	3,	0x07,	0,					"Filename", 0	},	/* 6 */
+	{	3,	3,	0,	3,	0x01,	0,					NULL,		7	},	/* 7 */
+	{	160,12, 0,	0,	0x07,	0,					"Target",	6	},	/* 8 */
 };
 
 COLUMN_DESC *ptrFullColumn[10] =
