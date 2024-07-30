@@ -70,6 +70,7 @@ COLUMN_DESC *ptrChangeColumn[3] =
 	&colChangeDescs[2]
 };
 
+int incCount = 1;
 int startCount = 1;
 int filesFound = 0;
 int totalLines = 0;
@@ -108,8 +109,9 @@ void helpThem (char *name)
 	version ();
 	printf ("Enter the command: %s -[options] <filename>\n", basename(name));
 	printf ("     -h . . . . Count up in hex.\n");
-	printf ("     -p # . . . Pad the number up to # chars.\n");
-	printf ("     -s # . . . Set the starting number.\n");
+	printf ("     -i # . . . Number to increment by (can be negative).\n");
+	printf ("     -p # . . . Pad the number up to # chars (1 to 20).\n");
+	printf ("     -s # . . . Set starting number (can be negative).\n");
 	printf ("     -z . . . . Zero pad the numbers.\n");
 }
 
@@ -146,12 +148,24 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "hp:s:z?")) != -1)
+	while ((i = getopt(argc, argv, "hi:p:s:z?")) != -1)
 	{
 		switch (i)
 		{
+		case 'h':
+			hexNum = !hexNum;
+			break;
+			
+		case 'i':
+			sscanf (optarg, "%d", &incCount);
+			if (incCount < -100 || incCount > 100)
+			{
+				incCount = 1;
+			}
+			break;
+
 		case 'p':
-			padSize = atoi (optarg);
+			sscanf (optarg, "%d", &padSize);
 			if (padSize < 1 || padSize > 20)
 			{
 				padSize = 1;
@@ -159,8 +173,8 @@ int main (int argc, char *argv[])
 			break;
 			
 		case 's':
-			startCount = atoi (optarg);
-			if (startCount < 1 || startCount > 32767)
+			sscanf (optarg, "%d", &startCount);
+			if (startCount < -32767 || startCount > 32767)
 			{
 				startCount = 1;
 			}
@@ -170,17 +184,12 @@ int main (int argc, char *argv[])
 			zeroPad = !zeroPad;
 			break;
 
-		case 'h':
-			hexNum = !hexNum;
-			break;
-			
 		case '?':
 			helpThem (argv[0]);
 			exit (1);
 		}
 	}
 	
-	printf ("padSize: %d\n", padSize);
 	if (zeroPad)
 	{
 		sprintf (formatStr, "/* %%0%d%c */", padSize, hexNum ? 'X' : 'd');
@@ -238,7 +247,7 @@ int main (int argc, char *argv[])
  */
 int showDir (DIR_ENTRY *file)
 {
-	char inBuffer[256], outBuffer[512], inFile[PATH_SIZE], outFile[PATH_SIZE];
+	char inBuffer[256], outBuffer[600], inFile[PATH_SIZE], outFile[PATH_SIZE];
 	int linesFixed = 0, bytesIn, match = 0, count = startCount;
 	FILE *readFile, *writeFile;
 
@@ -262,8 +271,9 @@ int showDir (DIR_ENTRY *file)
 					{
 						if (matchStr[++match] == 0)
 						{
-							sprintf (&outBuffer[j], formatStr, count++);
+							sprintf (&outBuffer[j], formatStr, count);
 							j = strlen (outBuffer);
+							count += incCount;
 							++linesFixed;
 							match = 0;
 						}
@@ -289,6 +299,15 @@ int showDir (DIR_ENTRY *file)
 							outBuffer[j++] = inBuffer[i];
 							outBuffer[j] = 0;
 						}
+					}
+					if (j > 500)
+					{
+						if (!fwrite (outBuffer, j, 1, writeFile))
+						{
+							j = linesFixed = 0;
+							break;
+						}
+						j = 0;
 					}
 				}
 				if (j)
