@@ -347,7 +347,8 @@ int main (int argc, char *argv[])
 			break;
 		case 't':
 			{
-				int t = atoi (optarg);
+				int t = 4;
+				sscanf (optarg, "%d", &t);
 				if (t > 0 && t <= 32)
 				{
 					tabSize = t;

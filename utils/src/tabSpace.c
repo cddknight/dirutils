@@ -163,7 +163,7 @@ int main (int argc, char *argv[])
 			break;
 
 		case 't':
-			tabSize = atoi (optarg);
+			sscanf (optarg, "%d", &tabSize);
 			if (tabSize <= 0)
 			{
 				fprintf (stderr, "Tab size must be greater than 0.\n");

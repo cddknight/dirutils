@@ -253,7 +253,7 @@ int main (int argc, char *argv[])
 			break;
 
 		case 'w':
-			width = atoi (optarg);
+			sscanf (optarg, "%d", &width);
 			displayWidth = (width / 8) * 8;
 			if (displayWidth < 8 || displayWidth > 80)
 			{

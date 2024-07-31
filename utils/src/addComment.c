@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
 		switch (i)
 		{
 		case 'l':
-			commentLine = atoi (optarg);
+			sscanf (optarg, "%d", &commentLine);
 			break;
 
 		case 'h':
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 			break;
 
 		case 'w':
-			boxWidth = atoi (optarg);
+			sscanf (optarg, "%d", &boxWidth);
 			if (boxWidth < 40 || boxWidth > MAX_BOXWIDTH)
 			{
 				boxWidth = DEF_BOXWIDTH;
@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 			break;
 
 		case 'C':
-			copyrightType = atoi (optarg);
+			sscanf (optarg, "%d", &copyrightType);
 			if (strlen (optarg) > 1)
 			{
 				strncpy (companyName, &optarg[1], 127);
