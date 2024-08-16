@@ -2,8 +2,34 @@
 
 source /etc/os-release
 
+function doLine
+{
+	LINECMD=$(which lineDraw 2> /dev/null)
+	if [ "${LINECMD}" != "" ]
+	then
+		${LINECMD} $1
+	else
+		echo --------------------------------------------------------------------------------
+	fi
+}
+
+function doBigText
+{
+	doLine
+	TEXTCMD=$(which bigWord 2> /dev/null)
+	if [ "${TEXTCMD}" != "" ] && [ "${1}" != "" ]
+	then
+		${TEXTCMD} -c 2 $1
+	else
+		echo $1
+	fi
+	doLine
+}
+
 if [ "$ID" == "debian" ] || [ "$ID" == "ubuntu" ] || [ "$ID" == "raspbian" ]
 then
+
+	doBigText "@PACKAGE@.deb"
 
 	ORIGPWD=$PWD
 	rm -f @PACKAGE@-@VERSION@.tar.bz2
@@ -19,6 +45,8 @@ then
 
 elif [ "$ID" == "fedora" ] || [ "$ID" == "centos" ] || [ "$ID" == "rhel" ] || [ "$ID" == "opensuse-leap" ]
 then
+
+	doBigText "@PACKAGE@.rpm"
 
 	if [ -d $HOME/gitroot/rpmbuild ]
 	then
@@ -42,11 +70,11 @@ then
 	rm -f @PACKAGE@-@VERSION@.tar.bz2
 	make dist-bzip2
 
-	cp @PACKAGE_NAME@.spec $DIR/SPECS/
+	cp @PACKAGE@.spec $DIR/SPECS/
 	cp @PACKAGE@-@VERSION@.tar.bz2 $DIR/SOURCES/
 
 	cd $DIR/SPECS
-	rpmbuild -ba -v @PACKAGE_NAME@.spec
+	rpmbuild -ba -v @PACKAGE@.spec
 	rpmsign --addsign $DIR/RPMS/$(uname -m)/@PACKAGE@-@VERSION@-@REVISION@.*.$(uname -m).rpm
 	rpmsign --addsign $DIR/SRPMS/@PACKAGE@-@VERSION@-@REVISION@.*.src.rpm
 
