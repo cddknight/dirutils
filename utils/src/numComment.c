@@ -74,7 +74,8 @@ int incCount = 1;
 int startCount = 1;
 int filesFound = 0;
 int totalLines = 0;
-char *matchStr = "/* # */";
+int cppMode = 0;
+char matchStr[41] = "/* # */";
 char formatStr[41] = "/* %1d */";
 
 /**********************************************************************************************************************
@@ -110,6 +111,7 @@ void helpThem (char *name)
 	printf ("Enter the command: %s -[options] <filename>\n", basename(name));
 	printf ("     -h . . . . Count up in hex [false].\n");
 	printf ("     -i # . . . Number to increment by [1] (can be negative).\n");
+	printf ("     -P . . . . Switch to C++ mode and replace // #\\n.\n");
 	printf ("     -p # . . . Pad the number up to # chars [1] (1 to 20).\n");
 	printf ("     -s # . . . Set starting number [1] (can be negative).\n");
 	printf ("     -z . . . . Zero pad the numbers [false].\n");
@@ -150,7 +152,7 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "hi:p:s:z?")) != -1)
+	while ((i = getopt(argc, argv, "hi:Pp:s:z?")) != -1)
 	{
 		switch (i)
 		{
@@ -164,6 +166,12 @@ int main (int argc, char *argv[])
 			{
 				incCount = 1;
 			}
+			break;
+
+		case 'P':
+			strcpy (matchStr, "// #\n");
+			strcpy (formatStr, "// %ld\n");
+			cppMode = 1;
 			break;
 
 		case 'p':
@@ -194,11 +202,11 @@ int main (int argc, char *argv[])
 
 	if (zeroPad)
 	{
-		sprintf (formatStr, "/* %%0%d%c */", padSize, hexNum ? 'X' : 'd');
+		sprintf (formatStr, cppMode ? "// %%0%d%c\n" : "/* %%0%d%c */", padSize, hexNum ? 'X' : 'd');
 	}
 	else
 	{
-		sprintf (formatStr, "/* %%%d%c */", padSize, hexNum ? 'X' : 'd');
+		sprintf (formatStr, cppMode ? "// %%%d%c\n" : "/* %%%d%c */", padSize, hexNum ? 'X' : 'd');
 	}
 	for (; optind < argc; ++optind)
 	{
@@ -256,7 +264,7 @@ int showDir (DIR_ENTRY *file)
 	strcpy (inFile, file -> fullPath);
 	strcat (inFile, file -> fileName);
 	strcpy (outFile, file -> fullPath);
-	strcat (outFile, "modcr$$$.000");
+	strcat (outFile, "numCom$$$.000");
 
 	if ((readFile = fopen (inFile, "rb")) != NULL)
 	{
