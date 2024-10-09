@@ -301,7 +301,7 @@ void displayFunc(char *fileName, int line, int func, int count)
 	int i;
 	char numBuffer[21];
 
-	debugLine("Line %d: ++++ Display function ++++\n", line);	
+	debugLine("Line %d: ++++ Display function ++++\n", line);
 
 	displayInColumn (0, displayCommaNumber (func, numBuffer));
 	displayInColumn (1, displayCommaNumber (line, numBuffer));
@@ -467,7 +467,7 @@ int showDir(DIR_ENTRY * file)
 				{
 					if (curParam)
 					{
-						debugLine("Line %d: **** Display function (%d) ****\n", line, braceLevel);	
+						debugLine("Line %d: **** Display function (%d) ****\n", line, braceLevel);
 						displayFunc(file->fileName, funcLine, ++func, curParam);
 						comBuffPos = 0;
 						curParam = 0;

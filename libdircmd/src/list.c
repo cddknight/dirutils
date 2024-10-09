@@ -392,6 +392,46 @@ void *queueRead (void *queueHandle, int item)
 
 /**********************************************************************************************************************
  *                                                                                                                    *
+ *  Q U E U E  R E A D  N E X T                                                                                       *
+ *  ===========================                                                                                       *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Allows quick iteration over the queue, use with care.
+ *  \param queueHandle Handle of the queue, returned from create.
+ *  \param queueCurrent The pointer to the last item returned.
+ *  \result A pointer to the item or NULL if none found.
+ */
+void *queueReadNext (void *queueHandle, void **queueCurrent)
+{
+	void *retn = NULL;
+
+	if (queueHandle)
+	{
+		QUEUE_HEADER *myQueue = (QUEUE_HEADER *)queueHandle;
+		QUEUE_ITEM *currentItem = *queueCurrent;
+
+		queueLock (myQueue);
+		if (currentItem == NULL)
+		{
+			currentItem = myQueue -> firstInQueue;
+		}
+		else
+		{
+			currentItem = currentItem -> myNextPtr;
+		}
+		if (currentItem)
+		{
+			retn = currentItem -> myData;
+			*queueCurrent = currentItem;
+		}
+		queueUnLock (myQueue);
+	}
+	return retn;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
  *  Q U E U E  S E T  F R E E  D A T A                                                                                *
  *  ==================================                                                                                *
  *                                                                                                                    *

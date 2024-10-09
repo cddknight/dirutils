@@ -417,7 +417,7 @@ int directorySort (void **fileList)
  **********************************************************************************************************************/
 /**
  *  \brief Funtion to process all the files in the directory.
- *  \param dirEntry xx.
+ *  \param ProcFile Function to call to display directory.
  *  \param fileList Saved directory, loaded with directoryLoad.
  *  \result Number of files processed.
  */
@@ -430,7 +430,7 @@ int directoryProcess (int(*ProcFile)(DIR_ENTRY *dirEntry),	void **fileList)
 	{
 		if (ProcFile (readEntry))
 		{
-			filesProcessed ++;
+			++filesProcessed;
 		}
 		if (readEntry -> md5Sum != NULL)
 		{
@@ -457,6 +457,35 @@ int directoryProcess (int(*ProcFile)(DIR_ENTRY *dirEntry),	void **fileList)
 	queueDelete (*fileList);
 	*fileList = NULL;
 	return filesProcessed;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I R E C T O R Y  R E A D                                                                                        *
+ *  ==========================                                                                                        *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Called to get called back for each file in the fileList.
+ *  \param ReadFile Function to call to read files.
+ *  \param fileList Saved directory, loaded with directoryLoad.
+ *  \result Number of files read.
+ */
+int directoryRead (int(*ReadFile)(DIR_ENTRY *dirEntry),	void **fileList)
+{
+	DIR_ENTRY *readEntry;
+	int filesRead = 0;
+	void *lastRead;
+	
+	lastRead = NULL;
+	while ((readEntry = (DIR_ENTRY *)queueReadNext (*fileList, &lastRead)) != NULL)
+	{
+		if (ReadFile (readEntry))
+		{
+			++filesRead;
+		}
+	}
+	return filesRead;
 }
 
 /**********************************************************************************************************************

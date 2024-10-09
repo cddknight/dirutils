@@ -781,7 +781,7 @@ int displayBox(int type, int count, FILE *outFile)
 					 "General Public License for more details.", 2040);
 			boxLine (tempBuff, 0, 0, 1, outFile);
 
-            boxLine ("You should have received a copy of the GNU General Public License "
+			boxLine ("You should have received a copy of the GNU General Public License "
 					 "along with this program. If not, see: <http://www.gnu.org/licenses/>",
 					 0, 1, 0, outFile);
 		}

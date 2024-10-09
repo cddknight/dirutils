@@ -66,7 +66,7 @@ int showDir (DIR_ENTRY *file);
 #define CASE_NONE	0
 #define CASE_LOWER	1
 #define CASE_UPPER	2
-#define CASE_PROPER	4
+#define CASE_PROPER 4
 
 /*----------------------------------------------------------------------*/
 /* Globals                                                              */
@@ -88,7 +88,7 @@ COLUMN_DESC *ptrChangeColumn[3] =
 static char removeChars[] = "\"\'!?);:,]}|";
 static char updateChars[] = " {[(";
 
-int	dirType = ONLYFILES;
+int dirType = ONLYFILES;
 int filesFound = 0;
 int totalChanged = 0;
 int dispFlags = 0;
@@ -223,7 +223,7 @@ int main (int argc, char *argv[])
 			return 1;
 		}
 		directoryProcess (showDir, &fileList);
-		
+
 		if (totalChanged > 0 || (dispFlags & SHOW_ALL))
 		{
 			displayDrawLine (0);
@@ -233,7 +233,7 @@ int main (int argc, char *argv[])
 			displayNewLine(DISPLAY_INFO);
 			displayInColumn (0, "Found");
 			displayInColumn (1, displayCommaNumber (found, numBuff));
-			displayInColumn (2, "file%c", found	== 1 ? ' ' : 's');
+			displayInColumn (2, "file%c", found == 1 ? ' ' : 's');
 			displayNewLine(DISPLAY_INFO);
 			displayAllLines ();
 		}
@@ -289,10 +289,10 @@ int showDir (DIR_ENTRY *file)
 					nextUpper = 1;
 				}
 			}
-		    else if (strchr (removeChars, inFileName[i]))
-		    {
+			else if (strchr (removeChars, inFileName[i]))
+			{
 				nextUpper = 1;
-		    }
+			}
 			else if (inFileName[i] == '.')
 			{
 				if (extn)
@@ -304,67 +304,67 @@ int showDir (DIR_ENTRY *file)
 				nextUpper = 1;
 				extn = 1;
 			}
-		    else if (inFileName[i] == '-')
-		    {
+			else if (inFileName[i] == '-')
+			{
 				if (lastAdd != '_' && lastAdd != '-')
 				{
 					*outPtr++ = lastAdd = '-';
 					nextUpper = 1;
 				}
-		    }
-		    else if (inFileName[i] == '#')
-		    {
+			}
+			else if (inFileName[i] == '#')
+			{
 				*outPtr++ = (fixCase == CASE_LOWER) ? 'h' : 'H';
 				*outPtr++ = (fixCase == CASE_UPPER) ? 'A' : 'a';
 				*outPtr++ = (fixCase == CASE_UPPER) ? 'S' : 's';
 				*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'H' : 'h';
 				nextUpper = 1;
-		    }
-		    else if (inFileName[i] == '+')
-		    {
+			}
+			else if (inFileName[i] == '+')
+			{
 				*outPtr++ = (fixCase == CASE_LOWER) ? 'p' : 'P';
 				*outPtr++ = (fixCase == CASE_UPPER) ? 'L' : 'l';
 				*outPtr++ = (fixCase == CASE_UPPER) ? 'U' : 'u';
 				*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'S' : 's';
 				nextUpper = 1;
-		    }
-		    else if (inFileName[i] == '*')
-		    {
+			}
+			else if (inFileName[i] == '*')
+			{
 				*outPtr++ = (fixCase == CASE_LOWER) ? 's' : 'S';
 				*outPtr++ = (fixCase == CASE_UPPER) ? 'T' : 't';
 				*outPtr++ = (fixCase == CASE_UPPER) ? 'A' : 'a';
 				*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'R' : 'r';
 				nextUpper = 1;
-		    }
-		    else if (inFileName[i] == '!')
-		    {
+			}
+			else if (inFileName[i] == '!')
+			{
 				*outPtr++ = (fixCase == CASE_LOWER) ? 'p' : 'P';
 				*outPtr++ = (fixCase == CASE_UPPER) ? 'I' : 'i';
 				*outPtr++ = (fixCase == CASE_UPPER) ? 'N' : 'n';
 				*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'G' : 'g';
 				nextUpper = 1;
-		    }
-		    else if (inFileName[i] == '&')
-		    {
+			}
+			else if (inFileName[i] == '&')
+			{
 				*outPtr++ = (fixCase == CASE_LOWER) ? 'a' : 'A';
 				*outPtr++ = (fixCase == CASE_UPPER) ? 'N' : 'n';
 				*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'D' :'d';
 				nextUpper = 1;
-		    }
-		    else if (inFileName[i] == '@')
-		    {
+			}
+			else if (inFileName[i] == '@')
+			{
 				*outPtr++ = (fixCase == CASE_UPPER || fixCase == CASE_PROPER) ? 'A' :'a';
 				*outPtr++ = lastAdd = (fixCase == CASE_UPPER) ? 'T' :'t';
 				nextUpper = 1;
-		    }
-		    else if (inFileName[i] < ' ')
-		    {
+			}
+			else if (inFileName[i] < ' ')
+			{
 				*outPtr++ = lastAdd = 'x';
-		    }
-		    else if (inFileName[i] > 126 && (dispFlags & REMOVE_BIG))
-		    {
+			}
+			else if (inFileName[i] > 126 && (dispFlags & REMOVE_BIG))
+			{
 				*outPtr++ = lastAdd = 'X';
-		    }
+			}
 			else
 			{
 				corrected = 0;
@@ -427,7 +427,7 @@ int showDir (DIR_ENTRY *file)
 		{
 			char numBuff[40];
 			sprintf (numBuff, "_%d", number);
-			strcat (outFilePath, numBuff);		
+			strcat (outFilePath, numBuff);
 		}
 		if (extn)
 		{

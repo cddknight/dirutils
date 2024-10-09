@@ -53,6 +53,7 @@
  * Prototypes                                                                 *
  *----------------------------------------------------------------------------*/
 int showDir (DIR_ENTRY *file);
+int readDir (DIR_ENTRY *file);
 
 /*----------------------------------------------------------------------------*
  * Globals                                                                    *
@@ -69,9 +70,14 @@ COLUMN_DESC *ptrLinesColumn[3] =
 	&colLinesDescs[1]
 };
 
-#define SHOW_PATH		1
+#define SHOW_PATH		0x0001
+#define SHOW_RORDER		0x0002
+
+#define ORDER_NAMES		0
+#define ORDER_LINES		1
 
 int showFlags = 0;
+int showOrder = ORDER_NAMES;
 int filesFound = 0;
 long totalLines = 0;
 
@@ -105,11 +111,52 @@ void version (void)
 void helpThem(char *progName)
 {
 	printf ("Enter the command: %s [-Ccpr] <filename>\n", basename (progName));
-	printf ("    -C . . . . . Display output in colour\n");
-	printf ("    -c . . . . . Directory case sensitive\n");
-	printf ("    -p . . . . . Show the path and filename\n");
-	printf ("    -r . . . . . Search in subdirectories\n");
-	printf ("    -R . . . . . Search links to directories\n");
+	printf ("    -C . . . . . Display output in colour.\n");
+	printf ("    -c . . . . . Directory case sensitive.\n");
+	printf ("    -on  . . . . Order results by file name.\n");
+	printf ("    -ol  . . . . Order by number of lines.\n");
+	printf ("    -or  . . . . Reverse the current order.\n");
+	printf ("    -p . . . . . Show the path and filename.\n");
+	printf ("    -r . . . . . Search in subdirectories.\n");
+	printf ("    -R . . . . . Search links to directories.\n");
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I R E C T O R Y  C O M P A R E                                                                                  *
+ *  ================================                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Not using default so that we can compare number of lines.
+ *  \param fileOne First file to compare.
+ *  \param fileTwo Second file to compare.
+ *  \result -1, 0 or 1 depening on the order.
+ */
+int directoryCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
+{
+	int retn = 0;
+
+	if (showOrder == ORDER_LINES)
+	{
+		if (fileOne -> match > fileTwo -> match)
+		{
+			retn = 1;
+		}
+		else if (fileOne -> match < fileTwo -> match)
+		{
+			retn = -1;
+		}
+	}
+	if (retn == 0)
+	{
+		retn = strcasecmp (fileOne -> fileName, fileTwo -> fileName);
+	}
+	if (showFlags & SHOW_RORDER && retn)
+	{
+		retn = (retn == 1 ? -1 : 1);
+	}
+	return retn;
 }
 
 /**********************************************************************************************************************
@@ -144,7 +191,7 @@ int main (int argc, char *argv[])
 
 	displayInit ();
 
-	while ((i = getopt(argc, argv, "CcprR?")) != -1)
+	while ((i = getopt(argc, argv, "Cco:prR?")) != -1)
 	{
 		switch (i)
 		{
@@ -168,6 +215,32 @@ int main (int argc, char *argv[])
 			showFlags ^= SHOW_PATH;
 			break;
 
+		case 'o':
+		{
+			int i = 0;
+			while (optarg[i])
+			{
+				if (optarg[i] == 'l')
+				{
+					showOrder = ORDER_LINES;
+				}
+				else if (optarg[i] == 'n')
+				{
+					showOrder = ORDER_NAMES;
+				}
+				else if (optarg[i] == 'r')
+				{
+					showFlags ^= SHOW_RORDER;
+				}
+				else
+				{
+					helpThem (argv[0]);
+					exit (1);
+				}
+				++i;
+			}
+			break;
+		}
 		case '?':
 			helpThem (argv[0]);
 			exit (1);
@@ -176,18 +249,18 @@ int main (int argc, char *argv[])
 
 	for (; optind < argc; ++optind)
 	{
-		found += directoryLoad (argv[optind], dirType, NULL, &fileList);
+		found += directoryLoad (argv[optind], dirType, directoryCompare, &fileList);
 	}
 
 	/*------------------------------------------------------------------------*
-     * Now we can sort the directory.                                         *
+     * Now we can process the directory.                                      *
      *------------------------------------------------------------------------*/
-	directorySort (&fileList);
-
 	if (found)
 	{
 		char numBuff[15];
 
+		directoryRead (readDir, &fileList);
+		directorySort (&fileList);
 		if (!displayColumnInit (2, ptrLinesColumn, DISPLAY_HEADINGS | displayColour))
 		{
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
@@ -216,16 +289,16 @@ int main (int argc, char *argv[])
 
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  S H O W  D I R                                                                                                    *
+ *  R E A D  D I R                                                                                                    *
  *  ==============                                                                                                    *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  \brief Count the lines in a file.
+ *  \brief Called back before the sort to read the lines in the file.
  *  \param file File to count lines in.
  *  \result 1 if all OK.
  */
-int showDir (DIR_ENTRY *file)
+int readDir (DIR_ENTRY *file)
 {
 	char inBuffer[16384], inFile[PATH_SIZE];
 	long linesFound = 0;
@@ -251,11 +324,34 @@ int showDir (DIR_ENTRY *file)
 		while (readBytes > 0);
 		fclose (readFile);
 	}
+	file -> match = linesFound;
 	totalLines += linesFound;
 
-	displayInColumn (0, displayCommaNumber (linesFound, inBuffer));
+	return (linesFound ? 1 : 0);
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  S H O W  D I R                                                                                                    *
+ *  ==============                                                                                                    *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Count the lines in a file.
+ *  \param file File to show.
+ *  \result 1 if all OK.
+ */
+int showDir (DIR_ENTRY *file)
+{
+	char numBuffer[41];
+	long linesFound = file -> match;
+
+	displayInColumn (0, displayCommaNumber (linesFound, numBuffer));
 	if (showFlags & SHOW_PATH)
 	{
+		char inFile[PATH_SIZE];
+		strcpy (inFile, file -> fullPath);
+		strcat (inFile, file -> fileName);
 		displayInColumn (1, "%s", inFile);
 	}
 	else

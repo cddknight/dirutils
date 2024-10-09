@@ -63,7 +63,7 @@ COLUMN_DESC colChangeDescs[4] =
 {
 	{	10, 10, 0,	3,	0x07,	COL_ALIGN_RIGHT,	"Removed",	1	},	/* 0 */
 	{	160,12, 0,	0,	0x07,	0,					"Input", 0	},	/* 1 */
-	{	160,12, 0,	0,	0x07,	0,					"Output", 0	},	/* 1 */
+	{	160,12, 0,	0,	0x07,	0,					"Output", 0 },	/* 1 */
 };
 
 COLUMN_DESC *ptrChangeColumn[4] =
@@ -161,7 +161,7 @@ int main (int argc, char *argv[])
 			exit (1);
 		}
 	}
-	
+
 	if (endPos <= startPos && endPos != -1)
 	{
 		fprintf (stderr, "ERROR: End must be greater than start\n");

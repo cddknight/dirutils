@@ -225,7 +225,7 @@ struct dirEntry
 #else
 	struct stat fileStat;
 #endif
-	/** Was a match found for this file */
+	/** Was a match found, or free for other counts */
 	unsigned int match;
 	/** Pointer to function used to compare the files */
 	comparePtr *Compare;
@@ -254,6 +254,7 @@ typedef int (compareFile)(DIR_ENTRY *first, DIR_ENTRY *second);
  */
 EXTERNC char *directoryVersion(void);
 EXTERNC int directoryLoad (char *inPath, int findFlags, compareFile Compare, void **fileList);
+EXTERNC int directoryRead (int(*ReadFile)(DIR_ENTRY *f1), void **fileList);
 EXTERNC int directorySort (void **fileList);
 EXTERNC int directoryProcess (int(*ProcFile)(DIR_ENTRY *f1), void **fileList);
 EXTERNC mode_t directoryTrueLinkType (DIR_ENTRY *f1);
@@ -313,6 +314,7 @@ EXTERNC void  queuePut (void *queueHandle, void *putData);
 EXTERNC void  queuePutSort (void *queueHandle, void *putData, comparePtr Compare);
 EXTERNC void  queuePush (void *queueHandle, void *putData);
 EXTERNC void *queueRead (void *queueHandle, int item);
+EXTERNC void *queueReadNext (void *queueHandle, void **queueCurrent);
 EXTERNC void queueSetFreeData (void *queueHandle, unsigned long setData);
 EXTERNC unsigned long queueGetFreeData (void *queueHandle);
 EXTERNC unsigned long queueGetItemCount (void *queueHandle);
