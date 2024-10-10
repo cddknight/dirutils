@@ -52,6 +52,7 @@
 /**********************************************************************************************************************
  * Prototypes                                                                                                         *
  **********************************************************************************************************************/
+int readDir (DIR_ENTRY *file);
 int showDir (DIR_ENTRY *file);
 
 /**********************************************************************************************************************
@@ -212,7 +213,6 @@ int main (int argc, char *argv[])
 	{
 		found += directoryLoad (argv[optind], ONLYFILES, NULL, &fileList);
 	}
-	directorySort (&fileList);
 
 	if (found)
 	{
@@ -223,11 +223,13 @@ int main (int argc, char *argv[])
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 1;
 		}
+		directoryRead (readDir, &fileList);
+		directorySort (&fileList);
 		directoryProcess (showDir, &fileList);
 
 		displayDrawLine (0);
 		displayInColumn (0, displayCommaNumber (totalLines, numBuff));
-		displayInColumn (1, "CR's modified");
+		displayInColumn (1, "Comments modified");
 		displayNewLine(DISPLAY_INFO);
 		displayInColumn (0, displayCommaNumber (filesFound, numBuff));
 		displayInColumn (1, "Files changed");
@@ -246,16 +248,16 @@ int main (int argc, char *argv[])
 
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  S H O W  D I R                                                                                                    *
+ *  R E A D  D I R                                                                                                    *
  *  ==============                                                                                                    *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  \brief Convert the file that was found.
- *  \param file File to convert.
+ *  \brief Process the file that was found.
+ *  \param file File to be processed.
  *  \result 1 if file changed.
  */
-int showDir (DIR_ENTRY *file)
+int readDir (DIR_ENTRY *file)
 {
 	char inBuffer[256], outBuffer[600], inFile[PATH_SIZE], outFile[PATH_SIZE];
 	int linesFixed = 0, bytesIn, match = 0, count = startCount, err = 0;
@@ -335,13 +337,41 @@ int showDir (DIR_ENTRY *file)
 		{
 			unlink (inFile);
 			rename (outFile, inFile);
+			file -> match = linesFixed;
 			totalLines += linesFixed;
 			filesFound ++;
 		}
 		else
+		{
 			unlink (outFile);
+		}
+	}
+	else
+	{
+		file -> match = -1;
+	}
+	return linesFixed ? 1 : 0;
+}
 
-		displayInColumn (0, displayCommaNumber (linesFixed, inBuffer));
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  S H O W  D I R                                                                                                    *
+ *  ==============                                                                                                    *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Display the result of processing the file.
+ *  \param file File that was processed.
+ *  \result 1 if file changed.
+ */
+int showDir (DIR_ENTRY *file)
+{
+	char numBuffer[41];
+	int linesFixed = file -> match;
+
+	if (linesFixed >= 0)
+	{
+		displayInColumn (0, displayCommaNumber (linesFixed, numBuffer));
 		displayInColumn (1, "%s", file -> fileName);
 	}
 	else
