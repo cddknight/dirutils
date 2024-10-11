@@ -52,6 +52,7 @@
 /*----------------------------------------------------------------------------*
  * Prototypes                                                                 *
  *----------------------------------------------------------------------------*/
+int readDir (DIR_ENTRY *file);
 int showDir (DIR_ENTRY *file);
 
 /*----------------------------------------------------------------------------*
@@ -69,6 +70,14 @@ COLUMN_DESC *ptrChangeColumn[3] =
 	&colChangeDescs[1]
 };
 
+#define SHOW_PATH		0x0001
+#define SHOW_RORDER		0x0002
+
+#define ORDER_NAMES		0
+#define ORDER_LINES		1
+
+int showFlags = 0;
+int showOrder = ORDER_NAMES;
 int careful = 0;
 int filesFound = 0;
 int totalLines = 0;
@@ -104,6 +113,48 @@ void helpThem (char *name)
 {
 	version ();
 	printf ("Enter the command: %s <filename>\n", basename(name));
+	printf ("     -c . . . . Use careful mode to avoid // within quotes.\n");
+	printf ("     -on  . . . Order results by file name.\n");
+	printf ("     -ol  . . . Order results by number of lines changed.\n");
+	printf ("     -or  . . . Reverse the current sort order.\n");
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I R E C T O R Y  C O M P A R E                                                                                  *
+ *  ================================                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Not using default so that we can compare number of lines.
+ *  \param fileOne First file to compare.
+ *  \param fileTwo Second file to compare.
+ *  \result -1, 0 or 1 depening on the order.
+ */
+int directoryCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
+{
+	int retn = 0;
+
+	if (showOrder == ORDER_LINES)
+	{
+		if (fileOne -> match > fileTwo -> match)
+		{
+			retn = 1;
+		}
+		else if (fileOne -> match < fileTwo -> match)
+		{
+			retn = -1;
+		}
+	}
+	if (!retn)
+	{
+		retn = directoryDefCompare (fileOne, fileTwo);
+	}
+	if (showFlags & SHOW_RORDER && retn)
+	{
+		retn = (retn == 1 ? -1 : 1);
+	}
+	return retn;
 }
 
 /**********************************************************************************************************************
@@ -139,7 +190,7 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "c?")) != -1)
+	while ((i = getopt(argc, argv, "co:?")) != -1)
 	{
 		switch (i)
 		{
@@ -147,6 +198,32 @@ int main (int argc, char *argv[])
 			careful = 1;
 			break;
 
+		case 'o':
+		{
+			int i = 0;
+			while (optarg[i])
+			{
+				if (optarg[i] == 'l')
+				{
+					showOrder = ORDER_LINES;
+				}
+				else if (optarg[i] == 'n')
+				{
+					showOrder = ORDER_NAMES;
+				}
+				else if (optarg[i] == 'r')
+				{
+					showFlags ^= SHOW_RORDER;
+				}
+				else
+				{
+					helpThem (argv[0]);
+					exit (1);
+				}
+				++i;
+			}
+			break;
+		}
 		case '?':
 			helpThem (argv[0]);
 			exit (1);
@@ -155,13 +232,8 @@ int main (int argc, char *argv[])
 
 	for (; optind < argc; ++optind)
 	{
-		found += directoryLoad (argv[optind], ONLYFILES, NULL, &fileList);
+		found += directoryLoad (argv[optind], ONLYFILES, directoryCompare, &fileList);
 	}
-
-	/*------------------------------------------------------------------------*
-     * Now we can sort the directory.                                         *
-     *------------------------------------------------------------------------*/
-	directorySort (&fileList);
 
 	if (found)
 	{
@@ -172,6 +244,8 @@ int main (int argc, char *argv[])
 			fprintf (stderr, "ERROR in: displayColumnInit\n");
 			return 1;
 		}
+		directoryRead (readDir, &fileList);
+		directorySort (&fileList);
 		directoryProcess (showDir, &fileList);
 
 		displayDrawLine (0);
@@ -195,16 +269,16 @@ int main (int argc, char *argv[])
 
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  S H O W  D I R                                                                                                    *
+ *  R E A D  D I R                                                                                                    *
  *  ==============                                                                                                    *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
- *  \brief Convert the file that was found.
- *  \param file File to convert.
- *  \result 1 if file changed.
+ *  \brief Called back before the sort to read the lines in the file.
+ *  \param file File to count lines in.
+ *  \result 1 if all OK.
  */
-int showDir (DIR_ENTRY *file)
+int readDir (DIR_ENTRY *file)
 {
 	char inBuffer[1025], outBuffer[2049], inFile[PATH_SIZE], outFile[PATH_SIZE];
 	int linesFixed = 0, i, j, bytesIn;
@@ -308,6 +382,7 @@ int showDir (DIR_ENTRY *file)
 		{
 			unlink (inFile);
 			rename (outFile, inFile);
+			file -> match = linesFixed;
 			totalLines += linesFixed;
 			filesFound ++;
 		}
@@ -315,7 +390,33 @@ int showDir (DIR_ENTRY *file)
 		{
 			unlink (outFile);
 		}
-		displayInColumn (0, displayCommaNumber (linesFixed, inBuffer));
+	}
+	else
+	{
+		file -> match = -1;
+	}
+	return linesFixed ? 1 : 0;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  S H O W  D I R                                                                                                    *
+ *  ==============                                                                                                    *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Convert the file that was found.
+ *  \param file File to convert.
+ *  \result 1 if file changed.
+ */
+int showDir (DIR_ENTRY *file)
+{
+	char numBuffer[41];
+	int linesFixed = file -> match;
+
+	if (linesFixed >= 0)
+	{
+		displayInColumn (0, displayCommaNumber (linesFixed, numBuffer));
 		displayInColumn (1, "%s", file -> fileName);
 	}
 	else

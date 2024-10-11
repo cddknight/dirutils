@@ -461,7 +461,7 @@ void helpThem (char *progName, int flags)
 		printf ("     --case  . . . . . . . . -c  . . . . . Should the sort be case sensitive.\n");
 		printf ("     --colour  . . . . . . . -C  . . . . . Toggle colour display, defined in dirrc.\n");
 	}
-	if (flags == 0 || flags == HELP_DATE)	// Date
+	if (flags == 0 || flags == HELP_DATE)	/* Date */
 	{
 		printf ("     --date accessed . . . . -da . . . . . Show time of last access.\n");
 #ifdef USE_STATX
@@ -470,7 +470,7 @@ void helpThem (char *progName, int flags)
 		printf ("     --date changed  . . . . -dc . . . . . Show time of last status change.\n");
 		printf ("     --date modified . . . . -dm . . . . . Show time of last modification.\n");
 	}
-	if (flags == 0 || flags == HELP_DISPLAY)	// Display
+	if (flags == 0 || flags == HELP_DISPLAY)	/* Display */
 	{
 		printf ("     --display context . . . -Dc . . . . . Show the context of the file.\n");
 		printf ("     --display date  . . . . -Dd . . . . . Show the date of the file.\n");
@@ -494,7 +494,7 @@ void helpThem (char *progName, int flags)
 		printf ("     --unique  . . . . . . . -M  . . . . . Show only files with no duplicate.\n");
 		printf ("     --number #  . . . . . . -n# . . . . . Display some, # > 0 first #, # < 0 last n.\n");
 	}
-	if (flags == 0 || flags == HELP_ORDER)	// Order
+	if (flags == 0 || flags == HELP_ORDER)	/* Order */
 	{
 		printf ("     --order context . . . . -oc . . . . . Order the files by context.\n");
 		printf ("     --order date  . . . . . -od . . . . . Order the files by time and date.\n");
@@ -522,7 +522,7 @@ void helpThem (char *progName, int flags)
 		printf ("     --recursive . . . . . . -r  . . . . . Recursive directory listing.\n");
 		printf ("     --recurlink . . . . . . -R  . . . . . Recursive including links.\n");
 	}
-	if (flags == 0 || flags == HELP_SHOW)	// Show
+	if (flags == 0 || flags == HELP_SHOW)	/* Show */
 	{
 		printf ("     --show dirs . . . . . . -sd . . . . . Show only directories.\n");
 		printf ("     --show files  . . . . . -sf . . . . . Show only files.\n");
@@ -537,7 +537,7 @@ void helpThem (char *progName, int flags)
 		printf ("     --size  . . . . . . . . -S  . . . . . Show the file size in full.\n");
 		printf ("     --thousep . . . . . . . -t  . . . . . Do not display the thousand seperator.\n");
 	}
-	if (flags == 0 || flags == HELP_TIME)	// Time
+	if (flags == 0 || flags == HELP_TIME)	/* Time */
 	{
 		printf ("     --time g{time}  . . . . -Tg{time} . . Show when file age > #d#h#m#s.\n");
 		printf ("     --time l{time}  . . . . -Tl{time} . . Show when file age < #d#h#m#s.\n");

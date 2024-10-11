@@ -70,6 +70,13 @@ COLUMN_DESC *ptrChangeColumn[3] =
 	&colChangeDescs[1]
 };
 
+#define SHOW_RORDER		0x0001
+
+#define ORDER_NAMES		0
+#define ORDER_LINES		1
+
+int showFlags = 0;
+int showOrder = ORDER_NAMES;
 int tabSize = 8;
 int debugMode = 0;
 int spaceToTab = 0;
@@ -109,9 +116,50 @@ void helpThem (char *name)
 	version ();
 	printf ("Enter the command: %s [options] <filename>\n", basename(name));
 	printf ("Options: \n");
-	printf ("     -c . . . Modify comments as well as code.\n");
-	printf ("     -s . . . Convert spaces to tabs, default is tabs to spaces.\n");
-	printf ("     -tN  . . Set the desired tab size, defaults to 8.\n");
+	printf ("    -c . . . . . Modify comments as well as code.\n");
+	printf ("    -s . . . . . Convert spaces to tabs, default is tabs to spaces.\n");
+	printf ("    -tN  . . . . Set the desired tab size, defaults to 8.\n");
+	printf ("    -on  . . . . Order results by file name.\n");
+	printf ("    -ol  . . . . Order results by number of lines changed.\n");
+	printf ("    -or  . . . . Reverse the current sort order.\n");
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I R E C T O R Y  C O M P A R E                                                                                  *
+ *  ================================                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Not using default so that we can compare number of lines.
+ *  \param fileOne First file to compare.
+ *  \param fileTwo Second file to compare.
+ *  \result -1, 0 or 1 depening on the order.
+ */
+int directoryCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
+{
+	int retn = 0;
+
+	if (showOrder == ORDER_LINES)
+	{
+		if (fileOne -> match > fileTwo -> match)
+		{
+			retn = 1;
+		}
+		else if (fileOne -> match < fileTwo -> match)
+		{
+			retn = -1;
+		}
+	}
+	if (!retn)
+	{
+		retn = directoryDefCompare (fileOne, fileTwo);
+	}
+	if (showFlags & SHOW_RORDER && retn)
+	{
+		retn = (retn == 1 ? -1 : 1);
+	}
+	return retn;
 }
 
 /**********************************************************************************************************************
@@ -147,7 +195,7 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "cdst:?")) != -1)
+	while ((i = getopt(argc, argv, "cdst:o:?")) != -1)
 	{
 		switch (i)
 		{
@@ -173,6 +221,32 @@ int main (int argc, char *argv[])
 			}
 			break;
 
+		case 'o':
+		{
+			int i = 0;
+			while (optarg[i])
+			{
+				if (optarg[i] == 'l')
+				{
+					showOrder = ORDER_LINES;
+				}
+				else if (optarg[i] == 'n')
+				{
+					showOrder = ORDER_NAMES;
+				}
+				else if (optarg[i] == 'r')
+				{
+					showFlags ^= SHOW_RORDER;
+				}
+				else
+				{
+					helpThem (argv[0]);
+					exit (1);
+				}
+				++i;
+			}
+			break;
+		}
 		case '?':
 			helpThem (argv[0]);
 			exit (1);
@@ -181,7 +255,7 @@ int main (int argc, char *argv[])
 
 	for (; optind < argc; ++optind)
 	{
-		found += directoryLoad (argv[optind], ONLYFILES, NULL, &fileList);
+		found += directoryLoad (argv[optind], ONLYFILES, directoryCompare, &fileList);
 	}
 
 	if (found)

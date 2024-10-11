@@ -148,9 +148,9 @@ int directoryCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
 			retn = -1;
 		}
 	}
-	if (retn == 0)
+	if (!retn)
 	{
-		retn = strcasecmp (fileOne -> fileName, fileTwo -> fileName);
+		retn = directoryDefCompare (fileOne, fileTwo);
 	}
 	if (showFlags & SHOW_RORDER && retn)
 	{

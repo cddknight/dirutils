@@ -71,6 +71,13 @@ COLUMN_DESC *ptrChangeColumn[3] =
 	&colChangeDescs[2]
 };
 
+#define SHOW_RORDER		0x0001
+
+#define ORDER_NAMES		0
+#define ORDER_LINES		1
+
+int showFlags = 0;
+int showOrder = ORDER_NAMES;
 int incCount = 1;
 int startCount = 1;
 int filesFound = 0;
@@ -116,8 +123,49 @@ void helpThem (char *name)
 	printf ("     -p # . . . Pad the number up to # chars [1] (1 to 20).\n");
 	printf ("     -s # . . . Set starting number [1] (can be negative).\n");
 	printf ("     -z . . . . Zero pad the numbers [false].\n");
+	printf ("     -on  . . . Order results by file name.\n");
+	printf ("     -ol  . . . Order results by number of lines changed.\n");
+	printf ("     -or  . . . Reverse the current sort order.\n");
 	printf ("This utility replaces \"/* # */\" with \"/* 123 */\".\n");
 	displayLine ();
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  D I R E C T O R Y  C O M P A R E                                                                                  *
+ *  ================================                                                                                  *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Not using default so that we can compare number of lines.
+ *  \param fileOne First file to compare.
+ *  \param fileTwo Second file to compare.
+ *  \result -1, 0 or 1 depening on the order.
+ */
+int directoryCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo)
+{
+	int retn = 0;
+
+	if (showOrder == ORDER_LINES)
+	{
+		if (fileOne -> match > fileTwo -> match)
+		{
+			retn = 1;
+		}
+		else if (fileOne -> match < fileTwo -> match)
+		{
+			retn = -1;
+		}
+	}
+	if (!retn)
+	{
+		retn = directoryDefCompare (fileOne, fileTwo);
+	}
+	if (showFlags & SHOW_RORDER && retn)
+	{
+		retn = (retn == 1 ? -1 : 1);
+	}
+	return retn;
 }
 
 /**********************************************************************************************************************
@@ -153,7 +201,7 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "hi:Pp:s:z?")) != -1)
+	while ((i = getopt(argc, argv, "hi:Pp:s:zo:?")) != -1)
 	{
 		switch (i)
 		{
@@ -195,6 +243,32 @@ int main (int argc, char *argv[])
 			zeroPad = !zeroPad;
 			break;
 
+		case 'o':
+		{
+			int i = 0;
+			while (optarg[i])
+			{
+				if (optarg[i] == 'l')
+				{
+					showOrder = ORDER_LINES;
+				}
+				else if (optarg[i] == 'n')
+				{
+					showOrder = ORDER_NAMES;
+				}
+				else if (optarg[i] == 'r')
+				{
+					showFlags ^= SHOW_RORDER;
+				}
+				else
+				{
+					helpThem (argv[0]);
+					exit (1);
+				}
+				++i;
+			}
+			break;
+		}
 		case '?':
 			helpThem (argv[0]);
 			exit (1);
@@ -211,7 +285,7 @@ int main (int argc, char *argv[])
 	}
 	for (; optind < argc; ++optind)
 	{
-		found += directoryLoad (argv[optind], ONLYFILES, NULL, &fileList);
+		found += directoryLoad (argv[optind], ONLYFILES, directoryCompare, &fileList);
 	}
 
 	if (found)

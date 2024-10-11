@@ -564,14 +564,14 @@ void myErrorFunc (void *ctx, const char *msg, ...)
 		va_list arg_ptr;
 
 		va_start (arg_ptr, msg);
-//		displayVInColumn (COL_ERROR, (char *)msg, arg_ptr);
+/*		displayVInColumn (COL_ERROR, (char *)msg, arg_ptr); */
 		va_end (arg_ptr);
 	}
 	else if (!shownError)
 	{
 		shownError = true;
-//		displayInColumn (COL_ERROR, "Parsing file failed");
-//		displayNewLine(0);
+/*		displayInColumn (COL_ERROR, "Parsing file failed"); */
+/*		displayNewLine(0); */
 	}
 	return;
 }

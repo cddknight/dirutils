@@ -4,6 +4,6 @@
 #ifndef BUILDDATE_H
 #define BUILDDATE_H
 
-static const char *buildDate = "2023/04/12";
+static const char *buildDate = "2024/10/10";
 
 #endif

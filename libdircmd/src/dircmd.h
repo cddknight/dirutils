@@ -255,6 +255,7 @@ typedef int (compareFile)(DIR_ENTRY *first, DIR_ENTRY *second);
 EXTERNC char *directoryVersion(void);
 EXTERNC int directoryLoad (char *inPath, int findFlags, compareFile Compare, void **fileList);
 EXTERNC int directoryRead (int(*ReadFile)(DIR_ENTRY *f1), void **fileList);
+EXTERNC int directoryDefCompare (DIR_ENTRY *fileOne, DIR_ENTRY *fileTwo);
 EXTERNC int directorySort (void **fileList);
 EXTERNC int directoryProcess (int(*ProcFile)(DIR_ENTRY *f1), void **fileList);
 EXTERNC mode_t directoryTrueLinkType (DIR_ENTRY *f1);

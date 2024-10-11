@@ -147,9 +147,9 @@ int main (int argc, char *argv[])
 		case '?':
 			version ();
 			printf ("%s -[options] <file names>\n\n", basename (argv[0]));
-			printf ("        -l  To make the file names lower case.\n");
-			printf ("        -u  To make the file names upper case.\n");
-			printf ("        -p  To make the file names proper case.\n");
+			printf ("        -l  To make the contents lower case.\n");
+			printf ("        -u  To make the contents upper case.\n");
+			printf ("        -p  To make the contents proper case.\n");
 			displayLine ();
 			exit (1);
 		}
