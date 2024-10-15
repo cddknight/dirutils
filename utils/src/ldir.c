@@ -592,7 +592,7 @@ time_t parseTime (char *timeStr, int *len)
 		case 'h':
 			running += (current * (60 * 60));
 			current = 0;
-			used = l;
+			used = l + 1;
 			break;
 		case 'm':
 			running += (current * 60);
