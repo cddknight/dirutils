@@ -82,6 +82,7 @@ int incCount = 1;
 int startCount = 1;
 int filesFound = 0;
 int totalLines = 0;
+int undoMode = 0;
 int cppMode = 0;
 char matchStr[41] = "/* # */";
 char formatStr[41] = "/* %d */";
@@ -203,7 +204,7 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "Hhi:Pp:s:zo:?")) != -1)
+	while ((i = getopt(argc, argv, "Hhi:Pp:s:uzo:?")) != -1)
 	{
 		switch (i)
 		{
@@ -243,6 +244,10 @@ int main (int argc, char *argv[])
 			{
 				startCount = 1;
 			}
+			break;
+			
+		case 'u':
+			undoMode = !undoMode;
 			break;
 
 		case 'z':
@@ -291,6 +296,7 @@ int main (int argc, char *argv[])
 		sprintf (formatStr, cppMode ? "// %%%d%c\n" : "/* %%%d%c */", padSize, 
 				hexNum ? (hexNum == 1 ? 'x' : 'X') : 'd');
 	}
+
 	for (; optind < argc; ++optind)
 	{
 		found += directoryLoad (argv[optind], ONLYFILES, directoryCompare, &fileList);
@@ -341,7 +347,7 @@ int main (int argc, char *argv[])
  */
 int readDir (DIR_ENTRY *file)
 {
-	char inBuffer[256], outBuffer[600], inFile[PATH_SIZE], outFile[PATH_SIZE];
+	char inBuffer[256], outBuffer[600], inFile[PATH_SIZE], outFile[PATH_SIZE], tempBuff[101];
 	int linesFixed = 0, bytesIn, match = 0, count = startCount, err = 0;
 	FILE *readFile, *writeFile;
 
@@ -349,6 +355,11 @@ int readDir (DIR_ENTRY *file)
 	strcat (inFile, file -> fileName);
 	strcpy (outFile, file -> fullPath);
 	strcat (outFile, "numCom$$$.000");
+	
+	if (undoMode)
+	{
+		sprintf (matchStr, formatStr, count);
+	}
 
 	if ((readFile = fopen (inFile, "rb")) != NULL)
 	{
@@ -359,15 +370,24 @@ int readDir (DIR_ENTRY *file)
 				int i, j;
 
 				inBuffer[bytesIn] = 0;
+				
 				for (i = j = 0; i < bytesIn; i++)
 				{
 					if (inBuffer[i] == matchStr[match])
 					{
 						if (matchStr[++match] == 0)
 						{
-							sprintf (&outBuffer[j], formatStr, count);
+							if (undoMode)
+							{
+								strcpy (&outBuffer[j], cppMode ? "// #\n" : "/* # */");
+								sprintf (matchStr, formatStr, (count += incCount));
+							}
+							else
+							{
+								sprintf (&outBuffer[j], formatStr, count);
+								count += incCount;
+							}
 							j = strlen (outBuffer);
-							count += incCount;
 							++linesFixed;
 							match = 0;
 						}
