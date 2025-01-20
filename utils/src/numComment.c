@@ -84,7 +84,7 @@ int filesFound = 0;
 int totalLines = 0;
 int cppMode = 0;
 char matchStr[41] = "/* # */";
-char formatStr[41] = "/* %1d */";
+char formatStr[41] = "/* %d */";
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -117,16 +117,18 @@ void helpThem (char *name)
 {
 	version ();
 	printf ("Enter the command: %s -[options] <filename>\n", basename(name));
-	printf ("     -h . . . . Count up in hex [false].\n");
+	printf ("     -H . . . . Count up in uppercase hex [false].\n");
+	printf ("     -h . . . . Count up in lowercase hex [false].\n");
 	printf ("     -i # . . . Number to increment by [1] (can be negative).\n");
-	printf ("     -P . . . . Switch to C++ mode and replace // #\\n.\n");
+	printf ("     -P . . . . Switch to C++ mode and replace // #<cr>.\n");
 	printf ("     -p # . . . Pad the number up to # chars [1] (1 to 20).\n");
 	printf ("     -s # . . . Set starting number [1] (can be negative).\n");
 	printf ("     -z . . . . Zero pad the numbers [false].\n");
 	printf ("     -on  . . . Order results by file name.\n");
 	printf ("     -ol  . . . Order results by number of lines changed.\n");
 	printf ("     -or  . . . Reverse the current sort order.\n");
-	printf ("This utility replaces \"/* # */\" with \"/* 123 */\".\n");
+	printf ("This utility replaces: \"/* # */\" with \"/* 123 */\".\n");
+	printf ("          In C++ mode: \"// #<cr>/\" with \"// 123<cr>/\".\n");
 	displayLine ();
 }
 
@@ -201,12 +203,16 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "hi:Pp:s:zo:?")) != -1)
+	while ((i = getopt(argc, argv, "Hhi:Pp:s:zo:?")) != -1)
 	{
 		switch (i)
 		{
 		case 'h':
-			hexNum = !hexNum;
+			hexNum = hexNum ? 0 : 1;
+			break;
+
+		case 'H':
+			hexNum = hexNum ? 0 : 2;
 			break;
 
 		case 'i':
@@ -219,7 +225,7 @@ int main (int argc, char *argv[])
 
 		case 'P':
 			strcpy (matchStr, "// #\n");
-			strcpy (formatStr, "// %ld\n");
+			strcpy (formatStr, "// %d\n");
 			cppMode = 1;
 			break;
 
@@ -277,11 +283,13 @@ int main (int argc, char *argv[])
 
 	if (zeroPad)
 	{
-		sprintf (formatStr, cppMode ? "// %%0%d%c\n" : "/* %%0%d%c */", padSize, hexNum ? 'X' : 'd');
+		sprintf (formatStr, cppMode ? "// %%0%d%c\n" : "/* %%0%d%c */", padSize, 
+				hexNum ? (hexNum == 1 ? 'x' : 'X') : 'd');
 	}
 	else
 	{
-		sprintf (formatStr, cppMode ? "// %%%d%c\n" : "/* %%%d%c */", padSize, hexNum ? 'X' : 'd');
+		sprintf (formatStr, cppMode ? "// %%%d%c\n" : "/* %%%d%c */", padSize, 
+				hexNum ? (hexNum == 1 ? 'x' : 'X') : 'd');
 	}
 	for (; optind < argc; ++optind)
 	{
