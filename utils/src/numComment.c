@@ -124,6 +124,7 @@ void helpThem (char *name)
 	printf ("     -P . . . . Switch to C++ mode and replace // #<cr>.\n");
 	printf ("     -p # . . . Pad the number up to # chars [1] (1 to 20).\n");
 	printf ("     -s # . . . Set starting number [1] (can be negative).\n");
+	printf ("     -u . . . . Undo the numbering, options should match.\n");
 	printf ("     -z . . . . Zero pad the numbers [false].\n");
 	printf ("     -on  . . . Order results by file name.\n");
 	printf ("     -ol  . . . Order results by number of lines changed.\n");
