@@ -3,7 +3,7 @@
  *  N U M  C O M M E N T . C                                                                                          *
  *  ========================                                                                                          *
  *                                                                                                                    *
- *  Copyright (c) 2024                                                                                                *
+ *  Copyright (c) 2025                                                                                                *
  *                                                                                                                    *
  *  File numComment.c is free software: you can redistribute it and/or modify it under the terms of the GNU General   *
  *  Public License as published by the Free Software Foundation, either version 3 of the License, or (at your         *
@@ -84,8 +84,9 @@ int filesFound = 0;
 int totalLines = 0;
 int undoMode = 0;
 int cppMode = 0;
-char matchStr[41] = "/* # */";
-char formatStr[41] = "/* %d */";
+char matchStr[41];
+char formatStr[41];
+char replaceStr[41];
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -129,8 +130,8 @@ void helpThem (char *name)
 	printf ("     -on  . . . Order results by file name.\n");
 	printf ("     -ol  . . . Order results by number of lines changed.\n");
 	printf ("     -or  . . . Reverse the current sort order.\n");
-	printf ("This utility replaces: \"/* # */\" with \"/* 123 */\".\n");
-	printf ("          In C++ mode: \"// #<cr>/\" with \"// 123<cr>/\".\n");
+	printf ("This utility replaces: [/* # */] with [/* 123 */].\n");
+	printf ("          In C++ mode: [// #<cr>] with [// 123<cr>].\n");
 	displayLine ();
 }
 
@@ -226,9 +227,7 @@ int main (int argc, char *argv[])
 			break;
 
 		case 'P':
-			strcpy (matchStr, "// #\n");
-			strcpy (formatStr, "// %d\n");
-			cppMode = 1;
+			cppMode = !cppMode;
 			break;
 
 		case 'p':
@@ -285,6 +284,17 @@ int main (int argc, char *argv[])
 			helpThem (argv[0]);
 			exit (1);
 		}
+	}
+
+	if (cppMode)
+	{
+		strcpy (matchStr, "// #\n");
+		strcpy (replaceStr, "// #\n");
+	}
+	else
+	{
+		strcpy (matchStr, "/* # */");
+		strcpy (replaceStr, "/* # */");
 	}
 
 	if (zeroPad)
@@ -380,7 +390,7 @@ int readDir (DIR_ENTRY *file)
 						{
 							if (undoMode)
 							{
-								strcpy (&outBuffer[j], cppMode ? "// #\n" : "/* # */");
+								strcpy (&outBuffer[j], replaceStr);
 								sprintf (matchStr, formatStr, (count += incCount));
 							}
 							else
