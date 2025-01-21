@@ -87,6 +87,7 @@ int cppMode = 0;
 char matchStr[41];
 char formatStr[41];
 char replaceStr[41];
+char IDChar;
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -119,17 +120,18 @@ void helpThem (char *name)
 {
 	version ();
 	printf ("Enter the command: %s -[options] <filename>\n", basename(name));
-	printf ("     -H . . . . Count up in uppercase hex [false].\n");
-	printf ("     -h . . . . Count up in lowercase hex [false].\n");
-	printf ("     -i # . . . Number to increment by [1] (can be negative).\n");
-	printf ("     -P . . . . Switch to C++ mode and replace // #<cr>.\n");
-	printf ("     -p # . . . Pad the number up to # chars [1] (1 to 20).\n");
-	printf ("     -s # . . . Set starting number [1] (can be negative).\n");
-	printf ("     -u . . . . Undo the numbering, options should match.\n");
-	printf ("     -z . . . . Zero pad the numbers [false].\n");
-	printf ("     -on  . . . Order results by file name.\n");
-	printf ("     -ol  . . . Order results by number of lines changed.\n");
-	printf ("     -or  . . . Reverse the current sort order.\n");
+	printf ("     -H . . . . Count up in uppercase hex [false].\n");					/* H:01 */
+	printf ("     -h . . . . Count up in lowercase hex [false].\n");                    /* H:02 */
+	printf ("     -i # . . . Number to increment by [1] (can be negative).\n");         /* H:03 */
+	printf ("     -I # . . . Identity letter to match /* <id># */.\n");                 /* H:04 */
+	printf ("     -P . . . . Switch to C++ mode and replace // #<cr>.\n");              /* H:05 */
+	printf ("     -p # . . . Pad the number up to # chars [1] (1 to 20).\n");           /* H:06 */
+	printf ("     -s # . . . Set starting number [1] (can be negative).\n");            /* H:07 */
+	printf ("     -u . . . . Undo the numbering, options should match.\n");             /* H:08 */
+	printf ("     -z . . . . Zero pad the numbers [false].\n");                         /* H:09 */
+	printf ("     -on  . . . Order results by file name.\n");                           /* H:10 */
+	printf ("     -ol  . . . Order results by number of lines changed.\n");             /* H:11 */
+	printf ("     -or  . . . Reverse the current sort order.\n");              			/* H:12 */
 	printf ("This utility replaces: [/* # */] with [/* 123 */].\n");
 	printf ("          In C++ mode: [// #<cr>] with [// 123<cr>].\n");
 	displayLine ();
@@ -206,7 +208,7 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "Hhi:Pp:s:uzo:?")) != -1)
+	while ((i = getopt(argc, argv, "Hhi:I:Pp:s:uzo:?")) != -1)
 	{
 		switch (i)
 		{
@@ -223,6 +225,16 @@ int main (int argc, char *argv[])
 			if (incCount < -100 || incCount > 100)
 			{
 				incCount = 1;
+			}
+			break;
+
+		case 'I':
+			{
+				char ch = optarg[0];
+				if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9'))
+				{
+					IDChar = ch;
+				}
 			}
 			break;
 
@@ -245,7 +257,7 @@ int main (int argc, char *argv[])
 				startCount = 1;
 			}
 			break;
-			
+
 		case 'u':
 			undoMode = !undoMode;
 			break;
@@ -286,26 +298,41 @@ int main (int argc, char *argv[])
 		}
 	}
 
-	if (cppMode)
+	if (IDChar)
 	{
-		strcpy (matchStr, "// #\n");
-		strcpy (replaceStr, "// #\n");
+		sprintf (matchStr, cppMode ? "// %c#\n" : "/* %c# */", IDChar);
 	}
 	else
 	{
-		strcpy (matchStr, "/* # */");
-		strcpy (replaceStr, "/* # */");
+		sprintf (matchStr, cppMode ? "// #\n" : "/* # */");
 	}
+	strcpy (replaceStr, matchStr);
 
 	if (zeroPad)
 	{
-		sprintf (formatStr, cppMode ? "// %%0%d%c\n" : "/* %%0%d%c */", padSize, 
-				hexNum ? (hexNum == 1 ? 'x' : 'X') : 'd');
+		if (IDChar)
+		{
+			sprintf (formatStr, cppMode ? "// %c:%%0%d%c\n" : "/* %c:%%0%d%c */",
+					IDChar, padSize, hexNum ? (hexNum == 1 ? 'x' : 'X') : 'd');
+		}
+		else
+		{
+			sprintf (formatStr, cppMode ? "// %%0%d%c\n" : "/* %%0%d%c */",
+					padSize, hexNum ? (hexNum == 1 ? 'x' : 'X') : 'd');
+		}
 	}
 	else
 	{
-		sprintf (formatStr, cppMode ? "// %%%d%c\n" : "/* %%%d%c */", padSize, 
-				hexNum ? (hexNum == 1 ? 'x' : 'X') : 'd');
+		if (IDChar)
+		{
+			sprintf (formatStr, cppMode ? "// %c:%%%d%c\n" : "/* %c:%%%d%c */",
+					IDChar, padSize, hexNum ? (hexNum == 1 ? 'x' : 'X') : 'd');
+		}
+		else
+		{
+			sprintf (formatStr, cppMode ? "// %%%d%c\n" : "/* %%%d%c */",
+					padSize, hexNum ? (hexNum == 1 ? 'x' : 'X') : 'd');
+		}
 	}
 
 	for (; optind < argc; ++optind)
@@ -366,7 +393,7 @@ int readDir (DIR_ENTRY *file)
 	strcat (inFile, file -> fileName);
 	strcpy (outFile, file -> fullPath);
 	strcat (outFile, "numCom$$$.000");
-	
+
 	if (undoMode)
 	{
 		sprintf (matchStr, formatStr, count);
@@ -381,7 +408,7 @@ int readDir (DIR_ENTRY *file)
 				int i, j;
 
 				inBuffer[bytesIn] = 0;
-				
+
 				for (i = j = 0; i < bytesIn; i++)
 				{
 					if (inBuffer[i] == matchStr[match])
