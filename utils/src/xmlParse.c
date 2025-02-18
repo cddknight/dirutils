@@ -167,6 +167,7 @@ void helpThem(char *progName)
 	printf ("    -P . . . . . . . Output the full path.\n");
 	printf ("    -p <path>  . . . Path to search (eg: /sensors/light).\n");
 	printf ("    -s <xsd> . . . . Path to xsd schema validation file.\n");
+	printf ("    -S . . . . . . . Stop after each screen full.\n");
 	displayLine ();
 }
 
@@ -278,7 +279,7 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "hxCdqPp:s:D:?")) != -1)
+	while ((i = getopt(argc, argv, "hxCdqPSp:s:D:?")) != -1)
 	{
 		switch (i)
 		{
@@ -346,6 +347,10 @@ int main (int argc, char *argv[])
 				optarg[PATH_SIZE] = 0;
 			}
 			strcpy (xsdPath, optarg);
+			break;
+			
+		case 'S':
+			displayOptions ^= DISPLAY_IN_PAGES;
 			break;
 
 		case '?':
