@@ -162,6 +162,7 @@ void helpThem(char *progName)
 	printf ("    -h . . . . . . . Force the use of the HTML parser.\n");
 	printf ("    -C . . . . . . . Display output in colour.\n");
 	printf ("    -D[dnavke] . . . Toggle display columns.\n");
+	printf ("                     Depth,Name,Attr,Valus,Key,Error\n");
 	printf ("    -d . . . . . . . Output parser debug messages.\n");
 	printf ("    -q . . . . . . . Quite mode, output name=key pairs.\n");
 	printf ("    -P . . . . . . . Output the full path.\n");
