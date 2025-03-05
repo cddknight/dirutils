@@ -113,6 +113,22 @@ COLUMN_DESC *ptrFileColumn[4] =
 	&fileDescs[0],	&fileDescs[1],	&fileDescs[2],	&fileDescs[3]
 };
 
+static struct option longOptions[] =
+{
+	{	"xml",			no_argument,		0,	'x' },
+	{	"html",			no_argument,		0,	'h' },
+	{	"colour",		no_argument,		0,	'C' },
+	{	"display",		required_argument,	0,	'D' },
+	{	"debug",		no_argument,		0,	'd' },
+	{	"quiet",		no_argument,		0,	'q' },
+	{	"path",			no_argument,		0,	'P' },
+	{	"search",		required_argument,	0,	'p' },
+	{	"schema",		required_argument,	0,	's' },
+	{	"screen",		no_argument,		0,	'S' },
+	{	"help",			no_argument,		0,	'?' },
+	{	0,				0,					0,	0	}
+};
+
 int filesFound = 0;
 int fileType = FILE_UNKNOWN;
 int displayOptions = DISPLAY_HEADINGS | DISPLAY_HEADINGS_NB;
@@ -158,17 +174,18 @@ void helpThem(char *progName)
 
 	printf ("%s -[Options] <FileName>\n", basename (progName));
 	printf ("\nOptions:\n");
-	printf ("    -x . . . . . . . Force the use of the XML parser.\n");
-	printf ("    -h . . . . . . . Force the use of the HTML parser.\n");
-	printf ("    -C . . . . . . . Display output in colour.\n");
-	printf ("    -D[dnavke] . . . Toggle display columns.\n");
-	printf ("                     Depth,Name,Attr,Valus,Key,Error\n");
-	printf ("    -d . . . . . . . Output parser debug messages.\n");
-	printf ("    -q . . . . . . . Quite mode, output name=key pairs.\n");
-	printf ("    -P . . . . . . . Output the full path.\n");
-	printf ("    -p <path>  . . . Path to search (eg: /sensors/light).\n");
-	printf ("    -s <xsd> . . . . Path to xsd schema validation file.\n");
-	printf ("    -S . . . . . . . Stop after each screen full.\n");
+	printf ("    --xml  . . . -x . . . . . . . Force the use of the XML parser.\n");
+	printf ("    --html . . . -h . . . . . . . Force the use of the HTML parser.\n");
+	printf ("    --colour . . -C . . . . . . . Display output in colour.\n");
+	printf ("    --display  . -D[dnavke] . . . Toggle display columns.\n");
+	printf ("                                  Depth,Name,Attr,Valus,Key,Error\n");
+	printf ("    --debug  . . -d . . . . . . . Output parser debug messages.\n");
+	printf ("    --quiet  . . -q . . . . . . . Quite mode, output name=key pairs.\n");
+	printf ("    --path . . . -P . . . . . . . Output the full path.\n");
+	printf ("    --search . . -p <path>  . . . Path to search (eg: /sensors/light).\n");
+	printf ("    --schema . . -s <xsd> . . . . Path to xsd schema validation file.\n");
+	printf ("    --screen . . -S . . . . . . . Stop after each screen full.\n");
+	printf ("    --help . . . -? . . . . . . . Display this help message.\n");
 	displayLine ();
 }
 
@@ -262,7 +279,7 @@ int testFile (char *fileName)
 int main (int argc, char *argv[])
 {
 	void *fileList = NULL;
-	int i, j, found = 0;
+	int i, j, found = 0, opt;
 	char fullVersion[81];
 
 	strcpy (fullVersion, VERSION);
@@ -280,9 +297,20 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "hxCdqPSp:s:D:?")) != -1)
+	while (1)
 	{
-		switch (i)
+		/*--------------------------------------------------------------------*
+		 * getopt_long stores the option index here.                          *
+	     *--------------------------------------------------------------------*/
+		int optionIndex = 0;
+		opt = getopt_long (argc, argv, "hxCdqPSp:s:D:?", longOptions, &optionIndex);
+
+		/*--------------------------------------------------------------------*
+		 * Detect the end of the options.                                     *
+	     *--------------------------------------------------------------------*/
+		if (opt == -1) break;
+
+		switch (opt)
 		{
 		case 'x':
 			fileType = FILE_XML;
