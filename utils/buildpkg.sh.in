@@ -43,7 +43,7 @@ then
 	cp -r $ORIGPWD/debian .
 	dpkg-buildpackage
 
-elif [ "$ID" == "fedora" ] || [ "$ID" == "centos" ] || [ "$ID" == "rhel" ] || [ "$ID" == "opensuse-leap" ]
+elif [ "$ID" == "fedora" ] || [ "$ID" == "centos" ] || [ "$ID" == "rhel" ] || [ "$ID" == "opensuse-leap" ] || [ "$ID" == "rocky" ]
 then
 
 	doBigText "@PACKAGE@.rpm"
