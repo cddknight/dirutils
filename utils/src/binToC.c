@@ -202,7 +202,7 @@ int main (int argc, char *argv[])
 int showDir (DIR_ENTRY *file)
 {
 	char inBuffer[256], outBuffer[2048], inFile[PATH_SIZE], outFile[PATH_SIZE];
-	int bytesRead = 0, i = 0, j = 0, bytesIn;
+	int bytesRead = 0, i = 0, j = 0, bytesIn, skip = 0;
 	FILE *readFile, *writeFile;
 
 	strcpy (inFile, file -> fullPath);
@@ -215,17 +215,20 @@ int showDir (DIR_ENTRY *file)
 	strncpy (inBuffer, file -> fileName, 250);
 	for (i = 0; i < strlen (inBuffer); ++i)
 	{
-		if ((inBuffer[i] >= 'A' && inBuffer[i] >= 'Z') || 
-			(inBuffer[i] >= 'a' && inBuffer[i] >= 'z') || 
-			(inBuffer[i] >= '0' && inBuffer[i] >= '9'))
+		if ((inBuffer[i] >= 'A' && inBuffer[i] <= 'Z') || 
+			(inBuffer[i] >= 'a' && inBuffer[i] <= 'z') || 
+			(inBuffer[i] >= '0' && inBuffer[i] <= '9') ||
+			inBuffer[i] == '-')
 		{
 			outBuffer[j++] = inBuffer[i];
 			outBuffer[j] = 0;
+			skip = 0;
 		}
-		else
+		else if (!skip)
 		{
 			outBuffer[j++] = '_';
 			outBuffer[j] = 0;
+			skip = 1;
 		}
 	}
 	if (outBuffer[0] == 0)
