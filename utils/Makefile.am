@@ -1,11 +1,12 @@
 AUTOMAKE_OPTIONS = dist-bzip2
-bin_PROGRAMS = ldir addComment casefile fileChop findFunny fixDir hexDump inQuote jsonParse lineDraw lineNum lines \
+bin_PROGRAMS = ldir addComment binToC casefile fileChop findFunny fixDir hexDump inQuote jsonParse lineDraw lineNum lines \
 		listFunc mkTable modcr numComment pfile rmCppCmt tabSpace xmlParse
 AM_CPPFLAGS = -D_FILE_OFFSET_BITS=64 $(S_DEPS_CFLAGS)
 LIBS = $(S_DEPS_LIBS) -lm
 ldir_SOURCES = src/ldir.c buildDate.h
 addComment_SOURCES = src/addComment.c
 addComment_LDADD = -lreadline
+binToC_SOURCES = src/binToC.c
 casefile_SOURCES = src/casefile.c
 fileChop_SOURCES = src/fileChop.c
 findFunny_SOURCES = src/findFunny.c
