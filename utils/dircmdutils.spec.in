@@ -34,6 +34,7 @@ mkdir -p $RPM_BUILD_ROOT%{_bindir}
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}
 
 install -s -m 755 addComment $RPM_BUILD_ROOT%{_bindir}/addComment
+install -s -m 755 binToC $RPM_BUILD_ROOT%{_bindir}/binToC
 install -s -m 755 casefile $RPM_BUILD_ROOT%{_bindir}/casefile
 install -s -m 755 fixDir $RPM_BUILD_ROOT%{_bindir}/fixDir
 install -s -m 755 hexDump $RPM_BUILD_ROOT%{_bindir}/hexDump
@@ -62,6 +63,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 %{_bindir}/addComment
+%{_bindir}/binToC
 %{_bindir}/casefile
 %{_bindir}/fixDir
 %{_bindir}/hexDump

@@ -385,7 +385,7 @@ int main (int argc, char *argv[])
  */
 int readDir (DIR_ENTRY *file)
 {
-	char inBuffer[256], outBuffer[600], inFile[PATH_SIZE], outFile[PATH_SIZE], tempBuff[101];
+	char inBuffer[256], outBuffer[600], inFile[PATH_SIZE], outFile[PATH_SIZE];
 	int linesFixed = 0, bytesIn, match = 0, count = startCount, err = 0;
 	FILE *readFile, *writeFile;
 

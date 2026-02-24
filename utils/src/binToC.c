@@ -161,7 +161,6 @@ int main (int argc, char *argv[])
 	if (found)
 	{
 		char numBuff[15];
-		int col = 0;
 
 		if (!displayColumnInit (2, ptrChangeColumn, DISPLAY_HEADINGS))
 		{
@@ -203,7 +202,7 @@ int main (int argc, char *argv[])
 int showDir (DIR_ENTRY *file)
 {
 	char inBuffer[256], outBuffer[2048], inFile[PATH_SIZE], outFile[PATH_SIZE];
-	int bytesRead = 0, i = 0, j = 0, bytesIn, col = 0;
+	int bytesRead = 0, i = 0, j = 0, bytesIn;
 	FILE *readFile, *writeFile;
 
 	strcpy (inFile, file -> fullPath);

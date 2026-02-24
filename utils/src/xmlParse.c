@@ -279,7 +279,7 @@ int testFile (char *fileName)
 int main (int argc, char *argv[])
 {
 	void *fileList = NULL;
-	int i, j, found = 0, opt;
+	int j, found = 0, opt;
 	char fullVersion[81];
 
 	strcpy (fullVersion, VERSION);
