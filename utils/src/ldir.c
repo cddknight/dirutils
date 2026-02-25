@@ -1176,17 +1176,11 @@ int main (int argc, char *argv[])
 {
 	int found = 0, foundDir = 0, opt;
 	void *fileList = NULL;
-	char defaultDir[PATH_SIZE], fullVersion[81];
+	char defaultDir[PATH_SIZE];
 
-	strcpy (fullVersion, VERSION);
-#ifdef USE_STATX
-	strcat (fullVersion, ".1");
-#else
-	strcat (fullVersion, ".0");
-#endif
-	if (strcmp (directoryVersion(), fullVersion) != 0)
+	if (strcmp (directoryVersion(), LIBDIRCMD_VER) != 0)
 	{
-		fprintf (stderr, "Library (%s) does not match Utility (%s).\n", directoryVersion(), fullVersion);
+		fprintf (stderr, "Installed library: %s, does not match expected: %s.\n", directoryVersion(), LIBDIRCMD_VER);
 		exit (1);
 	}
 

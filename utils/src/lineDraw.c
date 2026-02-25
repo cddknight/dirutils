@@ -63,17 +63,10 @@
 int main (int argc, char *argv[])
 {
 	char dispChar = '-';
-	char fullVersion[81];
 
-	strcpy (fullVersion, VERSION);
-#ifdef USE_STATX
-	strcat (fullVersion, ".1");
-#else
-	strcat (fullVersion, ".0");
-#endif
-	if (strcmp (directoryVersion(), fullVersion) != 0)
+	if (strcmp (directoryVersion(), LIBDIRCMD_VER) != 0)
 	{
-		fprintf (stderr, "Library (%s) does not match Utility (%s).\n", directoryVersion(), fullVersion);
+		fprintf (stderr, "Installed library: %s, does not match expected: %s.\n", directoryVersion(), LIBDIRCMD_VER);
 		exit (1);
 	}
 	if (argc > 1)
