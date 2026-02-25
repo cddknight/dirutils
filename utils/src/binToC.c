@@ -201,7 +201,7 @@ int main (int argc, char *argv[])
  */
 int showDir (DIR_ENTRY *file)
 {
-	char inBuffer[256], outBuffer[2048], inFile[PATH_SIZE], outFile[PATH_SIZE];
+	char inBuffer[256], outBuffer[2048], inFile[PATH_SIZE], outFile[PATH_SIZE], varName[256];
 	int bytesRead = 0, i = 0, j = 0, bytesIn, skip = 0;
 	FILE *readFile, *writeFile;
 
@@ -211,7 +211,7 @@ int showDir (DIR_ENTRY *file)
 	strcat (outFile, file -> fileName);
 	strcat (outFile, ".h");
 
-	outBuffer[0] = 0;
+	varName[0] = 0;
 	strncpy (inBuffer, file -> fileName, 250);
 	for (i = 0; i < strlen (inBuffer); ++i)
 	{
@@ -220,14 +220,14 @@ int showDir (DIR_ENTRY *file)
 			(inBuffer[i] >= '0' && inBuffer[i] <= '9') ||
 			inBuffer[i] == '-')
 		{
-			outBuffer[j++] = inBuffer[i];
-			outBuffer[j] = 0;
+			varName[j++] = inBuffer[i];
+			varName[j] = 0;
 			skip = 0;
 		}
 		else if (!skip)
 		{
-			outBuffer[j++] = '_';
-			outBuffer[j] = 0;
+			varName[j++] = '_';
+			varName[j] = 0;
 			skip = 1;
 		}
 	}
@@ -240,7 +240,7 @@ int showDir (DIR_ENTRY *file)
 	{
 		if ((writeFile = fopen (outFile, "wb")) != NULL)
 		{
-			fprintf (writeFile, "unsigned char %s[] =\n{", outBuffer);
+			fprintf (writeFile, "unsigned char %s[] =\n{", varName);
 			while ((bytesIn = fread (inBuffer, 1, 32, readFile)) != 0)
 			{
 				bytesRead += bytesIn;
@@ -260,7 +260,7 @@ int showDir (DIR_ENTRY *file)
 					}
 				}
 			}
-			fprintf (writeFile, "\n};\n");
+			fprintf (writeFile, "\n};\n#define %s_size %d\n", varName, bytesRead);
 			fclose (writeFile);
 		}
 		fclose (readFile);
