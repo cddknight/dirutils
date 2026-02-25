@@ -1,20 +1,20 @@
 /**********************************************************************************************************************
  *                                                                                                                    *
- *  M O D C R . C                                                                                                     *
- *  =============                                                                                                     *
+ *  B I N  T O  C . C                                                                                                 *
+ *  =================                                                                                                 *
  *                                                                                                                    *
- *  Copyright (c) 2023 Chris Knight                                                                                   *
+ *  Copyright (c) 2026                                                                                                *
  *                                                                                                                    *
- *  File modcr.c part of DirCmdUtils is free software: you can redistribute it and/or modify it under the terms of    *
- *  the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or  *
- *  (at your option) any later version.                                                                               *
+ *  File binToC.c is free software: you can redistribute it and/or modify it under the terms of the GNU General       *
+ *  Public License as published by the Free Software Foundation, either version 3 of the License, or (at your         *
+ *  option) any later version.                                                                                        *
  *                                                                                                                    *
- *  DirCmdUtils is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the         *
+ *  File binToC.c is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the       *
  *  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for  *
  *  more details.                                                                                                     *
  *                                                                                                                    *
- *  You should have received a copy of the GNU General Public License along with this program. If not, see            *
- *  <http://www.gnu.org/licenses/>.                                                                                   *
+ *  You should have received a copy of the GNU General Public License along with this program. If not, see:           *
+ *  <http://www.gnu.org/licenses/>                                                                                    *
  *                                                                                                                    *
  **********************************************************************************************************************/
 /**
@@ -69,8 +69,10 @@ COLUMN_DESC *ptrChangeColumn[2] =
 	&colChangeDescs[1]
 };
 
+int colCount = 32;
 int filesFound = 0;
 int totalRead = 0;
+char varName[256];
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -103,6 +105,11 @@ void helpThem (char *name)
 {
 	version ();
 	printf ("Enter the command: %s <filename>\n", basename(name));
+	printf ("     -c #  . . . . . Number of columns in the array [32].\n");
+	printf ("     -v <name> . . . Name of the character array.\n");
+	printf ("                     By default array name is based on file name.\n");
+	printf ("     -?  . . . . . . Show this help message.\n");
+	displayLine ();
 }
 
 /**********************************************************************************************************************
@@ -138,10 +145,22 @@ int main (int argc, char *argv[])
 	displayInit ();
 	displayGetWidth();
 
-	while ((i = getopt(argc, argv, "?")) != -1)
+	while ((i = getopt(argc, argv, "c:v:?")) != -1)
 	{
 		switch (i)
 		{
+		case 'c':
+			sscanf (optarg, "%d", &colCount);
+			if (colCount < 8 || colCount > 200)
+			{
+				colCount = 32;
+			}
+			break;
+
+		case 'v':
+			strncpy (varName, optarg, 250);
+			break;
+			
 		case '?':
 			helpThem (argv[0]);
 			exit (1);
@@ -201,7 +220,7 @@ int main (int argc, char *argv[])
  */
 int showDir (DIR_ENTRY *file)
 {
-	char inBuffer[256], outBuffer[2048], inFile[PATH_SIZE], outFile[PATH_SIZE], varName[256];
+	char inBuffer[256], outBuffer[2048], inFile[PATH_SIZE], outFile[PATH_SIZE];
 	int bytesRead = 0, i = 0, j = 0, bytesIn, skip = 0;
 	FILE *readFile, *writeFile;
 
@@ -211,37 +230,38 @@ int showDir (DIR_ENTRY *file)
 	strcat (outFile, file -> fileName);
 	strcat (outFile, ".h");
 
-	varName[0] = 0;
-	strncpy (inBuffer, file -> fileName, 250);
-	for (i = 0; i < strlen (inBuffer); ++i)
+	if (varName[0] == 0)
 	{
-		if ((inBuffer[i] >= 'A' && inBuffer[i] <= 'Z') || 
-			(inBuffer[i] >= 'a' && inBuffer[i] <= 'z') || 
-			(inBuffer[i] >= '0' && inBuffer[i] <= '9') ||
-			inBuffer[i] == '-')
+		strncpy (inBuffer, file -> fileName, 250);
+		for (i = 0; i < strlen (inBuffer); ++i)
 		{
-			varName[j++] = inBuffer[i];
-			varName[j] = 0;
-			skip = 0;
+			if ((inBuffer[i] >= 'A' && inBuffer[i] <= 'Z') || 
+				(inBuffer[i] >= 'a' && inBuffer[i] <= 'z') || 
+				(inBuffer[i] >= '0' && inBuffer[i] <= '9') ||
+				inBuffer[i] == '-')
+			{
+				varName[j++] = inBuffer[i];
+				varName[j] = 0;
+				skip = 0;
+			}
+			else if (!skip)
+			{
+				varName[j++] = '_';
+				varName[j] = 0;
+				skip = 1;
+			}
 		}
-		else if (!skip)
+		if (varName[0] == 0)
 		{
-			varName[j++] = '_';
-			varName[j] = 0;
-			skip = 1;
+			strcpy (varName, "data");
 		}
 	}
-	if (outBuffer[0] == 0)
-	{
-		strcpy (outBuffer, "data");
-	}
-
 	if ((readFile = fopen (inFile, "rb")) != NULL)
 	{
 		if ((writeFile = fopen (outFile, "wb")) != NULL)
 		{
 			fprintf (writeFile, "unsigned char %s[] =\n{", varName);
-			while ((bytesIn = fread (inBuffer, 1, 32, readFile)) != 0)
+			while ((bytesIn = fread (inBuffer, 1, colCount, readFile)) != 0)
 			{
 				bytesRead += bytesIn;
 				inBuffer[bytesIn] = 0;
@@ -266,12 +286,12 @@ int showDir (DIR_ENTRY *file)
 		fclose (readFile);
 
 		displayInColumn (0, displayCommaNumber (bytesRead, inBuffer));
-		displayInColumn (1, "%s.h", file -> fileName);
+		displayInColumn (1, "%s", outFile);
 	}
 	else
 	{
 		displayInColumn (0, "Failed");
-		displayInColumn (1, "%s", file -> fileName);
+		displayInColumn (1, "%s", outFile);
 	}
 	displayNewLine (0);
 	if (bytesRead)
