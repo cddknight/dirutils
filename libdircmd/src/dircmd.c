@@ -46,6 +46,7 @@
 #endif
 
 #include "dircmd.h"
+static char dirVer[81] = LIBDIRCMD_VER;
 
 /**********************************************************************************************************************
  *                                                                                                                    *
@@ -71,13 +72,6 @@ static int getEntryType (struct stat *fileStat);
  */
 char *directoryVersion(void)
 {
-	static char dirVer[81];
-	strcpy (dirVer, VERSION);
-#ifdef USE_STATX
-	strcat (dirVer, ".1");
-#else
-	strcat (dirVer, ".0");
-#endif
 	return dirVer;
 }
 
