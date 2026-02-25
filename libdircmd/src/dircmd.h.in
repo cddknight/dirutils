@@ -26,6 +26,9 @@
 
 #ifdef STATX_ALL
 #define USE_STATX
+#define LIBDIRCMD_VER	"@VERSION@.1"
+#else
+#define LIBDIRCMD_VER	"@VERSION@.0"
 #endif
 
 #include <stdarg.h>

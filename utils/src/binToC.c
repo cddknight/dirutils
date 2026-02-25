@@ -86,7 +86,7 @@ char varName[256];
  */
 void version (void)
 {
-	printf ("TheKnight: Convert a binary file to C string, Version: %s, Built: %s\n", VERSION, buildDate);
+	printf ("TheKnight: Convert binary files to C strings, Version: %s, Built: %s\n", VERSION, buildDate);
 	displayLine ();
 }
 
@@ -128,17 +128,10 @@ int main (int argc, char *argv[])
 {
 	void *fileList = NULL;
 	int i, found = 0;
-	char fullVersion[81];
 
-	strcpy (fullVersion, VERSION);
-#ifdef USE_STATX
-	strcat (fullVersion, ".1");
-#else
-	strcat (fullVersion, ".0");
-#endif
-	if (strcmp (directoryVersion(), fullVersion) != 0)
+	if (strcmp (directoryVersion(), LIBDIRCMD_VER) != 0)
 	{
-		fprintf (stderr, "Library (%s) does not match Utility (%s).\n", directoryVersion(), fullVersion);
+		fprintf (stderr, "Installed library: %s, does not match expected: %s.\n", directoryVersion(), LIBDIRCMD_VER);
 		exit (1);
 	}
 

@@ -14,7 +14,7 @@ AC_CHECK_LIB(selinux, lgetfilecon, [DEPS_LIBS="$DEPS_LIBS -lselinux"])
 AC_CHECK_LIB(acl, acl_get_file, [DEPS_LIBS="$DEPS_LIBS -lacl"]) 
 AC_SUBST(DEPS_LIBS)
 AC_SUBST([REVISION])
-AC_CONFIG_FILES([Makefile libdircmd.spec pkgconfig/dircmd.pc])
+AC_CONFIG_FILES([Makefile libdircmd.spec pkgconfig/dircmd.pc src/dircmd.h])
 AC_CONFIG_FILES([buildpkg.sh],[chmod +x buildpkg.sh])
 AC_CONFIG_FILES([debian/control debian/changelog])
 AC_OUTPUT
