@@ -95,10 +95,10 @@ int displayFlags = 0;
 int removeSpace = 1;
 int lineHeading = 0;
 char separator = ',';
-int setValue[MASK_COUNT];
 int bitMaskSet[MASK_COUNT] = { 0, 0, 0, 1, 1, 1, 1 };
 unsigned int bitMask[MASK_COUNT][MASK_SIZE];
-float colCount[MAX_COL], colSum[MAX_COL], colAvg[MAX_COL], colMax[MAX_COL], colMin[MAX_COL];
+float colSum[MAX_COL], colAvg[MAX_COL], colMax[MAX_COL], colMin[MAX_COL];
+int numSum[MAX_COL], numAvg[MAX_COL], numMax[MAX_COL], numMin[MAX_COL];
 
 /**********************************************************************************************************************
  * Command line params                                                                                                *
@@ -676,28 +676,27 @@ int showLine (char *inBuffer, int linesRead)
 								if (getBitMask (MASK_SUM, ocol, 1))
 								{
 									colSum[ocol] += value;
-									setValue[MASK_SUM] = 1;
+									++numSum[ocol];
 								}
 								if (getBitMask (MASK_AVG, ocol, 1))
 								{
 									colAvg[ocol] += value;
-									++colCount[ocol];
-									setValue[MASK_AVG] = 1;
+									++numAvg[ocol];
 								}
 								if (getBitMask (MASK_MAX, ocol, 1))
 								{
-									if (setValue[MASK_MAX] == 0 || colMax[ocol] < value)
+									if (numMax[ocol] == 0 || colMax[ocol] < value)
 									{
 										colMax[ocol] = value;
-										setValue[MASK_MAX] = 1;
+										++numMax[ocol];
 									}
 								}
 								if (getBitMask (MASK_MIN, ocol, 1))
 								{
-									if (setValue[MASK_MIN] == 0 || colMin[ocol] > value)
+									if (numMin[ocol] == 0 || colMin[ocol] > value)
 									{
 										colMin[ocol] = value;
-										setValue[MASK_MIN] = 1;
+										++numMin[ocol];
 									}
 								}
 							}
@@ -753,24 +752,24 @@ void showValue (int mask)
 		{
 			if (getBitMask (mask, ocol, 1))
 			{
-				if (setValue[mask])
+				if (mask == MASK_AVG && numAvg[ocol])
 				{
-					if (mask == MASK_AVG)
-					{
-						displayInColumn (ocol, "A=%0.2f", colAvg[ocol] / colCount[ocol]);
-					}
-					if (mask == MASK_SUM)
-					{
-						displayInColumn (ocol, "S=%0.2f", colSum[ocol]);
-					}
-					if (mask == MASK_MAX)
-					{
-						displayInColumn (ocol, "H=%0.2f", colMax[ocol]);
-					}
-					if (mask == MASK_MIN)
-					{
-						displayInColumn (ocol, "L=%0.2f", colMin[ocol]);
-					}
+					displayInColumn (ocol, "A=%0.2f", colAvg[ocol] / numAvg[ocol]);
+					shown = 1;
+				}
+				if (mask == MASK_SUM && numSum[ocol])
+				{
+					displayInColumn (ocol, "S=%0.2f", colSum[ocol]);
+					shown = 1;
+				}
+				if (mask == MASK_MAX && numMax[ocol])
+				{
+					displayInColumn (ocol, "H=%0.2f", colMax[ocol]);
+					shown = 1;
+				}
+				if (mask == MASK_MIN && numMin[ocol])
+				{
+					displayInColumn (ocol, "L=%0.2f", colMin[ocol]);
 					shown = 1;
 				}
 			}
