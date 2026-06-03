@@ -786,6 +786,16 @@ void showValue (int mask)
 	}
 }
 
+void resetValues()
+{
+	int i;
+	for (i = 0; i < MAX_COL; ++i)
+	{
+		colSum[i] = colAvg[i] = colMax[i] = colMin[i] = 0;
+		numSum[i] = numAvg[i] = numMax[i] = numMin[i] = 0;
+	}
+}
+
 /**********************************************************************************************************************
  *                                                                                                                    *
  *  S H O W  D I R                                                                                                    *
@@ -854,6 +864,7 @@ int showDir (DIR_ENTRY *file)
 		showValue (MASK_AVG);
 		showValue (MASK_MAX);
 		showValue (MASK_MIN);
+		resetValues();
 		displayAllLines ();
 		displayTidy ();
 	}
@@ -922,6 +933,7 @@ void showStdIn (void)
 		showValue (MASK_MAX);
 		showValue (MASK_MIN);
 		displayDrawLine (0);
+		resetValues();
 	}
 	displayAllLines ();
 	displayTidy ();
