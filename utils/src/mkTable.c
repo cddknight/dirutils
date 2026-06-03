@@ -381,7 +381,10 @@ void helpThem (char *name)
 	printf ("     --columns # . . . . -c#  . . . Columns to display, [example 1,3-5,7].\n");
 	printf ("     --rows #  . . . . . -r#  . . . Rows to display, [example 1,3-5,7].\n");
 	printf ("     --separator \"c\" . . -sc  . . . Set separator character [default ,].\n");
-	printf ("     --sum # . . . . . . -S . . . . Sum the values in selected column.\n");
+	printf ("     --sum # . . . . . . -S#  . . . Sum the values in selected column.\n");
+	printf ("     --high #  . . . . . -H#  . . . Highest value in selected column.\n");
+	printf ("     --low # . . . . . . -L#  . . . Lowest value in selected column.\n");
+	printf ("     --average # . . . . -A#  . . . Average value in selected column.\n");
 	printf ("     --help  . . . . . . -? . . . . Display this help message.\n");
 }
 
