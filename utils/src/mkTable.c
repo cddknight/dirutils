@@ -676,19 +676,20 @@ int showLine (char *inBuffer, int linesRead)
 								if (getBitMask (MASK_SUM, ocol, 1))
 								{
 									colSum[ocol] += value;
-									++setValue[MASK_SUM];
+									setValue[MASK_SUM] = 1;
 								}
 								if (getBitMask (MASK_AVG, ocol, 1))
 								{
 									colAvg[ocol] += value;
-									++setValue[MASK_AVG];
+									++colCount[ocol];
+									setValue[MASK_AVG] = 1;
 								}
 								if (getBitMask (MASK_MAX, ocol, 1))
 								{
 									if (setValue[MASK_MAX] == 0 || colMax[ocol] < value)
 									{
 										colMax[ocol] = value;
-										++setValue[MASK_MAX];
+										setValue[MASK_MAX] = 1;
 									}
 								}
 								if (getBitMask (MASK_MIN, ocol, 1))
@@ -696,7 +697,7 @@ int showLine (char *inBuffer, int linesRead)
 									if (setValue[MASK_MIN] == 0 || colMin[ocol] > value)
 									{
 										colMin[ocol] = value;
-										++setValue[MASK_MIN];
+										setValue[MASK_MIN] = 1;
 									}
 								}
 							}
@@ -756,7 +757,7 @@ void showValue (int mask)
 				{
 					if (mask == MASK_AVG)
 					{
-						displayInColumn (ocol, "A=%0.2f", colAvg[ocol] / setValue[mask]);
+						displayInColumn (ocol, "A=%0.2f", colAvg[ocol] / colCount[ocol]);
 					}
 					if (mask == MASK_SUM)
 					{
@@ -914,6 +915,10 @@ void showStdIn (void)
 	}
 	if (linesShown)
 	{
+		showValue (MASK_SUM);
+		showValue (MASK_AVG);
+		showValue (MASK_MAX);
+		showValue (MASK_MIN);
 		displayDrawLine (0);
 	}
 	displayAllLines ();
