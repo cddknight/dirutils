@@ -57,7 +57,11 @@
 #define MASK_COLS		0
 #define MASK_ROWS		1
 #define MASK_RIGHT		2
-#define MASK_COUNT		3
+#define MASK_SUM		3
+#define MASK_AVG		4
+#define MASK_MAX		5
+#define MASK_MIN		6
+#define MASK_COUNT		7
 #define MASK_SIZE		1024
 
 /**********************************************************************************************************************
@@ -91,8 +95,10 @@ int displayFlags = 0;
 int removeSpace = 1;
 int lineHeading = 0;
 char separator = ',';
-int bitMaskSet[MASK_COUNT];
+int setValue[MASK_COUNT];
+int bitMaskSet[MASK_COUNT] = { 0, 0, 0, 1, 1, 1, 1 };
 unsigned int bitMask[MASK_COUNT][MASK_SIZE];
+float colCount[MAX_COL], colSum[MAX_COL], colAvg[MAX_COL], colMax[MAX_COL], colMin[MAX_COL];
 
 /**********************************************************************************************************************
  * Command line params                                                                                                *
@@ -110,6 +116,10 @@ static struct option longOptions[] =
 	{	"columns",		required_argument,	0,	'c' },
 	{	"rows",			required_argument,	0,	'r' },
 	{	"separator",	required_argument,	0,	's' },
+	{	"sum",			required_argument,	0,	'S' },
+	{	"high",			required_argument,	0,	'H' },
+	{	"low",			required_argument,	0,	'L' },
+	{	"average",		required_argument,	0,	'A' },
 	{	0,				0,					0,	0	}
 };
 
@@ -371,6 +381,7 @@ void helpThem (char *name)
 	printf ("     --columns # . . . . -c#  . . . Columns to display, [example 1,3-5,7].\n");
 	printf ("     --rows #  . . . . . -r#  . . . Rows to display, [example 1,3-5,7].\n");
 	printf ("     --separator \"c\" . . -sc  . . . Set separator character [default ,].\n");
+	printf ("     --sum # . . . . . . -S . . . . Sum the values in selected column.\n");
 	printf ("     --help  . . . . . . -? . . . . Display this help message.\n");
 }
 
@@ -406,7 +417,7 @@ int main (int argc, char *argv[])
 		 * getopt_long stores the option index here.                                                                  *
 		 **************************************************************************************************************/
 		int optionIndex = 0;
-		int c = getopt_long (argc, argv, "a:CNPhnqwc:r:s:?", longOptions, &optionIndex);
+		int c = getopt_long (argc, argv, "a:CNPhnqwc:r:s:S:H:L:A:?", longOptions, &optionIndex);
 
 		/**************************************************************************************************************
 		 * Detect the end of the options.                                                                             *
@@ -503,6 +514,22 @@ int main (int argc, char *argv[])
 			}
 			break;
 
+		case 'S':
+			procNumberRange (MASK_SUM, optarg);
+			break;
+
+		case 'H':
+			procNumberRange (MASK_MAX, optarg);
+			break;
+
+		case 'L':
+			procNumberRange (MASK_MIN, optarg);
+			break;
+
+		case 'A':
+			procNumberRange (MASK_AVG, optarg);
+			break;
+
 		case 'w':
 			removeSpace = 0;
 			break;
@@ -540,6 +567,7 @@ int main (int argc, char *argv[])
 				return 0;
 			}
 			displayDrawLine (0);
+
 			displayInColumn (0, "%d %s shown\n", filesFound, filesFound == 1 ? "File" : "Files");
 			displayNewLine(DISPLAY_INFO);
 			displayAllLines ();
@@ -640,7 +668,38 @@ int showLine (char *inBuffer, int linesRead)
 					{
 						if (opos)
 						{
+							float value = 0;
+
 							showData (linesRead, ocol, icol, outBuffer);
+							if (sscanf (outBuffer, "%f", &value))
+							{
+								if (getBitMask (MASK_SUM, ocol, 1))
+								{
+									colSum[ocol] += value;
+									++setValue[MASK_SUM];
+								}
+								if (getBitMask (MASK_AVG, ocol, 1))
+								{
+									colAvg[ocol] += value;
+									++setValue[MASK_AVG];
+								}
+								if (getBitMask (MASK_MAX, ocol, 1))
+								{
+									if (setValue[MASK_MAX] == 0 || colMax[ocol] < value)
+									{
+										colMax[ocol] = value;
+										++setValue[MASK_MAX];
+									}
+								}
+								if (getBitMask (MASK_MIN, ocol, 1))
+								{
+									if (setValue[MASK_MIN] == 0 || colMin[ocol] > value)
+									{
+										colMin[ocol] = value;
+										++setValue[MASK_MIN];
+									}
+								}
+							}
 						}
 						++ocol;
 					}
@@ -670,6 +729,58 @@ int showLine (char *inBuffer, int linesRead)
 		}
 	}
 	return shown;
+}
+
+/**********************************************************************************************************************
+ *                                                                                                                    *
+ *  S H O W  V A L U E                                                                                                *
+ *  ==================                                                                                                *
+ *                                                                                                                    *
+ **********************************************************************************************************************/
+/**
+ *  \brief Show the value for a particular mask if set.
+ *  \param mask Which mask we are showing.
+ *  \result None.
+ */
+void showValue (int mask)
+{
+	int ocol = 0, icol = 0, shown = 0;
+
+	while (icol < MAX_COL)
+	{
+		if (getBitMask (MASK_COLS, icol, 1))
+		{
+			if (getBitMask (mask, ocol, 1))
+			{
+				if (setValue[mask])
+				{
+					if (mask == MASK_AVG)
+					{
+						displayInColumn (ocol, "A=%0.2f", colAvg[ocol] / setValue[mask]);
+					}
+					if (mask == MASK_SUM)
+					{
+						displayInColumn (ocol, "S=%0.2f", colSum[ocol]);
+					}
+					if (mask == MASK_MAX)
+					{
+						displayInColumn (ocol, "H=%0.2f", colMax[ocol]);
+					}
+					if (mask == MASK_MIN)
+					{
+						displayInColumn (ocol, "L=%0.2f", colMin[ocol]);
+					}
+					shown = 1;
+				}
+			}
+			++ocol;
+		}
+		++icol;
+	}
+	if (shown)
+	{
+		displayNewLine (0);
+	}
 }
 
 /**********************************************************************************************************************
@@ -735,6 +846,11 @@ int showDir (DIR_ENTRY *file)
 			}
 		}
 		fclose (readFile);
+
+		showValue (MASK_SUM);
+		showValue (MASK_AVG);
+		showValue (MASK_MAX);
+		showValue (MASK_MIN);
 		displayAllLines ();
 		displayTidy ();
 	}
